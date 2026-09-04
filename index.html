@@ -200,6 +200,10 @@
     </form>
     <p class="note ok" id="s-offer-msg"></p>
     <p class="note" id="s-note-msg"></p>
+    <label id="s-allow-wrap" hidden style="display:flex;align-items:center;gap:8px;font-size:.86rem;color:var(--due);margin-top:6px;cursor:pointer">
+      <input type="checkbox" id="s-allow" style="width:auto;margin:0">
+      البضاعة موجودة عندي بس لسه ما سجّلتش شراءها — اسمح بالبيع
+    </label>
   </div>
   <div class="tbl-wrap"><table id="t-sales"></table></div>
 </section>
@@ -826,15 +830,16 @@
     var expenses = live("cash").filter(function(c){return c.type==="expense";})
                      .reduce(function(a,c){ return a + (Number(c.amount)||0); },0);
 
+    var net = profit - expenses;
     var cells = [
       ["إجمالي المبيعات", money(revenue), ""],
-      ["مجمل الربح", money(profit), profit>=0?"v-gain":"v-due"],
-      ["المصاريف", money(expenses), ""],
+      ["مجمل الربح (قبل المصاريف)", money(profit), profit>=0?"v-gain":"v-due"],
+      ["المصاريف", money(expenses), expenses>0?"v-due":""],
+      ["صافي الربح", money(net), net>=0?"v-gain":"v-due"],
       ["قيمة المخزون", money(stockValue), ""],
+      ["رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due"],
       ["لك عند العملاء", money(recv), recv>0?"v-gain":""],
       ["عليك للموردين", money(pay), pay>0?"v-due":""],
-      ["رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due"],
-      ["عدد الأصناف", qty(live("items").length), ""],
       ["عدد عمليات البيع", qty(sales.length), ""]
     ];
     document.getElementById("kpis").innerHTML = cells.map(function(c){
@@ -1014,11 +1019,18 @@
   function byDate(a,b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : (b.at||0)-(a.at||0)); }
 
   function fillSelects(){
-    function opts(list, sel, placeholder){
+    function opts(list, sel, placeholder, withStock){
       var el = document.getElementById(sel);
       var cur = el.value;
       el.innerHTML = '<option value="">'+placeholder+'</option>' + list.map(function(o){
-        return '<option value="'+o.id+'">'+esc(o.name)+'</option>';
+        var label = o.name;
+        if(withStock){
+          var st = stockOf(o.id);
+          label += st > 0
+            ? " — متاح " + qty(st) + (o.unit ? " " + o.unit : "")
+            : " — خلصان";
+        }
+        return '<option value="'+o.id+'">'+esc(label)+'</option>';
       }).join("");
       if(cur) el.value = cur;
     }
@@ -1026,7 +1038,7 @@
     var suppliers = live("parties").filter(function(p){return p.type==="supplier";});
     opts(customers, "s-party", "اختر عميل");
     opts(suppliers, "p-party", "اختر مورد");
-    opts(live("items"), "s-item", "اختر صنف");
+    opts(live("items"), "s-item", "اختر صنف", true);
     opts(live("items"), "p-item", "اختر صنف");
     var ct = document.getElementById("c-type").value;
     opts(ct==="out"?suppliers:(ct==="in"?customers:[]), "c-party", ct==="expense"?"بدون جهة":"اختر الجهة");
@@ -1085,7 +1097,9 @@
     editing[list] = null;
     document.getElementById(EDIT_UI[list].form).reset();
     if(list==="sales"){ document.getElementById("s-date").value = today();
-      document.getElementById("s-offer-msg").textContent=""; document.getElementById("s-note-msg").textContent=""; priceManual=false; }
+      document.getElementById("s-offer-msg").textContent=""; document.getElementById("s-note-msg").textContent="";
+      document.getElementById("s-allow").checked = false;
+      document.getElementById("s-allow-wrap").hidden = true; priceManual=false; }
     if(list==="purchases") document.getElementById("p-date").value = today();
     if(list==="cash"){ document.getElementById("c-date").value = today(); fillSelects(); }
     setEditUI(list);
@@ -1221,14 +1235,35 @@
     priceManual = true; applyTierPrice();
   });
 
+  // لو بنعدّل بيع قديم، كميته الأصلية بترجع للرصيد المتاح
+  function availableFor(itemId){
+    var av = stockOf(itemId);
+    if(editing.sales){
+      var rec = db.sales.find(function(x){ return x.id === editing.sales; });
+      if(rec && rec.itemId === itemId) av += Number(rec.qty)||0;
+    }
+    return av;
+  }
+
   function checkStock(){
     var msg = document.getElementById("s-note-msg");
     var id = document.getElementById("s-item").value;
     var q = Number(document.getElementById("s-qty").value)||0;
     if(!id || !q){ msg.textContent=""; msg.classList.remove("bad"); return; }
-    var st = stockOf(id);
-    if(q > st){ msg.textContent = "الرصيد الحالي " + qty(st) + " بس. الحفظ هيخلي الرصيد بالسالب."; msg.classList.add("bad"); }
-    else { msg.textContent = "الرصيد بعد البيع: " + qty(st-q); msg.classList.remove("bad"); }
+    var st = availableFor(id);
+    var wrap = document.getElementById("s-allow-wrap");
+    if(q > st){
+      msg.textContent = st <= 0
+        ? "الصنف ده خلصان — الرصيد " + qty(st) + "."
+        : "المتاح " + qty(st) + " بس، وأنت بتبيع " + qty(q) + ".";
+      msg.classList.add("bad");
+      wrap.hidden = false;
+    } else {
+      msg.textContent = "الرصيد بعد البيع: " + qty(st-q);
+      msg.classList.remove("bad");
+      wrap.hidden = true;
+      document.getElementById("s-allow").checked = false;
+    }
   }
 
   bind("f-sale","b-sale", function(form){
@@ -1242,10 +1277,19 @@
       note: document.getElementById("s-note").value.trim()
     };
     if(!fields.partyId || !fields.itemId || !fields.qty){ toast("اختر العميل والصنف والكمية"); return; }
+    var av = availableFor(fields.itemId);
+    if(fields.qty > av && !document.getElementById("s-allow").checked){
+      document.getElementById("s-allow-wrap").hidden = false;
+      checkStock();
+      toast(av <= 0 ? "الصنف خلصان — سجّل شراء الأول" : "المتاح " + qty(av) + " بس");
+      return;
+    }
     commit("sales", fields, form, "اتسجّل البيع");
     document.getElementById("s-date").value = today();
     document.getElementById("s-note-msg").textContent = "";
     document.getElementById("s-offer-msg").textContent = "";
+    document.getElementById("s-allow").checked = false;
+    document.getElementById("s-allow-wrap").hidden = true;
     priceManual = false;
     renderAll();
   });
