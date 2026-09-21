@@ -460,6 +460,7 @@
   <button data-tab="cash">الخزنة</button>
   <button data-tab="items">الأصناف</button>
   <button data-tab="parties">العملاء والموردين</button>
+  <button data-tab="capital">رأس المال</button>
   <button data-tab="inv">المخزون</button>
   <button data-tab="rep">تقارير</button>
   <button data-tab="log">سجل الحركات</button>
@@ -693,7 +694,7 @@
     <form class="grid" id="f-party">
       <div><label for="pt-name">الاسم</label><input id="pt-name" required autocomplete="off"></div>
       <div><label for="pt-type">النوع</label>
-        <select id="pt-type"><option value="customer">عميل</option><option value="supplier">مورد</option></select>
+        <select id="pt-type"><option value="customer">عميل</option><option value="supplier">مورد</option><option value="partner">شريك</option></select>
       </div>
       <div><label for="pt-phone">التليفون</label><input id="pt-phone" autocomplete="off"></div>
       <div><label for="pt-gov">المحافظة</label><select id="pt-gov"></select></div>
@@ -711,6 +712,69 @@
 </section>
 
 <!-- المخزون -->
+<section id="tab-capital" hidden>
+  <h2>رأس المال والشركاء</h2>
+  <p class="hint">كل شريك حاطط مبلغ، والمبلغ ده هو اللي بيشتري البضاعة ويدفع المصاريف. لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي ضخّ فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
+
+  <div class="stats" id="cap-stats"></div>
+
+  <div class="panel">
+    <h3>الشركاء</h3>
+    <div class="tbl-wrap"><table id="t-partners"></table></div>
+    <p class="hint" style="margin-top:10px">الشركاء بيتسجّلوا من تبويب <strong>العملاء والموردين</strong> بنوع «شريك».</p>
+  </div>
+
+  <div class="panel">
+    <h3>حركة رأس مال</h3>
+    <form class="grid" id="f-cap">
+      <div><label for="cp-date">التاريخ</label><input type="date" id="cp-date"></div>
+      <div><label for="cp-partner">الشريك</label><select id="cp-partner"></select></div>
+      <div><label for="cp-type">النوع</label>
+        <select id="cp-type">
+          <option value="cap_in">ضخّ رأس مال</option>
+          <option value="cap_out">سحب من رأس المال</option>
+          <option value="cap_payout">صرف من الجاري</option>
+          <option value="cap_reinvest">تحويل الجاري لرأس المال</option>
+        </select></div>
+      <div><label for="cp-amount">المبلغ</label><input type="number" id="cp-amount" step="any" min="0" autocomplete="off"></div>
+      <div><label for="cp-note">البيان</label><input id="cp-note" autocomplete="off"></div>
+      <div><button class="tbtn primary" type="button" id="b-cap">حفظ الحركة</button></div>
+    </form>
+    <p class="hintline" id="cap-hint" style="margin-top:10px"></p>
+  </div>
+
+  <div class="panel">
+    <h3>توزيع أرباح</h3>
+    <div class="grid">
+      <div><label for="dist-from">من تاريخ</label><input type="date" id="dist-from"></div>
+      <div><label for="dist-to">لتاريخ</label><input type="date" id="dist-to"></div>
+      <div><label for="dist-amount">المبلغ اللي هيتوزّع</label><input type="number" id="dist-amount" step="any" min="0" autocomplete="off"></div>
+      <div><button class="tbtn" type="button" id="b-dist-calc">احسب الأنصبة</button></div>
+    </div>
+    <p class="note" id="dist-limits" style="margin-top:10px"></p>
+
+    <div id="dist-box" hidden>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="t-dist"></table></div>
+      <p class="note" id="dist-check" style="margin-top:10px"></p>
+      <div class="row-actions">
+        <button class="tbtn primary" type="button" id="b-dist-do">أكّد التوزيع</button>
+        <button class="tbtn" type="button" id="b-dist-cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>توفيق الميزانية</h3>
+    <p class="hint">صافي الأصول لازم يساوي حقوق الملكية. لو في فرق، يبقى في حاجة مش مسجّلة — غالباً أرصدة افتتاحية ما اتسجّلتش كرأس مال شركاء.</p>
+    <div class="tbl-wrap"><table id="t-recon"></table></div>
+  </div>
+
+  <div class="panel">
+    <h3>سجل حركات رأس المال</h3>
+    <div class="tbl-wrap"><table id="t-cap-log"></table></div>
+  </div>
+</section>
+
 <section id="tab-inv" hidden>
   <h2>المخزون</h2>
   <p class="hint">الأرصدة تراكمية دايمًا. المشترى والمباع والمرتجع بيتبعوا الفترة المختارة. اضغط على أي تركيبة تشوف حركتها بالتفصيل.</p>
@@ -1675,6 +1739,7 @@
     live("purchases").forEach(function(p){ if(p.partyId===id) bal -= purchTotal(p) - (Number(p.paid)||0); });
     live("cash").forEach(function(c){
       if(c.partyId!==id) return;
+      if(isCapType(c.type)) return;                              // رأس مال — مش مديونية
       if(c.type==="opening_party") bal += Number(c.amount)||0;   // موجب = ليك عنده
       if(c.type==="in")  bal -= Number(c.amount)||0;
       if(c.type==="out") bal += Number(c.amount)||0;
@@ -1693,12 +1758,132 @@
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
       // معالجة صريحة: قبل كده أي نوع مجهول كان بيتعامل كخروج بالغلط
+      if(isCapType(c.type)) { v += CAP[c.type].cash * a; return; }   // رأس مال وشركاء
       if(c.type === "opening")      v += a;    // رصيد افتتاحي للخزنة
       else if(c.type === "opening_party") return;  // ده بيأثّر على رصيد الجهة بس
       else if(c.type === "in" || c.type === "settle") v += a;
       else if(c.type === "out" || c.type === "expense") v -= a;
     });
     return v;
+  }
+
+  /* ================= رأس المال والشركاء ================= */
+  // حركات رأس المال بتتخزّن في قايمة cash بأنواع cap_* — فبتاخد المزامنة
+  // وحواجز الإقفال والحذف جاهزة. اللي بيأثّر على الخزنة منها متعلّم تحت.
+  var CAP = {
+    cap_in:       { label:"ضخّ رأس مال",        cash:+1, capital:+1, current: 0 },
+    cap_out:      { label:"سحب من رأس المال",   cash:-1, capital:-1, current: 0 },
+    cap_share:    { label:"نصيب في أرباح",      cash: 0, capital: 0, current:+1 },
+    cap_payout:   { label:"صرف للشريك",         cash:-1, capital: 0, current:-1 },
+    cap_reinvest: { label:"تحويل للرأس مال",    cash: 0, capital:+1, current:-1 }
+  };
+  function isCapType(t){ return Object.prototype.hasOwnProperty.call(CAP, t); }
+
+  function isPartner(p){ return !!p && p.type === "partner"; }
+  function partners(){ return live("parties").filter(isPartner); }
+
+  function capRows(partnerId, asOf){
+    return live("cash").filter(function(c){
+      if(!isCapType(c.type)) return false;
+      if(partnerId && c.partyId !== partnerId) return false;
+      if(asOf && (c.date||"") > asOf) return false;
+      return true;
+    });
+  }
+  function capSum(partnerId, asOf, field){
+    return capRows(partnerId, asOf).reduce(function(a,c){
+      return a + (CAP[c.type][field] * (Number(c.amount)||0));
+    }, 0);
+  }
+  // رأس مال الشريك: اللي ضخّه − اللي سحبه + اللي أعاد استثماره
+  function capitalOf(id, asOf){ return capSum(id, asOf, "capital"); }
+  // جاري الشريك: أرباح استحقها ولسه ما أخدهاش ولا حوّلها لرأس مال
+  function currentOf(id, asOf){ return capSum(id, asOf, "current"); }
+
+  function totalCapital(asOf){
+    return partners().reduce(function(a,p){ return a + capitalOf(p.id, asOf); }, 0);
+  }
+  function ratioOf(id, asOf){
+    var t = totalCapital(asOf);
+    return t > 0 ? capitalOf(id, asOf) / t : 0;
+  }
+
+  // كل تاريخ اتغيّر فيه رأس مال أي شريك — حدود شرائح الترجيح
+  function capChangeDates(){
+    var seen = {};
+    live("cash").forEach(function(c){
+      if(isCapType(c.type) && CAP[c.type].capital !== 0 && c.date) seen[c.date] = 1;
+    });
+    return Object.keys(seen).sort();
+  }
+
+  // النسبة المرجّحة بالزمن — الأساس المعتمد في محاسبة شركات الأشخاص.
+  // الشريك اللي ضخّ فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.
+  function weightedRatio(id, from, to){
+    if(!from || !to || from > to) return ratioOf(id, to || today());
+    var total = daysBetween(from, to) + 1;
+    if(total <= 0) return 0;
+    var bounds = [from];
+    capChangeDates().forEach(function(d){
+      if(d > from && d <= to && bounds.indexOf(d) < 0) bounds.push(d);
+    });
+    bounds.sort();
+    var acc = 0;
+    for(var i = 0; i < bounds.length; i++){
+      var a = bounds[i];
+      var b = (i + 1 < bounds.length) ? addDays(bounds[i+1], -1) : to;
+      acc += ratioOf(id, a) * (daysBetween(a, b) + 1);
+    }
+    return acc / total;
+  }
+
+  /* ---------- الأرباح المحتجزة ---------- */
+  function netProfitAll(){ return periodStats(null).net; }
+  function distributedTotal(){
+    return live("cash").filter(function(c){ return c.type === "cap_share"; })
+      .reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
+  }
+  // اللي لسه متاح للتوزيع: كل الأرباح من البداية ناقص اللي اتوزّع
+  function retainedEarnings(){ return netProfitAll() - distributedTotal(); }
+
+  /* ---------- توفيق الميزانية ---------- */
+  // صافي الأصول لازم يساوي حقوق الملكية. الفرق معناه حاجة مش مسجّلة.
+  function netAssets(){
+    var stock = live("items").reduce(function(a,i){
+      return a + variantsOf(i.id).reduce(function(b,v){
+        return b + Math.max(0, stockOfV(i.id,v.color,v.size)) * avgCostV(i.id,v.color,v.size);
+      }, 0);
+    }, 0);
+    var recv = 0, pay = 0;
+    live("parties").forEach(function(p){
+      if(isPartner(p)) return;
+      var b = partyBalance(p.id);
+      if(b > 0) recv += b; else pay += -b;
+    });
+    return cashBox() + walletsTotal() + stock + recv - pay;
+  }
+  function totalEquity(){
+    return partners().reduce(function(a,p){
+      return a + capitalOf(p.id) + currentOf(p.id);
+    }, 0) + retainedEarnings();
+  }
+
+  /* ---------- حساب التوزيع ---------- */
+  // بترجّع نصيب كل شريك مع تسوية فرق التقريب على أكبر نصيب
+  function computeShares(amount, from, to){
+    var ps = partners();
+    if(!ps.length) return [];
+    var rows = ps.map(function(p){
+      var w = weightedRatio(p.id, from, to);
+      return { id:p.id, name:p.name, ratio:w, share:Math.round(amount * w * 100) / 100 };
+    });
+    var sum = rows.reduce(function(a,r){ return a + r.share; }, 0);
+    var diff = Math.round((amount - sum) * 100) / 100;
+    if(diff !== 0){
+      var big = rows.reduce(function(a,r){ return r.share > a.share ? r : a; }, rows[0]);
+      big.share = Math.round((big.share + diff) * 100) / 100;
+    }
+    return rows;
   }
 
   /* ---------- الأرصدة الافتتاحية ---------- */
@@ -1744,10 +1929,18 @@
   // ---------- الفترة ----------
   var period = { mode:"all", from:"", to:"" };
 
+  function isoOf(d){
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") +
+           "-" + String(d.getDate()).padStart(2,"0");
+  }
+  // كانت بتقرا بالتوقيت المحلي وبتكتب بـUTC، فكانت بتغلط يوم في أي توقيت شرق جرينتش
   function addDays(iso, n){
     var d = new Date(iso + "T00:00:00");
     d.setDate(d.getDate() + n);
-    return d.toISOString().slice(0,10);
+    return isoOf(d);
+  }
+  function daysBetween(a, b){
+    return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00")) / 86400000);
   }
   function monthRange(offset){
     var t = new Date(today() + "T00:00:00");
@@ -2688,6 +2881,7 @@
   }
 
   function cashLabel(t){
+    if(isCapType(t)) return CAP[t].label;
     return t==="in" ? "تحصيل" : t==="out" ? "دفع" :
            t==="settle" ? "سحب من شركة شحن" :
            t==="opening" ? "رصيد افتتاحي — الخزنة" :
@@ -2720,7 +2914,9 @@
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
       if(c.type === "opening_party") return;   // رصيد جهة — مش حركة خزنة
-      var isIn = (c.type==="in" || c.type==="settle" || c.type==="opening");
+      if(isCapType(c.type) && CAP[c.type].cash === 0) return;   // حركة رأس مال من غير نقدية
+      var isIn = (c.type==="in" || c.type==="settle" || c.type==="opening" ||
+                  (isCapType(c.type) && CAP[c.type].cash > 0));
       L.push({d:c.date, at:c.at, t:cashLabel(c.type),
         who:(c.type==="settle" ? (c.shipCo||"شركة شحن") : (c.partyId?partyName(c.partyId):"—")),
         note:c.note||"", inn:(isIn?a:0), out:(isIn?0:a),
@@ -2977,6 +3173,8 @@
     });
     document.getElementById("c-party").disabled = (ct === "settle" || ct === "expense");
 
+    opts(partners(), "cp-partner", "اختر شريك");
+
     // قوايم الأرصدة الافتتاحية
     opts(live("items"), "ob-item", "اختر صنف");
     opts(live("parties"), "ob-party", "اختر جهة");
@@ -3016,7 +3214,7 @@
     renderSales(); renderPurch(); renderWallets(); renderCash();
     renderItems(); renderVars(); renderOffers(); renderParties(); renderStatement(); renderLog();
     renderFind();
-    renderOpening(); renderLock();
+    renderOpening(); renderLock(); renderCapital(); renderDistLimits();
   }
 
   /* ---------- البحث عن أوردر ---------- */
@@ -3096,8 +3294,9 @@
     if(!b) return;
     Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){ x.setAttribute("aria-current","false"); });
     b.setAttribute("aria-current","true");
-    ["dash","sales","find","purch","cash","items","parties","inv","rep","log","backup"].forEach(function(id){
-      document.getElementById("tab-"+id).hidden = (id !== b.dataset.tab);
+    // بتتقرا من الـDOM بدل قايمة ثابتة بتتنسى مع كل تبويب جديد
+    Array.prototype.forEach.call(document.querySelectorAll("main > section[id^='tab-']"), function(sec){
+      sec.hidden = (sec.id !== "tab-" + b.dataset.tab);
     });
     window.scrollTo(0,0);
   });
@@ -4173,6 +4372,262 @@
     if(!sinks.local && !sinks.cloud && !fileHandle && (db.sales.length || db.purchases.length || db.items.length)){
       e.preventDefault(); e.returnValue = "";
     }
+  });
+
+  /* ================= شاشة رأس المال ================= */
+
+  function renderCapStats(){
+    var el = document.getElementById("cap-stats");
+    if(!el) return;
+    var cap = totalCapital(), cur = partners().reduce(function(a,p){ return a + currentOf(p.id); },0);
+    var ret = retainedEarnings();
+    var cells = [
+      ["رأس المال الكلي", money(cap), "", qty(partners().length) + " شريك"],
+      ["أرباح محتجزة", money(ret), ret>=0?"v-gain":"v-due", "متاحة للتوزيع"],
+      ["جاري الشركاء", money(cur), cur>0?"v-due":"", "أرباح استحقوها ولسه ما أخدوهاش"],
+      ["رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due", "سقف الصرف النقدي"]
+    ];
+    el.innerHTML = cells.map(function(c){
+      return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
+        "<small>"+esc(c[3])+"</small></div>";
+    }).join("");
+  }
+
+  function renderPartners(){
+    var ps = partners();
+    var rows = ps.map(function(p){
+      var cap = capitalOf(p.id), cur = currentOf(p.id), r = ratioOf(p.id);
+      return "<tr><td class='wide'>"+esc(p.name)+
+          (p.phone ? "<span class='sub'>"+esc(p.phone)+"</span>" : "")+"</td>"+
+        "<td class='num'>"+money(cap)+"</td>"+
+        "<td class='num'>"+(r*100).toFixed(2)+"%</td>"+
+        "<td class='num "+(cur>0?"v-gain":"")+"'>"+money(cur)+"</td>"+
+        "<td class='num' style='font-weight:600'>"+money(cap+cur)+"</td></tr>";
+    });
+    table("t-partners", ["الشريك","رأس ماله","نسبته","جاريه","إجمالي حقه"], rows,
+      "مفيش شركاء — سجّلهم من تبويب العملاء والموردين بنوع «شريك».");
+  }
+
+  function renderRecon(){
+    var a = netAssets(), e = totalEquity(), d = a - e;
+    var rows = [
+      ["الخزنة", cashBox(), ""],
+      ["محافظ شركات الشحن", walletsTotal(), ""],
+      ["المخزون", netAssets() - cashBox() - walletsTotal() - reconDues(), ""],
+      ["صافي أرصدة العملاء والموردين", reconDues(), ""],
+      ["صافي الأصول", a, "tot"],
+      ["رأس المال", totalCapital(), ""],
+      ["جاري الشركاء", partners().reduce(function(x,p){ return x + currentOf(p.id); },0), ""],
+      ["الأرباح المحتجزة", retainedEarnings(), ""],
+      ["حقوق الملكية", e, "tot"],
+      ["الفرق", d, "diff"]
+    ].map(function(x){
+      var cls = x[2]==="diff" ? (Math.abs(x[1])<0.01 ? "v-gain" : "v-due") : "";
+      var w = x[2]==="tot" || x[2]==="diff" ? "font-weight:600" : "";
+      return "<tr"+(x[2]==="tot"?" style='background:var(--teal-soft)'":"")+
+        "><td class='wide' style='"+w+"'>"+esc(x[0])+"</td>"+
+        "<td class='num "+cls+"' style='"+w+"'>"+money(x[1])+
+        (x[2]==="diff" ? (Math.abs(x[1])<0.01 ? " ✓" : " ⚠") : "")+"</td></tr>";
+    });
+    table("t-recon", ["البند","القيمة"], rows, "");
+  }
+  function reconDues(){
+    var recv=0, pay=0;
+    live("parties").forEach(function(p){
+      if(isPartner(p)) return;
+      var b = partyBalance(p.id);
+      if(b > 0) recv += b; else pay += -b;
+    });
+    return recv - pay;
+  }
+
+  function renderCapLog(){
+    var rows = live("cash").filter(function(c){ return isCapType(c.type); })
+      .slice().sort(function(a,b){
+        if((a.date||"") !== (b.date||"")) return (a.date||"") < (b.date||"") ? 1 : -1;
+        return (b.at||0) - (a.at||0);
+      })
+      .map(function(c){
+        var d = CAP[c.type], a = Number(c.amount)||0;
+        return "<tr><td class='num'>"+esc(c.date||"—")+"</td>"+
+          "<td class='wide'>"+esc(partyName(c.partyId))+"</td>"+
+          "<td>"+esc(d.label)+(c.note?"<span class='sub'>"+esc(c.note)+"</span>":"")+"</td>"+
+          "<td class='num "+(d.capital>0?"v-gain":(d.capital<0?"v-due":""))+"'>"+
+            (d.capital ? (d.capital>0?"+":"−")+money(a) : "—")+"</td>"+
+          "<td class='num "+(d.current>0?"v-gain":(d.current<0?"v-due":""))+"'>"+
+            (d.current ? (d.current>0?"+":"−")+money(a) : "—")+"</td>"+
+          "<td><button class='del' data-del='cash' data-id='"+c.id+"'>حذف</button></td></tr>";
+      });
+    table("t-cap-log", ["التاريخ","الشريك","الحركة","رأس المال","الجاري",""], rows,
+      "مفيش حركات رأس مال لسه.");
+  }
+
+  function renderCapHint(){
+    var el = document.getElementById("cap-hint");
+    if(!el) return;
+    var pid = document.getElementById("cp-partner").value;
+    var t = document.getElementById("cp-type").value;
+    if(!pid){ el.textContent = ""; el.className = "hintline"; return; }
+    if(t === "cap_payout" || t === "cap_reinvest"){
+      var c = currentOf(pid);
+      el.textContent = "جاري " + partyName(pid) + " دلوقتي: " + money(c) +
+        (c <= 0 ? " — مفيش رصيد يتصرف منه" : "");
+      el.className = c > 0 ? "hintline" : "hintline bad";
+    } else if(t === "cap_out"){
+      var k = capitalOf(pid);
+      el.textContent = "رأس مال " + partyName(pid) + ": " + money(k);
+      el.className = "hintline";
+    } else {
+      el.textContent = "";
+      el.className = "hintline";
+    }
+  }
+
+  function renderCapital(){
+    renderCapStats(); renderPartners(); renderRecon(); renderCapLog(); renderCapHint();
+    var df = document.getElementById("dist-from"), dt = document.getElementById("dist-to");
+    if(df && !df.value){ var m = monthRange(0); df.value = m.from; dt.value = m.to; }
+    var cd = document.getElementById("cp-date");
+    if(cd && !cd.value) cd.value = firstOpenDate();
+  }
+
+  /* ---------- حفظ حركة رأس مال ---------- */
+  document.getElementById("b-cap").addEventListener("click", function(){
+    var d   = document.getElementById("cp-date").value || firstOpenDate();
+    var pid = document.getElementById("cp-partner").value;
+    var t   = document.getElementById("cp-type").value;
+    var a   = Number(document.getElementById("cp-amount").value)||0;
+    if(!pid){ toast("اختر الشريك"); return; }
+    if(!a){ toast("اكتب المبلغ"); return; }
+    if(!guardLock(d, "حركة رأس المال")) return;
+
+    if(t === "cap_out" && a > capitalOf(pid) + 0.009){
+      toast("رأس مال " + partyName(pid) + " " + money(capitalOf(pid)) + " بس"); return;
+    }
+    if((t === "cap_payout" || t === "cap_reinvest") && a > currentOf(pid) + 0.009){
+      toast("جاري " + partyName(pid) + " " + money(currentOf(pid)) + " بس"); return;
+    }
+    if(CAP[t].cash < 0 && a > cashBox() + 0.009){
+      toast("الخزنة فيها " + money(cashBox()) + " بس"); return;
+    }
+
+    db.cash.push(stamp({ date:d, type:t, partyId:pid, amount:a, shipCo:"",
+      note: document.getElementById("cp-note").value.trim() || CAP[t].label }));
+    document.getElementById("cp-amount").value = "";
+    document.getElementById("cp-note").value = "";
+    saveSoon("cash"); renderAll(); toast(CAP[t].label + " اتسجّل");
+  });
+
+  ["cp-partner","cp-type"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", renderCapHint);
+  });
+
+  /* ---------- توزيع الأرباح ---------- */
+  var distDraft = null;
+
+  function renderDistLimits(){
+    var el = document.getElementById("dist-limits");
+    if(!el) return;
+    var ret = retainedEarnings(), cash = cashBox();
+    el.textContent = "متاح للتوزيع " + money(ret) + " · الخزنة " + money(cash) +
+      " — الصرف النقدي مينفعش يزيد عن رصيد الخزنة حتى لو الأرباح أكبر (الباقي محبوس في مخزون).";
+    el.className = ret > 0 ? "note ok" : "note bad";
+  }
+
+  document.getElementById("b-dist-calc").addEventListener("click", function(){
+    var from = document.getElementById("dist-from").value;
+    var to   = document.getElementById("dist-to").value;
+    var amt  = Number(document.getElementById("dist-amount").value)||0;
+    if(!partners().length){ toast("سجّل الشركاء الأول"); return; }
+    if(!totalCapital()){ toast("سجّل رأس مال الشركاء الأول"); return; }
+    if(!from || !to || from > to){ toast("اختار فترة صحيحة"); return; }
+    if(!amt){ toast("اكتب المبلغ اللي هيتوزّع"); return; }
+    if(amt > retainedEarnings() + 0.009){
+      toast("الأرباح المحتجزة " + money(retainedEarnings()) + " بس"); return;
+    }
+    distDraft = { from:from, to:to, amount:amt, rows:computeShares(amt, from, to), mode:{} };
+    distDraft.rows.forEach(function(r){ distDraft.mode[r.id] = "cash"; });
+    renderDist();
+    document.getElementById("dist-box").hidden = false;
+  });
+
+  function renderDist(){
+    if(!distDraft) return;
+    var changed = capChangeDates().some(function(d){
+      return d > distDraft.from && d <= distDraft.to;
+    });
+    var rows = distDraft.rows.map(function(r){
+      var m = distDraft.mode[r.id];
+      return "<tr><td class='wide'>"+esc(r.name)+"</td>"+
+        "<td class='num'>"+money(capitalOf(r.id))+"</td>"+
+        "<td class='num'>"+(r.ratio*100).toFixed(2)+"%</td>"+
+        "<td class='num' style='font-weight:600'>"+money(r.share)+"</td>"+
+        "<td><select data-distmode='"+r.id+"'>"+
+          "<option value='cash'"+(m==="cash"?" selected":"")+">نقدي</option>"+
+          "<option value='capital'"+(m==="capital"?" selected":"")+">يتضاف لرأس ماله</option>"+
+        "</select></td></tr>";
+    });
+    table("t-dist", ["الشريك","رأس ماله","النسبة المرجّحة","نصيبه","ياخده إزاي"], rows, "");
+
+    var cash = 0, capAdd = 0;
+    distDraft.rows.forEach(function(r){
+      if(distDraft.mode[r.id] === "cash") cash += r.share; else capAdd += r.share;
+    });
+    // النسب بعد التوزيع — الشريك يشوف أثر قراره قبل ما يأكّد
+    var after = distDraft.rows.map(function(r){
+      return { name:r.name, v: capitalOf(r.id) + (distDraft.mode[r.id]==="capital" ? r.share : 0) };
+    });
+    var tot = after.reduce(function(a,x){ return a + x.v; }, 0);
+    var newRatios = after.map(function(x){
+      return esc(x.name) + " " + (tot > 0 ? (x.v/tot*100).toFixed(1) : "0.0") + "%";
+    }).join(" · ");
+
+    var el = document.getElementById("dist-check");
+    var over = cash > cashBox() + 0.009;
+    el.innerHTML = "نقدي " + esc(money(cash)) + (over ? " ⚠ أكبر من الخزنة (" + esc(money(cashBox())) + ")" : " ✓") +
+      " · لرأس المال " + esc(money(capAdd)) +
+      "<br>النسب بعد التوزيع: " + newRatios +
+      (changed ? "<br>⚠ رأس المال اتغيّر جوّه الفترة — النسب محسوبة مرجّحة بالزمن" : "");
+    el.className = over ? "note bad" : "note ok";
+    document.getElementById("b-dist-do").disabled = over;
+  }
+
+  document.getElementById("t-dist").addEventListener("change", function(e){
+    var sel = e.target.closest("[data-distmode]");
+    if(!sel || !distDraft) return;
+    distDraft.mode[sel.dataset.distmode] = sel.value;
+    renderDist();
+  });
+
+  document.getElementById("b-dist-cancel").addEventListener("click", function(){
+    distDraft = null;
+    document.getElementById("dist-box").hidden = true;
+  });
+
+  document.getElementById("b-dist-do").addEventListener("click", function(){
+    if(!distDraft) return;
+    var d = distDraft.to;
+    if(!guardLock(d, "التوزيع")) return;
+    var cash = distDraft.rows.reduce(function(a,r){
+      return a + (distDraft.mode[r.id]==="cash" ? r.share : 0); }, 0);
+    if(cash > cashBox() + 0.009){ toast("الصرف النقدي أكبر من الخزنة"); return; }
+
+    var distId = uid();
+    var note = "توزيع أرباح " + distDraft.from + " → " + distDraft.to;
+    distDraft.rows.forEach(function(r){
+      if(r.share <= 0) return;
+      // الاستحقاق دايماً بيتسجّل — الصرف أو التحويل حركة منفصلة بعده
+      db.cash.push(stamp({ date:d, type:"cap_share", partyId:r.id, amount:r.share,
+        shipCo:"", note:note, distId:distId }));
+      db.cash.push(stamp({ date:d,
+        type: distDraft.mode[r.id]==="cash" ? "cap_payout" : "cap_reinvest",
+        partyId:r.id, amount:r.share, shipCo:"", note:note, distId:distId }));
+    });
+    distDraft = null;
+    document.getElementById("dist-box").hidden = true;
+    document.getElementById("dist-amount").value = "";
+    saveSoon("cash"); renderAll();
+    toast("التوزيع اتسجّل");
   });
 
   /* ================= الأرصدة الافتتاحية وإقفال الفترة ================= */
