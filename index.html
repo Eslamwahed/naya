@@ -350,6 +350,29 @@
   .drawer-foot .sums > div{font-size:.75rem;color:var(--ink-soft)}
   .drawer-foot .sums strong{display:block;font-size:1rem;color:var(--ink);font-weight:600;margin-top:1px}
 
+  /* أقسام الشرح اللي بتتطوي */
+  details.explain{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;margin-bottom:16px;
+  }
+  details.explain > summary{
+    padding:13px 16px;font-weight:600;font-size:.9rem;cursor:pointer;
+    list-style:none;display:flex;align-items:center;gap:9px;color:var(--ink);
+  }
+  details.explain > summary::-webkit-details-marker{display:none}
+  details.explain > summary::before{
+    content:"\25BE";color:var(--teal);display:inline-block;transition:transform .16s;
+  }
+  details.explain:not([open]) > summary::before{transform:rotate(-90deg)}
+  details.explain .xbody{padding:0 16px 16px;display:grid;gap:14px}
+  details.explain p{margin:0;font-size:.88rem;color:var(--ink-soft);line-height:1.7}
+  details.explain p strong{color:var(--ink);font-weight:600}
+  details.explain table{font-size:.85rem}
+  details.explain th{font-size:.72rem}
+  .why{margin-top:12px}
+  .why > summary{font-size:.85rem;padding:10px 0;color:var(--teal)}
+  .why .xbody{padding:0}
+
   /* الموبايل: الجدول كروت، والدرج ياخد الشاشة */
   @media (max-width:760px){
     .s-wrap{overflow:visible;max-height:none;border:none;background:none}
@@ -722,6 +745,41 @@
   <h2>رأس المال والشركاء</h2>
   <p class="hint">فلوس الشريك نوعين: <strong>رأس ماله</strong> (اللي حطّه، وبيحدّد نسبته) و<strong>أرباح مستحقة له</strong> (أرباح بقت ملكه ولسه ما أخدهاش، ومابتأثّرش على نسبته). لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي دفع فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
 
+  <details class="explain">
+    <summary>إزاي بيتحسب نصيب الشريك؟</summary>
+    <div class="xbody">
+
+      <p><strong>فلوس الشريك نوعين، والفرق بينهم مهم:</strong></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th></th><th>رأس ماله</th><th>أرباح مستحقة له</th></tr></thead>
+        <tbody>
+          <tr><td class="wide">إيه ده</td><td>الفلوس اللي حطّها</td><td>أرباح بقت ملكه ولسه ما أخدهاش</td></tr>
+          <tr><td class="wide">بيتحدّد إزاي</td><td>هو اللي بيدفعه</td><td>بيتحسب لما توزّع أرباح</td></tr>
+          <tr><td class="wide">بيأثّر على نسبته</td><td><span class="v-gain">أيوه</span></td><td><span class="v-due">لأ</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <p><strong>الأربع حركات وأثر كل واحدة:</strong></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>الحركة</th><th>الخزنة</th><th>رأس ماله</th><th>أرباحه المستحقة</th><th>نسبته</th></tr></thead>
+        <tbody>
+          <tr><td class="wide">دفع رأس مال</td><td class="num v-gain">+</td><td class="num v-gain">+</td><td class="num">—</td><td>تزيد</td></tr>
+          <tr><td class="wide">سحب من رأس ماله</td><td class="num v-due">−</td><td class="num v-due">−</td><td class="num">—</td><td>تقل</td></tr>
+          <tr><td class="wide">صرف أرباح له</td><td class="num v-due">−</td><td class="num">—</td><td class="num v-due">−</td><td>ما تتغيّرش</td></tr>
+          <tr><td class="wide">ساب أرباحه رأس مال</td><td class="num">—</td><td class="num v-gain">+</td><td class="num v-due">−</td><td>تزيد</td></tr>
+        </tbody>
+      </table></div>
+      <p>خد بالك من الفرق بين <strong>سحب من رأس ماله</strong> و<strong>صرف أرباح له</strong>: الاتنين بيطلّعوا فلوس من الخزنة، بس الأول بيقلّل حصّته في الشركة والتاني لأ. القاعدة: بياخد من أرباحه؟ صرف أرباح. بيقلّل حصّته؟ سحب من رأس ماله.</p>
+
+      <p><strong>ليه النسبة مرجّحة بالزمن؟</strong></p>
+      <p>لأن النسب بتتغيّر. لو شريك كان ٢٠٪ من يناير لمايو وبعدين دفع فلوس فبقى ٣٣٪، مينفعش ياخد ٣٣٪ من أرباح السنة كلها — هو مكانش شريك بالنسبة دي في نص السنة الأولانية. السيستم بيقسّم الفترة عند كل تغيير وبيرجّح كل شريحة بعدد أيامها.</p>
+      <p>وقت التوزيع، اضغط <strong>«ليه النسب دي؟»</strong> تحت الجدول عشان تشوف الشرائح بتواريخك الحقيقية.</p>
+
+      <p><strong>الأرباح المحتجزة</strong> = كل الأرباح من البداية ناقص اللي اتوزّع. ودي السقف الأعلى للتوزيع. بس <strong>الصرف النقدي سقفه رصيد الخزنة</strong>، لأن جزء من الأرباح ممكن يكون محبوس في مخزون أو عند عملاء.</p>
+
+    </div>
+  </details>
+
   <div class="stats" id="cap-stats"></div>
 
   <div class="panel">
@@ -761,6 +819,13 @@
 
     <div id="dist-box" hidden>
       <div class="tbl-wrap" style="margin-top:12px"><table id="t-dist"></table></div>
+      <details class="explain why" id="dist-why">
+        <summary>ليه النسب دي؟</summary>
+        <div class="xbody">
+          <p>الفترة بتتقسّم عند كل تاريخ اتغيّر فيه رأس مال أي شريك، وكل شريحة بتاخد وزن بعدد أيامها.</p>
+          <div class="tbl-wrap"><table id="t-why"></table></div>
+        </div>
+      </details>
       <p class="note" id="dist-check" style="margin-top:10px"></p>
       <div class="row-actions">
         <button class="tbtn primary" type="button" id="b-dist-do">أكّد التوزيع</button>
@@ -4657,8 +4722,44 @@
     document.getElementById("dist-box").hidden = false;
   });
 
+  // بتقسّم الفترة لشرائح عند كل تغيير في رأس المال — نفس اللي weightedRatio بتعمله
+  function ratioSegments(from, to){
+    var bounds = [from];
+    capChangeDates().forEach(function(d){
+      if(d > from && d <= to && bounds.indexOf(d) < 0) bounds.push(d);
+    });
+    bounds.sort();
+    return bounds.map(function(a, i){
+      var b = (i + 1 < bounds.length) ? addDays(bounds[i+1], -1) : to;
+      return { from:a, to:b, days: daysBetween(a,b) + 1,
+               ratios: partners().map(function(p){ return ratioOf(p.id, a); }) };
+    });
+  }
+
+  function renderWhy(from, to){
+    var ps = partners();
+    var segs = ratioSegments(from, to);
+    var total = daysBetween(from, to) + 1;
+    var head = ["الشريحة","أيامها"].concat(ps.map(function(p){ return p.name; }));
+    var rows = segs.map(function(sg){
+      return "<tr><td class='wide'>" + esc(sg.from) + " → " + esc(sg.to) + "</td>" +
+        "<td class='num'>" + qty(sg.days) + "</td>" +
+        sg.ratios.map(function(r){
+          return "<td class='num'>" + (r*100).toFixed(2) + "%</td>"; }).join("") + "</tr>";
+    });
+    rows.push("<tr style='background:var(--teal-soft)'>" +
+      "<td class='wide' style='font-weight:600'>المرجّح بالزمن</td>" +
+      "<td class='num' style='font-weight:600'>" + qty(total) + "</td>" +
+      ps.map(function(p){
+        return "<td class='num' style='font-weight:600'>" +
+          (weightedRatio(p.id, from, to)*100).toFixed(2) + "%</td>";
+      }).join("") + "</tr>");
+    table("t-why", head, rows, "");
+  }
+
   function renderDist(){
     if(!distDraft) return;
+    renderWhy(distDraft.from, distDraft.to);
     var changed = capChangeDates().some(function(d){
       return d > distDraft.from && d <= distDraft.to;
     });
