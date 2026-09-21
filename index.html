@@ -1382,7 +1382,30 @@
     return [{ itemId:s.itemId, color:s.color, size:s.size,
               qty:s.qty, price:s.price, ret:s.ret }];
   }
-  function lineCost(l){ return avgCostV(l.itemId, vColor(l), vSize(l)); }
+  // التكلفة بتتثبّت على السطر وقت التسليم وما بتتغيّرش بعد كده.
+  // من غير التثبيت ده، أي شراء جديد بسعر مختلف كان بيعيد كتابة أرباح الشهور اللي فاتت.
+  function lineCost(l){
+    if(l && l.unitCost != null && l.unitCost !== "") return Number(l.unitCost)||0;
+    return avgCostV(l.itemId, vColor(l), vSize(l));   // السجلات القديمة: نفس السلوك القديم
+  }
+
+  // تاريخ التسليم — الإيراد بيتسجّل فيه، مش في تاريخ إنشاء الأوردر (IFRS 15.31)
+  function revDate(s){ return (s && s.deliveredAt) ? s.deliveredAt : (s ? s.date : ""); }
+
+  // بتتنادى مع كل حفظ أو تغيير حالة: بتثبّت التكلفة وتاريخ التسليم مرة واحدة
+  function stampDelivery(rec){
+    if(!rec) return;
+    if(stOf(rec) === "delivered"){
+      if(!rec.deliveredAt) rec.deliveredAt = today();
+      SL(rec).forEach(function(l){
+        if(l && (l.unitCost == null || l.unitCost === ""))
+          l.unitCost = avgCostV(l.itemId, vColor(l), vSize(l));
+      });
+    } else {
+      // رجع لحالة تانية: التاريخ يتلغي عشان لو اتسلّم تاني ياخد تاريخه الصح
+      delete rec.deliveredAt;
+    }
+  }
   function lineRet(l){
     var r = Number(l.ret)||0, q = Number(l.qty)||0;
     return Math.min(Math.max(r,0), q);
@@ -1657,7 +1680,9 @@
     var d = dateStr || "";
     return d >= r.from && d <= r.to;
   }
-  function salesIn(r){ return live("sales").filter(function(s){ return inRange(s.date, r); }); }
+  // الأوردر بيدخل الفترة بتاريخ تسليمه مش تاريخ طلبه — أوردر اتعمل آخر الشهر
+  // واتسلّم أول الشهر اللي بعده إيراده بيتسجّل في شهر التسليم (IFRS 15.31)
+  function salesIn(r){ return live("sales").filter(function(s){ return inRange(revDate(s), r); }); }
   function expensesIn(r){
     return live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r); })
       .reduce(function(a,c){ return a + (Number(c.amount)||0); },0);
@@ -1938,7 +1963,7 @@
           if(keyOf(p)===k && inRange(p.date,r)) bought += Number(p.qty)||0;
         });
         live("sales").forEach(function(x){
-          if(!inRange(x.date,r)) return;
+          if(!inRange(revDate(x),r)) return;
           SL(x).forEach(function(l){
             if(keyOf(l) !== k) return;
             if(isDelivered(x)){ sold += lineSold(l,x); ret += lineRet(l); }
@@ -2180,7 +2205,8 @@
              lines: SL(rec).map(function(l){
                return { itemId:l.itemId||"", color:vColor(l), size:vSize(l),
                         qty:Number(l.qty)||"", price:Number(l.price)||"",
-                        ret:Number(l.ret)||"", manual:true };
+                        ret:Number(l.ret)||"", manual:true,
+                        unitCost: l.unitCost };      // التكلفة المثبّتة بتعدّي مع التعديل
              }) };
   }
   draft = newDraft();
@@ -3185,6 +3211,7 @@
       if(!l) return;
       if(f === "price") l.manual = true;
       l[f] = v;
+      if(f === "itemId" || f === "color" || f === "size") l.unitCost = null;
       if(f === "itemId"){ l.color = ""; l.size = ""; l.manual = false; }
       if(f === "itemId" || f === "qty") applyDraftTier(l);
       // الصنف بيغيّر قوايم اللون والمقاس، فسطور الأصناف بس هي اللي بتتبني تاني
@@ -3323,7 +3350,8 @@
     var lines = draft.lines.map(function(l){
       return { itemId:l.itemId, color:l.color, size:l.size,
                qty:Number(l.qty)||0, price:Number(l.price)||0,
-               ret: status === "delivered" ? (Number(l.ret)||0) : 0 };
+               ret: status === "delivered" ? (Number(l.ret)||0) : 0,
+               unitCost: l.unitCost };
     }).filter(function(l){ return l.itemId && l.qty > 0; });
 
     if(!draft.partyId){ toast("اختر العميل"); focusFirst(); return; }
@@ -3367,12 +3395,14 @@
       if(rec){
         Object.keys(fields).forEach(function(k){ rec[k] = fields[k]; });
         rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+        stampDelivery(rec);
       }
       freshId = editing.sales; editing.sales = null;
       toast("اتعدّل الأوردر");
     } else {
       fields.no = nextSaleNo();
       var rec2 = stamp(fields);
+      stampDelivery(rec2);
       db.sales.push(rec2);
       freshId = rec2.id;
       toast("اتسجّل أوردر #" + rec2.no);
@@ -3517,6 +3547,7 @@
       if(short){ toast(short + " — سجّل شراء الأول"); sel.value = prev; return; }
     }
     rec.status = next; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+    stampDelivery(rec);
     renderAll(); saveSoon("sales");
     // لما الملغي يرجع مسلّم، خانة المحصّل بتكون اتصفّرت وقت الإلغاء
     if(prev === "cancelled" && next === "delivered" && !(Number(rec.paid)||0))
