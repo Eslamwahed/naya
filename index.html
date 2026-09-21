@@ -861,6 +861,61 @@
   </div>
 
   <div class="panel">
+    <h3>الأرصدة الافتتاحية</h3>
+    <p class="hint">لو بدأت تستخدم السيستم والبيزنس شغّال قبل كده، سجّل هنا اللي كان موجود يوم البداية: فلوس الخزنة، البضاعة اللي عندك، وأرصدة العملاء والموردين. من غيرها التقارير هتبدأ من الصفر وأرقامك هتبقى ناقصة.</p>
+    <p class="note" id="opening-state" style="margin-bottom:12px"></p>
+
+    <div class="fgroup">
+      <span class="glabel">رصيد الخزنة يوم البداية</span>
+      <div class="grid">
+        <div><label for="ob-date">تاريخ البداية</label><input type="date" id="ob-date"></div>
+        <div><label for="ob-cash">المبلغ</label><input type="number" id="ob-cash" step="any" autocomplete="off"></div>
+        <div><button class="tbtn primary" type="button" id="b-ob-cash">سجّل رصيد الخزنة</button></div>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <span class="glabel">بضاعة موجودة عندك</span>
+      <p class="hint" style="margin:0 0 10px">بتتسجّل كفاتورة شراء بمدفوع صفر — فبتدخل في متوسط التكلفة من غير ما تأثّر على الخزنة ولا تعمل مديونية لمورد.</p>
+      <div class="grid">
+        <div><label for="ob-item">الصنف</label><select id="ob-item"></select></div>
+        <div><label for="ob-color">اللون</label><select id="ob-color"></select></div>
+        <div><label for="ob-size">المقاس</label><select id="ob-size"></select></div>
+        <div><label for="ob-qty">الكمية</label><input type="number" id="ob-qty" step="any" min="0" autocomplete="off"></div>
+        <div><label for="ob-cost">تكلفة القطعة</label><input type="number" id="ob-cost" step="any" min="0" autocomplete="off"></div>
+        <div><button class="tbtn primary" type="button" id="b-ob-stock">سجّل البضاعة</button></div>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <span class="glabel">أرصدة العملاء والموردين</span>
+      <div class="grid">
+        <div><label for="ob-party">الجهة</label><select id="ob-party"></select></div>
+        <div><label for="ob-dir">الاتجاه</label>
+          <select id="ob-dir">
+            <option value="1">ليك عنده</option>
+            <option value="-1">عليك له</option>
+          </select></div>
+        <div><label for="ob-amount">المبلغ</label><input type="number" id="ob-amount" step="any" min="0" autocomplete="off"></div>
+        <div><button class="tbtn primary" type="button" id="b-ob-party">سجّل الرصيد</button></div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:14px"><table id="t-opening"></table></div>
+  </div>
+
+  <div class="panel">
+    <h3>إقفال الفترة</h3>
+    <p class="hint">بعد ما تقفل شهر، مفيش أي حركة تاريخها في الفترة دي تتعدّل أو تتحذف. ده اللي بيخلي الرقم اللي وزّعت عليه أرباح ثابت — ومن غيره أي تعديل قديم بيغيّر تقارير قفلتها خلاص.</p>
+    <p class="note" id="lock-state" style="margin-bottom:12px"></p>
+    <div class="grid">
+      <div><label for="lock-until">مقفولة لحد تاريخ</label><input type="date" id="lock-until"></div>
+      <div><button class="tbtn primary" type="button" id="b-lock">اقفل الفترة</button></div>
+      <div><button class="tbtn" type="button" id="b-unlock" hidden>افتح الفترة</button></div>
+    </div>
+  </div>
+
+  <div class="panel">
     <h3>الإعدادات</h3>
     <form class="grid" id="f-settings">
       <div><label for="cur">رمز العملة</label><input id="cur" value="ج.م" autocomplete="off"></div>
@@ -1620,7 +1675,8 @@
     live("purchases").forEach(function(p){ if(p.partyId===id) bal -= purchTotal(p) - (Number(p.paid)||0); });
     live("cash").forEach(function(c){
       if(c.partyId!==id) return;
-      if(c.type==="in") bal -= Number(c.amount)||0;
+      if(c.type==="opening_party") bal += Number(c.amount)||0;   // موجب = ليك عنده
+      if(c.type==="in")  bal -= Number(c.amount)||0;
       if(c.type==="out") bal += Number(c.amount)||0;
     });
     return bal; // موجب = ليك عنده، سالب = عليك له
@@ -1636,9 +1692,52 @@
     live("purchases").forEach(function(p){ v -= Number(p.paid)||0; });
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
-      if(c.type==="in" || c.type==="settle") v += a; else v -= a;
+      // معالجة صريحة: قبل كده أي نوع مجهول كان بيتعامل كخروج بالغلط
+      if(c.type === "opening")      v += a;    // رصيد افتتاحي للخزنة
+      else if(c.type === "opening_party") return;  // ده بيأثّر على رصيد الجهة بس
+      else if(c.type === "in" || c.type === "settle") v += a;
+      else if(c.type === "out" || c.type === "expense") v -= a;
     });
     return v;
+  }
+
+  /* ---------- الأرصدة الافتتاحية ---------- */
+  // opening        : رصيد الخزنة يوم ما بدأت تستخدم السيستم
+  // opening_party  : موجب = ليك عنده · سالب = عليك له
+  // المخزون الافتتاحي بيتسجّل كفاتورة شراء عليها opening:true ومدفوع صفر،
+  // فبتدخل في متوسط التكلفة من غير ما تأثّر على الخزنة أو على مديونية مورد.
+  function openingCash(){
+    return live("cash").filter(function(c){ return c.type === "opening"; })
+      .reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
+  }
+  function hasOpening(){
+    return live("cash").some(function(c){ return c.type==="opening" || c.type==="opening_party"; })
+        || live("purchases").some(function(p){ return p.opening; });
+  }
+
+  /* ---------- إقفال الفترة ---------- */
+  // أي حركة تاريخها قبل أو يساوي lockedUntil مقفولة — مينفعش تتعدّل ولا تتحذف.
+  // ده اللي بيخلي الرقم اللي وزّعت عليه أرباح الشركاء يفضل هو هو.
+  function lockDate(){ return (settings && settings.lockedUntil) || ""; }
+  function isLocked(dateStr){
+    var L = lockDate();
+    return !!(L && dateStr && String(dateStr) <= L);
+  }
+  // بترجّع true لو الحركة مسموح بيها، وبتنبّه لو مقفولة
+  function guardLock(dateStr, what){
+    if(!isLocked(dateStr)) return true;
+    toast((what || "الحركة") + " في فترة مقفولة (لحد " + lockDate() + ") — افتح الفترة الأول من تبويب النسخة الاحتياطية");
+    return false;
+  }
+  // الأوردر مقفول لو تاريخ طلبه أو تاريخ تسليمه في الفترة المقفولة
+  // أول تاريخ مسموح تسجّل فيه — عشان السجل الجديد ما يقعش في فترة مقفولة
+  function firstOpenDate(){
+    var L = lockDate(), t = today();
+    if(!L || L < t) return t;
+    return addDays(L, 1);
+  }
+  function saleLocked(rec){
+    return isLocked(rec && rec.date) || isLocked(rec && rec.deliveredAt);
   }
 
   /* ---------- عرض ---------- */
@@ -2192,7 +2291,7 @@
   var draft = null;
   function blankLine(){ return { itemId:"", color:"", size:"", qty:"", price:"", ret:"", manual:false }; }
   function newDraft(keep){
-    return { date: today(), status:"progress", partyId:"", owner: me || "",
+    return { date: firstOpenDate(), status:"progress", partyId:"", owner: me || "",
              shipCo: keep ? keep.shipCo : "", shipCode:"",
              shipIn:"", shipOut:"", payVia: keep ? keep.payVia : "ship",
              paid:"", note:"", lines:[ blankLine() ] };
@@ -2589,7 +2688,10 @@
   }
 
   function cashLabel(t){
-    return t==="in" ? "تحصيل" : t==="out" ? "دفع" : t==="settle" ? "سحب من شركة شحن" : "مصروف";
+    return t==="in" ? "تحصيل" : t==="out" ? "دفع" :
+           t==="settle" ? "سحب من شركة شحن" :
+           t==="opening" ? "رصيد افتتاحي — الخزنة" :
+           t==="opening_party" ? "رصيد افتتاحي — جهة" : "مصروف";
   }
 
   // دفتر الخزنة: كل حركة نقدية مهما كان مصدرها
@@ -2617,11 +2719,12 @@
     });
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
-      var isIn = (c.type==="in" || c.type==="settle");
+      if(c.type === "opening_party") return;   // رصيد جهة — مش حركة خزنة
+      var isIn = (c.type==="in" || c.type==="settle" || c.type==="opening");
       L.push({d:c.date, at:c.at, t:cashLabel(c.type),
         who:(c.type==="settle" ? (c.shipCo||"شركة شحن") : (c.partyId?partyName(c.partyId):"—")),
         note:c.note||"", inn:(isIn?a:0), out:(isIn?0:a),
-        src:"يدوي", id:c.id});
+        src:(c.type==="opening" ? "افتتاحي" : "يدوي"), id:c.id});
     });
     L.sort(function(a,b){
       if(a.d !== b.d) return a.d < b.d ? -1 : 1;
@@ -2873,6 +2976,12 @@
       w.hidden = ct !== "settle";
     });
     document.getElementById("c-party").disabled = (ct === "settle" || ct === "expense");
+
+    // قوايم الأرصدة الافتتاحية
+    opts(live("items"), "ob-item", "اختر صنف");
+    opts(live("parties"), "ob-party", "اختر جهة");
+    var obd = document.getElementById("ob-date");
+    if(obd && !obd.value) obd.value = today();
   }
 
   // بيملّي قوائم اللون والمقاس حسب الصنف المختار
@@ -2881,8 +2990,9 @@
     var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
     var cSel = document.getElementById(prefix+"-color");
     var zSel = document.getElementById(prefix+"-size");
-    var wraps = document.querySelectorAll(prefix === "s" ? ".vfield" : ".pvfield");
-    var notes = document.querySelectorAll(prefix === "s" ? ".vnote" : ".pvnote");
+    if(!cSel || !zSel) return;
+    var wraps = prefix === "ob" ? [] : document.querySelectorAll(prefix === "s" ? ".vfield" : ".pvfield");
+    var notes = prefix === "ob" ? [] : document.querySelectorAll(prefix === "s" ? ".vnote" : ".pvnote");
     var show = cs.length > 0 || zs.length > 0;
     Array.prototype.forEach.call(wraps, function(w){ w.hidden = !show; });
     // التنبيه بيظهر بس لما يكون في صنف مختار ومالوش تركيبات
@@ -2906,6 +3016,7 @@
     renderSales(); renderPurch(); renderWallets(); renderCash();
     renderItems(); renderVars(); renderOffers(); renderParties(); renderStatement(); renderLog();
     renderFind();
+    renderOpening(); renderLock();
   }
 
   /* ---------- البحث عن أوردر ---------- */
@@ -3069,6 +3180,14 @@
 
   function commit(list, fields, form, addMsg){
     var id = editing[list];
+    // حاجز الإقفال — مركزي لكل القوايم اللي بتعدي من هنا (مشتريات، خزنة، أصناف، جهات)
+    if(fields.date && !guardLock(fields.date, "الحركة")) return;
+    if(id){
+      var prev = db[list].find(function(x){ return x.id===id; });
+      if(prev && prev.date && isLocked(prev.date)){
+        toast("السجل ده في فترة مقفولة — مينفعش يتعدّل"); return;
+      }
+    }
     if(id){
       var rec = db[list].find(function(x){ return x.id===id; });
       if(rec){
@@ -3327,6 +3446,8 @@
     var el = e.target.closest("[data-date]"); if(!el) return;
     var rec = db.sales.find(function(x){ return x.id === el.dataset.date; });
     if(!rec) return;
+    if(saleLocked(rec) || isLocked(el.value)){ el.value = rec.date || today();
+      toast("التاريخ ده في فترة مقفولة"); return; }
     if(!el.value){ el.value = rec.date || today(); return; }
     rec.date = el.value; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll(); toast("التاريخ بقى " + rec.date);
@@ -3353,6 +3474,13 @@
                ret: status === "delivered" ? (Number(l.ret)||0) : 0,
                unitCost: l.unitCost };
     }).filter(function(l){ return l.itemId && l.qty > 0; });
+
+    // الفترة المقفولة: لا السجل القديم يتعدّل، ولا سجل جديد يتحط جواها
+    if(editing.sales){
+      var oldRec = db.sales.find(function(x){ return x.id === editing.sales; });
+      if(oldRec && saleLocked(oldRec)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+    }
+    if(!guardLock(draft.date, "الأوردر")) return;
 
     if(!draft.partyId){ toast("اختر العميل"); focusFirst(); return; }
     if(!lines.length){ toast("اختر صنف واكتب الكمية"); return; }
@@ -3477,7 +3605,7 @@
       return;
     }
     commit("purchases", fields, form, "اتسجّل الشراء");
-    document.getElementById("p-date").value = today();
+    document.getElementById("p-date").value = firstOpenDate();
     renderAll();
   });
 
@@ -3529,6 +3657,8 @@
     if(!sel) return;
     var rec = db.sales.find(function(x){ return x.id === sel.dataset.status; });
     if(!rec) return;
+    if(saleLocked(rec)){ sel.value = stOf(rec);
+      toast("الأوردر ده في فترة مقفولة — مينفعش تتغيّر حالته"); return; }
     var next = sel.value, prev = stOf(rec);
     if(next === prev) return;
     // لو هيتحوّل لحالة بتخصم مخزون، اتأكد إن في رصيد
@@ -3614,7 +3744,10 @@
     }
     var list = d.dataset.del, id = d.dataset.id;
     var rec = db[list].find(function(x){ return x.id===id; });
-    if(rec){ rec.deleted = true; rec.at = Date.now(); renderAll(); toast("اتحذف"); saveSoon(list); }
+    if(!rec) return;
+    var locked = (list === "sales") ? saleLocked(rec) : isLocked(rec.date);
+    if(locked){ toast("السجل ده في فترة مقفولة — مينفعش يتحذف"); return; }
+    rec.deleted = true; rec.at = Date.now(); renderAll(); toast("اتحذف"); saveSoon(list);
   });
 
   document.getElementById("me").addEventListener("change", async function(){
@@ -3952,6 +4085,10 @@
 
   // المسح بيتم بعلامة حذف على كل سجل عشان يتزامن مع باقي الأجهزة كمان
   function doReset(){
+    if(lockDate()){
+      toast("فيه فترة مقفولة لحد " + lockDate() + " — افتحها الأول لو متأكد إنك عايز تمسح");
+      closeReset(); return;
+    }
     downloadBackup();                       // نسخة احتياطية إجبارية الأول
     var now = Date.now();
     LISTS.forEach(function(name){
@@ -4038,10 +4175,153 @@
     }
   });
 
+  /* ================= الأرصدة الافتتاحية وإقفال الفترة ================= */
+
+  function renderOpening(){
+    var el = document.getElementById("t-opening");
+    if(!el) return;
+
+    var rows = [];
+    live("cash").filter(function(c){ return c.type==="opening"; }).forEach(function(c){
+      rows.push({ d:c.date, t:"خزنة", who:"—",
+        v:money(Number(c.amount)||0), cls:"", id:c.id, list:"cash" });
+    });
+    live("purchases").filter(function(p){ return p.opening; }).forEach(function(p){
+      var vl = vLabel(vColor(p), vSize(p));
+      rows.push({ d:p.date, t:"بضاعة", who: itemName(p.itemId) + (vl ? " ("+vl+")" : ""),
+        v: qty(Number(p.qty)||0) + " × " + money(p.cost) + " = " + money(purchTotal(p)),
+        cls:"", id:p.id, list:"purchases" });
+    });
+    live("cash").filter(function(c){ return c.type==="opening_party"; }).forEach(function(c){
+      var a = Number(c.amount)||0;
+      rows.push({ d:c.date, t:(a>=0 ? "ليك عند" : "عليك لـ"), who:partyName(c.partyId),
+        v:money(Math.abs(a)), cls:(a>=0?"v-gain":"v-due"), id:c.id, list:"cash" });
+    });
+    rows.sort(function(a,b){ return (a.d||"") < (b.d||"") ? -1 : 1; });
+
+    table("t-opening", ["التاريخ","النوع","الجهة / الصنف","القيمة",""],
+      rows.map(function(r){
+        return "<tr><td class='num'>"+esc(r.d||"—")+"</td><td>"+esc(r.t)+"</td>"+
+          "<td class='wide'>"+esc(r.who)+"</td>"+
+          "<td class='num "+r.cls+"'>"+esc(r.v)+"</td>"+
+          "<td><button class='del' data-del='"+r.list+"' data-id='"+r.id+"'>حذف</button></td></tr>";
+      }), "مفيش أرصدة افتتاحية — لو البيزنس بدأ مع السيستم مش محتاجها.");
+
+    var st = document.getElementById("opening-state");
+    if(st){
+      if(!hasOpening()){
+        st.textContent = "مفيش أرصدة افتتاحية مسجّلة — التقارير بتبدأ من أول حركة سجّلتها.";
+        st.className = "note";
+      } else {
+        var stockVal = live("purchases").filter(function(p){ return p.opening; })
+          .reduce(function(a,p){ return a + purchTotal(p); }, 0);
+        var due = live("cash").filter(function(c){ return c.type==="opening_party"; })
+          .reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
+        st.textContent = "خزنة " + money(openingCash()) + " · بضاعة " + money(stockVal) +
+          " · صافي أرصدة الجهات " + money(due);
+        st.className = "note ok";
+      }
+    }
+  }
+
+  function renderLock(){
+    var st = document.getElementById("lock-state");
+    var un = document.getElementById("b-unlock");
+    if(!st) return;
+    var L = lockDate();
+    if(L){
+      var n = live("sales").filter(function(x){ return saleLocked(x); }).length;
+      st.textContent = "الفترة مقفولة لحد " + L + " — " + qty(n) + " أوردر محمي من التعديل والحذف.";
+      st.className = "note ok";
+    } else {
+      st.textContent = "مفيش فترة مقفولة — أي حركة قديمة ممكن تتعدّل وتغيّر تقارير قفلتها.";
+      st.className = "note";
+    }
+    if(un) un.hidden = !L;
+    var inp = document.getElementById("lock-until");
+    if(inp && !inp.value) inp.value = L || "";
+  }
+
+  document.getElementById("b-lock").addEventListener("click", function(){
+    var v = document.getElementById("lock-until").value;
+    if(!v){ toast("اختر التاريخ الأول"); return; }
+    if(v >= today()){
+      toast("اقفل لتاريخ عدّى — لو قفلت النهاردة مش هتقدر تسجّل حركات النهاردة");
+      return;
+    }
+    settings.lockedUntil = v;
+    saveSettings(); renderLock(); renderAll();
+    toast("الفترة اتقفلت لحد " + v);
+  });
+
+  // الفتح بخطوتين — مش حركة عابرة
+  document.getElementById("b-unlock").addEventListener("click", function(){
+    if(this.dataset.armed !== "1"){
+      this.dataset.armed = "1";
+      this.textContent = "متأكد؟ الأرقام هتبقى قابلة للتغيير";
+      var b = this;
+      setTimeout(function(){
+        if(b.dataset.armed === "1"){ b.dataset.armed = ""; b.textContent = "افتح الفترة"; }
+      }, 5000);
+      return;
+    }
+    this.dataset.armed = ""; this.textContent = "افتح الفترة";
+    settings.lockedUntil = "";
+    saveSettings(); renderLock(); renderAll();
+    toast("الفترة اتفتحت — التعديل مسموح تاني");
+  });
+
+  document.getElementById("b-ob-cash").addEventListener("click", function(){
+    var d = document.getElementById("ob-date").value || today();
+    var a = Number(document.getElementById("ob-cash").value)||0;
+    if(!a){ toast("اكتب المبلغ"); return; }
+    if(!guardLock(d, "الرصيد الافتتاحي")) return;
+    db.cash.push(stamp({ date:d, type:"opening", amount:a, partyId:"", shipCo:"",
+      note:"رصيد افتتاحي" }));
+    document.getElementById("ob-cash").value = "";
+    saveSoon("cash"); renderAll(); toast("اتسجّل رصيد الخزنة الافتتاحي");
+  });
+
+  document.getElementById("b-ob-stock").addEventListener("click", function(){
+    var d  = document.getElementById("ob-date").value || today();
+    var it = document.getElementById("ob-item").value;
+    var q  = Number(document.getElementById("ob-qty").value)||0;
+    var c  = Number(document.getElementById("ob-cost").value)||0;
+    if(!it || !q){ toast("اختر الصنف واكتب الكمية"); return; }
+    if(!c){ toast("اكتب تكلفة القطعة — من غيرها الربح هيطلع غلط"); return; }
+    var col = document.getElementById("ob-color").value;
+    var sz  = document.getElementById("ob-size").value;
+    var miss = variantMissing(it, col, sz);
+    if(miss){ toast(miss); return; }
+    if(!guardLock(d, "الرصيد الافتتاحي")) return;
+    // فاتورة شراء بمدفوع صفر ومن غير مورد: بتدخل المخزون والتكلفة بس
+    db.purchases.push(stamp({ date:d, partyId:"", itemId:it, color:col, size:sz,
+      qty:q, cost:c, paid:0, opening:true, note:"مخزون افتتاحي" }));
+    ["ob-qty","ob-cost"].forEach(function(x){ document.getElementById(x).value = ""; });
+    saveSoon("purchases"); renderAll(); toast("اتسجّلت البضاعة الافتتاحية");
+  });
+
+  document.getElementById("b-ob-party").addEventListener("click", function(){
+    var d  = document.getElementById("ob-date").value || today();
+    var pid = document.getElementById("ob-party").value;
+    var a  = Number(document.getElementById("ob-amount").value)||0;
+    var dir = Number(document.getElementById("ob-dir").value)||1;
+    if(!pid || !a){ toast("اختر الجهة واكتب المبلغ"); return; }
+    if(!guardLock(d, "الرصيد الافتتاحي")) return;
+    db.cash.push(stamp({ date:d, type:"opening_party", partyId:pid, amount:Math.abs(a)*dir,
+      shipCo:"", note:"رصيد افتتاحي" }));
+    document.getElementById("ob-amount").value = "";
+    saveSoon("cash"); renderAll(); toast("اتسجّل الرصيد الافتتاحي للجهة");
+  });
+
+  document.getElementById("ob-item").addEventListener("change", function(){
+    fillVariantSelects("ob", this.value);
+  });
+
   /* ---------- بدء ---------- */
   (async function init(){
-    document.getElementById("p-date").value = today();
-    document.getElementById("c-date").value = today();
+    document.getElementById("p-date").value = firstOpenDate();
+    document.getElementById("c-date").value = firstOpenDate();
     await loadAll();
     loadSyncCfg();
     document.getElementById("sb-url").value = sync.url;
