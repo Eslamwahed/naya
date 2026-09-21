@@ -2167,8 +2167,17 @@
     var box = document.getElementById("dash-partners");
     if(!box) return;
     var ps = partners();
-    if(!ps.length){ box.hidden = true; return; }
     box.hidden = false;
+    // بدل ما اللوحة تختفي خالص والمستخدم يدوّر عليها، بتفضل باينة وبتقول المطلوب
+    if(!ps.length){
+      document.getElementById("dp-note").innerHTML =
+        "لسه مفيش شركاء مسجّلين. سجّلهم من تبويب <strong>العملاء والموردين</strong> بنوع «شريك»، " +
+        "وبعدين سجّل رأس مال كل واحد من تبويب <strong>رأس المال</strong> — " +
+        "وساعتها اللوحة دي هتوريك نصيب كل واحد من الربح لحظة بلحظة.";
+      document.getElementById("dp-note").className = "hint";
+      table("t-dash-partners", ["الشريك"], [], "");
+      return;
+    }
 
     var r = periodRange();
     // «كل الفترات» مالهاش حدود، فبنبدأ من أول حركة مسجّلة لحد النهاردة
@@ -2179,7 +2188,8 @@
 
     var note = document.getElementById("dp-note");
     if(!cap){
-      note.textContent = "الشركاء مسجّلين بس مفيش رأس مال متسجّل ليهم — سجّله من تبويب رأس المال عشان النسب تتحسب.";
+      note.innerHTML = "الشركاء مسجّلين بس مفيش رأس مال متسجّل ليهم. " +
+        "سجّل رأس مال كل واحد من تبويب <strong>رأس المال</strong> عشان النسب تتحسب.";
       note.className = "hint";
       table("t-dash-partners", ["الشريك"], [], "");
       return;
