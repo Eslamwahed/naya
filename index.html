@@ -3633,6 +3633,8 @@
   document.getElementById("nav").addEventListener("click", function(e){
     var b = e.target.closest("button[data-tab]");
     if(!b) return;
+    if(openEntryKey) closeEntry(true);      // درج مفتوح؟ يتقفل مع تغيير التبويب
+    if(SD_OPEN) closeDrawer();
     Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){ x.setAttribute("aria-current","false"); });
     b.setAttribute("aria-current","true");
     // بتتقرا من الـDOM بدل قايمة ثابتة بتتنسى مع كل تبويب جديد
@@ -4870,7 +4872,9 @@
       note: document.getElementById("cp-note").value.trim() || CAP[t].label }));
     document.getElementById("cp-amount").value = "";
     document.getElementById("cp-note").value = "";
-    saveSoon("cash"); renderAll(); toast(CAP[t].label + " اتسجّل");
+    saveSoon("cash"); renderAll();
+    if(openEntryKey === "capital") closeEntry();
+    toast(CAP[t].label + " اتسجّل");
   });
 
   ["cp-partner","cp-type"].forEach(function(id){
