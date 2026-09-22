@@ -1566,7 +1566,17 @@
       }
     }
     var on = document.getElementById("b-sync-on"), off = document.getElementById("b-sync-off");
-    if(on && off){ on.hidden = sync.on; off.hidden = !sync.on; }
+    if(on && off){
+      // المفتاح بيتقرا من الخانة وقت الضغط بس. لو المستخدم لصق مفتاح جديد
+      // والمزامنة شغالة، الزرار كان مخفي فمكانش فيه طريقة يطبّقه.
+      var uEl = document.getElementById("sb-url"), kEl = document.getElementById("sb-key");
+      var typedU = uEl ? normalizeSyncUrl(uEl.value) : "";
+      var typedK = kEl ? kEl.value.trim() : "";
+      var differs = sync.on && (typedU !== sync.url || typedK !== sync.key);
+      on.hidden = sync.on && !differs;
+      on.textContent = differs ? "طبّق البيانات الجديدة" : "تشغيل المزامنة";
+      off.hidden = !sync.on;
+    }
   }
 
   function live(name){ return db[name].filter(function(r){ return !r.deleted; }); }
@@ -4471,6 +4481,9 @@
     syncTick(); toast("بيزامن…");
   });
   document.getElementById("b-sync-all").addEventListener("click", pullEverything);
+  ["sb-url","sb-key"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", renderStorageState);
+  });
 
   document.getElementById("b-link").addEventListener("click", linkNewFile);
   document.getElementById("b-open").addEventListener("click", linkExistingFile);
