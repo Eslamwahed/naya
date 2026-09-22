@@ -943,6 +943,7 @@
       <button class="act" type="button" id="b-sync-on">تشغيل المزامنة</button>
       <button class="act ghost" type="button" id="b-sync-off" hidden>إيقاف</button>
       <button class="act ghost" type="button" id="b-sync-now">مزامنة دلوقتي</button>
+      <button class="act ghost" type="button" id="b-sync-all">اسحب كل البيانات</button>
       <button class="act ghost" type="button" id="b-sql">نسخ كود التجهيز (SQL)</button>
       <button class="act ghost" type="button" id="b-sql-img">كود الصور (SQL)</button>
     </div>
@@ -1318,12 +1319,40 @@
   var sync = { url:"", key:"", on:false, lastSeen:null, timer:null,
                state:"واقفة", pushed:{}, busy:false, err:"", pushTimer:null };
 
+  // بصمة قصيرة للسجل — بنخزّنها بدل الـJSON كامل عشان تدخل localStorage
+  function fp(str){
+    var h = 0x811c9dc5;
+    for(var i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+    return h.toString(36);
+  }
+
+  // بصمات آخر رفعة. من غير تخزينها كان السيستم بيرفع كل الداتا من الأول
+  // مع كل فتحة للصفحة، وده بيساوي updated_at لكل الصفوف وبيربك المزامنة.
+  function loadPushed(){
+    if(!LS) return;
+    try{
+      var o = JSON.parse(LS.getItem("naya:pushed")||"null");
+      // البصمات مربوطة بمشروع معيّن — لو الرابط اتغيّر تبقى ملهاش لازمة
+      sync.pushed = (o && o.u === sync.url && o.m) ? o.m : {};
+    }catch(e){ sync.pushed = {}; }
+  }
+  function savePushed(){
+    if(!LS) return;
+    try{ LS.setItem("naya:pushed", JSON.stringify({ u:sync.url, m:sync.pushed })); }
+    catch(e){}                       // امتلت؟ مش مشكلة، أسوأ حاجة رفعة زيادة
+  }
+  function clearPushed(){
+    sync.pushed = {};
+    if(LS){ try{ LS.removeItem("naya:pushed"); }catch(e){} }
+  }
+
   function loadSyncCfg(){
     if(!LS) return;
     try{
       var c = JSON.parse(LS.getItem("naya:sync")||"null");
       if(c){ sync.url=c.url||""; sync.key=c.key||""; sync.on=!!c.on; sync.lastSeen=c.lastSeen||null; }
     }catch(e){}
+    loadPushed();
   }
   function saveSyncCfg(){
     if(!LS) return;
@@ -1349,13 +1378,13 @@
     LISTS.forEach(function(list){
       db[list].forEach(function(r){
         if(!r || !r.id) return;
-        var j = JSON.stringify(r);
-        if(sync.pushed[r.id] !== j) out.push({ id:r.id, list:list, payload:r, _j:j });
+        var h = fp(JSON.stringify(r));
+        if(sync.pushed[r.id] !== h) out.push({ id:r.id, list:list, payload:r, _h:h });
       });
     });
-    var sj = JSON.stringify(settings);
-    if(sync.pushed["__settings"] !== sj)
-      out.push({ id:"__settings", list:"settings", payload:settings, _j:sj });
+    var sh = fp(JSON.stringify(settings));
+    if(sync.pushed["__settings"] !== sh)
+      out.push({ id:"__settings", list:"settings", payload:settings, _h:sh });
     return out;
   }
 
@@ -1372,7 +1401,8 @@
         body: JSON.stringify(body)
       }), 15000);
       if(!res.ok) throw new Error("HTTP " + res.status);
-      rows.forEach(function(r){ sync.pushed[r.id] = r._j; });
+      rows.forEach(function(r){ sync.pushed[r.id] = r._h; });
+      savePushed();
       sync.state = "متزامنة"; sync.err = "";
       lastSaved = Date.now();
     }catch(e){
@@ -1395,7 +1425,7 @@
       var changed = false;
       rows.forEach(function(row){
         sync.lastSeen = row.updated_at;
-        sync.pushed[row.id] = JSON.stringify(row.payload);
+        sync.pushed[row.id] = fp(JSON.stringify(row.payload));
         if(row.list === "settings"){
           if(row.payload && row.payload.currency){ settings = row.payload; changed = true; }
           return;
@@ -1407,7 +1437,7 @@
           changed = true;
         }
       });
-      saveSyncCfg();
+      saveSyncCfg(); savePushed();
       if(changed){ writeLocal(); writeFileSoon(); renderAll(); }
       renderStorageState();
       return changed;
@@ -1431,6 +1461,20 @@
     syncTick();
     renderStorageState();
   }
+  // بتلغي علامة «آخر حاجة شفتها» فالسحب الجاي بيجيب كل حاجة من الأول.
+  // ده المخرج لما العلامة تتقدّم من غير ما البيانات توصل للجهاز ده.
+  async function pullEverything(){
+    if(!sync.on){ toast("شغّل المزامنة الأول"); return; }
+    sync.lastSeen = null;
+    clearPushed();
+    saveSyncCfg();
+    toast("بيسحب كل البيانات…");
+    var got = await syncPull();
+    renderAll();
+    var n = LISTS.reduce(function(a,x){ return a + live(x).length; }, 0);
+    toast(n ? ("اتسحب — السيستم فيه " + qty(n) + " سجل") : "السيرفر فاضي فعلاً");
+  }
+
   function stopSync(){
     sync.on = false; clearInterval(sync.timer); sync.timer = null;
     sync.state = "واقفة"; saveSyncCfg(); renderStorageState();
@@ -1501,10 +1545,21 @@
     var sl = document.getElementById("sync-state");
     if(sl){
       if(sync.on){
-        sl.textContent = "المزامنة شغالة · " + sync.state +
-          (sync.err ? " (" + sync.err + ")" : "") +
-          (lastSaved ? " · آخر تحديث " + new Date(lastSaved).toLocaleTimeString("en-GB",{hour12:false}) : "");
-        sl.className = (sync.state === "متزامنة") ? "note ok" : "note bad";
+        var n = LISTS.reduce(function(a,x){ return a + live(x).length; }, 0);
+        // «متزامنة» لوحدها كانت بتخفي إن السيستم فاضي: السحب بيجيب اللي
+        // اتغيّر بعد آخر مرة بس، فلو العلامة اتقدّمت غلط مابيرجعش حاجة
+        // وبيقول متزامنة وهو مش شايف داتا. العدد بيكشف ده على طول.
+        if(sync.state === "متزامنة" && n === 0){
+          sl.innerHTML = "المزامنة شغالة بس <strong>السيستم فاضي</strong> — " +
+            "لو المفروض فيه بيانات على السيرفر، اضغط <strong>«اسحب كل البيانات»</strong>.";
+          sl.className = "note bad";
+        } else {
+          sl.textContent = "المزامنة شغالة · " + sync.state +
+            " · " + qty(n) + " سجل" +
+            (sync.err ? " (" + sync.err + ")" : "") +
+            (lastSaved ? " · آخر تحديث " + new Date(lastSaved).toLocaleTimeString("en-GB",{hour12:false}) : "");
+          sl.className = (sync.state === "متزامنة") ? "note ok" : "note bad";
+        }
       } else {
         sl.textContent = "المزامنة واقفة — كل جهاز شغال لوحده.";
         sl.className = "note";
@@ -4399,7 +4454,10 @@
   });
 
   document.getElementById("b-sync-on").addEventListener("click", function(){
-    sync.url = normalizeSyncUrl(document.getElementById("sb-url").value);
+    var newUrl = normalizeSyncUrl(document.getElementById("sb-url").value);
+    // مشروع تاني = بصمات قديمة ملهاش معنى، وعلامة «آخر حاجة شفتها» كمان
+    if(newUrl !== sync.url){ clearPushed(); sync.lastSeen = null; }
+    sync.url = newUrl;
     sync.key = document.getElementById("sb-key").value.trim();
     document.getElementById("sb-url").value = sync.url;
     if(/sb_secret_|service_role/i.test(sync.key)){
@@ -4412,6 +4470,7 @@
     if(!sync.on){ toast("شغّل المزامنة الأول"); return; }
     syncTick(); toast("بيزامن…");
   });
+  document.getElementById("b-sync-all").addEventListener("click", pullEverything);
 
   document.getElementById("b-link").addEventListener("click", linkNewFile);
   document.getElementById("b-open").addEventListener("click", linkExistingFile);
