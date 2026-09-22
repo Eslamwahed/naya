@@ -350,6 +350,48 @@
   .drawer-foot .sums > div{font-size:.75rem;color:var(--ink-soft)}
   .drawer-foot .sums strong{display:block;font-size:1rem;color:var(--ink);font-weight:600;margin-top:1px}
 
+  /* ---------- درج موحّد: أي لوحة إدخال بتتحوّل لدرج بنفس شكل المبيعات ---------- */
+  .panel.as-drawer{
+    position:fixed;inset-block:0;inset-inline-start:0;width:min(600px,100%);
+    z-index:41;margin:0;border-radius:0;border:none;
+    display:flex;flex-direction:column;padding:0;
+    box-shadow:0 8px 30px rgba(36,30,38,.2);
+    transform:translateX(100%);transition:transform .24s cubic-bezier(.32,.72,0,1);
+  }
+  [data-theme="dark"] .panel.as-drawer{box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .panel.as-drawer.on{transform:translateX(0)}
+  .panel.as-drawer[hidden]{display:none}
+  .panel.as-drawer > .dhead{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:16px 18px;border-bottom:1px solid var(--line);flex:0 0 auto;
+  }
+  .panel.as-drawer > .dhead h3{margin:0;font-size:1rem;font-weight:600}
+  .panel.as-drawer > .dbody{
+    overflow:auto;padding:18px;flex:1;
+    padding-block-end:calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+  .panel.as-drawer .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  /* الهيدر والجسم مايبانوش وهي لوحة عادية (مش درج) */
+  .panel:not(.as-drawer) > .dhead{padding:0 0 4px;border:none}
+  .dclose{
+    margin-inline-start:auto;background:none;border:none;color:var(--ink-soft);
+    font-size:1.3rem;line-height:1;padding:4px 9px;border-radius:7px;cursor:pointer;
+  }
+  .dclose:hover{background:var(--paper);color:var(--ink)}
+  .panel:not(.as-drawer) .dclose{display:none}
+
+  /* شريط الإجراء فوق كل جدول */
+  .tbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .tbar .spacer{margin-inline-start:auto}
+
+  /* الرصيد اللي الحركة هتأثّر عليه — بيبان وانت بتكتب */
+  .impact{
+    background:var(--teal-soft);border-radius:10px;padding:11px 14px;
+    font-size:.86rem;display:flex;gap:14px;flex-wrap:wrap;align-items:baseline;
+  }
+  .impact b{font-weight:600;font-variant-numeric:tabular-nums}
+  .impact .arrow{color:var(--ink-soft)}
+
   /* أقسام الشرح اللي بتتطوي */
   details.explain{
     background:var(--card);border:1px solid var(--line);
@@ -477,17 +519,17 @@
 </div>
 <nav id="nav">
   <button data-tab="dash" aria-current="true">لوحة المتابعة</button>
-  <button data-tab="sales">مبيعات</button>
-  <button data-tab="find">بحث</button>
-  <button data-tab="purch">مشتريات</button>
-  <button data-tab="cash">الخزنة</button>
-  <button data-tab="items">الأصناف</button>
-  <button data-tab="parties">العملاء والموردين</button>
   <button data-tab="capital">رأس المال</button>
+  <button data-tab="cash">الخزنة</button>
+  <button data-tab="purch">المشتريات</button>
+  <button data-tab="items">الأصناف</button>
   <button data-tab="inv">المخزون</button>
+  <button data-tab="sales">المبيعات</button>
+  <button data-tab="find">بحث</button>
+  <button data-tab="parties">العملاء والموردين</button>
   <button data-tab="rep">تقارير</button>
   <button data-tab="log">سجل الحركات</button>
-  <button data-tab="backup">نسخة احتياطية</button>
+  <button data-tab="backup">الإعدادات</button>
 </nav>
 
 <main>
@@ -608,8 +650,17 @@
 <section id="tab-purch" hidden>
   <h2>مشتريات</h2>
   <p class="hint">كل شراء بيزوّد رصيد الصنف وبيعدّل متوسط تكلفته.</p>
-  <div class="panel">
-    <h3>شراء جديد</h3>
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
+  </div>
+
+  <div class="panel" id="entry-purchases" hidden>
+    <div class="dhead">
+      <h3 id="title-purchases">شراء جديد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-purchases"></p>
     <form class="grid" id="f-purch">
       <div><label for="p-date">التاريخ</label><input type="date" id="p-date" required></div>
       <div><label for="p-party">المورد</label><select id="p-party" required></select></div>
@@ -625,6 +676,7 @@
       <div><button class="act" type="button" id="b-purch">حفظ الشراء</button> <button class="act ghost" type="button" id="x-purch" hidden>إلغاء</button></div>
     </form>
     <p class="note" id="p-note-msg"></p>
+    </div>
   </div>
   <div class="tbl-wrap"><table id="t-purch"></table></div>
 </section>
@@ -633,8 +685,17 @@
 <section id="tab-cash" hidden>
   <h2>الخزنة</h2>
   <p class="hint">الجدول ده دفتر الخزنة كامل: كل حركة نقدية من الأوردرات والمشتريات بتظهر فيه لوحدها، والفورم ده للحركات اليدوية اللي مش مربوطة بأوردر (تحصيل متأخر، دفع لمورد، مصروف). مرتّب من الأقدم للأحدث عشان الرصيد التراكمي يبقى مقروء.</p>
-  <div class="panel">
-    <h3>حركة نقدية</h3>
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="cash">+ حركة نقدية</button>
+  </div>
+
+  <div class="panel" id="entry-cash" hidden>
+    <div class="dhead">
+      <h3 id="title-cash">حركة نقدية</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-cash" hidden></p>
     <form class="grid" id="f-cash">
       <div><label for="c-date">التاريخ</label><input type="date" id="c-date" required></div>
       <div><label for="c-type">النوع</label>
@@ -652,6 +713,7 @@
       <div><label for="c-note">البيان</label><input id="c-note" autocomplete="off"></div>
       <div><button class="act" type="button" id="b-cash">حفظ الحركة</button> <button class="act ghost" type="button" id="x-cash" hidden>إلغاء</button></div>
     </form>
+    </div>
   </div>
   <div class="panel" id="wallet-panel" hidden>
     <h3>محافظ شركات الشحن</h3>
@@ -667,7 +729,17 @@
 <section id="tab-items" hidden>
   <h2>الأصناف</h2>
   <p class="hint">سعر البيع هنا بيتحط تلقائي في شاشة البيع، وتقدر تغيّره في أي عملية.</p>
-  <div class="panel">
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="items">+ صنف جديد</button>
+  </div>
+
+  <div class="panel" id="entry-items" hidden>
+    <div class="dhead">
+      <h3 id="title-items">صنف جديد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-items" hidden></p>
     <form class="grid" id="f-item">
       <div><label for="i-name">اسم الصنف</label><input id="i-name" required autocomplete="off"></div>
       <div><label for="i-unit">الوحدة</label><input id="i-unit" placeholder="قطعة، كرتونة، كيلو" autocomplete="off"></div>
@@ -686,6 +758,7 @@
         </div></div>
       <div><button class="act" type="button" id="b-item">إضافة صنف</button> <button class="act ghost" type="button" id="x-item" hidden>إلغاء</button></div>
     </form>
+    </div>
   </div>
   <div class="tbl-wrap"><table id="t-items"></table></div>
 
@@ -719,7 +792,17 @@
 <section id="tab-parties" hidden>
   <h2>العملاء والموردين</h2>
   <p class="hint">اضغط على أي اسم تشوف كشف حسابه. التليفون بيستخدم للتعرّف على العميل المتكرر.</p>
-  <div class="panel">
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="parties">+ عميل أو مورد</button>
+  </div>
+
+  <div class="panel" id="entry-parties" hidden>
+    <div class="dhead">
+      <h3 id="title-parties">جهة جديدة</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-parties" hidden></p>
     <form class="grid" id="f-party">
       <div><label for="pt-name">الاسم</label><input id="pt-name" required autocomplete="off"></div>
       <div><label for="pt-type">النوع</label>
@@ -732,6 +815,7 @@
       <div><label for="pt-note">ملاحظة</label><input id="pt-note" autocomplete="off"></div>
       <div><button class="act" type="button" id="b-party">إضافة</button> <button class="act ghost" type="button" id="x-party" hidden>إلغاء</button></div>
     </form>
+    </div>
   </div>
   <div class="tbl-wrap"><table id="t-parties"></table></div>
   <div class="panel" id="statement-panel" hidden>
@@ -788,8 +872,17 @@
     <p class="hint" style="margin-top:10px">الشركاء بيتسجّلوا من تبويب <strong>العملاء والموردين</strong> بنوع «شريك».</p>
   </div>
 
-  <div class="panel">
-    <h3>حركة رأس مال</h3>
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="capital">+ حركة رأس مال</button>
+  </div>
+
+  <div class="panel" id="entry-capital" hidden>
+    <div class="dhead">
+      <h3 id="title-capital">حركة رأس مال</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-capital" hidden></p>
     <form class="grid" id="f-cap">
       <div><label for="cp-date">التاريخ</label><input type="date" id="cp-date"></div>
       <div><label for="cp-partner">الشريك</label><select id="cp-partner"></select></div>
@@ -805,6 +898,7 @@
       <div><button class="tbtn primary" type="button" id="b-cap">حفظ الحركة</button></div>
     </form>
     <p class="hintline" id="cap-hint" style="margin-top:10px"></p>
+    </div>
   </div>
 
   <div class="panel">
@@ -925,7 +1019,7 @@
 
 <!-- نسخة احتياطية -->
 <section id="tab-backup" hidden>
-  <h2>نسخة احتياطية</h2>
+  <h2>الإعدادات</h2>
   <p class="hint">البيانات محفوظة ومشتركة بين كل من يفتح هذا الملف. خُد نسخة كل فترة.</p>
   <div class="panel">
     <h3>المزامنة بين الأجهزة</h3>
@@ -1073,6 +1167,7 @@
 </main>
 
 <div class="scrim" id="sale-scrim" hidden></div>
+<div class="scrim" id="gen-scrim" hidden></div>
 <aside class="drawer" id="sale-drawer" hidden aria-label="بيانات الأوردر">
   <div class="drawer-head">
     <h2 id="sd-title">أوردر جديد</h2>
@@ -3572,8 +3667,10 @@
     var ui = EDIT_UI[list], on = !!editing[list];
     document.getElementById(ui.btn).textContent = on ? ui.save : ui.add;
     document.getElementById(ui.cancel).hidden = !on;
-    document.getElementById(ui.form).style.outline = on ? "2px solid var(--teal)" : "";
-    document.getElementById(ui.form).style.outlineOffset = on ? "8px" : "";
+    var f = document.getElementById(ui.form);
+    var inDrawer = !!f.closest(".panel.as-drawer");
+    f.style.outline = (on && !inDrawer) ? "2px solid var(--teal)" : "";
+    f.style.outlineOffset = (on && !inDrawer) ? "8px" : "";
   }
 
   function cancelEdit(list){
@@ -3615,7 +3712,8 @@
     }
     setEditUI(list);
     goTab(EDIT_UI[list].tab);
-    document.getElementById(EDIT_UI[list].form).scrollIntoView({block:"center"});
+    if(ENTRY[list]) openEntry(list);
+    else document.getElementById(EDIT_UI[list].form).scrollIntoView({block:"center"});
     toast("بتعدّل حركة موجودة");
   }
 
@@ -3652,6 +3750,7 @@
     }
     form.reset();
     saveSoon(list);
+    if(openEntryKey === list) closeEntry();
   }
 
   function stamp(o){ o.id = uid(); o.by = me || "غير محدد"; o.at = Date.now(); return o; }
@@ -4093,7 +4192,10 @@
 
   // أزرار إلغاء التعديل
   Object.keys(EDIT_UI).forEach(function(list){
-    document.getElementById(EDIT_UI[list].cancel).addEventListener("click", function(){ cancelEdit(list); });
+    document.getElementById(EDIT_UI[list].cancel).addEventListener("click", function(){
+      cancelEdit(list);
+      if(openEntryKey === list) closeEntry();
+    });
   });
 
   // تغيير حالة الأوردر من الجدول على طول
@@ -4917,6 +5019,103 @@
     document.getElementById("dist-amount").value = "";
     saveSoon("cash"); renderAll();
     toast("التوزيع اتسجّل");
+  });
+
+  /* ================= الدرج الموحّد لكل شاشات الإدخال ================= */
+  // كل لوحة إدخال بتتحوّل لدرج بإضافة كلاس، من غير ما نلمس الفورم ولا الـIDs
+  // ولا المعالجات — فكل منطق الحفظ والتعديل شغال زي ما هو.
+  var ENTRY = {
+    purchases: { panel:"entry-purchases", title:"شراء جديد",  edit:"تعديل شراء",  focus:"p-party" },
+    cash:      { panel:"entry-cash",      title:"حركة نقدية", edit:"تعديل حركة",  focus:"c-type"  },
+    items:     { panel:"entry-items",     title:"صنف جديد",   edit:"تعديل صنف",   focus:"i-name"  },
+    parties:   { panel:"entry-parties",   title:"جهة جديدة",  edit:"تعديل جهة",   focus:"pt-name" },
+    capital:   { panel:"entry-capital",   title:"حركة رأس مال", edit:"حركة رأس مال", focus:"cp-partner" }
+  };
+  var openEntryKey = null;
+
+  function entryScrim(){ return document.getElementById("gen-scrim"); }
+
+  function openEntry(key){
+    var cfg = ENTRY[key]; if(!cfg) return;
+    var box = document.getElementById(cfg.panel); if(!box) return;
+    if(openEntryKey && openEntryKey !== key) closeEntry(true);
+
+    var t = document.getElementById("title-" + key);
+    if(t) t.textContent = (key !== "capital" && editing[key]) ? cfg.edit : cfg.title;
+
+    box.classList.add("as-drawer");
+    box.hidden = false;
+    var sc = entryScrim(); sc.hidden = false;
+    requestAnimationFrame(function(){ box.classList.add("on"); sc.classList.add("on"); });
+    openEntryKey = key;
+    updateImpact(key);
+    var f = document.getElementById(cfg.focus);
+    if(f) setTimeout(function(){ try{ f.focus(); }catch(e){} }, 60);
+  }
+
+  function closeEntry(quick){
+    if(!openEntryKey) return;
+    var cfg = ENTRY[openEntryKey];
+    var box = document.getElementById(cfg.panel);
+    var sc = entryScrim();
+    var key = openEntryKey;
+    openEntryKey = null;
+    if(box) box.classList.remove("on");
+    sc.classList.remove("on");
+    var done = function(){
+      if(openEntryKey) return;                  // اتفتح تاني في اللحظة دي
+      if(box){ box.hidden = true; box.classList.remove("as-drawer"); }
+      sc.hidden = true;
+    };
+    if(quick) done(); else setTimeout(done, 240);
+    // تعديل مفتوح والمستخدم قفل الدرج = إلغاء التعديل
+    if(key !== "capital" && editing[key]) cancelEdit(key);
+  }
+
+  document.body.addEventListener("click", function(e){
+    var op = e.target.closest("[data-openentry]");
+    if(op){ openEntry(op.dataset.openentry); return; }
+    if(e.target.closest("[data-closeentry]")){ closeEntry(); return; }
+  });
+  document.getElementById("gen-scrim").addEventListener("click", function(){ closeEntry(); });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && openEntryKey) closeEntry();
+  });
+
+  // الرصيد اللي الحركة هتأثّر عليه — بيتحدّث وانت بتكتب
+  function updateImpact(key){
+    var el = document.getElementById("impact-" + (key || openEntryKey));
+    if(!el) return;
+    var cash = cashBox();
+    var html = "";
+    if(key === "purchases"){
+      var paid = Number((document.getElementById("p-paid")||{}).value)||0;
+      html = "<span>الخزنة</span> <b>" + esc(money(cash)) + "</b>" +
+        (paid ? " <span class='arrow'>←</span> <b class='" + (cash-paid < 0 ? "v-due" : "") + "'>" +
+          esc(money(cash - paid)) + "</b>" : "");
+    } else if(key === "cash"){
+      var t = (document.getElementById("c-type")||{}).value;
+      var a = Number((document.getElementById("c-amount")||{}).value)||0;
+      var sign = (t === "in" || t === "settle" || t === "opening") ? 1 : -1;
+      html = "<span>الخزنة</span> <b>" + esc(money(cash)) + "</b>" +
+        (a ? " <span class='arrow'>←</span> <b class='" + (cash + sign*a < 0 ? "v-due" : "") + "'>" +
+          esc(money(cash + sign*a)) + "</b>" : "");
+    } else if(key === "capital"){
+      var pid = (document.getElementById("cp-partner")||{}).value;
+      if(pid) html = "<span>رأس ماله</span> <b>" + esc(money(capitalOf(pid))) + "</b>" +
+        " <span class='arrow'>·</span> <span>نسبته</span> <b>" + (ratioOf(pid)*100).toFixed(2) + "%</b>";
+    } else if(key === "items" || key === "parties"){
+      el.hidden = true; return;
+    }
+    el.hidden = !html;
+    el.innerHTML = html;
+  }
+  // أي كتابة في الدرج بتحدّث الرصيد
+  document.body.addEventListener("input", function(e){
+    if(openEntryKey && e.target.closest(".panel.as-drawer")) updateImpact(openEntryKey);
+  });
+  document.body.addEventListener("change", function(e){
+    if(openEntryKey && e.target.closest(".panel.as-drawer")) updateImpact(openEntryKey);
   });
 
   /* ================= الأرصدة الافتتاحية وإقفال الفترة ================= */
