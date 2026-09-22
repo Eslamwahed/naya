@@ -504,7 +504,7 @@
 <body>
 
 <header class="top">
-  <h1>Lora Collection <span style="font-weight:400;font-size:.72rem;opacity:.75;padding-inline-start:6px">إصدار 21</span></h1>
+  <h1>Lora Collection <span id="ver-badge" style="font-weight:400;font-size:.72rem;opacity:.75;padding-inline-start:6px"></span></h1>
   <div class="who">
     <label for="me" style="margin:0;color:#fff;opacity:.8">المستخدم</label>
     <input id="me" placeholder="اسمك" autocomplete="off">
@@ -1073,7 +1073,8 @@
 
   <div class="panel">
     <h3>التخزين</h3>
-    <p class="hint" style="margin-top:0">إصدار السيستم: <strong>17</strong> — فيه: الألوان والمقاسات · الفترة الزمنية · التقارير · مسؤول الأوردر · تنبيه المخزون · بوليصة الشحن · شاشة الموبايل.</p>
+    <p class="hint" style="margin-top:0">إصدار السيستم: <strong id="ver-num"></strong> — <span id="ver-date"></span></p>
+    <div id="changelog" style="margin-top:12px"></div>
     <p class="note ok" id="storage-state"></p>
     <p class="hint" style="margin:8px 0 12px">
       البيانات بتتحفظ لوحدها في ذاكرة المتصفح مع كل حركة. لو ربطت ملف على جهازك، هيتكتب فيه نسخة كاملة بعد كل تعديل — ودي أضمن طريقة، لأنها بتفضل موجودة حتى لو مسحت بيانات المتصفح أو نقلت الملف لجهاز تاني.
@@ -1277,6 +1278,27 @@
 <script>
 (function(){
   "use strict";
+
+  /* ---------- الإصدار وسجل التغييرات ----------
+     أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
+     عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
+  var VERSION = "22";
+  var CHANGELOG = [
+    { v:"22", d:"2026-09-22", items:[
+      "درج موحّد لكل شاشات الإدخال — المشتريات والخزنة والأصناف والجهات ورأس المال",
+      "ترتيب التبويبات حسب مسار الفلوس: رأس المال ← الخزنة ← المشتريات ← المخزون ← المبيعات",
+      "الرصيد اللي الحركة هتأثّر عليه بيبان جوه الدرج وانت بتكتب",
+      "وحدة رأس المال والشركاء: نسب مرجّحة بالزمن وتوزيع أرباح",
+      "كارت نصيب الشركاء في لوحة المتابعة",
+      "تسجيل الشريك من جوه درج رأس المال",
+      "حذف التوزيع بقى كوحدة واحدة بدل ما يكسر الأرقام",
+      "الأرصدة الافتتاحية وإقفال الفترة",
+      "تثبيت التكلفة وقت التسليم — أرباح الشهور اللي فاتت ما بتتغيّرش",
+      "الإيراد بيتسجّل بتاريخ التسليم مش تاريخ الطلب",
+      "المزامنة: وقف الرفع المتكرر، وزرار «اسحب كل البيانات»، و«طبّق البيانات الجديدة»",
+      "إعادة تصميم شاشة المبيعات: ٥ أعمدة وسطر تفاصيل وفلاتر مطوية"
+    ]}
+  ];
 
   var KEYS = {
     items:"trade:items", parties:"trade:parties", purchases:"trade:purchases",
@@ -5341,6 +5363,25 @@
     fillVariantSelects("ob", this.value);
   });
 
+  function renderVersion(){
+    var bd = document.getElementById("ver-badge");
+    if(bd) bd.textContent = "إصدار " + VERSION;
+    var vn = document.getElementById("ver-num");
+    if(vn) vn.textContent = VERSION;
+    var vd = document.getElementById("ver-date");
+    if(vd) vd.textContent = CHANGELOG.length ? CHANGELOG[0].d : "";
+    var box = document.getElementById("changelog");
+    if(!box) return;
+    box.innerHTML = CHANGELOG.map(function(c, i){
+      return "<details class='explain'" + (i === 0 ? " open" : "") + ">" +
+        "<summary>إصدار " + esc(c.v) + " · " + esc(c.d) + "</summary>" +
+        "<div class='xbody'><ul style='margin:0;padding-inline-start:18px;display:grid;gap:6px'>" +
+        c.items.map(function(x){
+          return "<li style='font-size:.86rem;color:var(--ink-soft)'>" + esc(x) + "</li>"; }).join("") +
+        "</ul></div></details>";
+    }).join("");
+  }
+
   /* ---------- بدء ---------- */
   (async function init(){
     document.getElementById("p-date").value = firstOpenDate();
@@ -5351,6 +5392,7 @@
     document.getElementById("sb-key").value = sync.key;
     renderStorageState();
     document.getElementById("me").value = me;
+    renderVersion();
     document.getElementById("cur").value = settings.currency;
 
     var note = document.getElementById("fs-note");
