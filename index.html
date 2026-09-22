@@ -952,7 +952,7 @@
   </div>
 
   <div class="panel">
-    <h3>سجل حركات رأس المال</h3>
+    <h3 id="caplog-title">سجل حركات رأس المال</h3>
     <div class="tbl-wrap"><table id="t-cap-log"></table></div>
   </div>
 </section>
@@ -4313,7 +4313,17 @@
     if(!rec) return;
     var locked = (list === "sales") ? saleLocked(rec) : isLocked(rec.date);
     if(locked){ toast("السجل ده في فترة مقفولة — مينفعش يتحذف"); return; }
-    rec.deleted = true; rec.at = Date.now(); renderAll(); toast("اتحذف"); saveSoon(list);
+
+    // التوزيع حركتين لكل شريك (استحقاق + صرف). مسح واحدة بتسيب التانية
+    // يتيمة وبتخلي الأرباح المستحقة سالبة، فبيتحذف كوحدة واحدة.
+    var group = [rec];
+    if(list === "cash" && rec.distId){
+      group = live("cash").filter(function(x){ return x.distId === rec.distId; });
+    }
+    var now = Date.now();
+    group.forEach(function(r){ r.deleted = true; r.at = now; });
+    renderAll(); saveSoon(list);
+    toast(group.length > 1 ? ("اتحذف التوزيع كامل (" + qty(group.length) + " حركة)") : "اتحذف");
   });
 
   document.getElementById("me").addEventListener("change", async function(){
@@ -4771,7 +4781,8 @@
     var ps = partners();
     var rows = ps.map(function(p){
       var cap = capitalOf(p.id), cur = currentOf(p.id), r = ratioOf(p.id);
-      return "<tr><td class='wide'>"+esc(p.name)+
+      return "<tr style='cursor:pointer' data-caplog='"+p.id+"' title='وريني حركاته'>" +
+          "<td class='wide'>"+esc(p.name)+
           (p.phone ? "<span class='sub'>"+esc(p.phone)+"</span>" : "")+"</td>"+
         "<td class='num'>"+money(cap)+"</td>"+
         "<td class='num'>"+(r*100).toFixed(2)+"%</td>"+
@@ -4779,7 +4790,7 @@
         "<td class='num' style='font-weight:600'>"+money(cap+cur)+"</td></tr>";
     });
     table("t-partners", ["الشريك","رأس ماله","نسبته","أرباح مستحقة له","إجمالي حقه"], rows,
-      "مفيش شركاء — سجّلهم من تبويب العملاء والموردين بنوع «شريك».");
+      "مفيش شركاء لسه — اضغط «+ حركة رأس مال» فوق، وجوه الدرج هتلاقي «+ شريك».");
   }
 
   function renderRecon(){
@@ -4815,8 +4826,11 @@
     return recv - pay;
   }
 
+  var capLogFor = null;      // فلتر السجل على شريك واحد
+
   function renderCapLog(){
-    var rows = live("cash").filter(function(c){ return isCapType(c.type); })
+    var rows = live("cash").filter(function(c){
+        return isCapType(c.type) && (!capLogFor || c.partyId === capLogFor); })
       .slice().sort(function(a,b){
         if((a.date||"") !== (b.date||"")) return (a.date||"") < (b.date||"") ? 1 : -1;
         return (b.at||0) - (a.at||0);
@@ -4833,7 +4847,12 @@
           "<td><button class='del' data-del='cash' data-id='"+c.id+"'>حذف</button></td></tr>";
       });
     table("t-cap-log", ["التاريخ","الشريك","الحركة","رأس المال","أرباح مستحقة",""], rows,
-      "مفيش حركات رأس مال لسه.");
+      capLogFor ? "مفيش حركات للشريك ده." : "مفيش حركات رأس مال لسه.");
+    var ttl = document.getElementById("caplog-title");
+    if(ttl) ttl.innerHTML = capLogFor
+      ? "حركات <strong>" + esc(partyName(capLogFor)) + "</strong> " +
+        "<button class='rowact' type='button' id='b-caplog-all'>وريني الكل</button>"
+      : "سجل حركات رأس المال";
   }
 
   function renderCapHint(){
@@ -4892,6 +4911,17 @@
     saveSoon("cash"); renderAll();
     if(openEntryKey === "capital") closeEntry();
     toast(CAP[t].label + " اتسجّل");
+  });
+
+  document.getElementById("t-partners").addEventListener("click", function(e){
+    var tr = e.target.closest("[data-caplog]");
+    if(!tr) return;
+    capLogFor = (capLogFor === tr.dataset.caplog) ? null : tr.dataset.caplog;
+    renderCapLog();
+    document.getElementById("t-cap-log").scrollIntoView({block:"nearest"});
+  });
+  document.body.addEventListener("click", function(e){
+    if(e.target.id === "b-caplog-all"){ capLogFor = null; renderCapLog(); }
   });
 
   document.getElementById("b-newpartner").addEventListener("click", function(){
