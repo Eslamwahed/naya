@@ -861,6 +861,8 @@
 
       <p><strong>الأرباح المحتجزة</strong> = كل الأرباح من البداية ناقص اللي اتوزّع. ودي السقف الأعلى للتوزيع. بس <strong>الصرف النقدي سقفه رصيد الخزنة</strong>، لأن جزء من الأرباح ممكن يكون محبوس في مخزون أو عند عملاء.</p>
 
+      <p><strong>رأس مال ≠ ربح.</strong> لو سجّلت رأس مال ١٥٠ ألف، الخزنة هتبقى ١٥٠ ألف بس الأرباح المحتجزة صفر — دي فلوس الشركاء نفسهم مش مكسب. الربح مبيظهرش غير لما تبيع بضاعة بأكتر من تكلفتها. عشان كده زرار «احسب الأنصبة» بيرفض أي مبلغ أكبر من الأرباح المحتجزة، مهما كان في الخزنة فلوس. لو شريك عايز يسترجع من فلوسه قبل ما يبقى في أرباح، ده <strong>«سحب من رأس ماله»</strong> مش توزيع أرباح — وبيقلّل نسبته.</p>
+
     </div>
   </details>
 
@@ -1282,8 +1284,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "22";
+  var VERSION = "23";
   var CHANGELOG = [
+    { v:"23", d:"2026-09-22", items:[
+      "توزيع الأرباح بيشرح سبب الرفض بدل ما يقول «الأرباح المحتجزة صفر»",
+      "توضيح الفرق بين فلوس رأس المال وفلوس الربح في شاشة رأس المال",
+      "كارت الأرباح المحتجزة بيفرّق بين «لسه مفيش ربح» و«خسارة لازم تتغطّى»"
+    ]},
     { v:"22", d:"2026-09-22", items:[
       "درج موحّد لكل شاشات الإدخال — المشتريات والخزنة والأصناف والجهات ورأس المال",
       "ترتيب التبويبات حسب مسار الفلوس: رأس المال ← الخزنة ← المشتريات ← المخزون ← المبيعات",
@@ -4789,7 +4796,8 @@
     var ret = retainedEarnings();
     var cells = [
       ["رأس المال الكلي", money(cap), "", qty(partners().length) + " شريك"],
-      ["أرباح محتجزة", money(ret), ret>=0?"v-gain":"v-due", "متاحة للتوزيع"],
+      ["أرباح محتجزة", money(ret), ret>0.009?"v-gain":(ret<-0.009?"v-due":""),
+        ret>0.009 ? "متاحة للتوزيع" : (ret<-0.009 ? "خسارة لازم تتغطّى الأول" : "لسه مفيش ربح يتوزّع")],
       ["أرباح مستحقة للشركاء", money(cur), cur>0?"v-due":"", "استحقوها ولسه ما أخدوهاش"],
       ["رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due", "سقف الصرف النقدي"]
     ];
@@ -4982,13 +4990,24 @@
   /* ---------- توزيع الأرباح ---------- */
   var distDraft = null;
 
-  function renderDistLimits(){
+  // الرسالة دي هي اللي بتفهّم اللي مش محاسب الفرق بين فلوس رأس المال وفلوس الربح
+  function renderDistLimits(err){
     var el = document.getElementById("dist-limits");
     if(!el) return;
-    var ret = retainedEarnings(), cash = cashBox();
-    el.textContent = "متاح للتوزيع " + money(ret) + " · الخزنة " + money(cash) +
-      " — الصرف النقدي مينفعش يزيد عن رصيد الخزنة حتى لو الأرباح أكبر (الباقي محبوس في مخزون).";
-    el.className = ret > 0 ? "note ok" : "note bad";
+    var ret = retainedEarnings(), cash = cashBox(), cap = totalCapital();
+    if(err){ el.innerHTML = err; el.className = "note bad"; return; }
+    if(ret > 0.009){
+      var t = "<strong>متاح للتوزيع " + money(ret) + "</strong> — ده صافي الربح اللي اتحقق ولسه ما اتوزّعش.";
+      if(cash < ret) t += " بس الخزنة فيها " + money(cash) + " دلوقتي، فالصرف النقدي سقفه الرقم ده " +
+        "والباقي محبوس في مخزون أو عند العملاء — الشريك ينفع ياخد نصيبه على الورق ويستلمه بعدين.";
+      el.innerHTML = t; el.className = "note ok"; return;
+    }
+    el.innerHTML = "<strong>لسه مفيش أرباح تتوزّع.</strong> اللي في الخزنة (" + money(cash) + ") ده " +
+      "<u>فلوس رأس المال</u> مش ربح — دي فلوس الشركاء اللي بتشتري بيها بضاعة. " +
+      "الربح بيتولد لما تبيع، ووقتها الرقم ده بيكبر لوحده." +
+      (cap > 0 ? " ولو شريك عايز يسترجع جزء من فلوسه دلوقتي، ده مش توزيع أرباح — " +
+        "استخدمه من «حركة رأس مال» ← «سحب من رأس ماله»." : "");
+    el.className = "note";
   }
 
   document.getElementById("b-dist-calc").addEventListener("click", function(){
@@ -5000,10 +5019,24 @@
     if(!from || !to || from > to){ toast("اختار فترة صحيحة"); return; }
     if(!amt){ toast("اكتب المبلغ اللي هيتوزّع"); return; }
     if(amt > retainedEarnings() + 0.009){
-      toast("الأرباح المحتجزة " + money(retainedEarnings()) + " بس"); return;
+      var ret = retainedEarnings();
+      document.getElementById("dist-box").hidden = true;
+      if(ret <= 0.009){
+        renderDistLimits("<strong>مينفعش توزّع " + money(amt) + ".</strong> المشروع لسه ما حققش أرباح. " +
+          "اللي في الخزنة (" + money(cashBox()) + ") ده فلوس رأس مال الشركاء نفسهم، " +
+          "ولو وزّعتها كأرباح تبقى بتوزّع فلوس مش ربح وتضيّع نسب رأس المال. " +
+          "لو المقصود إن شريك يسترجع من فلوسه: من «حركة رأس مال» اختار «سحب من رأس ماله».");
+        toast("دي فلوس رأس مال مش أرباح");
+      } else {
+        renderDistLimits("<strong>مينفعش توزّع " + money(amt) + ".</strong> " +
+          "الأرباح المتاحة للتوزيع " + money(ret) + " بس — نزّل المبلغ.");
+        toast("أكبر مبلغ ينفع يتوزّع " + money(ret));
+      }
+      return;
     }
     distDraft = { from:from, to:to, amount:amt, rows:computeShares(amt, from, to), mode:{} };
     distDraft.rows.forEach(function(r){ distDraft.mode[r.id] = "cash"; });
+    renderDistLimits();
     renderDist();
     document.getElementById("dist-box").hidden = false;
   });
