@@ -869,7 +869,7 @@
   <div class="panel">
     <h3>الشركاء</h3>
     <div class="tbl-wrap"><table id="t-partners"></table></div>
-    <p class="hint" style="margin-top:10px">الشركاء بيتسجّلوا من تبويب <strong>العملاء والموردين</strong> بنوع «شريك».</p>
+    <p class="hint" style="margin-top:10px">سجّل الشريك ورأس ماله من زرار <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة لو الشريك لسه مش مسجّل.</p>
   </div>
 
   <div class="tbar">
@@ -885,7 +885,11 @@
     <p class="impact" id="impact-capital" hidden></p>
     <form class="grid" id="f-cap">
       <div><label for="cp-date">التاريخ</label><input type="date" id="cp-date"></div>
-      <div><label for="cp-partner">الشريك</label><select id="cp-partner"></select></div>
+      <div><label for="cp-partner">الشريك</label>
+        <div class="withbtn">
+          <select id="cp-partner" style="flex:1"></select>
+          <button type="button" class="tbtn" id="b-newpartner">+ شريك</button>
+        </div></div>
       <div><label for="cp-type">النوع</label>
         <select id="cp-type">
           <option value="cap_in">الشريك دفع رأس مال — نسبته تزيد</option>
@@ -897,6 +901,19 @@
       <div><label for="cp-note">البيان</label><input id="cp-note" autocomplete="off"></div>
       <div><button class="tbtn primary" type="button" id="b-cap">حفظ الحركة</button></div>
     </form>
+
+    <div class="newcust" id="newpartner-box" hidden style="margin-top:12px">
+      <h4>شريك جديد</h4>
+      <div class="fgrid">
+        <div><label for="np-name">الاسم</label><input id="np-name" autocomplete="off"></div>
+        <div><label for="np-phone">التليفون (اختياري)</label><input id="np-phone" autocomplete="off"></div>
+      </div>
+      <div class="row-actions">
+        <button class="tbtn primary" type="button" id="b-savepartner">حفظ الشريك</button>
+        <button class="tbtn" type="button" id="b-cancelpartner">إلغاء</button>
+      </div>
+    </div>
+
     <p class="hintline" id="cap-hint" style="margin-top:10px"></p>
     </div>
   </div>
@@ -4875,6 +4892,35 @@
     saveSoon("cash"); renderAll();
     if(openEntryKey === "capital") closeEntry();
     toast(CAP[t].label + " اتسجّل");
+  });
+
+  document.getElementById("b-newpartner").addEventListener("click", function(){
+    var box = document.getElementById("newpartner-box");
+    box.hidden = false;
+    document.getElementById("np-name").focus();
+    box.scrollIntoView({block:"nearest"});
+  });
+  document.getElementById("b-cancelpartner").addEventListener("click", function(){
+    document.getElementById("newpartner-box").hidden = true;
+    ["np-name","np-phone"].forEach(function(x){ document.getElementById(x).value = ""; });
+  });
+  document.getElementById("b-savepartner").addEventListener("click", function(){
+    var name = document.getElementById("np-name").value.trim();
+    if(!name){ toast("اكتب اسم الشريك"); return; }
+    var dup = live("parties").find(function(x){
+      return isPartner(x) && x.name.trim() === name; });
+    if(dup){ toast("فيه شريك بنفس الاسم"); return; }
+    var rec = stamp({ name:name, type:"partner",
+      phone: document.getElementById("np-phone").value.trim(),
+      gov:"", address:"", fb:"", note:"" });
+    db.parties.push(rec);
+    ["np-name","np-phone"].forEach(function(x){ document.getElementById(x).value = ""; });
+    document.getElementById("newpartner-box").hidden = true;
+    saveSoon("parties");
+    renderAll();
+    document.getElementById("cp-partner").value = rec.id;   // يتختار على طول
+    updateImpact("capital"); renderCapHint();
+    toast("اتضاف الشريك واتختار");
   });
 
   ["cp-partner","cp-type"].forEach(function(id){
