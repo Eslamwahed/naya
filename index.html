@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Naya Project</title>
+<title>Lora Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -462,7 +462,7 @@
 <body>
 
 <header class="top">
-  <h1>Naya Project <span style="font-weight:400;font-size:.72rem;opacity:.75;padding-inline-start:6px">إصدار 21</span></h1>
+  <h1>Lora Collection <span style="font-weight:400;font-size:.72rem;opacity:.75;padding-inline-start:6px">إصدار 21</span></h1>
   <div class="who">
     <label for="me" style="margin:0;color:#fff;opacity:.8">المستخدم</label>
     <input id="me" placeholder="اسمك" autocomplete="off">
@@ -1442,8 +1442,8 @@
   async function linkNewFile(){
     try{
       fileHandle = await window.showSaveFilePicker({
-        suggestedName: "naya-data.json",
-        types: [{ description: "بيانات Naya", accept: { "application/json": [".json"] } }]
+        suggestedName: "lora-data.json",
+        types: [{ description: "بيانات Lora Collection", accept: { "application/json": [".json"] } }]
       });
       writeFileSoon(); toast("الملف اتربط — الحفظ هيبقى تلقائي");
     }catch(e){ if(e && e.name !== "AbortError") toast("متعذّر ربط الملف"); }
@@ -1453,7 +1453,7 @@
   async function linkExistingFile(){
     try{
       var picked = await window.showOpenFilePicker({
-        types: [{ description: "بيانات Naya", accept: { "application/json": [".json"] } }]
+        types: [{ description: "بيانات Lora Collection", accept: { "application/json": [".json"] } }]
       });
       fileHandle = picked[0];
       var f = await fileHandle.getFile();
@@ -4337,7 +4337,7 @@
       'th{width:34%;background:#F2F4F3;font-weight:600}' +
       '.cod{margin-top:14px;font-size:1.15rem;font-weight:700;border:2px solid #16211E;padding:10px;text-align:center}' +
       '@media print{body{padding:0}}</style></head><body>' +
-      '<h1>Naya Project — بوليصة شحن</h1><div class="sub">' + esc(s.note||"") + '</div>' +
+      '<h1>Lora Collection — بوليصة شحن</h1><div class="sub">' + esc(s.note||"") + '</div>' +
       '<table>' + rowsHTML + '</table>' +
       '<div class="cod">المطلوب تحصيله: ' + esc(money(cod)) + '</div>' +
       '<scr'+'ipt>window.onload=function(){window.print()}</scr'+'ipt></body></html>';
@@ -4499,7 +4499,7 @@
   });
 
   function downloadBackup(){
-    download("naya-backup-"+today()+".json", JSON.stringify({db:db,settings:settings},null,2), "application/json");
+    download("lora-backup-"+today()+".json", JSON.stringify({db:db,settings:settings},null,2), "application/json");
   }
   document.getElementById("b-export").addEventListener("click", downloadBackup);
   document.getElementById("b-csv").addEventListener("click", function(){
@@ -4522,7 +4522,7 @@
           .map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(","));
       });
     });
-    download("naya-sales-"+today()+".csv", lines.join("\n"), "text/csv");
+    download("lora-sales-"+today()+".csv", lines.join("\n"), "text/csv");
   });
   document.getElementById("b-import").addEventListener("click", function(){ document.getElementById("file-import").click(); });
   document.getElementById("file-import").addEventListener("change", function(){
