@@ -684,10 +684,51 @@
 <!-- الخزنة -->
 <section id="tab-cash" hidden>
   <h2>الخزنة</h2>
-  <p class="hint">الجدول ده دفتر الخزنة كامل: كل حركة نقدية من الأوردرات والمشتريات بتظهر فيه لوحدها، والفورم ده للحركات اليدوية اللي مش مربوطة بأوردر (تحصيل متأخر، دفع لمورد، مصروف). مرتّب من الأقدم للأحدث عشان الرصيد التراكمي يبقى مقروء.</p>
-  <div class="tbar">
+  <p class="hint">دفتر الفلوس كامل. كل حركة من الأوردرات والمشتريات بتنزل هنا لوحدها، والزرار ده للحركات اليدوية بس (تحصيل متأخر، دفع لمورد، مصروف، سحب من شركة شحن). مرتّب من الأقدم للأحدث عشان عمود «الرصيد بعدها» يبقى مقروء — وده الرصيد الحقيقي دايماً حتى لو فلترت.</p>
+
+  <div class="stats" id="cash-stats"></div>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="cf-text" type="search" placeholder="جهة، بيان، رقم أوردر…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+    <button class="tbtn" type="button" id="b-cfilters" aria-expanded="false" aria-controls="cash-filters">
+      فلاتر <span class="fcount" id="cf-count" hidden>0</span>
+    </button>
     <button class="tbtn primary" type="button" data-openentry="cash">+ حركة نقدية</button>
   </div>
+
+  <div class="filters" id="cash-filters" hidden>
+    <div><label for="cf-dir">الاتجاه</label>
+      <select id="cf-dir">
+        <option value="">الكل</option>
+        <option value="in">داخل بس</option>
+        <option value="out">خارج بس</option>
+      </select></div>
+    <div><label for="cf-kind">نوع الحركة</label>
+      <select id="cf-kind">
+        <option value="">الكل</option>
+        <option value="تحصيل">تحصيل من عملاء</option>
+        <option value="دفع">دفع لموردين</option>
+        <option value="مصروف">مصاريف</option>
+        <option value="شحن">شحن</option>
+        <option value="رأس مال">رأس مال وشركاء</option>
+        <option value="افتتاحي">أرصدة افتتاحية</option>
+      </select></div>
+    <div><label for="cf-src">مصدر الحركة</label>
+      <select id="cf-src">
+        <option value="">الكل</option>
+        <option value="يدوي">يدوي (اللي سجّلته بإيدك)</option>
+        <option value="تلقائي">تلقائي (من أوردر أو شراء)</option>
+      </select></div>
+    <div><label for="cf-from">من تاريخ</label><input type="date" id="cf-from"></div>
+    <div><label for="cf-to">لتاريخ</label><input type="date" id="cf-to"></div>
+  </div>
+
+  <div class="chips" id="cf-chips"></div>
 
   <div class="panel" id="entry-cash" hidden>
     <div class="dhead">
@@ -711,6 +752,13 @@
       <div><label for="c-party">الجهة</label><select id="c-party"></select></div>
       <div><label for="c-amount">المبلغ</label><input type="number" id="c-amount" step="any" min="0" required></div>
       <div><label for="c-note">البيان</label><input id="c-note" autocomplete="off"></div>
+      <div id="c-over" hidden style="grid-column:1/-1">
+        <p class="note bad" id="c-over-msg" style="margin-top:0"></p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;cursor:pointer;margin-top:6px">
+          <input type="checkbox" id="c-force" style="width:auto;margin:0">
+          <span>أنا متأكد — سجّلها برضه وخلّي الخزنة بالسالب</span>
+        </label>
+      </div>
       <div><button class="act" type="button" id="b-cash">حفظ الحركة</button> <button class="act ghost" type="button" id="x-cash" hidden>إلغاء</button></div>
     </form>
     </div>
@@ -721,7 +769,6 @@
     <div class="tbl-wrap"><table id="t-wallets"></table></div>
   </div>
 
-  <p class="note ok" id="cash-summary" style="margin-bottom:10px"></p>
   <div class="tbl-wrap"><table id="t-cash"></table></div>
 </section>
 
@@ -1284,8 +1331,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "23";
+  var VERSION = "24";
   var CHANGELOG = [
+    { v:"24", d:"2026-09-22", items:[
+      "شاشة الخزنة: كروت الرصيد بدل سطر الملخّص، وكارت لفلوس شركات الشحن",
+      "فلاتر وبحث في دفتر الخزنة — والرصيد التراكمي بيفضل صح حتى وانت مفلتر",
+      "حاجز: مينفعش تدفع أو تصرف أكتر من رصيد الخزنة إلا بتأكيد صريح",
+      "الرسالة بتقولك تعمل إيه: سجّل رأس مال، حصّل من عميل، أو اسحب من محفظة الشحن"
+    ]},
     { v:"23", d:"2026-09-22", items:[
       "توزيع الأرباح بيشرح سبب الرفض بدل ما يقول «الأرباح المحتجزة صفر»",
       "توضيح الفرق بين فلوس رأس المال وفلوس الربح في شاشة رأس المال",
@@ -3275,6 +3328,14 @@
            t==="opening_party" ? "رصيد افتتاحي — جهة" : "مصروف";
   }
 
+  // تصنيف عام للحركة — الفلتر بيشتغل عليه
+  function cashKind(t){
+    if(isCapType(t)) return "رأس مال";
+    return t==="in" ? "تحصيل" : t==="out" ? "دفع" :
+           t==="settle" ? "شحن" :
+           (t==="opening" || t==="opening_party") ? "افتتاحي" : "مصروف";
+  }
+
   // دفتر الخزنة: كل حركة نقدية مهما كان مصدرها
   function cashLedger(){
     var L = [];
@@ -3283,19 +3344,19 @@
       var who = partyName(s.partyId);
       var what = (s.no ? "#"+s.no+" · " : "") + itemsLabel(s);
       if(isCancelled(s)){
-        if(shipIn(s)) L.push({d:s.date, at:s.at, t:"شحن من عميل", who:who,
+        if(shipIn(s)) L.push({d:s.date, at:s.at, t:"شحن من عميل", who:who, kind:"شحن",
           note:"أوردر ملغي · "+what, inn:shipIn(s), out:0, src:"أوردر"});
       } else if(Number(s.paid)||0){
-        L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who,
+        L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
           note:"أوردر "+ST_LABEL[stOf(s)]+" · "+what, inn:Number(s.paid)||0, out:0, src:"أوردر"});
       }
       if(shipCounts(s) && shipOut(s))
-        L.push({d:s.date, at:s.at, t:"شحن مدفوع", who:(s.shipCo||"شركة شحن"),
+        L.push({d:s.date, at:s.at, t:"شحن مدفوع", who:(s.shipCo||"شركة شحن"), kind:"شحن",
           note:"أوردر "+who+" · "+what, inn:0, out:shipOut(s), src:"أوردر"});
     });
     live("purchases").forEach(function(p){
       if(Number(p.paid)||0)
-        L.push({d:p.date, at:p.at, t:"دفع لمورد", who:partyName(p.partyId),
+        L.push({d:p.date, at:p.at, t:"دفع لمورد", who:partyName(p.partyId), kind:"دفع",
           note:"شراء "+itemName(p.itemId), inn:0, out:Number(p.paid)||0, src:"شراء"});
     });
     live("cash").forEach(function(c){
@@ -3304,9 +3365,9 @@
       if(isCapType(c.type) && CAP[c.type].cash === 0) return;   // حركة رأس مال من غير نقدية
       var isIn = (c.type==="in" || c.type==="settle" || c.type==="opening" ||
                   (isCapType(c.type) && CAP[c.type].cash > 0));
-      L.push({d:c.date, at:c.at, t:cashLabel(c.type),
+      L.push({d:c.date, at:c.at, t:cashLabel(c.type), kind:cashKind(c.type),
         who:(c.type==="settle" ? (c.shipCo||"شركة شحن") : (c.partyId?partyName(c.partyId):"—")),
-        note:c.note||"", inn:(isIn?a:0), out:(isIn?0:a),
+        note:((c.note||"") === cashLabel(c.type) ? "" : (c.note||"")), inn:(isIn?a:0), out:(isIn?0:a),
         src:(c.type==="opening" ? "افتتاحي" : "يدوي"), id:c.id});
     });
     L.sort(function(a,b){
@@ -3345,12 +3406,79 @@
       }), "");
   }
 
+  /* ---------- فلاتر الخزنة ---------- */
+  var cfilt = { dir:"", kind:"", src:"", from:"", to:"", text:"" };
+  var CF_LABEL = { dir:"الاتجاه", kind:"النوع", src:"المصدر", from:"من", to:"لـ", text:"بحث" };
+  var CF_ID = { dir:"cf-dir", kind:"cf-kind", src:"cf-src", from:"cf-from", to:"cf-to", text:"cf-text" };
+
+  function readCashFilters(){
+    Object.keys(CF_ID).forEach(function(k){
+      var el = document.getElementById(CF_ID[k]);
+      cfilt[k] = el ? (el.value||"").trim() : "";
+    });
+  }
+  function cfChipText(k){
+    if(k === "dir") return cfilt.dir === "in" ? "داخل بس" : "خارج بس";
+    if(k === "src") return cfilt.src === "يدوي" ? "يدوي" : "تلقائي";
+    return cfilt[k];
+  }
+  function renderCashChips(){
+    var keys = Object.keys(CF_LABEL).filter(function(k){ return cfilt[k]; });
+    var c = document.getElementById("cf-count");
+    if(c){ c.textContent = keys.length; c.hidden = !keys.length; }
+    var box = document.getElementById("cf-chips");
+    if(!box) return;
+    box.innerHTML = !keys.length ? "" :
+      keys.map(function(k){
+        return "<span class='chip'>" + esc(CF_LABEL[k]) + ": <b>" + esc(cfChipText(k)) + "</b>" +
+          "<button type='button' data-rmcf='" + k + "' aria-label='شيل فلتر " + esc(CF_LABEL[k]) + "'>&times;</button></span>";
+      }).join("") + "<button class='clearall' type='button' id='b-clearcf'>مسح الكل</button>";
+  }
+  // بتتطبّق على العرض بس — الرصيد التراكمي بيتحسب على الدفتر كامل قبلها
+  function cashMatch(x){
+    if(cfilt.dir === "in"  && !x.inn) return false;
+    if(cfilt.dir === "out" && !x.out) return false;
+    if(cfilt.kind && x.kind !== cfilt.kind) return false;
+    if(cfilt.src === "يدوي"   && !x.id) return false;
+    if(cfilt.src === "تلقائي" &&  x.id) return false;
+    if(cfilt.from && (x.d||"") < cfilt.from) return false;
+    if(cfilt.to   && (x.d||"") > cfilt.to)   return false;
+    if(cfilt.text){
+      var q = cfilt.text.toLowerCase();
+      if(((x.who||"")+" "+(x.note||"")+" "+(x.t||"")).toLowerCase().indexOf(q) < 0) return false;
+    }
+    return true;
+  }
+
+  function renderCashStats(shown, tin, tout){
+    var el = document.getElementById("cash-stats");
+    if(!el) return;
+    var bal = cashBox(), wal = walletsTotal();
+    var filtered = Object.keys(CF_LABEL).some(function(k){ return cfilt[k]; });
+    var scope = filtered ? "في الحركات المعروضة" : "من أول يوم";
+    var cells = [
+      ["رصيد الخزنة", money(bal), bal >= 0 ? "" : "v-due",
+        bal >= 0 ? "الفلوس اللي في إيدك دلوقتي" : "بالسالب — في حركة ناقصة أو صرف زيادة"],
+      ["داخل", money(tin), tin ? "v-gain" : "", scope],
+      ["خارج", money(tout), tout ? "v-due" : "", scope],
+      ["في محافظ الشحن", money(wal), wal > 0.009 ? "v-due" : "",
+        wal > 0.009 ? "محصّلة ولسه ما وصلتكش" : "مفيش فلوس معلّقة"]
+    ];
+    el.innerHTML = cells.map(function(c){
+      return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
+        "<small>"+esc(c[3])+"</small></div>";
+    }).join("");
+  }
+
   function renderCash(){
     var L = cashLedger(), run = 0;
-    var tin = 0, tout = 0;
-    var rows = L.map(function(x){
-      run += x.inn - x.out; tin += x.inn; tout += x.out;
-      return "<tr><td class='num'>"+esc(x.d)+"</td>"+
+    var tin = 0, tout = 0, shown = 0;
+    var rows = [];
+    L.forEach(function(x){
+      run += x.inn - x.out;               // الرصيد الحقيقي — بيعدّ كل حركة حتى المخفية بالفلتر
+      if(!cashMatch(x)) return;
+      shown++; tin += x.inn; tout += x.out;
+      rows.push("<tr><td class='num'>"+esc(x.d)+"</td>"+
         "<td>"+esc(x.t)+"<span class='sub'>"+esc(x.src)+"</span></td>"+
         "<td class='wide'>"+esc(x.who)+(x.note?"<span class='sub'>"+esc(x.note)+"</span>":"")+"</td>"+
         "<td class='num "+(x.inn?"v-gain":"")+"'>"+(x.inn?money(x.inn):"—")+"</td>"+
@@ -3359,16 +3487,13 @@
         "<td>"+(x.id
           ? "<button class='del' style='color:var(--teal)' data-edit='cash|"+x.id+"'>تعديل</button>"+
             "<button class='del' data-del='cash' data-id='"+x.id+"'>حذف</button>"
-          : "<span style='font-size:.75rem;color:var(--ink-soft)'>تلقائي</span>")+"</td></tr>";
+          : "<span style='font-size:.75rem;color:var(--ink-soft)' title='الحركة دي جاية من أوردر أو شراء — عدّلها من شاشتها'>تلقائي</span>")+"</td></tr>");
     });
+    renderCashChips();
     table("t-cash", ["التاريخ","الحركة","الجهة","داخل","خارج","الرصيد بعدها",""], rows,
-      "مفيش حركات نقدية لسه. أول بيع أو شراء هيظهر هنا لوحده.");
-    var sm = document.getElementById("cash-summary");
-    if(sm){
-      sm.textContent = "إجمالي الداخل " + money(tin) + " · إجمالي الخارج " + money(tout) +
-        " · الرصيد " + money(run);
-      sm.className = run >= 0 ? "note ok" : "note bad";
-    }
+      L.length ? "مفيش حركات مطابقة للفلتر. امسح الفلاتر عشان تشوف الدفتر كامل."
+               : "الخزنة فاضية. أول حركة في السيستم هي تسجيل رأس المال من تبويب «رأس المال» — وهو اللي بتشتري بيه بضاعة وتدفع منه المصاريف.");
+    renderCashStats(shown, tin, tout);
   }
 
   function renderItems(){
@@ -4011,6 +4136,31 @@
     if(tr && e.target === tr){ e.preventDefault(); toggleDetail(tr.dataset.row); }
   });
 
+  // فلاتر الخزنة
+  document.getElementById("b-cfilters").addEventListener("click", function(){
+    var pnl = document.getElementById("cash-filters");
+    pnl.hidden = !pnl.hidden;
+    this.setAttribute("aria-expanded", String(!pnl.hidden));
+  });
+  ["cf-dir","cf-kind","cf-src","cf-from","cf-to"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){ readCashFilters(); renderCash(); });
+  });
+  document.getElementById("cf-text").addEventListener("input", function(){ readCashFilters(); renderCash(); });
+  document.getElementById("cf-chips").addEventListener("click", function(e){
+    var rm = e.target.closest("[data-rmcf]");
+    if(rm){
+      var el = document.getElementById(CF_ID[rm.dataset.rmcf]);
+      if(el){ el.value = ""; readCashFilters(); renderCash(); }
+      return;
+    }
+    if(e.target.id === "b-clearcf"){
+      Object.keys(CF_ID).forEach(function(k){
+        var el = document.getElementById(CF_ID[k]); if(el) el.value = "";
+      });
+      readCashFilters(); renderCash();
+    }
+  });
+
   // الفلاتر المطوية + الـ chips
   document.getElementById("b-filters").addEventListener("click", function(){
     var pnl = document.getElementById("filters-panel");
@@ -4222,14 +4372,60 @@
         if(old0 && old0.type==="settle" && (old0.shipCo||"")===fields.shipCo) bal += Number(old0.amount)||0;
       }
       if(fields.amount > bal + 0.009){
-        toast("المحفظة فيها " + money(bal) + " بس");
+        toast(fields.shipCo + " محتفظة بـ " + money(bal) + " بس — مينفعش تسحب أكتر");
         return;
       }
     } else if(fields.type!=="expense" && !fields.partyId){ toast("اختر الجهة"); return; }
+    if(!cashOutOk(fields)) return;
     commit("cash", fields, form, "اتسجّلت الحركة");
     document.getElementById("c-date").value = today();
-    fillSelects(); renderAll();
+    clearOver(); fillSelects(); renderAll();
   });
+
+  /* ---------- حاجز الصرف بأكتر من رصيد الخزنة ---------- */
+  function clearOver(){
+    var box = document.getElementById("c-over"), f = document.getElementById("c-force");
+    if(box) box.hidden = true;
+    if(f) f.checked = false;
+  }
+  // الرصيد من غير الحركة اللي بنعدّلها — عشان التعديل ما يتحاسبش مرتين
+  function cashWithoutEdited(){
+    var bal = cashBox();
+    if(!editing.cash) return bal;
+    var o = db.cash.find(function(x){ return x.id === editing.cash; });
+    if(!o) return bal;
+    var a = Number(o.amount)||0;
+    if(isCapType(o.type)) return bal - CAP[o.type].cash * a;
+    if(o.type === "opening_party") return bal;
+    if(o.type === "in" || o.type === "settle" || o.type === "opening") return bal - a;
+    return bal + a;
+  }
+  function cashOutOk(fields){
+    if(fields.type !== "out" && fields.type !== "expense") return true;
+    var bal = cashWithoutEdited();
+    if(fields.amount <= bal + 0.009) return true;
+    var f = document.getElementById("c-force");
+    if(f && f.checked) return true;           // المستخدم أصرّ — بنسجّلها وبنسيب الخزنة بالسالب
+    var msg;
+    if(bal <= 0.009 && !totalCapital()){
+      msg = "<strong>الخزنة فاضية.</strong> مفيش فلوس تدفع منها. أول خطوة في السيستم إنك تسجّل " +
+            "<strong>رأس المال</strong> من تبويب «رأس المال» — الفلوس دي بتتحوّل للخزنة تلقائي، " +
+            "وبعدين تدفع منها للموردين والمصاريف.";
+    } else if(bal <= 0.009){
+      msg = "<strong>الخزنة فاضية</strong> (رصيدها " + money(bal) + "). حصّل من العملاء، أو اسحب من " +
+            "محفظة شركة الشحن، أو سجّل ضخّ رأس مال جديد — الأول.";
+    } else {
+      msg = "<strong>الخزنة فيها " + money(bal) + " بس</strong> وإنت بتصرف " + money(fields.amount) + "." +
+            (walletsTotal() > 0.009
+              ? " في " + money(walletsTotal()) + " عند شركات الشحن — اسحبهم بـ«سحب من شركة شحن» وهيدخلوا الخزنة."
+              : " حصّل من العملاء أو سجّل ضخّ رأس مال الأول.");
+    }
+    var box = document.getElementById("c-over"), el = document.getElementById("c-over-msg");
+    if(el) el.innerHTML = msg;
+    if(box) box.hidden = false;
+    toast("المبلغ أكبر من رصيد الخزنة");
+    return false;
+  }
 
   // البحث عن أوردر
   document.getElementById("find-q").addEventListener("input", renderFind);
@@ -5178,6 +5374,7 @@
     var t = document.getElementById("title-" + key);
     if(t) t.textContent = (key !== "capital" && editing[key]) ? cfg.edit : cfg.title;
 
+    if(key === "cash") clearOver();
     box.classList.add("as-drawer");
     box.hidden = false;
     var sc = entryScrim(); sc.hidden = false;
@@ -5440,6 +5637,7 @@
     try{ if(LS) applyTheme(LS.getItem("naya:theme") || "light"); }catch(e){}
     backfillSaleNos();
     readFilters();
+    readCashFilters();
     renderAll();
     renderStorageState();
 
