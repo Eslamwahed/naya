@@ -711,6 +711,34 @@
     <p class="note" id="p-note-msg"></p>
     </div>
   </div>
+  <div class="panel" id="entry-pret" hidden>
+    <div class="dhead">
+      <h3 id="title-pret">مرتجع للمورد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="impact" id="impact-pret" hidden></p>
+      <div class="ptot" id="pr-src" style="margin-bottom:12px"></div>
+      <form class="grid" id="f-pret">
+        <div><label for="pr-date">تاريخ المرتجع</label><input type="date" id="pr-date" required></div>
+        <div><label for="pr-qty">الكمية المرجّعة</label>
+          <input type="number" id="pr-qty" step="any" min="0" required autocomplete="off"></div>
+        <div><label for="pr-unit">اللي المورد هيرجّعه للقطعة</label>
+          <input type="number" id="pr-unit" step="any" min="0" required autocomplete="off"></div>
+        <div><label for="pr-mode">الفلوس رجعت إزاي</label>
+          <select id="pr-mode">
+            <option value="cash">استلمتها كاش دلوقتي</option>
+            <option value="credit">اتحسبت على حسابه (هيخصمها بعدين)</option>
+          </select></div>
+        <div style="grid-column:span 2"><label for="pr-note">سبب المرتجع</label>
+          <input id="pr-note" placeholder="بضاعة معيبة، مقاس غلط…" autocomplete="off"></div>
+        <div style="grid-column:1/-1"><p class="note" id="pr-msg" style="margin-top:0"></p></div>
+        <div><button class="act" type="button" id="b-pret">سجّل المرتجع</button>
+          <button class="act ghost" type="button" data-closeentry>إلغاء</button></div>
+      </form>
+    </div>
+  </div>
+
   <div class="tbl-wrap"><table id="t-purch"></table></div>
   <datalist id="pack-list">
     <option value="قطعة"></option><option value="كرتونة"></option><option value="دستة"></option>
@@ -1368,8 +1396,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "25";
+  var VERSION = "26";
   var CHANGELOG = [
+    { v:"26", d:"2026-09-23", items:[
+      "مرتجع للمورد: ترجّع بضاعة معيبة والمخزون يقل لوحده",
+      "الفلوس ترجع كاش للخزنة أو تتخصم من حساب المورد",
+      "حاجز: مينفعش ترجّع أكتر من المتاح عندك",
+      "عمودين مستقلين في المخزون: «رجع للمورد» و«رجع من عميل»"
+    ]},
     { v:"25", d:"2026-09-23", items:[
       "فاتورة الشراء بقت كذا صنف ولون في مرة واحدة",
       "تشتري بالكرتونة وتبيع بالقطعة — اكتب القطع اللي في الكرتونة والسيستم يحسب تكلفة القطعة",
@@ -2126,6 +2160,10 @@
     return Number(p && p.cost)||0;
   }
   function pPackName(p){ return ((p && p.packName) || "").trim(); }
+  // مرتجع للمورد = شراء بكمية بالسالب. كل معادلات المخزون والمتوسط
+  // بتتعامل معاه صح من غير أي استثناء: الرصيد بيقل، ومتوسط التكلفة
+  // بيتحسب على اللي فضل (مصاريف النقل بتفضل على البضاعة اللي عندك).
+  function isPRet(p){ return !!(p && (p.isReturn || (Number(p.qty)||0) < 0)); }
   function pFreight(p){ return Number(p && p.freight)||0; }
   // الواصل للمخزن = بضاعة + نقل. ده اللي بيتحط في قيمة المخزون (IAS 2.11)
   function purchTotal(p){ return (Number(p.qty)||0)*(Number(p.cost)||0); }
@@ -2775,9 +2813,11 @@
     live("items").forEach(function(i){
       variantsOf(i.id).forEach(function(v){
         var k = vKey(i.id, v.color, v.size);
-        var bought=0, sold=0, ret=0, cancQ=0;
+        var bought=0, sold=0, ret=0, cancQ=0, pret=0;
         live("purchases").forEach(function(p){
-          if(keyOf(p)===k && inRange(p.date,r)) bought += Number(p.qty)||0;
+          if(keyOf(p)!==k || !inRange(p.date,r)) return;
+          var q = Number(p.qty)||0;
+          if(q < 0) pret += -q; else bought += q;      // المرتجع للمورد في عمود لوحده
         });
         live("sales").forEach(function(x){
           if(!inRange(revDate(x),r)) return;
@@ -2788,7 +2828,7 @@
           });
         });
         out.push({ item:i, color:v.color, size:v.size, key:k,
-          bought:bought, sold:sold, ret:ret, canc:cancQ,
+          bought:bought, sold:sold, ret:ret, canc:cancQ, pret:pret,
           stock:stockOfV(i.id,v.color,v.size),
           rsv:reservedOfV(i.id,v.color,v.size),
           cost:avgCostV(i.id,v.color,v.size) });
@@ -2828,6 +2868,7 @@
     var bought   = src.reduce(function(a,x){ return a + x.bought; },0);
     var sold     = src.reduce(function(a,x){ return a + x.sold; },0);
     var rets     = src.reduce(function(a,x){ return a + x.ret; },0);
+    var prets    = src.reduce(function(a,x){ return a + (x.pret||0); },0);
     var outCount = src.filter(function(x){ return x.stock <= 0; }).length;
     var lowCount = src.filter(isLow).length;
 
@@ -2838,7 +2879,8 @@
       ["محجوز لأوردرات جارية", qty(reserved), reserved?"v-due":"", scope],
       ["قطع اتشترت", qty(bought), "", "<span class='sub'>في الفترة</span>"],
       ["قطع اتباعت", qty(sold), "v-gain", "<span class='sub'>في الفترة</span>"],
-      ["قطع رجعت", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
+      ["قطع رجعت للمورد", qty(prets), prets?"v-due":"", "<span class='sub'>في الفترة</span>"],
+      ["قطع رجعت من العملاء", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
       ["تركيبات خلصانة", qty(outCount), outCount?"v-due":"", scope],
       ["تركيبات قربت تخلص", qty(lowCount), lowCount?"v-due":"", scope]
     ];
@@ -2854,6 +2896,7 @@
             "<button class='del' style='color:var(--teal)' data-move='"+esc(x.key)+"'>"+
             esc(x.item.name)+(lbl?" · "+esc(lbl):"")+"</button></td>"+
           "<td class='num'>"+qty(x.bought)+"</td>"+
+          "<td class='num "+(x.pret?"v-due":"")+"'>"+(x.pret?qty(x.pret):"—")+"</td>"+
           "<td class='num'>"+qty(x.sold)+"</td>"+
           "<td class='num "+(x.ret?"v-due":"")+"'>"+(x.ret?qty(x.ret):"—")+"</td>"+
           "<td class='num "+(x.canc?"v-due":"")+"'>"+(x.canc?qty(x.canc):"—")+"</td>"+
@@ -2871,7 +2914,7 @@
         : only === "instock" ? "مفيش تركيبة فيها رصيد بالمواصفات دي."
         : "مفيش تركيبات بالمواصفات دي — جرّب تمسح الفلاتر.";
     }
-    table("t-inv", ["الصنف / التركيبة","اتشترى","اتباع","مرتجع","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
+    table("t-inv", ["الصنف / التركيبة","اتشترى","رجع للمورد","اتباع","رجع من عميل","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
       rows, emptyMsg);
 
     renderMovement();
@@ -3528,6 +3571,123 @@
     document.getElementById("p-over").hidden = false;
   }
 
+  /* ---------- مرتجع للمورد ---------- */
+  // بيتخزّن كسجل شراء بكمية بالسالب وسعر = اللي المورد رجّعه.
+  // كده الرصيد بيقل، ومتوسط تكلفة اللي فضل بيتحسب لوحده صح.
+  var pretSrc = null;
+  var pretDefUnit = 0;   // السعر الدقيق من غير تقريب — عشان 3 من كرتونة 800/12 يرجّعوا 200.00 بالظبط
+
+  function openPRet(id){
+    var rec = db.purchases.find(function(x){ return x.id===id; });
+    if(!rec || rec.deleted) return;
+    if(isPRet(rec)){ toast("ده مرتجع أصلاً"); return; }
+    pretSrc = id;
+    var free = freeOfV(rec.itemId, vColor(rec), vSize(rec));
+    var g = function(i){ return document.getElementById(i); };
+    g("pr-date").value = firstOpenDate();
+    g("pr-qty").value  = "";
+    pretDefUnit = pPackCost(rec) / pPackQty(rec);                  // سعر القطعة من غير النقل
+    g("pr-unit").value = Math.round(pretDefUnit * 100) / 100;
+    g("pr-mode").value = "cash";
+    g("pr-note").value = "";
+    g("pr-qty").max = Math.max(0, free);
+    renderPRetSrc();
+    openEntry("pret");
+  }
+
+  function pretRec(){ return pretSrc ? db.purchases.find(function(x){ return x.id===pretSrc; }) : null; }
+
+  function renderPRetSrc(){
+    var rec = pretRec(), box = document.getElementById("pr-src");
+    if(!rec || !box) return;
+    var c = vColor(rec), z = vSize(rec);
+    var lbl = vLabel(c,z), code = vCode(rec.itemId, c, z);
+    var free = freeOfV(rec.itemId, c, z), st = stockOfV(rec.itemId, c, z);
+    box.innerHTML =
+      "<div><span>الصنف</span><b>" + esc(itemName(rec.itemId)) +
+        (lbl ? " · " + esc(lbl) : "") + (code ? " · " + esc(code) : "") + "</b></div>" +
+      "<div><span>المورد</span><b>" + esc(partyName(rec.partyId)) + "</b></div>" +
+      "<div><span>الفاتورة</span><b>" + esc(rec.date) +
+        (rec.inv ? " · " + esc(rec.inv) : "") + " · " + esc(qty(Number(rec.qty)||0)) + " قطعة</b></div>" +
+      "<div><span>الرصيد دلوقتي</span><b class='" + (free <= 0 ? "v-due" : "") + "'>" +
+        esc(qty(st)) + " قطعة" + (free !== st ? " (متاح " + esc(qty(free)) + ")" : "") + "</b></div>";
+  }
+
+  function pretQty(){ return Number((document.getElementById("pr-qty")||{}).value)||0; }
+  // لو ما غيّرش السعر المعروض، بنحسب بالسعر الدقيق مش بالمقرّب
+  function pretUnit(){
+    var v = Number((document.getElementById("pr-unit")||{}).value)||0;
+    return Math.abs(v - Math.round(pretDefUnit * 100) / 100) < 0.005 ? pretDefUnit : v;
+  }
+
+  function renderPRetCalc(){
+    var rec = pretRec(), msg = document.getElementById("pr-msg");
+    if(!rec || !msg) return;
+    var q = pretQty(), u = pretUnit(), mode = document.getElementById("pr-mode").value;
+    var c = vColor(rec), z = vSize(rec);
+    var st = stockOfV(rec.itemId, c, z), free = freeOfV(rec.itemId, c, z);
+    var avg = avgCostV(rec.itemId, c, z);
+    if(!q){ msg.textContent = ""; msg.className = "note"; updateImpact("pret"); return; }
+    if(q > free + 0.0001){
+      msg.innerHTML = "<strong>مينفعش ترجّع " + qty(q) + " قطعة.</strong> المتاح " + qty(free) +
+        " بس" + (free !== st ? " (الرصيد " + qty(st) + " بس فيه محجوز لأوردرات)" : "") +
+        ". مش هتقدر ترجّع بضاعة مش موجودة عندك.";
+      msg.className = "note bad"; updateImpact("pret"); return;
+    }
+    var total = q * u;
+    var after = st - q;
+    var parts = "المخزون <b>" + qty(st) + " ← " + qty(after) + "</b> قطعة · " +
+      "المورد هيرجّع <b>" + money(total) + "</b> · " +
+      (mode === "cash" ? "هتدخل الخزنة دلوقتي" : "هتتخصم من اللي عليك له");
+    // فرق بين تكلفة القطعة في المخزن واللي المورد بيرجّعه
+    if(avg > 0 && Math.abs(u - avg) > 0.009){
+      var diff = (avg - u) * q;
+      parts += "<br>تكلفة القطعة عندك " + money(avg) + " والمورد بيرجّع " + money(u) + " — " +
+        (diff > 0 ? "فرق " + money(diff) + " هيفضل على البضاعة اللي فاضلة (النقل مبيرجعش)."
+                  : "المورد بيرجّع أكتر من تكلفتها بـ " + money(-diff) + " — اتأكد من الرقم.");
+    }
+    msg.innerHTML = parts;
+    msg.className = "note ok";
+    updateImpact("pret");
+  }
+
+  ["pr-qty","pr-unit","pr-mode"].forEach(function(id){
+    var el = document.getElementById(id);
+    el.addEventListener("input", renderPRetCalc);
+    el.addEventListener("change", renderPRetCalc);
+  });
+
+  bind("f-pret","b-pret", function(){
+    var rec = pretRec();
+    if(!rec){ toast("اختار السطر اللي هترجّعه"); return; }
+    var date = document.getElementById("pr-date").value || today();
+    if(!guardLock(date, "المرتجع")) return;
+    var q = pretQty(), u = pretUnit();
+    var mode = document.getElementById("pr-mode").value;
+    var c = vColor(rec), z = vSize(rec);
+    if(!q){ toast("اكتب الكمية المرجّعة"); return; }
+    var free = freeOfV(rec.itemId, c, z);
+    if(q > free + 0.0001){ toast("المتاح " + qty(free) + " قطعة بس"); return; }
+    if(!(u >= 0)){ toast("اكتب اللي المورد هيرجّعه للقطعة"); return; }
+
+    var total = q * u;
+    db.purchases.push(stamp({
+      date: date, partyId: rec.partyId, inv: rec.inv || "",
+      itemId: rec.itemId, color: c, size: z,
+      packName: "قطعة", packs: -q, packQty: 1, packCost: u,
+      qty: -q, cost: u, freight: 0,
+      paid: mode === "cash" ? -total : 0,
+      isReturn: true, srcId: rec.id, batchId: uid(),
+      note: document.getElementById("pr-note").value.trim() || "مرتجع للمورد"
+    }));
+    saveSoon("purchases");
+    pretSrc = null;
+    closeEntry();
+    renderAll();
+    toast("اترجّع " + qty(q) + " قطعة · " + money(total) +
+      (mode === "cash" ? " دخلت الخزنة" : " اتخصمت من حساب المورد"));
+  });
+
   function renderPurch(){
     // الفاتورة الواحدة كذا سجل بنفس batchId — بنعرضها مجمّعة
     var groups = [], byBatch = {};
@@ -3540,6 +3700,7 @@
     var rows = [];
     groups.forEach(function(g){
       var n = g.rows.length, h = g.head;
+      var isRet = isPRet(h);
       var goods = g.rows.reduce(function(a,x){ return a + goodsTotal(x); }, 0);
       var fr    = g.rows.reduce(function(a,x){ return a + pFreight(x); }, 0);
       var paid  = g.rows.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
@@ -3556,15 +3717,18 @@
           "<tr>" +
           (i === 0
             ? "<td class='num' rowspan='"+n+"'>"+esc(h.date)+
-                (h.inv ? "<span class='sub'>فاتورة "+esc(h.inv)+"</span>" : "")+"</td>" +
+                (isRet ? "<span class='sub'><span class='pill due'>مرتجع</span></span>"
+                       : (h.inv ? "<span class='sub'>فاتورة "+esc(h.inv)+"</span>" : ""))+"</td>" +
               "<td class='wide' rowspan='"+n+"'>"+esc(partyName(h.partyId))+
-                (n > 1 ? "<span class='sub'>"+qty(n)+" أصناف</span>" : "")+"</td>"
+                (isRet && h.note ? "<span class='sub'>"+esc(h.note)+"</span>"
+                                 : (n > 1 ? "<span class='sub'>"+qty(n)+" أصناف</span>" : ""))+"</td>"
             : "") +
           "<td class='wide'>"+esc(itemName(p.itemId))+
             (vl ? " <span class='pill'>"+esc(vl)+"</span>" : "")+
             (code ? " <span class='pill'>"+esc(code)+"</span>" : "")+
-            (sub ? "<span class='sub'>"+sub+"</span>" : "")+"</td>" +
-          "<td class='num'>"+qty(p.qty)+"</td>" +
+            (sub ? "<span class='sub'>"+sub+"</span>" : "")+
+            (isRet ? "" : "<span class='sub'><button class='del' style='color:var(--due)' data-pret='"+p.id+"'>رجّعه للمورد</button></span>")+"</td>" +
+          "<td class='num "+(isRet?"v-due":"")+"'>"+qty(p.qty)+"</td>" +
           "<td class='num'>"+money(p.cost)+
             (pFreight(p) ? "<span class='sub'>شامل نقل "+money(pFreight(p)/(Number(p.qty)||1))+"</span>" : "")+"</td>" +
           "<td class='num'>"+money(goodsTotal(p))+"</td>" +
@@ -3574,7 +3738,9 @@
               "<td class='num' rowspan='"+n+"'>"+
                 (rest>0.009 ? "<span class='pill due'>"+money(rest)+"</span>"
                             : "<span class='pill'>خالص</span>")+"</td>" +
-              "<td rowspan='"+n+"'><button class='del' style='color:var(--teal)' data-edit='purchases|"+h.id+"'>تعديل</button></td>" +
+              "<td rowspan='"+n+"'>"+(isRet
+                ? "<span style='font-size:.75rem;color:var(--ink-soft)'>مرتجع</span>"
+                : "<button class='del' style='color:var(--teal)' data-edit='purchases|"+h.id+"'>تعديل</button>")+"</td>" +
               "<td rowspan='"+n+"'><button class='del' data-del='purchases' data-id='"+h.id+"'>حذف</button></td>"
             : "") +
           "</tr>");
@@ -3621,9 +3787,14 @@
           note:"أوردر "+who+" · "+what, inn:0, out:shipOut(s), src:"أوردر"});
     });
     live("purchases").forEach(function(p){
-      if(Number(p.paid)||0)
+      var pd = Number(p.paid)||0;
+      if(pd > 0)
         L.push({d:p.date, at:p.at, t:"دفع لمورد", who:partyName(p.partyId), kind:"دفع",
-          note:"شراء "+itemName(p.itemId), inn:0, out:Number(p.paid)||0, src:"شراء"});
+          note:"شراء "+itemName(p.itemId), inn:0, out:pd, src:"شراء"});
+      else if(pd < 0)
+        L.push({d:p.date, at:p.at, t:"استرداد من مورد", who:partyName(p.partyId), kind:"تحصيل",
+          note:"مرتجع "+itemName(p.itemId)+(p.note?" · "+p.note:""),
+          inn:-pd, out:0, src:"مرتجع"});
       if(pFreight(p))
         L.push({d:p.date, at:p.at, t:"نقل بضاعة", who:"نقل وتوصيل", kind:"مصروف",
           note:"شحنة "+partyName(p.partyId)+" · "+itemName(p.itemId),
@@ -4708,6 +4879,11 @@
   }
 
   /* ---------- أحداث أسطر الفاتورة ---------- */
+  document.getElementById("t-purch").addEventListener("click", function(e){
+    var b = e.target.closest("[data-pret]");
+    if(b) openPRet(b.dataset.pret);
+  });
+
   document.getElementById("b-addpline").addEventListener("click", function(){
     pdraft.lines.push(newPLine());
     renderPLines();
@@ -5772,7 +5948,8 @@
     cash:      { panel:"entry-cash",      title:"حركة نقدية", edit:"تعديل حركة",  focus:"c-type"  },
     items:     { panel:"entry-items",     title:"صنف جديد",   edit:"تعديل صنف",   focus:"i-name"  },
     parties:   { panel:"entry-parties",   title:"جهة جديدة",  edit:"تعديل جهة",   focus:"pt-name" },
-    capital:   { panel:"entry-capital",   title:"حركة رأس مال", edit:"حركة رأس مال", focus:"cp-partner" }
+    capital:   { panel:"entry-capital",   title:"حركة رأس مال", edit:"حركة رأس مال", focus:"cp-partner" },
+    pret:      { panel:"entry-pret",      title:"مرتجع للمورد", edit:"مرتجع للمورد", focus:"pr-qty"   }
   };
   var openEntryKey = null;
 
@@ -5787,6 +5964,7 @@
     if(t) t.textContent = (key !== "capital" && editing[key]) ? cfg.edit : cfg.title;
 
     if(key === "cash") clearOver();
+    if(key === "pret"){ renderPRetSrc(); renderPRetCalc(); }
     if(key === "purchases"){
       if(!pdraft) pdraft = newPDraft();
       if(!editing.purchases && !pdraft.batchId) pdraft.date = firstOpenDate();
@@ -5854,6 +6032,12 @@
       var pid = (document.getElementById("cp-partner")||{}).value;
       if(pid) html = "<span>رأس ماله</span> <b>" + esc(money(capitalOf(pid))) + "</b>" +
         " <span class='arrow'>·</span> <span>نسبته</span> <b>" + (ratioOf(pid)*100).toFixed(2) + "%</b>";
+    } else if(key === "pret"){
+      var inCash = document.getElementById("pr-mode").value === "cash"
+        ? pretQty() * pretUnit() : 0;
+      html = "<span>الخزنة</span> <b>" + esc(money(cash)) + "</b>" +
+        (inCash ? " <span class='arrow'>←</span> <b class='v-gain'>" +
+          esc(money(cash + inCash)) + "</b>" : "");
     } else if(key === "items" || key === "parties"){
       el.hidden = true; return;
     }
