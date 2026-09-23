@@ -342,12 +342,13 @@
   .lmix-head button{background:none;border:1px dashed var(--line);border-radius:7px;
     color:var(--teal);font:inherit;font-size:.76rem;padding:3px 9px;cursor:pointer}
   .lmix-head button:hover{border-color:var(--teal);border-style:solid}
-  .lmix-row{display:flex;gap:6px;align-items:center}
-  .lmix-row select,.lmix-row input{flex:1;min-width:0;padding:6px 8px;font-size:.83rem}
-  .lmix-row input{max-width:84px}
+  .lmix-cols{display:grid;gap:6px;align-items:end;font-size:.7rem;color:var(--ink-soft);
+    font-weight:500;padding-bottom:1px}
+  .lmix-row{display:grid;gap:6px;align-items:center}
+  .lmix-row select,.lmix-row input{min-width:0;width:100%;padding:6px 8px;font-size:.83rem}
   .lmix-row .mcode{font-size:.72rem;color:var(--ink-soft);font-family:ui-monospace,monospace;
-    min-width:52px;text-align:center}
-  .lmix-row .rm{flex:0 0 auto;font-size:1.05rem;line-height:1;padding:2px 6px}
+    text-align:center;overflow:hidden;text-overflow:ellipsis}
+  .lmix-row .rm{font-size:1.05rem;line-height:1;padding:2px 4px;justify-self:center}
   .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
   .lmix-sum b{color:var(--ink);font-weight:600}
@@ -696,7 +697,31 @@
       <div class="fset">
         <h3>البضاعة</h3>
         <div id="p-lines"></div>
-        <button class="addline" type="button" id="b-addpline">+ صنف تاني</button>
+        <div class="row-actions" style="gap:8px">
+          <button class="addline" type="button" id="b-addpline" style="flex:1">+ صنف تاني</button>
+          <button class="tbtn" type="button" id="b-newitem">+ صنف جديد</button>
+        </div>
+        <div class="newcust" id="newitem-box" hidden>
+          <h4>صنف جديد</h4>
+          <p class="hintline">سجّله من هنا على طول ومش محتاج تروح تبويب الأصناف. هيتختار في السطر اللي إنت واقف عليه.</p>
+          <div class="fgrid">
+            <div class="span2"><label for="ni-name">اسم الصنف</label>
+              <input id="ni-name" autocomplete="off" placeholder="شبشب صيفي، شنطة كتف…"></div>
+            <div><label for="ni-price">سعر بيع القطعة</label>
+              <input type="number" id="ni-price" step="any" min="0" placeholder="0"></div>
+            <div><label for="ni-unit">وحدة البيع</label>
+              <input id="ni-unit" autocomplete="off" placeholder="قطعة"></div>
+            <div><label for="ni-colors">الألوان</label>
+              <input id="ni-colors" autocomplete="off" placeholder="بني، أسود، أحمر"></div>
+            <div><label for="ni-sizes">المقاسات</label>
+              <input id="ni-sizes" autocomplete="off" placeholder="38، 39، 40"></div>
+            <div class="span2"><p class="hintline">افصل بينهم بفاصلة. سيبهم فاضيين لو الصنف مالوش ألوان ولا مقاسات.</p></div>
+          </div>
+          <div class="row-actions">
+            <button class="tbtn primary" type="button" id="b-saveitem2">حفظ الصنف</button>
+            <button class="tbtn" type="button" id="b-cancelitem2">إلغاء</button>
+          </div>
+        </div>
       </div>
 
       <div class="fset">
@@ -1411,8 +1436,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "27";
+  var VERSION = "28";
   var CHANGELOG = [
+    { v:"28", d:"2026-09-23", items:[
+      "المسمّيات بتتكلم بوحدتك: كتبت «كرتونة» → «سعر الكرتونة» و«كام كرتونة؟»",
+      "تفصيل الشحنة بقى له عناوين أعمدة: اللون · المقاس · عدد القطع · الكود",
+      "تسجّل صنف جديد من جوّه درج الشراء ويتختار في السطر على طول"
+    ]},
     { v:"27", d:"2026-09-23", items:[
       "الكرتونة الواحدة بقى ليها تفصيل بالمقاس واللون — سعر واحد والسيستم يقسّمه",
       "«قطع في الواحدة» بتتحسب من التفصيل بدل ما تكتبها",
@@ -3470,6 +3500,23 @@
   function itemHasVars(itemId){
     return hasVariants(db.items.find(function(x){ return x.id===itemId; }));
   }
+  /* المسمّيات بتتكلم بوحدة الشراء اللي المستخدم كتبها:
+     كتب «كرتونة» → «سعر الكرتونة» و«كام كرتونة؟». اللي بيسجّل مش لازم
+     يفهم يعني إيه «وحدة» — بيشوف الكلمة اللي هو نفسه كتبها. */
+  function withAl(u){
+    u = String(u||"").trim() || "قطعة";
+    return u.indexOf("ال") === 0 ? u : "ال" + u;
+  }
+  function packsLabel(u){ return "كام " + (String(u||"").trim() || "قطعة") + "؟"; }
+  function costLabel(u){  return "سعر " + withAl(u) + " الواحدة"; }
+  function pqLabel(u){    return "كام قطعة جوّه " + withAl(u) + "؟"; }
+  function mixTitle(u){
+    u = String(u||"").trim();
+    // «اللي جوّه القطعة» كلام مالوش معنى — الشراء بالقطعة مالوش «جوّه»
+    if(!u || u === "قطعة") return "المقاسات والألوان اللي هتشتريها";
+    return "اللي جوّه " + withAl(u) + " بالتفصيل";
+  }
+
   function mixPieces(l){
     return (l.mix||[]).reduce(function(a,m){ return a + (Number(m.qty)||0); }, 0);
   }
@@ -3513,32 +3560,39 @@
     var it = db.items.find(function(x){ return x.id===l.itemId; });
     var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
     var vars = cs.length > 0 || zs.length > 0;
-    var unit = (l.packName||"").trim() || "وحدة";
+    var unit = (l.packName||"").trim() || "قطعة";
     var pieces = plQty(l), packs = Number(l.packs)||0;
 
     var mixHTML = "";
     if(l.itemId && vars){
+      // الأعمدة بتتغيّر حسب الصنف: في صنف بلون بس، وفي بلون ومقاس
+      var gcols = ((cs.length?"1.1fr ":"") + (zs.length?"1fr ":"") + "92px 58px 26px");
+      var gstyle = " style=\"grid-template-columns:"+gcols+"\"";
       var rows = (l.mix||[]).map(function(m, j){
         var code = vCode(l.itemId, m.color, m.size);
-        var sel = function(list, cur, f){
+        var sel = function(list, cur, f, ph){
           if(!list.length) return "";     // الصنف مالوش الخاصية دي — مفيش داعي لخانة فاضية
           return "<select data-pli='"+i+"' data-mi='"+j+"' data-mf='"+f+"'>" +
-            optsHTML(list.map(function(v){ return {v:v,t:v}; }), cur, "اختر") + "</select>";
+            optsHTML(list.map(function(v){ return {v:v,t:v}; }), cur, ph) + "</select>";
         };
-        return "<div class='lmix-row'>" +
-          sel(cs, m.color, "color") + sel(zs, m.size, "size") +
-          "<input type='number' step='any' min='0' placeholder='عدد' " +
+        return "<div class='lmix-row'"+gstyle+">" +
+          sel(cs, m.color, "color", "اختر اللون") + sel(zs, m.size, "size", "اختر المقاس") +
+          "<input type='number' step='any' min='0' placeholder='كام قطعة؟' " +
             "data-pli='"+i+"' data-mi='"+j+"' data-mf='qty' value='"+esc(m.qty)+"'>" +
-          "<span class='mcode'>"+(code ? esc(code) : "")+"</span>" +
-          "<button type='button' class='rm' data-rmmix='"+i+"|"+j+"' aria-label='شيل'>&times;</button>" +
+          "<span class='mcode'>"+(code ? esc(code) : "—")+"</span>" +
+          "<button type='button' class='rm' data-rmmix='"+i+"|"+j+"' aria-label='شيل السطر ده'>&times;</button>" +
           "</div>";
       }).join("");
-      var need = packs > 0 && Number(l.packQty) > 0 ? packs * Number(l.packQty) : 0;
+      var head = "<div class='lmix-cols'"+gstyle+">" +
+        (cs.length ? "<span>اللون</span>" : "") +
+        (zs.length ? "<span>المقاس</span>" : "") +
+        "<span>عدد القطع</span><span>الكود</span><span></span></div>";
       mixHTML =
         "<div class='lmix'>" +
-          "<div class='lmix-head'><span>اللي جوّه الـ"+esc(unit)+" — بالمقاس واللون</span>" +
-            "<button type='button' data-addmix='"+i+"'>+ سطر</button></div>" +
-          (rows || "<p class='lmix-empty'>ضيف المقاسات والألوان اللي في الشحنة. السعر بيتكتب مرة واحدة فوق والسيستم بيقسّمه على القطع دي.</p>") +
+          "<div class='lmix-head'><span class='lmix-title'>"+esc(mixTitle(unit))+"</span>" +
+            "<button type='button' data-addmix='"+i+"'>+ "+(cs.length&&zs.length?"لون ومقاس":(cs.length?"لون":"مقاس"))+"</button></div>" +
+          (rows ? head + rows
+                : "<p class='lmix-empty'>اكتب كل مقاس ولون جوّه الشحنة وعدد قطعه. السعر بيتكتب <strong>مرة واحدة فوق للشحنة كلها</strong>، والسيستم بيقسّمه على القطع دي بالتساوي.</p>") +
           (rows ? "<div class='lmix-sum'>إجمالي القطع <b>"+qty(pieces)+"</b></div>" : "") +
         "</div>";
     }
@@ -3547,15 +3601,15 @@
       "<div class='lrow-top'>" +
         "<div class='grow'><label for='pl-item-"+i+"'>الصنف</label>" +
           "<select id='pl-item-"+i+"' data-pli='"+i+"' data-pf='itemId'>"+itemOptionsHTML(l.itemId, true)+"</select></div>" +
-        "<div><label for='pl-pn-"+i+"'>بشتري بالـ</label>" +
+        "<div><label for='pl-pn-"+i+"'>المورد بيبيعهالي بإيه؟</label>" +
           "<input id='pl-pn-"+i+"' list='pack-list' data-pli='"+i+"' data-pf='packName' " +
           "placeholder='قطعة' autocomplete='off' value='"+esc(l.packName)+"'></div>" +
-        "<div><label for='pl-packs-"+i+"'>العدد</label>" +
+        "<div><label class='lab-packs' for='pl-packs-"+i+"'>"+esc(packsLabel(unit))+"</label>" +
           "<input id='pl-packs-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packs' value='"+esc(l.packs)+"'></div>" +
         (vars && l.itemId ? "" :
-          "<div><label for='pl-pq-"+i+"'>قطع في الواحدة</label>" +
+          "<div><label class='lab-pq' for='pl-pq-"+i+"'>"+esc(pqLabel(unit))+"</label>" +
           "<input id='pl-pq-"+i+"' type='number' step='any' min='1' data-pli='"+i+"' data-pf='packQty' value='"+esc(l.packQty)+"'></div>") +
-        "<div><label for='pl-pc-"+i+"'>سعر الواحدة</label>" +
+        "<div><label class='lab-cost' for='pl-pc-"+i+"'>"+esc(costLabel(unit))+"</label>" +
           "<input id='pl-pc-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packCost' value='"+esc(l.packCost)+"'></div>" +
       "</div>" +
       mixHTML +
@@ -3591,7 +3645,7 @@
       var txt = qty(packs) + " " + esc(unitName) + " × " + money(Number(l.packCost)||0) +
         " · <b>" + qty(q) + " قطعة</b>";
       if(packs > 0 && q % packs === 0 && q / packs > 1)
-        txt += " (" + qty(q/packs) + " في الـ" + esc(unitName) + ")";
+        txt += " (" + qty(q/packs) + " قطعة في " + esc(withAl(unitName)) + ")";
       txt += " · " + money(base) + " للقطعة";
       if(fr[i]) txt += " + نقل " + money(share);
       txt += " → تكلفة القطعة <b>" + money(landed) + "</b>";
@@ -3611,10 +3665,18 @@
       }
       el.innerHTML = txt;
     });
-    // مجموع القطع جوّه كل سطر بيتحدّث وانت بتكتب الكميات
+    // مجموع القطع والمسمّيات بيتحدّثوا وانت بتكتب
     pdraft.lines.forEach(function(l, i){
-      var sum = document.querySelector("#p-lines .lrow[data-pli='"+i+"'] .lmix-sum");
+      var row = document.querySelector("#p-lines .lrow[data-pli='"+i+"']");
+      if(!row) return;
+      var u = (l.packName||"").trim() || "قطعة";
+      var sum = row.querySelector(".lmix-sum");
       if(sum) sum.innerHTML = "إجمالي القطع <b>" + qty(plQty(l)) + "</b>";
+      var set = function(sel, txt){ var e = row.querySelector(sel); if(e) e.textContent = txt; };
+      set(".lab-packs", packsLabel(u));
+      set(".lab-cost",  costLabel(u));
+      set(".lab-pq",    pqLabel(u));
+      set(".lmix-title", mixTitle(u));
     });
 
     var goods = pdGoods(), freight = Number(pdraft.freight)||0;
@@ -5033,6 +5095,55 @@
     if(b) openPRet(b.dataset.pret);
   });
 
+  /* ---------- صنف جديد من جوّه درج الشراء ---------- */
+  var newItemFor = 0;      // السطر اللي هيتحط فيه الصنف الجديد
+
+  function closeNewItem(){
+    document.getElementById("newitem-box").hidden = true;
+    ["ni-name","ni-price","ni-unit","ni-colors","ni-sizes"].forEach(function(x){
+      document.getElementById(x).value = "";
+    });
+  }
+  document.getElementById("b-newitem").addEventListener("click", function(){
+    // السطر اللي لسه فاضي أولى بالصنف الجديد، وإلا آخر سطر
+    var idx = pdraft.lines.findIndex(function(l){ return !l.itemId; });
+    newItemFor = idx >= 0 ? idx : pdraft.lines.length - 1;
+    var box = document.getElementById("newitem-box");
+    box.hidden = false;
+    document.getElementById("ni-name").focus();
+    box.scrollIntoView({block:"nearest"});
+  });
+  document.getElementById("b-cancelitem2").addEventListener("click", closeNewItem);
+  document.getElementById("b-saveitem2").addEventListener("click", function(){
+    var name = document.getElementById("ni-name").value.trim();
+    if(!name){ toast("اكتب اسم الصنف"); return; }
+    var dup = live("items").find(function(x){ return (x.name||"").trim() === name; });
+    if(dup){ toast("فيه صنف بنفس الاسم — اختاره من القايمة"); return; }
+    var rec = stamp({
+      name: name,
+      unit: document.getElementById("ni-unit").value.trim(),
+      price: Number(document.getElementById("ni-price").value)||0,
+      min: 0,
+      colors: document.getElementById("ni-colors").value.trim(),
+      sizes:  document.getElementById("ni-sizes").value.trim(),
+      img: ""
+    });
+    db.items.push(rec);
+    saveSoon("items");
+    closeNewItem();
+
+    var l = pdraft.lines[newItemFor] || pdraft.lines[pdraft.lines.length - 1];
+    if(l){
+      l.itemId = rec.id;
+      l.mix = itemHasVars(rec.id) ? [newMix()] : [];
+    }
+    renderAll();
+    renderPLines();
+    var sel = document.getElementById("pl-item-" + newItemFor);
+    if(sel) sel.scrollIntoView({block:"nearest"});
+    toast("اتضاف الصنف واتختار في السطر");
+  });
+
   document.getElementById("b-addpline").addEventListener("click", function(){
     pdraft.lines.push(newPLine());
     renderPLines();
@@ -6141,6 +6252,7 @@
     if(key === "cash") clearOver();
     if(key === "pret"){ renderPRetSrc(); renderPRetCalc(); }
     if(key === "purchases"){
+      closeNewItem();
       if(!pdraft) pdraft = newPDraft();
       if(!editing.purchases && !pdraft.batchId) pdraft.date = firstOpenDate();
       clearPOver(); syncPHead(); renderPLines();
