@@ -336,6 +336,13 @@
     border-top:1px dashed var(--line);padding-top:8px}
   .lrow-foot .ltot{font-size:.88rem;font-weight:600;margin-inline-end:auto}
   .lrow-foot .ltot em{font-style:normal;font-size:.72rem;color:var(--ink-soft);font-weight:400}
+  .vcode{width:100%;min-width:92px;padding:5px 8px;font-size:.82rem;font-family:ui-monospace,monospace}
+  .ptot{background:var(--teal-soft);border-radius:10px;padding:11px 13px;display:grid;gap:5px;font-size:.85rem}
+  .ptot div{display:flex;justify-content:space-between;gap:12px}
+  .ptot b{font-weight:600}
+  .ptot .big{font-size:1rem;padding-top:6px;margin-top:2px;border-top:1px solid var(--line)}
+  .lrow .lcost{font-size:.78rem;color:var(--ink-soft);line-height:1.6}
+  .lrow .lcost b{color:var(--ink);font-weight:600}
   .lrow .rm{background:none;border:none;color:var(--due);font:inherit;font-size:.8rem;
     padding:3px 7px;border-radius:6px;cursor:pointer}
   .addline{background:none;border:1px dashed var(--line);color:var(--teal);
@@ -649,7 +656,7 @@
 <!-- مشتريات -->
 <section id="tab-purch" hidden>
   <h2>مشتريات</h2>
-  <p class="hint">كل شراء بيزوّد رصيد الصنف وبيعدّل متوسط تكلفته.</p>
+  <p class="hint">الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
   <div class="tbar">
     <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
   </div>
@@ -661,24 +668,54 @@
     </div>
     <div class="dbody">
     <p class="impact" id="impact-purchases"></p>
-    <form class="grid" id="f-purch">
-      <div><label for="p-date">التاريخ</label><input type="date" id="p-date" required></div>
-      <div><label for="p-party">المورد</label><select id="p-party" required></select></div>
-      <div><label for="p-item">الصنف</label><select id="p-item" required></select></div>
-      <div class="pvnote" hidden style="grid-column:span 2">
-        <p class="note" style="margin:0">الصنف ده مالوش ألوان ولا مقاسات — عرّفهم من تبويب الأصناف.</p></div>
-      <div class="pvfield" hidden><label for="p-color">اللون</label><select id="p-color"></select></div>
-      <div class="pvfield" hidden><label for="p-size">المقاس</label><select id="p-size"></select></div>
-      <div><label for="p-qty">الكمية</label><input type="number" id="p-qty" step="any" min="0" required></div>
-      <div><label for="p-cost">سعر الشراء للوحدة</label><input type="number" id="p-cost" step="any" min="0" required></div>
-      <div><label for="p-paid">المدفوع</label><input type="number" id="p-paid" step="any" min="0" value="0"></div>
-      <div><label for="p-note">ملاحظة</label><input id="p-note" autocomplete="off"></div>
-      <div><button class="act" type="button" id="b-purch">حفظ الشراء</button> <button class="act ghost" type="button" id="x-purch" hidden>إلغاء</button></div>
+    <form id="f-purch">
+      <div class="fset">
+        <h3>الفاتورة</h3>
+        <div class="grid">
+          <div><label for="p-date">التاريخ</label><input type="date" id="p-date" required></div>
+          <div><label for="p-party">المورد</label><select id="p-party" required></select></div>
+          <div><label for="p-inv">رقم فاتورة المورد</label><input id="p-inv" autocomplete="off" placeholder="اختياري"></div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <h3>البضاعة</h3>
+        <div id="p-lines"></div>
+        <button class="addline" type="button" id="b-addpline">+ صنف تاني</button>
+      </div>
+
+      <div class="fset">
+        <h3>النقل والدفع</h3>
+        <div class="grid">
+          <div><label for="p-freight">مصاريف النقل للشحنة</label>
+            <input type="number" id="p-freight" step="any" min="0" value="0" placeholder="0"></div>
+          <div><label for="p-paid">المدفوع للمورد</label>
+            <input type="number" id="p-paid" step="any" min="0" value="0"></div>
+          <div><label for="p-note">ملاحظة</label><input id="p-note" autocomplete="off"></div>
+        </div>
+        <p class="hintline">النقل بيتوزّع على الأصناف بنسبة قيمة كل صنف، وبيتخصم من الخزنة لوحده — مش بيتحسب دَين على المورد.</p>
+      </div>
+
+      <div id="p-total" class="ptot"></div>
+      <div id="p-over" hidden>
+        <p class="note bad" id="p-over-msg" style="margin-top:0"></p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;cursor:pointer;margin-top:6px">
+          <input type="checkbox" id="p-force" style="width:auto;margin:0">
+          <span>أنا متأكد — سجّلها برضه</span>
+        </label>
+      </div>
+      <div class="grid">
+        <div><button class="act" type="button" id="b-purch">حفظ الشراء</button> <button class="act ghost" type="button" id="x-purch" hidden>إلغاء</button></div>
+      </div>
     </form>
     <p class="note" id="p-note-msg"></p>
     </div>
   </div>
   <div class="tbl-wrap"><table id="t-purch"></table></div>
+  <datalist id="pack-list">
+    <option value="قطعة"></option><option value="كرتونة"></option><option value="دستة"></option>
+    <option value="شيكارة"></option><option value="باكو"></option><option value="طقم"></option>
+  </datalist>
 </section>
 
 <!-- الخزنة -->
@@ -1331,8 +1368,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "24";
+  var VERSION = "25";
   var CHANGELOG = [
+    { v:"25", d:"2026-09-23", items:[
+      "فاتورة الشراء بقت كذا صنف ولون في مرة واحدة",
+      "تشتري بالكرتونة وتبيع بالقطعة — اكتب القطع اللي في الكرتونة والسيستم يحسب تكلفة القطعة",
+      "مصاريف النقل بتتوزّع على الأصناف بنسبة قيمتها، فتكلفة القطعة تطلع واصلة المخزن",
+      "النقل بيتخصم من الخزنة لوحده ومبيتحسبش دَين على المورد",
+      "كود لكل لون ومقاس، بيظهر في الفاتورة وجدول المشتريات",
+      "تحذير لما تكلفة القطعة تبعد كتير عن متوسطها الحالي",
+      "حاجز: المدفوع أكبر من الفاتورة، أو الخزنة مش مكفّية",
+      "تعديل وحذف الفاتورة بيشتغلوا عليها كوحدة واحدة"
+    ]},
     { v:"24", d:"2026-09-22", items:[
       "شاشة الخزنة: كروت الرصيد بدل سطر الملخّص، وكارت لفلوس شركات الشحن",
       "فلاتر وبحث في دفتر الخزنة — والرصيد التراكمي بيفضل صح حتى وانت مفلتر",
@@ -1946,6 +1993,25 @@
   }
   function hasVariants(item){ return listOf(item,"colors").length > 0 || listOf(item,"sizes").length > 0; }
 
+  // كود لكل تركيبة لون/مقاس — بيتخزّن في الصنف نفسه {"أحمر|M":"LR-102"}
+  function codeKey(color, size){ return (color||"").trim() + "|" + (size||"").trim(); }
+  function vCode(itemId, color, size){
+    var it = db.items.find(function(x){ return x.id===itemId; });
+    if(!it || !it.codes) return "";
+    return String(it.codes[codeKey(color,size)] || "").trim();
+  }
+  function setVCode(itemId, color, size, code){
+    var it = db.items.find(function(x){ return x.id===itemId; });
+    if(!it) return;
+    if(!it.codes) it.codes = {};
+    var k = codeKey(color,size), v = String(code||"").trim();
+    if(v) it.codes[k] = v; else delete it.codes[k];
+  }
+  function vCodeLabel(itemId, color, size){
+    var c = vCode(itemId, color, size);
+    return c ? " · " + c : "";
+  }
+
   // كل التركيبات اللي ليها حركة فعلية أو معرّفة في الصنف
   function variantsOf(itemId){
     var it = db.items.find(function(x){ return x.id===itemId; }) || {};
@@ -2045,7 +2111,26 @@
   function saleTotal(s){
     return SL(s).reduce(function(a,l){ return a + lineTotal(l,s); },0);
   }
+  /* ---------- الشراء: وحدة الشراء ومصاريف النقل ----------
+     السجل بيتخزّن دايماً بـ qty = عدد القطع و cost = تكلفة القطعة واصلة المخزن،
+     فكل حسابات المخزون والربح شغالة عليهم زي ما هي. الحقول الجديدة (packs/packQty/
+     packCost/freight) للعرض والتعديل وللتفرقة بين دَين المورد وقيمة المخزون.
+     السجلات القديمة مالهاش الحقول دي، فبترجع لنفس سلوكها الأول بالظبط. */
+  function pPackQty(p){ var n = Number(p && p.packQty)||0; return n > 0 ? n : 1; }
+  function pPacks(p){
+    if(p && p.packs != null && p.packs !== "") return Number(p.packs)||0;
+    return Number(p && p.qty)||0;                     // قديم: الوحدة = القطعة
+  }
+  function pPackCost(p){
+    if(p && p.packCost != null && p.packCost !== "") return Number(p.packCost)||0;
+    return Number(p && p.cost)||0;
+  }
+  function pPackName(p){ return ((p && p.packName) || "").trim(); }
+  function pFreight(p){ return Number(p && p.freight)||0; }
+  // الواصل للمخزن = بضاعة + نقل. ده اللي بيتحط في قيمة المخزون (IAS 2.11)
   function purchTotal(p){ return (Number(p.qty)||0)*(Number(p.cost)||0); }
+  // اللي للمورد = البضاعة بس. النقل بيتدفع للناقل مش للمورد
+  function goodsTotal(p){ return purchTotal(p) - pFreight(p); }
   // ربح البضاعة (المسلّم بس)
   function goodsProfit(s){
     if(!isDelivered(s)) return 0;
@@ -2066,7 +2151,7 @@
     live("sales").forEach(function(s){
       if(s.partyId===id && isDelivered(s)) bal += saleTotal(s) + shipIn(s) - (Number(s.paid)||0);
     });
-    live("purchases").forEach(function(p){ if(p.partyId===id) bal -= purchTotal(p) - (Number(p.paid)||0); });
+    live("purchases").forEach(function(p){ if(p.partyId===id) bal -= goodsTotal(p) - (Number(p.paid)||0); });
     live("cash").forEach(function(c){
       if(c.partyId!==id) return;
       if(isCapType(c.type)) return;                              // رأس مال — مش مديونية
@@ -2084,7 +2169,7 @@
       else v += Number(s.paid)||0;
       if(shipCounts(s)) v -= shipOut(s);
     });
-    live("purchases").forEach(function(p){ v -= Number(p.paid)||0; });
+    live("purchases").forEach(function(p){ v -= (Number(p.paid)||0) + pFreight(p); });
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
       // معالجة صريحة: قبل كده أي نوع مجهول كان بيتعامل كخروج بالغلط
@@ -3303,21 +3388,202 @@
   }
 
 
-  function renderPurch(){
-    var rows = live("purchases").slice().sort(byDate).map(function(p){
-      var rest = purchTotal(p) - (Number(p.paid)||0);
-      return "<tr><td class='num'>"+esc(p.date)+"</td><td class='wide'>"+esc(partyName(p.partyId))+"</td>"+
-        "<td class='wide'>"+esc(itemName(p.itemId))+
-          (vLabel(vColor(p),vSize(p)) ? " <span class='pill'>"+esc(vLabel(vColor(p),vSize(p)))+"</span>" : "")+
-          "</td><td class='num'>"+qty(p.qty)+"</td>"+
-        "<td class='num'>"+money(p.cost)+"</td><td class='num'>"+money(purchTotal(p))+"</td>"+
-        "<td class='num'>"+money(p.paid)+"</td>"+
-        "<td class='num'>"+(rest>0.009?"<span class='pill due'>"+money(rest)+"</span>":"<span class='pill'>خالص</span>")+"</td>"+
-        "<td><button class='del' style='color:var(--teal)' data-edit='purchases|"+p.id+"'>تعديل</button></td>"+
-        "<td><button class='del' data-del='purchases' data-id='"+p.id+"'>حذف</button></td></tr>";
+  /* ================= فاتورة الشراء ================= */
+  // فاتورة واحدة = مورد + تاريخ + كذا سطر. بتتخزّن N سجلات بنفس batchId،
+  // كل سجل شايل نصيبه من النقل جوّه cost — فالمخزون والربح شغالين زي ما هما.
+  var pdraft = null;
+
+  function newPLine(){
+    return { itemId:"", color:"", size:"", packName:"", packs:"", packQty:1, packCost:"" };
+  }
+  function newPDraft(){
+    return { date:firstOpenDate(), partyId:"", inv:"", freight:0, paid:0, note:"",
+             lines:[newPLine()], batchId:"" };
+  }
+  function plPackQty(l){ var n = Number(l.packQty)||0; return n > 0 ? n : 1; }
+  function plQty(l){ return (Number(l.packs)||0) * plPackQty(l); }     // عدد القطع
+  function plGoods(l){ return (Number(l.packs)||0) * (Number(l.packCost)||0); }
+  function pdGoods(){ return pdraft.lines.reduce(function(a,l){ return a + plGoods(l); }, 0); }
+
+  // توزيع مبلغ على الأسطر بنسبة قيمة كل سطر، والفرق بيروح لأكبر سطر
+  function allocByValue(amount, lines){
+    var vals = lines.map(plGoods);
+    var tot  = vals.reduce(function(a,b){ return a+b; }, 0);
+    var amt  = Number(amount)||0;
+    if(!amt || tot <= 0) return lines.map(function(){ return 0; });
+    var out = vals.map(function(v){ return Math.round(amt * v / tot * 100) / 100; });
+    var diff = Math.round((amt - out.reduce(function(a,b){ return a+b; }, 0)) * 100) / 100;
+    if(diff !== 0){
+      var bi = 0;
+      vals.forEach(function(v,i){ if(v > vals[bi]) bi = i; });
+      out[bi] = Math.round((out[bi] + diff) * 100) / 100;
+    }
+    return out;
+  }
+
+  function pLineHTML(l, i){
+    var it = db.items.find(function(x){ return x.id===l.itemId; });
+    var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
+    var pick = function(list, sel, f){
+      return "<select data-pli='"+i+"' data-pf='"+f+"'>" +
+        optsHTML(list.map(function(v){ return {v:v,t:v}; }), sel, "اختر") + "</select>";
+    };
+    var dash = "<select disabled><option>—</option></select>";
+    var code = l.itemId ? vCode(l.itemId, l.color, l.size) : "";
+    return "<div class='lrow' data-pli='"+i+"'>" +
+      "<div class='lrow-top'>" +
+        "<div class='grow'><label for='pl-item-"+i+"'>الصنف</label>" +
+          "<select id='pl-item-"+i+"' data-pli='"+i+"' data-pf='itemId'>"+itemOptionsHTML(l.itemId)+"</select></div>" +
+        "<div><label>اللون</label>" + (cs.length ? pick(cs, l.color, "color") : dash) + "</div>" +
+        "<div><label>المقاس</label>" + (zs.length ? pick(zs, l.size, "size") : dash) + "</div>" +
+      "</div>" +
+      "<div class='lrow-top'>" +
+        "<div><label for='pl-pn-"+i+"'>بشتري بالـ</label>" +
+          "<input id='pl-pn-"+i+"' list='pack-list' data-pli='"+i+"' data-pf='packName' " +
+          "placeholder='قطعة' autocomplete='off' value='"+esc(l.packName)+"'></div>" +
+        "<div><label for='pl-packs-"+i+"'>العدد</label>" +
+          "<input id='pl-packs-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packs' value='"+esc(l.packs)+"'></div>" +
+        "<div><label for='pl-pq-"+i+"'>قطع في الواحدة</label>" +
+          "<input id='pl-pq-"+i+"' type='number' step='any' min='1' data-pli='"+i+"' data-pf='packQty' value='"+esc(l.packQty)+"'></div>" +
+        "<div><label for='pl-pc-"+i+"'>سعر الواحدة</label>" +
+          "<input id='pl-pc-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packCost' value='"+esc(l.packCost)+"'></div>" +
+      "</div>" +
+      "<div class='lrow-foot'>" +
+        "<span class='lcost' data-pli='"+i+"'>—</span>" +
+        (code ? "<span class='pill'>"+esc(code)+"</span>" : "") +
+        (pdraft.lines.length > 1 ? "<button type='button' class='rm' data-rmpline='"+i+"'>شيل السطر</button>" : "") +
+      "</div></div>";
+  }
+
+  function renderPLines(){
+    document.getElementById("p-lines").innerHTML =
+      pdraft.lines.map(function(l,i){ return pLineHTML(l,i); }).join("");
+    renderPCalc();
+  }
+
+  // بيحسب تكلفة القطعة واصلة المخزن لكل سطر + ملخّص الفاتورة
+  function renderPCalc(){
+    if(!pdraft) return;
+    var fr = allocByValue(pdraft.freight, pdraft.lines);
+    pdraft.lines.forEach(function(l, i){
+      var el = document.querySelector("#p-lines .lcost[data-pli='"+i+"']");
+      if(!el) return;
+      var q = plQty(l), g = plGoods(l), pq = plPackQty(l);
+      if(!q || !g){ el.textContent = "—"; return; }
+      var unitName = (l.packName || "").trim() || "قطعة";
+      var base = g / q, share = fr[i] / q, landed = (g + fr[i]) / q;
+      var txt = qty(Number(l.packs)||0) + " " + esc(unitName) + " × " + money(Number(l.packCost)||0);
+      if(pq > 1) txt += " · " + qty(pq) + " قطعة في الـ" + esc(unitName) +
+                        " = <b>" + qty(q) + " قطعة</b> بـ " + money(base) + " للقطعة";
+      if(fr[i]) txt += " · نقل " + money(share) + " للقطعة";
+      txt += " → تكلفة القطعة <b>" + money(landed) + "</b>";
+      var prev = l.itemId ? avgCostV(l.itemId, l.color, l.size) : 0;
+      var st   = l.itemId ? stockOfV(l.itemId, l.color, l.size) : 0;
+      if(st > 0 && prev > 0 && landed > 0){
+        var ratio = landed / prev;
+        if(ratio > 1.75 || ratio < 0.57)
+          txt += "<br><span class='v-due'>⚠ متوسط تكلفتها الحالي " + money(prev) +
+                 " — الفرق كبير، راجع سعر الوحدة وعدد القطع</span>";
+      }
+      el.innerHTML = txt;
     });
-    table("t-purch", ["التاريخ","المورد","الصنف","الكمية","التكلفة","الإجمالي","المدفوع","المتبقي","",""], rows,
-      "مفيش مشتريات لسه. سجّل أول شحنة عشان يبقى عندك مخزون تبيع منه.");
+
+    var goods = pdGoods(), freight = Number(pdraft.freight)||0;
+    var pieces = pdraft.lines.reduce(function(a,l){ return a + plQty(l); }, 0);
+    var paid = Number(pdraft.paid)||0;
+    var rest = goods - paid;
+    var box = document.getElementById("p-total");
+    box.innerHTML =
+      "<div><span>البضاعة (للمورد)</span><b>" + esc(money(goods)) + "</b></div>" +
+      (freight ? "<div><span>النقل (للناقل)</span><b>" + esc(money(freight)) + "</b></div>" : "") +
+      "<div><span>عدد القطع الداخلة المخزن</span><b>" + esc(qty(pieces)) + "</b></div>" +
+      "<div class='big'><span>قيمة المخزون الداخلة</span><b>" + esc(money(goods + freight)) + "</b></div>" +
+      (paid ? "<div><span>مدفوع للمورد</span><b>" + esc(money(paid)) + "</b></div>" : "") +
+      (Math.abs(rest) > 0.009
+        ? "<div><span>" + (rest > 0 ? "باقي على المورد" : "مدفوع زيادة") + "</span><b class='v-due'>" +
+          esc(money(Math.abs(rest))) + "</b></div>" : "") +
+      "<div><span>هيخرج من الخزنة دلوقتي</span><b class='" +
+        ((paid + freight) > cashBoxForPurch() ? "v-due" : "") + "'>" +
+        esc(money(paid + freight)) + "</b></div>";
+    updateImpact("purchases");
+  }
+
+  // رصيد الخزنة من غير الفاتورة اللي بنعدّلها
+  function cashBoxForPurch(){
+    var bal = cashBox();
+    if(!pdraft || !pdraft.batchId) return bal;
+    live("purchases").forEach(function(r){
+      if(r.batchId === pdraft.batchId) bal += (Number(r.paid)||0) + pFreight(r);
+    });
+    return bal;
+  }
+
+  function clearPOver(){
+    var b = document.getElementById("p-over"), f = document.getElementById("p-force");
+    if(b) b.hidden = true;
+    if(f) f.checked = false;
+  }
+  function pOverMsg(html){
+    document.getElementById("p-over-msg").innerHTML = html;
+    document.getElementById("p-over").hidden = false;
+  }
+
+  function renderPurch(){
+    // الفاتورة الواحدة كذا سجل بنفس batchId — بنعرضها مجمّعة
+    var groups = [], byBatch = {};
+    live("purchases").slice().sort(byDate).forEach(function(p){
+      var k = p.batchId || ("solo:" + p.id);
+      if(!byBatch[k]){ byBatch[k] = { key:k, rows:[], head:p }; groups.push(byBatch[k]); }
+      byBatch[k].rows.push(p);
+    });
+
+    var rows = [];
+    groups.forEach(function(g){
+      var n = g.rows.length, h = g.head;
+      var goods = g.rows.reduce(function(a,x){ return a + goodsTotal(x); }, 0);
+      var fr    = g.rows.reduce(function(a,x){ return a + pFreight(x); }, 0);
+      var paid  = g.rows.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
+      var rest  = goods - paid;
+      g.rows.forEach(function(p, i){
+        var vl = vLabel(vColor(p), vSize(p));
+        var code = vCode(p.itemId, vColor(p), vSize(p));
+        var pq = pPackQty(p);
+        var packs = pPacks(p), pn = pPackName(p) || "قطعة";
+        var sub = pq > 1
+          ? qty(packs) + " " + esc(pn) + " × " + qty(pq) + " قطعة"
+          : (packs !== (Number(p.qty)||0) ? "" : "");
+        return rows.push(
+          "<tr>" +
+          (i === 0
+            ? "<td class='num' rowspan='"+n+"'>"+esc(h.date)+
+                (h.inv ? "<span class='sub'>فاتورة "+esc(h.inv)+"</span>" : "")+"</td>" +
+              "<td class='wide' rowspan='"+n+"'>"+esc(partyName(h.partyId))+
+                (n > 1 ? "<span class='sub'>"+qty(n)+" أصناف</span>" : "")+"</td>"
+            : "") +
+          "<td class='wide'>"+esc(itemName(p.itemId))+
+            (vl ? " <span class='pill'>"+esc(vl)+"</span>" : "")+
+            (code ? " <span class='pill'>"+esc(code)+"</span>" : "")+
+            (sub ? "<span class='sub'>"+sub+"</span>" : "")+"</td>" +
+          "<td class='num'>"+qty(p.qty)+"</td>" +
+          "<td class='num'>"+money(p.cost)+
+            (pFreight(p) ? "<span class='sub'>شامل نقل "+money(pFreight(p)/(Number(p.qty)||1))+"</span>" : "")+"</td>" +
+          "<td class='num'>"+money(goodsTotal(p))+"</td>" +
+          (i === 0
+            ? "<td class='num' rowspan='"+n+"'>"+(fr ? money(fr) : "—")+"</td>" +
+              "<td class='num' rowspan='"+n+"'>"+money(paid)+"</td>" +
+              "<td class='num' rowspan='"+n+"'>"+
+                (rest>0.009 ? "<span class='pill due'>"+money(rest)+"</span>"
+                            : "<span class='pill'>خالص</span>")+"</td>" +
+              "<td rowspan='"+n+"'><button class='del' style='color:var(--teal)' data-edit='purchases|"+h.id+"'>تعديل</button></td>" +
+              "<td rowspan='"+n+"'><button class='del' data-del='purchases' data-id='"+h.id+"'>حذف</button></td>"
+            : "") +
+          "</tr>");
+      });
+    });
+
+    table("t-purch",
+      ["التاريخ","المورد","الصنف","القطع","تكلفة القطعة","قيمة البضاعة","النقل","المدفوع","المتبقي","",""],
+      rows, "مفيش مشتريات لسه. سجّل أول فاتورة عشان يبقى عندك مخزون تبيع منه.");
   }
 
   function cashLabel(t){
@@ -3358,6 +3624,10 @@
       if(Number(p.paid)||0)
         L.push({d:p.date, at:p.at, t:"دفع لمورد", who:partyName(p.partyId), kind:"دفع",
           note:"شراء "+itemName(p.itemId), inn:0, out:Number(p.paid)||0, src:"شراء"});
+      if(pFreight(p))
+        L.push({d:p.date, at:p.at, t:"نقل بضاعة", who:"نقل وتوصيل", kind:"مصروف",
+          note:"شحنة "+partyName(p.partyId)+" · "+itemName(p.itemId),
+          inn:0, out:pFreight(p), src:"شراء"});
     });
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
@@ -3525,13 +3795,16 @@
     var rows = variantsOf(it.id).map(function(v){
       var st = stockOfV(it.id,v.color,v.size), rs = reservedOfV(it.id,v.color,v.size);
       var label = vLabel(v.color, v.size) || "بدون لون/مقاس";
+      var ck = esc(codeKey(v.color, v.size));
       return "<tr><td class='wide'>"+esc(label)+"</td>"+
+        "<td><input class='vcode' data-vcode=\""+ck+"\" value=\""+esc(vCode(it.id,v.color,v.size))+"\" "+
+          "placeholder='—' autocomplete='off' dir='ltr'></td>"+
         "<td class='num "+(st<=0?"v-due":"")+"'>"+qty(st)+"</td>"+
         "<td class='num'>"+(rs?"<span class='pill due'>"+qty(rs)+"</span>":"—")+"</td>"+
         "<td class='num'>"+qty(st-rs)+"</td>"+
         "<td class='num'>"+money(avgCostV(it.id,v.color,v.size))+"</td></tr>";
     });
-    table("t-vars", ["اللون / المقاس","الرصيد","محجوز","متاح","متوسط التكلفة"], rows, "");
+    table("t-vars", ["اللون / المقاس","الكود","الرصيد","محجوز","متاح","متوسط التكلفة"], rows, "");
   }
 
   var offersFor = null;
@@ -3585,7 +3858,7 @@
       lines.push({d:s.date, t:(s.no?"أوردر #"+s.no+" — ":"")+itemsLabel(s)+(shipIn(s)?" + شحن":""),
         dr:saleTotal(s)+shipIn(s), cr:Number(s.paid)||0});
     });
-    live("purchases").forEach(function(x){ if(x.partyId===p.id) lines.push({d:x.date,t:"شراء "+itemName(x.itemId),dr:Number(x.paid)||0,cr:purchTotal(x)}); });
+    live("purchases").forEach(function(x){ if(x.partyId===p.id) lines.push({d:x.date,t:"شراء "+itemName(x.itemId),dr:Number(x.paid)||0,cr:goodsTotal(x)}); });
     live("cash").forEach(function(c){
       if(c.partyId!==p.id) return;
       if(c.type==="in") lines.push({d:c.date,t:"تحصيل نقدي",dr:0,cr:Number(c.amount)||0});
@@ -3640,7 +3913,6 @@
     var customers = live("parties").filter(function(p){return p.type==="customer";});
     var suppliers = live("parties").filter(function(p){return p.type==="supplier";});
     opts(suppliers, "p-party", "اختر مورد");
-    opts(live("items"), "p-item", "اختر صنف");
     // المحافظات
     var gv = document.getElementById("pt-gov");
     if(gv && !gv.options.length){
@@ -3850,7 +4122,7 @@
     editing[list] = null;
     if(list === "items") showImgPreview("");
     document.getElementById(EDIT_UI[list].form).reset();
-    if(list==="purchases") document.getElementById("p-date").value = today();
+    if(list==="purchases"){ pdraft = newPDraft(); clearPOver(); syncPHead(); renderPLines(); }
     if(list==="cash"){ document.getElementById("c-date").value = today(); fillSelects(); }
     setEditUI(list);
   }
@@ -3874,9 +4146,24 @@
       g("pt-phone").value=rec.phone||""; g("pt-gov").value=rec.gov||"";
       g("pt-address").value=rec.address||""; g("pt-fb").value=rec.fb||""; g("pt-note").value=rec.note||""; }
     if(list==="purchases"){
-      g("p-date").value=rec.date||today(); g("p-party").value=rec.partyId||""; g("p-item").value=rec.itemId||"";
-      fillVariantSelects("p", rec.itemId, {color:rec.color||"", size:rec.size||""});
-      g("p-qty").value=rec.qty||""; g("p-cost").value=rec.cost||""; g("p-paid").value=rec.paid||0; g("p-note").value=rec.note||"";
+      // الفاتورة كلها بترجع للدرج، مش السطر اللي دوست عليه بس
+      var grp = rec.batchId
+        ? live("purchases").filter(function(x){ return x.batchId === rec.batchId; })
+                           .sort(function(a,b){ return (a.at||0) - (b.at||0); })
+        : [rec];
+      pdraft = {
+        date: rec.date || today(), partyId: rec.partyId || "", inv: rec.inv || "",
+        freight: grp.reduce(function(a,x){ return a + pFreight(x); }, 0),
+        paid:    grp.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0),
+        note: rec.note || "", batchId: rec.batchId || "",
+        lines: grp.map(function(x){
+          return { itemId:x.itemId||"", color:x.color||"", size:x.size||"",
+                   packName:pPackName(x), packs:pPacks(x), packQty:pPackQty(x), packCost:pPackCost(x) };
+        })
+      };
+      // فاتورة قديمة من غير batchId: نديها واحد عشان التعديل يفضل وحدة واحدة
+      if(!pdraft.batchId){ pdraft.batchId = rec.batchId = uid(); }
+      clearPOver(); syncPHead(); renderPLines();
     }
     if(list==="cash"){
       g("c-date").value=rec.date||today(); g("c-type").value=rec.type||"in"; fillSelects();
@@ -3964,7 +4251,7 @@
     it.at = Date.now(); it.editedBy = me || "غير محدد";
     renderAll();
     lineRows().forEach(function(row){ fillRowVariants(row); });
-    fillVariantSelects("p", document.getElementById("p-item").value);
+    if(pdraft && openEntryKey === "purchases") renderPLines();
     if(editing.items === it.id){
       document.getElementById("i-colors").value = it.colors || "";
       document.getElementById("i-sizes").value  = it.sizes  || "";
@@ -4002,11 +4289,6 @@
       fb:document.getElementById("pt-fb").value.trim(),
       note:document.getElementById("pt-note").value.trim() }, form, "اتضاف الاسم");
     renderAll();
-  });
-
-  // قوايم اللون والمقاس في المشتريات
-  document.getElementById("p-item").addEventListener("change", function(){
-    fillVariantSelects("p", this.value);
   });
 
   /* ================= تشغيل سطر الإدخال ================= */
@@ -4326,29 +4608,152 @@
     saveSoon("parties");
   });
 
-  bind("f-purch","b-purch", function(form){
-    var fields = {
-      date: document.getElementById("p-date").value || today(),
-      partyId: document.getElementById("p-party").value,
-      itemId: document.getElementById("p-item").value,
-      color: document.getElementById("p-color").value,
-      size: document.getElementById("p-size").value,
-      qty: Number(document.getElementById("p-qty").value)||0,
-      cost: Number(document.getElementById("p-cost").value)||0,
-      paid: Number(document.getElementById("p-paid").value)||0,
-      note: document.getElementById("p-note").value.trim()
-    };
-    if(!fields.partyId || !fields.itemId || !fields.qty){ toast("اختر المورد والصنف والكمية"); return; }
-    var missP = variantMissing(fields.itemId, fields.color, fields.size);
-    if(missP){
-      toast(missP);
-      document.getElementById(listOf(db.items.find(function(x){return x.id===fields.itemId;}),"colors").length
-        && !fields.color ? "p-color" : "p-size").focus();
-      return;
+  /* ---------- حفظ فاتورة الشراء ---------- */
+  function readPHead(){
+    pdraft.date    = document.getElementById("p-date").value || today();
+    pdraft.partyId = document.getElementById("p-party").value;
+    pdraft.inv     = document.getElementById("p-inv").value.trim();
+    pdraft.freight = Number(document.getElementById("p-freight").value)||0;
+    pdraft.paid    = Number(document.getElementById("p-paid").value)||0;
+    pdraft.note    = document.getElementById("p-note").value.trim();
+  }
+
+  bind("f-purch","b-purch", function(){
+    if(!pdraft) return;
+    readPHead();
+    if(!guardLock(pdraft.date, "الشراء")) return;
+    if(!pdraft.partyId){ toast("اختر المورد"); return; }
+
+    var live_ = pdraft.lines.filter(function(l){ return l.itemId && plQty(l) > 0; });
+    if(!live_.length){ toast("اكتب صنف وكمية على الأقل"); return; }
+    for(var i = 0; i < live_.length; i++){
+      var miss = variantMissing(live_[i].itemId, live_[i].color, live_[i].size);
+      if(miss){ toast(itemName(live_[i].itemId) + ": " + miss); return; }
+      if(!(Number(live_[i].packCost) > 0)){
+        toast(itemName(live_[i].itemId) + ": اكتب سعر الوحدة"); return;
+      }
     }
-    commit("purchases", fields, form, "اتسجّل الشراء");
-    document.getElementById("p-date").value = firstOpenDate();
+
+    var goods = live_.reduce(function(a,l){ return a + plGoods(l); }, 0);
+    var forced = document.getElementById("p-force").checked;
+    if(!forced){
+      if(pdraft.paid > goods + 0.009){
+        pOverMsg("<strong>المدفوع أكبر من قيمة البضاعة.</strong> الفاتورة بـ " + money(goods) +
+          " وإنت كاتب مدفوع " + money(pdraft.paid) + ". لو ده مقصود (دفعة مقدمة لشحنة جاية) " +
+          "أكّد تحت، ولو غلطة عدّل الرقم. <br>ملاحظة: مصاريف النقل ليها خانة لوحدها — " +
+          "متضفهاش على المدفوع للمورد.");
+        toast("المدفوع أكبر من الفاتورة"); return;
+      }
+      var out = pdraft.paid + pdraft.freight, bal = cashBoxForPurch();
+      if(out > bal + 0.009){
+        pOverMsg("<strong>الخزنة فيها " + money(bal) + " بس</strong> وهيخرج منها " + money(out) +
+          (pdraft.freight ? " (" + money(pdraft.paid) + " للمورد + " + money(pdraft.freight) + " نقل)" : "") +
+          ". " + (bal <= 0.009 && !totalCapital()
+            ? "سجّل رأس المال الأول من تبويب «رأس المال» — هو اللي بتشتري بيه."
+            : "قلّل المدفوع وسيب الباقي دَين على نفسك للمورد، أو حصّل من العملاء الأول."));
+        toast("المبلغ أكبر من رصيد الخزنة"); return;
+      }
+    }
+
+    var frShares   = allocByValue(pdraft.freight, live_);
+    var paidShares = allocByValue(pdraft.paid,    live_);
+    var batchId = pdraft.batchId || uid();
+    var old = pdraft.batchId
+      ? live("purchases").filter(function(r){ return r.batchId === pdraft.batchId; })
+                         .sort(function(a,b){ return (a.at||0) - (b.at||0); })
+      : [];
+    var now = Date.now();
+
+    live_.forEach(function(l, i){
+      var q = plQty(l), g = plGoods(l);
+      var f = {
+        date: pdraft.date, partyId: pdraft.partyId, inv: pdraft.inv,
+        itemId: l.itemId, color: l.color||"", size: l.size||"",
+        packName: (l.packName||"").trim(), packs: Number(l.packs)||0,
+        packQty: plPackQty(l), packCost: Number(l.packCost)||0,
+        freight: frShares[i], paid: paidShares[i],
+        qty: q, cost: (g + frShares[i]) / q,          // تكلفة القطعة واصلة المخزن
+        note: pdraft.note, batchId: batchId
+      };
+      var rec = old[i];
+      if(rec){
+        Object.keys(f).forEach(function(k){ rec[k] = f[k]; });
+        delete rec.deleted;
+        rec.editedBy = me || "غير محدد"; rec.at = now;
+      } else {
+        db.purchases.push(stamp(f));
+      }
+    });
+    // أسطر اتشالت في التعديل
+    old.slice(live_.length).forEach(function(r){ r.deleted = true; r.at = now; });
+
+    var wasEdit = !!pdraft.batchId;
+    editing.purchases = null; setEditUI("purchases");
+    saveSoon("purchases");
+    pdraft = newPDraft();
+    renderPLines(); syncPHead();
+    clearPOver(); closeEntry();
     renderAll();
+    toast(wasEdit ? "اتعدّلت الفاتورة" : ("اتسجّلت الفاتورة (" + qty(live_.length) + " صنف)"));
+  });
+
+  // بيكتب رأس الفاتورة في الفورم من المسوّدة
+  function syncPHead(){
+    document.getElementById("p-date").value    = pdraft.date || firstOpenDate();
+    document.getElementById("p-party").value   = pdraft.partyId || "";
+    document.getElementById("p-inv").value     = pdraft.inv || "";
+    document.getElementById("p-freight").value = pdraft.freight || 0;
+    document.getElementById("p-paid").value    = pdraft.paid || 0;
+    document.getElementById("p-note").value    = pdraft.note || "";
+  }
+
+  /* ---------- أحداث أسطر الفاتورة ---------- */
+  document.getElementById("b-addpline").addEventListener("click", function(){
+    pdraft.lines.push(newPLine());
+    renderPLines();
+    var last = document.querySelector("#p-lines .lrow:last-child select[data-pf='itemId']");
+    if(last) last.focus();
+  });
+  document.getElementById("p-lines").addEventListener("click", function(e){
+    var rm = e.target.closest("[data-rmpline]");
+    if(!rm) return;
+    pdraft.lines.splice(Number(rm.dataset.rmpline), 1);
+    if(!pdraft.lines.length) pdraft.lines.push(newPLine());
+    renderPLines();
+  });
+  function pLineEdit(e){
+    var el = e.target.closest("[data-pli][data-pf]");
+    if(!el) return;
+    var l = pdraft.lines[Number(el.dataset.pli)];
+    if(!l) return;
+    var f = el.dataset.pf;
+    l[f] = el.value;
+    if(f === "itemId"){ l.color = ""; l.size = ""; renderPLines(); }
+    else if(f === "color" || f === "size") renderPLines();
+    else renderPCalc();
+  }
+  // كود التركيبة بيتحفظ وانت بتكتب
+  document.getElementById("t-vars").addEventListener("change", function(e){
+    var el = e.target.closest("[data-vcode]");
+    if(!el || !varsFor) return;
+    var parts = el.dataset.vcode.split("|");
+    setVCode(varsFor, parts[0], parts[1], el.value);
+    var it = db.items.find(function(x){ return x.id===varsFor; });
+    if(it){ it.at = Date.now(); it.editedBy = me || "غير محدد"; }
+    saveSoon("items");
+    if(pdraft && openEntryKey === "purchases") renderPLines();
+    renderPurch();
+    toast(el.value.trim() ? "اتسجّل الكود" : "اتشال الكود");
+  });
+
+  document.getElementById("p-lines").addEventListener("input", pLineEdit);
+  document.getElementById("p-lines").addEventListener("change", pLineEdit);
+  ["p-freight","p-paid"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", function(){
+      pdraft.freight = Number(document.getElementById("p-freight").value)||0;
+      pdraft.paid    = Number(document.getElementById("p-paid").value)||0;
+      clearPOver(); renderPCalc();
+    });
   });
 
   document.getElementById("c-type").addEventListener("change", fillSelects);
@@ -4545,10 +4950,17 @@
     if(list === "cash" && rec.distId){
       group = live("cash").filter(function(x){ return x.distId === rec.distId; });
     }
+    // الفاتورة كذا سجل بنفس batchId — حذف سطر لوحده بيسيب النقل والمدفوع مقسومين غلط
+    if(list === "purchases" && rec.batchId){
+      group = live("purchases").filter(function(x){ return x.batchId === rec.batchId; });
+    }
     var now = Date.now();
     group.forEach(function(r){ r.deleted = true; r.at = now; });
     renderAll(); saveSoon(list);
-    toast(group.length > 1 ? ("اتحذف التوزيع كامل (" + qty(group.length) + " حركة)") : "اتحذف");
+    toast(group.length > 1
+      ? (list === "purchases" ? "اتحذفت الفاتورة كاملة (" + qty(group.length) + " صنف)"
+                              : "اتحذف التوزيع كامل (" + qty(group.length) + " حركة)")
+      : "اتحذف");
   });
 
   document.getElementById("me").addEventListener("change", async function(){
@@ -5375,6 +5787,11 @@
     if(t) t.textContent = (key !== "capital" && editing[key]) ? cfg.edit : cfg.title;
 
     if(key === "cash") clearOver();
+    if(key === "purchases"){
+      if(!pdraft) pdraft = newPDraft();
+      if(!editing.purchases && !pdraft.batchId) pdraft.date = firstOpenDate();
+      clearPOver(); syncPHead(); renderPLines();
+    }
     box.classList.add("as-drawer");
     box.hidden = false;
     var sc = entryScrim(); sc.hidden = false;
@@ -5421,10 +5838,11 @@
     var cash = cashBox();
     var html = "";
     if(key === "purchases"){
-      var paid = Number((document.getElementById("p-paid")||{}).value)||0;
+      var out = (Number((document.getElementById("p-paid")||{}).value)||0) +
+                (Number((document.getElementById("p-freight")||{}).value)||0);
       html = "<span>الخزنة</span> <b>" + esc(money(cash)) + "</b>" +
-        (paid ? " <span class='arrow'>←</span> <b class='" + (cash-paid < 0 ? "v-due" : "") + "'>" +
-          esc(money(cash - paid)) + "</b>" : "");
+        (out ? " <span class='arrow'>←</span> <b class='" + (cash-out < 0 ? "v-due" : "") + "'>" +
+          esc(money(cash - out)) + "</b>" : "");
     } else if(key === "cash"){
       var t = (document.getElementById("c-type")||{}).value;
       var a = Number((document.getElementById("c-amount")||{}).value)||0;
