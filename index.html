@@ -336,6 +336,21 @@
     border-top:1px dashed var(--line);padding-top:8px}
   .lrow-foot .ltot{font-size:.88rem;font-weight:600;margin-inline-end:auto}
   .lrow-foot .ltot em{font-style:normal;font-size:.72rem;color:var(--ink-soft);font-weight:400}
+  .lmix{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 10px;display:grid;gap:7px}
+  .lmix-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    font-size:.74rem;color:var(--ink-soft);font-weight:500}
+  .lmix-head button{background:none;border:1px dashed var(--line);border-radius:7px;
+    color:var(--teal);font:inherit;font-size:.76rem;padding:3px 9px;cursor:pointer}
+  .lmix-head button:hover{border-color:var(--teal);border-style:solid}
+  .lmix-row{display:flex;gap:6px;align-items:center}
+  .lmix-row select,.lmix-row input{flex:1;min-width:0;padding:6px 8px;font-size:.83rem}
+  .lmix-row input{max-width:84px}
+  .lmix-row .mcode{font-size:.72rem;color:var(--ink-soft);font-family:ui-monospace,monospace;
+    min-width:52px;text-align:center}
+  .lmix-row .rm{flex:0 0 auto;font-size:1.05rem;line-height:1;padding:2px 6px}
+  .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
+  .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
+  .lmix-sum b{color:var(--ink);font-weight:600}
   .vcode{width:100%;min-width:92px;padding:5px 8px;font-size:.82rem;font-family:ui-monospace,monospace}
   .ptot{background:var(--teal-soft);border-radius:10px;padding:11px 13px;display:grid;gap:5px;font-size:.85rem}
   .ptot div{display:flex;justify-content:space-between;gap:12px}
@@ -918,7 +933,7 @@
     <form class="grid" id="f-party">
       <div><label for="pt-name">الاسم</label><input id="pt-name" required autocomplete="off"></div>
       <div><label for="pt-type">النوع</label>
-        <select id="pt-type"><option value="customer">عميل</option><option value="supplier">مورد</option><option value="partner">شريك</option></select>
+        <select id="pt-type"><option value="customer">عميل</option><option value="supplier">مورد</option></select>
       </div>
       <div><label for="pt-phone">التليفون</label><input id="pt-phone" autocomplete="off"></div>
       <div><label for="pt-gov">المحافظة</label><select id="pt-gov"></select></div>
@@ -1396,8 +1411,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "26";
+  var VERSION = "27";
   var CHANGELOG = [
+    { v:"27", d:"2026-09-23", items:[
+      "الكرتونة الواحدة بقى ليها تفصيل بالمقاس واللون — سعر واحد والسيستم يقسّمه",
+      "«قطع في الواحدة» بتتحسب من التفصيل بدل ما تكتبها",
+      "الشريك اتشال من شاشة العملاء والموردين — مكانه في رأس المال",
+      "«خلصان» اتشالت من قايمة الأصناف في الشراء (مالهاش لازمة هناك)",
+      "تنبيه لو نفس التركيبة اتكرّرت في نفس السطر"
+    ]},
     { v:"26", d:"2026-09-23", items:[
       "مرتجع للمورد: ترجّع بضاعة معيبة والمخزون يقل لوحده",
       "الفلوس ترجع كاش للخزنة أو تتخصم من حساب المورد",
@@ -3076,8 +3098,10 @@
       return '<option value="'+esc(o.v)+'"'+(String(o.v)===String(sel)?' selected':'')+'>'+esc(o.t)+'</option>';
     }).join("");
   }
-  function itemOptionsHTML(sel){
+  // في البيع مهم تعرف المتاح. في الشراء الرقم ده مالوش لازمة وبيلخبط.
+  function itemOptionsHTML(sel, plain){
     return optsHTML(live("items").map(function(o){
+      if(plain) return { v:o.id, t:o.name };
       var st = stockOf(o.id);
       return { v:o.id, t:o.name + (st > 0 ? " — متاح " + qty(st) : " — خلصان") };
     }), sel, "اختر صنف");
@@ -3436,16 +3460,37 @@
   // كل سجل شايل نصيبه من النقل جوّه cost — فالمخزون والربح شغالين زي ما هما.
   var pdraft = null;
 
+  // السطر = وحدة شراء واحدة بسعر واحد (كرتونة مثلاً).
+  // mix = اللي جوّه الشحنة بالمقاسات والألوان. المورد بيسعّر الكرتونة مش القطعة،
+  // فالسعر بيتكتب مرة واحدة والسيستم بيقسّمه على القطع اللي جوّاها.
   function newPLine(){
-    return { itemId:"", color:"", size:"", packName:"", packs:"", packQty:1, packCost:"" };
+    return { itemId:"", packName:"", packs:"", packQty:1, packCost:"", mix:[] };
+  }
+  function newMix(){ return { color:"", size:"", qty:"" }; }
+  function itemHasVars(itemId){
+    return hasVariants(db.items.find(function(x){ return x.id===itemId; }));
+  }
+  function mixPieces(l){
+    return (l.mix||[]).reduce(function(a,m){ return a + (Number(m.qty)||0); }, 0);
   }
   function newPDraft(){
     return { date:firstOpenDate(), partyId:"", inv:"", freight:0, paid:0, note:"",
              lines:[newPLine()], batchId:"" };
   }
   function plPackQty(l){ var n = Number(l.packQty)||0; return n > 0 ? n : 1; }
-  function plQty(l){ return (Number(l.packs)||0) * plPackQty(l); }     // عدد القطع
+  // عدد القطع: من تفصيل المقاسات لو موجود، وإلا من «قطع في الواحدة»
+  function plQty(l){
+    if(itemHasVars(l.itemId)) return mixPieces(l);
+    return (Number(l.packs)||0) * plPackQty(l);
+  }
   function plGoods(l){ return (Number(l.packs)||0) * (Number(l.packCost)||0); }
+  // السطر اللي فيه تفصيل بيتحوّل لسجل لكل تركيبة
+  function plParts(l){
+    if(!itemHasVars(l.itemId))
+      return [{ color:"", size:"", qty: plQty(l) }];
+    return (l.mix||[]).filter(function(m){ return (Number(m.qty)||0) > 0; })
+      .map(function(m){ return { color:m.color||"", size:m.size||"", qty:Number(m.qty)||0 }; });
+  }
   function pdGoods(){ return pdraft.lines.reduce(function(a,l){ return a + plGoods(l); }, 0); }
 
   // توزيع مبلغ على الأسطر بنسبة قيمة كل سطر، والفرق بيروح لأكبر سطر
@@ -3467,33 +3512,55 @@
   function pLineHTML(l, i){
     var it = db.items.find(function(x){ return x.id===l.itemId; });
     var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
-    var pick = function(list, sel, f){
-      return "<select data-pli='"+i+"' data-pf='"+f+"'>" +
-        optsHTML(list.map(function(v){ return {v:v,t:v}; }), sel, "اختر") + "</select>";
-    };
-    var dash = "<select disabled><option>—</option></select>";
-    var code = l.itemId ? vCode(l.itemId, l.color, l.size) : "";
+    var vars = cs.length > 0 || zs.length > 0;
+    var unit = (l.packName||"").trim() || "وحدة";
+    var pieces = plQty(l), packs = Number(l.packs)||0;
+
+    var mixHTML = "";
+    if(l.itemId && vars){
+      var rows = (l.mix||[]).map(function(m, j){
+        var code = vCode(l.itemId, m.color, m.size);
+        var sel = function(list, cur, f){
+          if(!list.length) return "";     // الصنف مالوش الخاصية دي — مفيش داعي لخانة فاضية
+          return "<select data-pli='"+i+"' data-mi='"+j+"' data-mf='"+f+"'>" +
+            optsHTML(list.map(function(v){ return {v:v,t:v}; }), cur, "اختر") + "</select>";
+        };
+        return "<div class='lmix-row'>" +
+          sel(cs, m.color, "color") + sel(zs, m.size, "size") +
+          "<input type='number' step='any' min='0' placeholder='عدد' " +
+            "data-pli='"+i+"' data-mi='"+j+"' data-mf='qty' value='"+esc(m.qty)+"'>" +
+          "<span class='mcode'>"+(code ? esc(code) : "")+"</span>" +
+          "<button type='button' class='rm' data-rmmix='"+i+"|"+j+"' aria-label='شيل'>&times;</button>" +
+          "</div>";
+      }).join("");
+      var need = packs > 0 && Number(l.packQty) > 0 ? packs * Number(l.packQty) : 0;
+      mixHTML =
+        "<div class='lmix'>" +
+          "<div class='lmix-head'><span>اللي جوّه الـ"+esc(unit)+" — بالمقاس واللون</span>" +
+            "<button type='button' data-addmix='"+i+"'>+ سطر</button></div>" +
+          (rows || "<p class='lmix-empty'>ضيف المقاسات والألوان اللي في الشحنة. السعر بيتكتب مرة واحدة فوق والسيستم بيقسّمه على القطع دي.</p>") +
+          (rows ? "<div class='lmix-sum'>إجمالي القطع <b>"+qty(pieces)+"</b></div>" : "") +
+        "</div>";
+    }
+
     return "<div class='lrow' data-pli='"+i+"'>" +
       "<div class='lrow-top'>" +
         "<div class='grow'><label for='pl-item-"+i+"'>الصنف</label>" +
-          "<select id='pl-item-"+i+"' data-pli='"+i+"' data-pf='itemId'>"+itemOptionsHTML(l.itemId)+"</select></div>" +
-        "<div><label>اللون</label>" + (cs.length ? pick(cs, l.color, "color") : dash) + "</div>" +
-        "<div><label>المقاس</label>" + (zs.length ? pick(zs, l.size, "size") : dash) + "</div>" +
-      "</div>" +
-      "<div class='lrow-top'>" +
+          "<select id='pl-item-"+i+"' data-pli='"+i+"' data-pf='itemId'>"+itemOptionsHTML(l.itemId, true)+"</select></div>" +
         "<div><label for='pl-pn-"+i+"'>بشتري بالـ</label>" +
           "<input id='pl-pn-"+i+"' list='pack-list' data-pli='"+i+"' data-pf='packName' " +
           "placeholder='قطعة' autocomplete='off' value='"+esc(l.packName)+"'></div>" +
         "<div><label for='pl-packs-"+i+"'>العدد</label>" +
           "<input id='pl-packs-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packs' value='"+esc(l.packs)+"'></div>" +
-        "<div><label for='pl-pq-"+i+"'>قطع في الواحدة</label>" +
-          "<input id='pl-pq-"+i+"' type='number' step='any' min='1' data-pli='"+i+"' data-pf='packQty' value='"+esc(l.packQty)+"'></div>" +
+        (vars && l.itemId ? "" :
+          "<div><label for='pl-pq-"+i+"'>قطع في الواحدة</label>" +
+          "<input id='pl-pq-"+i+"' type='number' step='any' min='1' data-pli='"+i+"' data-pf='packQty' value='"+esc(l.packQty)+"'></div>") +
         "<div><label for='pl-pc-"+i+"'>سعر الواحدة</label>" +
           "<input id='pl-pc-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packCost' value='"+esc(l.packCost)+"'></div>" +
       "</div>" +
+      mixHTML +
       "<div class='lrow-foot'>" +
         "<span class='lcost' data-pli='"+i+"'>—</span>" +
-        (code ? "<span class='pill'>"+esc(code)+"</span>" : "") +
         (pdraft.lines.length > 1 ? "<button type='button' class='rm' data-rmpline='"+i+"'>شيل السطر</button>" : "") +
       "</div></div>";
   }
@@ -3511,24 +3578,43 @@
     pdraft.lines.forEach(function(l, i){
       var el = document.querySelector("#p-lines .lcost[data-pli='"+i+"']");
       if(!el) return;
-      var q = plQty(l), g = plGoods(l), pq = plPackQty(l);
-      if(!q || !g){ el.textContent = "—"; return; }
+      var q = plQty(l), g = plGoods(l), packs = Number(l.packs)||0;
       var unitName = (l.packName || "").trim() || "قطعة";
+      if(!g){ el.textContent = "—"; return; }
+      if(!q){
+        el.innerHTML = itemHasVars(l.itemId)
+          ? "<span class='v-due'>اكتب المقاسات والألوان اللي جوّه الشحنة الأول</span>"
+          : "—";
+        return;
+      }
       var base = g / q, share = fr[i] / q, landed = (g + fr[i]) / q;
-      var txt = qty(Number(l.packs)||0) + " " + esc(unitName) + " × " + money(Number(l.packCost)||0);
-      if(pq > 1) txt += " · " + qty(pq) + " قطعة في الـ" + esc(unitName) +
-                        " = <b>" + qty(q) + " قطعة</b> بـ " + money(base) + " للقطعة";
-      if(fr[i]) txt += " · نقل " + money(share) + " للقطعة";
+      var txt = qty(packs) + " " + esc(unitName) + " × " + money(Number(l.packCost)||0) +
+        " · <b>" + qty(q) + " قطعة</b>";
+      if(packs > 0 && q % packs === 0 && q / packs > 1)
+        txt += " (" + qty(q/packs) + " في الـ" + esc(unitName) + ")";
+      txt += " · " + money(base) + " للقطعة";
+      if(fr[i]) txt += " + نقل " + money(share);
       txt += " → تكلفة القطعة <b>" + money(landed) + "</b>";
-      var prev = l.itemId ? avgCostV(l.itemId, l.color, l.size) : 0;
-      var st   = l.itemId ? stockOfV(l.itemId, l.color, l.size) : 0;
-      if(st > 0 && prev > 0 && landed > 0){
-        var ratio = landed / prev;
+      // تحذير الفرق الكبير: على أعلى متوسط موجود في تركيبات السطر
+      var worst = null;
+      plParts(l).forEach(function(pt){
+        if(stockOfV(l.itemId, pt.color, pt.size) <= 0) return;
+        var prev = avgCostV(l.itemId, pt.color, pt.size);
+        if(prev > 0 && (!worst || Math.abs(Math.log(landed/prev)) > Math.abs(Math.log(landed/worst))))
+          worst = prev;
+      });
+      if(worst && landed > 0){
+        var ratio = landed / worst;
         if(ratio > 1.75 || ratio < 0.57)
-          txt += "<br><span class='v-due'>⚠ متوسط تكلفتها الحالي " + money(prev) +
+          txt += "<br><span class='v-due'>⚠ متوسط تكلفتها الحالي " + money(worst) +
                  " — الفرق كبير، راجع سعر الوحدة وعدد القطع</span>";
       }
       el.innerHTML = txt;
+    });
+    // مجموع القطع جوّه كل سطر بيتحدّث وانت بتكتب الكميات
+    pdraft.lines.forEach(function(l, i){
+      var sum = document.querySelector("#p-lines .lrow[data-pli='"+i+"'] .lmix-sum");
+      if(sum) sum.innerHTML = "إجمالي القطع <b>" + qty(plQty(l)) + "</b>";
     });
 
     var goods = pdGoods(), freight = Number(pdraft.freight)||0;
@@ -3701,6 +3787,9 @@
     groups.forEach(function(g){
       var n = g.rows.length, h = g.head;
       var isRet = isPRet(h);
+      var nItems = Object.keys(g.rows.reduce(function(a,x){ a[x.itemId]=1; return a; }, {})).length;
+      var gLabel = nItems > 1 ? qty(nItems) + " أصناف · " + qty(n) + " تركيبة"
+                              : qty(n) + " تركيبة";
       var goods = g.rows.reduce(function(a,x){ return a + goodsTotal(x); }, 0);
       var fr    = g.rows.reduce(function(a,x){ return a + pFreight(x); }, 0);
       var paid  = g.rows.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
@@ -3721,7 +3810,7 @@
                        : (h.inv ? "<span class='sub'>فاتورة "+esc(h.inv)+"</span>" : ""))+"</td>" +
               "<td class='wide' rowspan='"+n+"'>"+esc(partyName(h.partyId))+
                 (isRet && h.note ? "<span class='sub'>"+esc(h.note)+"</span>"
-                                 : (n > 1 ? "<span class='sub'>"+qty(n)+" أصناف</span>" : ""))+"</td>"
+                                 : (n > 1 ? "<span class='sub'>"+esc(gLabel)+"</span>" : ""))+"</td>"
             : "") +
           "<td class='wide'>"+esc(itemName(p.itemId))+
             (vl ? " <span class='pill'>"+esc(vl)+"</span>" : "")+
@@ -3999,7 +4088,9 @@
   }
 
   function renderParties(){
-    var rows = live("parties").map(function(p){
+    // الشركاء ليهم شاشتهم في «رأس المال» — مبيظهروش هنا عشان الجدول ده
+    // للعملاء والموردين بس، ورصيد الشريك حاجة تانية خالص (حقوق ملكية)
+    var rows = live("parties").filter(function(p){ return !isPartner(p); }).map(function(p){
       var b = partyBalance(p.id);
       var txt = Math.abs(b)<0.009 ? "<span class='pill'>متسوي</span>"
         : (b>0 ? "<span class='pill due'>ليك "+money(b)+"</span>" : "<span class='pill due'>عليك "+money(-b)+"</span>");
@@ -4322,14 +4413,29 @@
         ? live("purchases").filter(function(x){ return x.batchId === rec.batchId; })
                            .sort(function(a,b){ return (a.at||0) - (b.at||0); })
         : [rec];
+      // السجلات بترجع أسطر: اللي بنفس lineId سطر واحد بتفصيل مقاساته
+      var byLine = {}, order = [];
+      grp.forEach(function(x){
+        var k = x.lineId || ("solo:" + x.id);
+        if(!byLine[k]){
+          byLine[k] = { itemId:x.itemId||"", packName:pPackName(x), packs:pPacks(x),
+                        packQty:pPackQty(x), packCost:pPackCost(x),
+                        lineId: x.lineId || "", mix:[] };
+          order.push(k);
+        }
+        byLine[k].mix.push({ color:x.color||"", size:x.size||"", qty:Number(x.qty)||0 });
+      });
       pdraft = {
         date: rec.date || today(), partyId: rec.partyId || "", inv: rec.inv || "",
         freight: grp.reduce(function(a,x){ return a + pFreight(x); }, 0),
         paid:    grp.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0),
         note: rec.note || "", batchId: rec.batchId || "",
-        lines: grp.map(function(x){
-          return { itemId:x.itemId||"", color:x.color||"", size:x.size||"",
-                   packName:pPackName(x), packs:pPacks(x), packQty:pPackQty(x), packCost:pPackCost(x) };
+        lines: order.map(function(k){
+          var l = byLine[k];
+          // صنف من غير ألوان ولا مقاسات: بيرجع بـ«قطع في الواحدة» زي ما اتكتب
+          if(!itemHasVars(l.itemId)) l.mix = [];
+          else l.packQty = 1;      // بتتحسب من التفصيل وقت الحفظ
+          return l;
         })
       };
       // فاتورة قديمة من غير batchId: نديها واحد عشان التعديل يفضل وحدة واحدة
@@ -4795,13 +4901,35 @@
     if(!guardLock(pdraft.date, "الشراء")) return;
     if(!pdraft.partyId){ toast("اختر المورد"); return; }
 
+    // سطر ناقص التفصيل: الصنف متختار والسعر مكتوب بس مفيش مقاسات
+    var half = pdraft.lines.filter(function(l){
+      return l.itemId && plGoods(l) > 0 && plQty(l) <= 0;
+    });
+    if(half.length){
+      toast(itemName(half[0].itemId) + ": اكتب المقاسات والألوان اللي جوّه الشحنة");
+      return;
+    }
     var live_ = pdraft.lines.filter(function(l){ return l.itemId && plQty(l) > 0; });
     if(!live_.length){ toast("اكتب صنف وكمية على الأقل"); return; }
     for(var i = 0; i < live_.length; i++){
-      var miss = variantMissing(live_[i].itemId, live_[i].color, live_[i].size);
-      if(miss){ toast(itemName(live_[i].itemId) + ": " + miss); return; }
       if(!(Number(live_[i].packCost) > 0)){
         toast(itemName(live_[i].itemId) + ": اكتب سعر الوحدة"); return;
+      }
+      var parts0 = plParts(live_[i]);
+      for(var j = 0; j < parts0.length; j++){
+        var miss = variantMissing(live_[i].itemId, parts0[j].color, parts0[j].size);
+        if(miss){ toast(itemName(live_[i].itemId) + ": " + miss); return; }
+      }
+      // نفس التركيبة مكرّرة في نفس السطر بتلخبط الجرد
+      var seen = {};
+      for(var k = 0; k < parts0.length; k++){
+        var kk = parts0[k].color + "|" + parts0[k].size;
+        if(seen[kk]){
+          toast(itemName(live_[i].itemId) + ": " +
+            (vLabel(parts0[k].color, parts0[k].size) || "التركيبة") + " مكرّرة — اجمعها في سطر واحد");
+          return;
+        }
+        seen[kk] = 1;
       }
     }
 
@@ -4828,6 +4956,7 @@
 
     var frShares   = allocByValue(pdraft.freight, live_);
     var paidShares = allocByValue(pdraft.paid,    live_);
+    // التقريب بيتظبط جوّه allocByValue، فمجموع الأنصبة = المكتوب بالظبط
     var batchId = pdraft.batchId || uid();
     var old = pdraft.batchId
       ? live("purchases").filter(function(r){ return r.batchId === pdraft.batchId; })
@@ -4835,18 +4964,36 @@
       : [];
     var now = Date.now();
 
+    // كل سطر بيتفكّ لسجل لكل تركيبة، وكلهم بنفس تكلفة القطعة
+    // (المورد بيسعّر الشحنة مش المقاس، فالتقسيم بالتساوي على القطع)
+    var recs = [];
     live_.forEach(function(l, i){
-      var q = plQty(l), g = plGoods(l);
-      var f = {
-        date: pdraft.date, partyId: pdraft.partyId, inv: pdraft.inv,
-        itemId: l.itemId, color: l.color||"", size: l.size||"",
-        packName: (l.packName||"").trim(), packs: Number(l.packs)||0,
-        packQty: plPackQty(l), packCost: Number(l.packCost)||0,
-        freight: frShares[i], paid: paidShares[i],
-        qty: q, cost: (g + frShares[i]) / q,          // تكلفة القطعة واصلة المخزن
-        note: pdraft.note, batchId: batchId
-      };
-      var rec = old[i];
+      var pieces = plQty(l), g = plGoods(l);
+      var unitCost = (g + frShares[i]) / pieces;
+      var lineId = l.lineId || uid();
+      l.lineId = lineId;
+      // «قطع في الواحدة» محسوبة من التفصيل — لازم تتخزّن عشان المرتجع
+      // يعرف سعر القطعة الأصلي، وعشان التعديل يرجّع نفس الأرقام
+      var packsN = Number(l.packs)||0;
+      var derivedPQ = packsN > 0 ? pieces / packsN : plPackQty(l);
+      plParts(l).forEach(function(pt){
+        var w = pt.qty / pieces;                       // نصيب التركيبة من السطر
+        recs.push({
+          date: pdraft.date, partyId: pdraft.partyId, inv: pdraft.inv,
+          itemId: l.itemId, color: pt.color, size: pt.size,
+          packName: (l.packName||"").trim(), packs: Number(l.packs)||0,
+          packQty: derivedPQ, packCost: Number(l.packCost)||0,
+          linePieces: pieces, lineId: lineId,
+          freight: frShares[i]   * w,
+          paid:    paidShares[i] * w,
+          qty: pt.qty, cost: unitCost,                 // تكلفة القطعة واصلة المخزن
+          note: pdraft.note, batchId: batchId
+        });
+      });
+    });
+
+    recs.forEach(function(f, n){
+      var rec = old[n];
       if(rec){
         Object.keys(f).forEach(function(k){ rec[k] = f[k]; });
         delete rec.deleted;
@@ -4855,8 +5002,8 @@
         db.purchases.push(stamp(f));
       }
     });
-    // أسطر اتشالت في التعديل
-    old.slice(live_.length).forEach(function(r){ r.deleted = true; r.at = now; });
+    // سجلات زيادة من قبل التعديل
+    old.slice(recs.length).forEach(function(r){ r.deleted = true; r.at = now; });
 
     var wasEdit = !!pdraft.batchId;
     editing.purchases = null; setEditUI("purchases");
@@ -4865,7 +5012,9 @@
     renderPLines(); syncPHead();
     clearPOver(); closeEntry();
     renderAll();
-    toast(wasEdit ? "اتعدّلت الفاتورة" : ("اتسجّلت الفاتورة (" + qty(live_.length) + " صنف)"));
+    toast(wasEdit ? "اتعدّلت الفاتورة"
+                  : ("اتسجّلت الفاتورة · " + qty(recs.length) + " تركيبة · " +
+                     qty(recs.reduce(function(a,x){ return a + x.qty; },0)) + " قطعة"));
   });
 
   // بيكتب رأس الفاتورة في الفورم من المسوّدة
@@ -4891,6 +5040,19 @@
     if(last) last.focus();
   });
   document.getElementById("p-lines").addEventListener("click", function(e){
+    var add = e.target.closest("[data-addmix]");
+    if(add){
+      var la = pdraft.lines[Number(add.dataset.addmix)];
+      if(la){ if(!la.mix) la.mix = []; la.mix.push(newMix()); renderPLines(); }
+      return;
+    }
+    var rmx = e.target.closest("[data-rmmix]");
+    if(rmx){
+      var pr = rmx.dataset.rmmix.split("|");
+      var lm = pdraft.lines[Number(pr[0])];
+      if(lm && lm.mix){ lm.mix.splice(Number(pr[1]), 1); renderPLines(); }
+      return;
+    }
     var rm = e.target.closest("[data-rmpline]");
     if(!rm) return;
     pdraft.lines.splice(Number(rm.dataset.rmpline), 1);
@@ -4898,14 +5060,27 @@
     renderPLines();
   });
   function pLineEdit(e){
+    var mx = e.target.closest("[data-pli][data-mi][data-mf]");
+    if(mx){
+      var lx = pdraft.lines[Number(mx.dataset.pli)];
+      var m = lx && lx.mix && lx.mix[Number(mx.dataset.mi)];
+      if(!m) return;
+      m[mx.dataset.mf] = mx.value;
+      // تغيير اللون أو المقاس بيغيّر الكود المعروض، فمحتاج إعادة رسم
+      if(mx.dataset.mf === "qty") renderPCalc(); else renderPLines();
+      return;
+    }
     var el = e.target.closest("[data-pli][data-pf]");
     if(!el) return;
     var l = pdraft.lines[Number(el.dataset.pli)];
     if(!l) return;
     var f = el.dataset.pf;
     l[f] = el.value;
-    if(f === "itemId"){ l.color = ""; l.size = ""; renderPLines(); }
-    else if(f === "color" || f === "size") renderPLines();
+    if(f === "itemId"){
+      // صنف جديد: نبدأ بسطر تفصيل واحد جاهز لو ليه ألوان أو مقاسات
+      l.mix = itemHasVars(l.itemId) ? [newMix()] : [];
+      renderPLines();
+    }
     else renderPCalc();
   }
   // كود التركيبة بيتحفظ وانت بتكتب
