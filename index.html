@@ -342,9 +342,16 @@
   .lmix-head button{background:none;border:1px dashed var(--line);border-radius:7px;
     color:var(--teal);font:inherit;font-size:.76rem;padding:3px 9px;cursor:pointer}
   .lmix-head button:hover{border-color:var(--teal);border-style:solid}
-  .lmix-cols{display:grid;gap:6px;align-items:end;font-size:.7rem;color:var(--ink-soft);
-    font-weight:500;padding-bottom:1px}
-  .lmix-row{display:grid;gap:6px;align-items:center}
+  .seg{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)}
+  .seg button{flex:1;background:none;border:none;font:inherit;font-size:.85rem;
+    padding:8px 6px;color:var(--ink-soft);cursor:pointer;transition:background .12s,color .12s}
+  .seg button+button{border-inline-start:1px solid var(--line)}
+  .seg button.on{background:var(--teal);color:#fff;font-weight:600}
+  [data-theme="dark"] .seg button.on{color:#1A141C}
+  .lmix-cols,.lmix-row{display:grid;gap:6px;
+    grid-template-columns:1.1fr 1fr 92px 58px 26px}
+  .lmix-cols{align-items:end;font-size:.7rem;color:var(--ink-soft);font-weight:500;padding-bottom:1px}
+  .lmix-row{align-items:center}
   .lmix-row select,.lmix-row input{min-width:0;width:100%;padding:6px 8px;font-size:.83rem}
   .lmix-row .mcode{font-size:.72rem;color:var(--ink-soft);font-family:ui-monospace,monospace;
     text-align:center;overflow:hidden;text-overflow:ellipsis}
@@ -780,10 +787,6 @@
   </div>
 
   <div class="tbl-wrap"><table id="t-purch"></table></div>
-  <datalist id="pack-list">
-    <option value="قطعة"></option><option value="كرتونة"></option><option value="دستة"></option>
-    <option value="شيكارة"></option><option value="باكو"></option><option value="طقم"></option>
-  </datalist>
 </section>
 
 <!-- الخزنة -->
@@ -1436,8 +1439,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "28";
+  var VERSION = "29";
   var CHANGELOG = [
+    { v:"29", d:"2026-09-23", items:[
+      "وحدة الشراء بقت اختيار واحد: قطعة أو كرتونة — مفيش وحدات تانية",
+      "تفصيل المقاسات والألوان بيظهر دايماً، حتى لو الصنف لسه ما اتعرّفتلوش",
+      "اللون والمقاس بقوا خانات كتابة حرّة، وأي جديد بيتضاف للصنف تلقائي",
+      "إصلاح: إعادة رسم الأسطر جوّه حدث الكتابة كانت بترمي خطأ في المتصفح"
+    ]},
     { v:"28", d:"2026-09-23", items:[
       "المسمّيات بتتكلم بوحدتك: كتبت «كرتونة» → «سعر الكرتونة» و«كام كرتونة؟»",
       "تفصيل الشحنة بقى له عناوين أعمدة: اللون · المقاس · عدد القطع · الكود",
@@ -3494,27 +3503,20 @@
   // mix = اللي جوّه الشحنة بالمقاسات والألوان. المورد بيسعّر الكرتونة مش القطعة،
   // فالسعر بيتكتب مرة واحدة والسيستم بيقسّمه على القطع اللي جوّاها.
   function newPLine(){
-    return { itemId:"", packName:"", packs:"", packQty:1, packCost:"", mix:[] };
+    return { itemId:"", byPack:false, packs:"", packQty:1, packCost:"", mix:[newMix()] };
   }
   function newMix(){ return { color:"", size:"", qty:"" }; }
   function itemHasVars(itemId){
     return hasVariants(db.items.find(function(x){ return x.id===itemId; }));
   }
-  /* المسمّيات بتتكلم بوحدة الشراء اللي المستخدم كتبها:
-     كتب «كرتونة» → «سعر الكرتونة» و«كام كرتونة؟». اللي بيسجّل مش لازم
-     يفهم يعني إيه «وحدة» — بيشوف الكلمة اللي هو نفسه كتبها. */
-  function withAl(u){
-    u = String(u||"").trim() || "قطعة";
-    return u.indexOf("ال") === 0 ? u : "ال" + u;
-  }
-  function packsLabel(u){ return "كام " + (String(u||"").trim() || "قطعة") + "؟"; }
-  function costLabel(u){  return "سعر " + withAl(u) + " الواحدة"; }
-  function pqLabel(u){    return "كام قطعة جوّه " + withAl(u) + "؟"; }
-  function mixTitle(u){
-    u = String(u||"").trim();
-    // «اللي جوّه القطعة» كلام مالوش معنى — الشراء بالقطعة مالوش «جوّه»
-    if(!u || u === "قطعة") return "المقاسات والألوان اللي هتشتريها";
-    return "اللي جوّه " + withAl(u) + " بالتفصيل";
+  function isByPack(l){ return !!(l && l.byPack); }
+  function unitOf(l){ return isByPack(l) ? "كرتونة" : "قطعة"; }
+  /* حالتين بس: بتشتري بالقطعة، أو بالكرتونة اللي جوّاها قطع.
+     مفيش وحدات تانية عشان مانضيّعش اللي بيسجّل في اختيارات مالهاش لزمة. */
+  function costLabel(l){ return isByPack(l) ? "سعر الكرتونة الواحدة" : "سعر القطعة الواحدة"; }
+  function mixTitle(l){
+    return isByPack(l) ? "اللي جوّه الكراتين — اكتب كل مقاس ولون وعدده"
+                       : "القطع اللي هتشتريها — اكتب كل مقاس ولون وعدده";
   }
 
   function mixPieces(l){
@@ -3525,18 +3527,15 @@
              lines:[newPLine()], batchId:"" };
   }
   function plPackQty(l){ var n = Number(l.packQty)||0; return n > 0 ? n : 1; }
-  // عدد القطع: من تفصيل المقاسات لو موجود، وإلا من «قطع في الواحدة»
-  function plQty(l){
-    if(itemHasVars(l.itemId)) return mixPieces(l);
-    return (Number(l.packs)||0) * plPackQty(l);
-  }
-  function plGoods(l){ return (Number(l.packs)||0) * (Number(l.packCost)||0); }
-  // السطر اللي فيه تفصيل بيتحوّل لسجل لكل تركيبة
+  // عدد القطع دايماً من التفصيل — ده المصدر الوحيد للكميات
+  function plQty(l){ return mixPieces(l); }
+  // بالكرتونة: عدد الكراتين × سعر الكرتونة. بالقطعة: عدد القطع × سعر القطعة
+  function plPacks(l){ return isByPack(l) ? (Number(l.packs)||0) : plQty(l); }
+  function plGoods(l){ return plPacks(l) * (Number(l.packCost)||0); }
   function plParts(l){
-    if(!itemHasVars(l.itemId))
-      return [{ color:"", size:"", qty: plQty(l) }];
     return (l.mix||[]).filter(function(m){ return (Number(m.qty)||0) > 0; })
-      .map(function(m){ return { color:m.color||"", size:m.size||"", qty:Number(m.qty)||0 }; });
+      .map(function(m){ return { color:(m.color||"").trim(), size:(m.size||"").trim(),
+                                 qty:Number(m.qty)||0 }; });
   }
   function pdGoods(){ return pdraft.lines.reduce(function(a,l){ return a + plGoods(l); }, 0); }
 
@@ -3559,57 +3558,57 @@
   function pLineHTML(l, i){
     var it = db.items.find(function(x){ return x.id===l.itemId; });
     var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
-    var vars = cs.length > 0 || zs.length > 0;
-    var unit = (l.packName||"").trim() || "قطعة";
-    var pieces = plQty(l), packs = Number(l.packs)||0;
+    var byPack = isByPack(l);
+    var pieces = plQty(l);
 
-    var mixHTML = "";
-    if(l.itemId && vars){
-      // الأعمدة بتتغيّر حسب الصنف: في صنف بلون بس، وفي بلون ومقاس
-      var gcols = ((cs.length?"1.1fr ":"") + (zs.length?"1fr ":"") + "92px 58px 26px");
-      var gstyle = " style=\"grid-template-columns:"+gcols+"\"";
-      var rows = (l.mix||[]).map(function(m, j){
-        var code = vCode(l.itemId, m.color, m.size);
-        var sel = function(list, cur, f, ph){
-          if(!list.length) return "";     // الصنف مالوش الخاصية دي — مفيش داعي لخانة فاضية
-          return "<select data-pli='"+i+"' data-mi='"+j+"' data-mf='"+f+"'>" +
-            optsHTML(list.map(function(v){ return {v:v,t:v}; }), cur, ph) + "</select>";
-        };
-        return "<div class='lmix-row'"+gstyle+">" +
-          sel(cs, m.color, "color", "اختر اللون") + sel(zs, m.size, "size", "اختر المقاس") +
-          "<input type='number' step='any' min='0' placeholder='كام قطعة؟' " +
-            "data-pli='"+i+"' data-mi='"+j+"' data-mf='qty' value='"+esc(m.qty)+"'>" +
-          "<span class='mcode'>"+(code ? esc(code) : "—")+"</span>" +
-          "<button type='button' class='rm' data-rmmix='"+i+"|"+j+"' aria-label='شيل السطر ده'>&times;</button>" +
-          "</div>";
-      }).join("");
-      var head = "<div class='lmix-cols'"+gstyle+">" +
-        (cs.length ? "<span>اللون</span>" : "") +
-        (zs.length ? "<span>المقاس</span>" : "") +
-        "<span>عدد القطع</span><span>الكود</span><span></span></div>";
-      mixHTML =
-        "<div class='lmix'>" +
-          "<div class='lmix-head'><span class='lmix-title'>"+esc(mixTitle(unit))+"</span>" +
-            "<button type='button' data-addmix='"+i+"'>+ "+(cs.length&&zs.length?"لون ومقاس":(cs.length?"لون":"مقاس"))+"</button></div>" +
-          (rows ? head + rows
-                : "<p class='lmix-empty'>اكتب كل مقاس ولون جوّه الشحنة وعدد قطعه. السعر بيتكتب <strong>مرة واحدة فوق للشحنة كلها</strong>، والسيستم بيقسّمه على القطع دي بالتساوي.</p>") +
-          (rows ? "<div class='lmix-sum'>إجمالي القطع <b>"+qty(pieces)+"</b></div>" : "") +
+    // اقتراحات اللون والمقاس من الصنف، وبرضه ينفع تكتب حاجة جديدة
+    var dl = function(id, list){
+      return "<datalist id='"+id+"'>" +
+        list.map(function(v){ return "<option value='"+esc(v)+"'></option>"; }).join("") +
+        "</datalist>";
+    };
+
+    var mixRows = (l.mix||[]).map(function(m, j){
+      var code = vCode(l.itemId, m.color, m.size);
+      return "<div class='lmix-row'>" +
+        "<input list='dl-c-"+i+"' placeholder='مثلاً بني' autocomplete='off' " +
+          "data-pli='"+i+"' data-mi='"+j+"' data-mf='color' value='"+esc(m.color)+"'>" +
+        "<input list='dl-z-"+i+"' placeholder='مثلاً 38' autocomplete='off' " +
+          "data-pli='"+i+"' data-mi='"+j+"' data-mf='size' value='"+esc(m.size)+"'>" +
+        "<input type='number' step='any' min='0' placeholder='كام قطعة؟' " +
+          "data-pli='"+i+"' data-mi='"+j+"' data-mf='qty' value='"+esc(m.qty)+"'>" +
+        "<span class='mcode'>"+(code ? esc(code) : "—")+"</span>" +
+        "<button type='button' class='rm' data-rmmix='"+i+"|"+j+"' aria-label='شيل السطر ده'>&times;</button>" +
         "</div>";
-    }
+    }).join("");
+
+    var mixHTML = l.itemId
+      ? "<div class='lmix'>" +
+          dl("dl-c-"+i, cs) + dl("dl-z-"+i, zs) +
+          "<div class='lmix-head'><span class='lmix-title'>"+esc(mixTitle(l))+"</span>" +
+            "<button type='button' data-addmix='"+i+"'>+ سطر</button></div>" +
+          "<div class='lmix-cols'><span>اللون</span><span>المقاس</span>" +
+            "<span>عدد القطع</span><span>الكود</span><span></span></div>" +
+          mixRows +
+          "<div class='lmix-sum'>إجمالي القطع <b>"+qty(pieces)+"</b></div>" +
+          "<p class='lmix-empty'>سيب اللون أو المقاس فاضي لو الصنف مالوش. أي لون أو مقاس جديد بتكتبه بيتضاف للصنف تلقائي.</p>" +
+        "</div>"
+      : "";
 
     return "<div class='lrow' data-pli='"+i+"'>" +
       "<div class='lrow-top'>" +
         "<div class='grow'><label for='pl-item-"+i+"'>الصنف</label>" +
           "<select id='pl-item-"+i+"' data-pli='"+i+"' data-pf='itemId'>"+itemOptionsHTML(l.itemId, true)+"</select></div>" +
-        "<div><label for='pl-pn-"+i+"'>المورد بيبيعهالي بإيه؟</label>" +
-          "<input id='pl-pn-"+i+"' list='pack-list' data-pli='"+i+"' data-pf='packName' " +
-          "placeholder='قطعة' autocomplete='off' value='"+esc(l.packName)+"'></div>" +
-        "<div><label class='lab-packs' for='pl-packs-"+i+"'>"+esc(packsLabel(unit))+"</label>" +
-          "<input id='pl-packs-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packs' value='"+esc(l.packs)+"'></div>" +
-        (vars && l.itemId ? "" :
-          "<div><label class='lab-pq' for='pl-pq-"+i+"'>"+esc(pqLabel(unit))+"</label>" +
-          "<input id='pl-pq-"+i+"' type='number' step='any' min='1' data-pli='"+i+"' data-pf='packQty' value='"+esc(l.packQty)+"'></div>") +
-        "<div><label class='lab-cost' for='pl-pc-"+i+"'>"+esc(costLabel(unit))+"</label>" +
+        "<div class='grow'><label>بشتري بالـ</label>" +
+          "<div class='seg' role='group'>" +
+            "<button type='button' data-pack='"+i+"|0'"+(byPack?"":" class='on'")+">قطعة</button>" +
+            "<button type='button' data-pack='"+i+"|1'"+(byPack?" class='on'":"")+">كرتونة</button>" +
+          "</div></div>" +
+        (byPack
+          ? "<div><label for='pl-packs-"+i+"'>عدد الكراتين</label>" +
+            "<input id='pl-packs-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packs' value='"+esc(l.packs)+"'></div>"
+          : "") +
+        "<div><label class='lab-cost' for='pl-pc-"+i+"'>"+esc(costLabel(l))+"</label>" +
           "<input id='pl-pc-"+i+"' type='number' step='any' min='0' data-pli='"+i+"' data-pf='packCost' value='"+esc(l.packCost)+"'></div>" +
       "</div>" +
       mixHTML +
@@ -3624,6 +3623,8 @@
       pdraft.lines.map(function(l,i){ return pLineHTML(l,i); }).join("");
     renderPCalc();
   }
+  // نداء آمن من جوّه change/blur: المتصفح بيخلّص الحدث الأول
+  function renderPLinesSoon(){ setTimeout(renderPLines, 0); }
 
   // بيحسب تكلفة القطعة واصلة المخزن لكل سطر + ملخّص الفاتورة
   function renderPCalc(){
@@ -3632,21 +3633,18 @@
     pdraft.lines.forEach(function(l, i){
       var el = document.querySelector("#p-lines .lcost[data-pli='"+i+"']");
       if(!el) return;
-      var q = plQty(l), g = plGoods(l), packs = Number(l.packs)||0;
-      var unitName = (l.packName || "").trim() || "قطعة";
-      if(!g){ el.textContent = "—"; return; }
+      var q = plQty(l), g = plGoods(l), packs = plPacks(l);
+      if(!Number(l.packCost)){ el.textContent = "—"; return; }
       if(!q){
-        el.innerHTML = itemHasVars(l.itemId)
-          ? "<span class='v-due'>اكتب المقاسات والألوان اللي جوّه الشحنة الأول</span>"
-          : "—";
+        el.innerHTML = "<span class='v-due'>اكتب القطع اللي في الشحنة تحت — كل مقاس ولون وعدده</span>";
         return;
       }
       var base = g / q, share = fr[i] / q, landed = (g + fr[i]) / q;
-      var txt = qty(packs) + " " + esc(unitName) + " × " + money(Number(l.packCost)||0) +
-        " · <b>" + qty(q) + " قطعة</b>";
-      if(packs > 0 && q % packs === 0 && q / packs > 1)
-        txt += " (" + qty(q/packs) + " قطعة في " + esc(withAl(unitName)) + ")";
-      txt += " · " + money(base) + " للقطعة";
+      var txt = isByPack(l)
+        ? qty(packs) + " كرتونة × " + money(Number(l.packCost)||0) + " · <b>" + qty(q) + " قطعة</b>" +
+          (packs > 0 && q % packs === 0 ? " (" + qty(q/packs) + " قطعة في الكرتونة)" : "")
+        : "<b>" + qty(q) + " قطعة</b> × " + money(Number(l.packCost)||0);
+      if(isByPack(l)) txt += " · " + money(base) + " للقطعة";
       if(fr[i]) txt += " + نقل " + money(share);
       txt += " → تكلفة القطعة <b>" + money(landed) + "</b>";
       // تحذير الفرق الكبير: على أعلى متوسط موجود في تركيبات السطر
@@ -3669,14 +3667,8 @@
     pdraft.lines.forEach(function(l, i){
       var row = document.querySelector("#p-lines .lrow[data-pli='"+i+"']");
       if(!row) return;
-      var u = (l.packName||"").trim() || "قطعة";
       var sum = row.querySelector(".lmix-sum");
       if(sum) sum.innerHTML = "إجمالي القطع <b>" + qty(plQty(l)) + "</b>";
-      var set = function(sel, txt){ var e = row.querySelector(sel); if(e) e.textContent = txt; };
-      set(".lab-packs", packsLabel(u));
-      set(".lab-cost",  costLabel(u));
-      set(".lab-pq",    pqLabel(u));
-      set(".lmix-title", mixTitle(u));
     });
 
     var goods = pdGoods(), freight = Number(pdraft.freight)||0;
@@ -4480,8 +4472,9 @@
       grp.forEach(function(x){
         var k = x.lineId || ("solo:" + x.id);
         if(!byLine[k]){
-          byLine[k] = { itemId:x.itemId||"", packName:pPackName(x), packs:pPacks(x),
-                        packQty:pPackQty(x), packCost:pPackCost(x),
+          byLine[k] = { itemId:x.itemId||"",
+                        byPack: x.byPack != null ? !!x.byPack : (pPackQty(x) > 1),
+                        packs:pPacks(x), packQty:pPackQty(x), packCost:pPackCost(x),
                         lineId: x.lineId || "", mix:[] };
           order.push(k);
         }
@@ -4494,9 +4487,7 @@
         note: rec.note || "", batchId: rec.batchId || "",
         lines: order.map(function(k){
           var l = byLine[k];
-          // صنف من غير ألوان ولا مقاسات: بيرجع بـ«قطع في الواحدة» زي ما اتكتب
-          if(!itemHasVars(l.itemId)) l.mix = [];
-          else l.packQty = 1;      // بتتحسب من التفصيل وقت الحفظ
+          if(!l.mix.length) l.mix = [newMix()];
           return l;
         })
       };
@@ -4973,6 +4964,29 @@
     }
     var live_ = pdraft.lines.filter(function(l){ return l.itemId && plQty(l) > 0; });
     if(!live_.length){ toast("اكتب صنف وكمية على الأقل"); return; }
+    // أي لون أو مقاس جديد اتكتب في الفاتورة بيتسجّل على الصنف نفسه،
+    // فالمستخدم مش محتاج يروح تبويب الأصناف يعرّفهم الأول
+    var touched = {};
+    live_.forEach(function(l){
+      var it = db.items.find(function(x){ return x.id === l.itemId; });
+      if(!it) return;
+      plParts(l).forEach(function(pt){
+        ["colors","sizes"].forEach(function(key){
+          var v = key === "colors" ? pt.color : pt.size;
+          if(!v) return;
+          var cur = listOf(it, key);
+          if(cur.indexOf(v) >= 0) return;
+          cur.push(v);
+          it[key] = cur.join("، ");
+          touched[it.id] = 1;
+        });
+      });
+    });
+    Object.keys(touched).forEach(function(id){
+      var it = db.items.find(function(x){ return x.id===id; });
+      if(it){ it.at = Date.now(); it.editedBy = me || "غير محدد"; }
+    });
+    if(Object.keys(touched).length) saveSoon("items");
     for(var i = 0; i < live_.length; i++){
       if(!(Number(live_[i].packCost) > 0)){
         toast(itemName(live_[i].itemId) + ": اكتب سعر الوحدة"); return;
@@ -5036,14 +5050,14 @@
       l.lineId = lineId;
       // «قطع في الواحدة» محسوبة من التفصيل — لازم تتخزّن عشان المرتجع
       // يعرف سعر القطعة الأصلي، وعشان التعديل يرجّع نفس الأرقام
-      var packsN = Number(l.packs)||0;
-      var derivedPQ = packsN > 0 ? pieces / packsN : plPackQty(l);
+      var packsN = plPacks(l);
+      var derivedPQ = packsN > 0 ? pieces / packsN : 1;
       plParts(l).forEach(function(pt){
         var w = pt.qty / pieces;                       // نصيب التركيبة من السطر
         recs.push({
           date: pdraft.date, partyId: pdraft.partyId, inv: pdraft.inv,
           itemId: l.itemId, color: pt.color, size: pt.size,
-          packName: (l.packName||"").trim(), packs: Number(l.packs)||0,
+          packName: unitOf(l), byPack: isByPack(l), packs: plPacks(l),
           packQty: derivedPQ, packCost: Number(l.packCost)||0,
           linePieces: pieces, lineId: lineId,
           freight: frShares[i]   * w,
@@ -5135,7 +5149,7 @@
     var l = pdraft.lines[newItemFor] || pdraft.lines[pdraft.lines.length - 1];
     if(l){
       l.itemId = rec.id;
-      l.mix = itemHasVars(rec.id) ? [newMix()] : [];
+      l.mix = [newMix()];
     }
     renderAll();
     renderPLines();
@@ -5151,6 +5165,23 @@
     if(last) last.focus();
   });
   document.getElementById("p-lines").addEventListener("click", function(e){
+    var pk = e.target.closest("[data-pack]");
+    if(pk){
+      var pp = pk.dataset.pack.split("|");
+      var lp = pdraft.lines[Number(pp[0])];
+      if(lp){
+        lp.byPack = pp[1] === "1";
+        lp.packCost = "";          // السعر بيتغيّر معناه، فمنخلّيهوش رقم قديم مضلّل
+        if(!lp.byPack) lp.packs = "";
+        var want = lp.byPack ? "pl-packs-"+pp[0] : "pl-pc-"+pp[0];
+        setTimeout(function(){
+          renderPLines();
+          var f = document.getElementById(want);
+          if(f) f.focus();
+        }, 0);
+      }
+      return;
+    }
     var add = e.target.closest("[data-addmix]");
     if(add){
       var la = pdraft.lines[Number(add.dataset.addmix)];
@@ -5177,8 +5208,13 @@
       var m = lx && lx.mix && lx.mix[Number(mx.dataset.mi)];
       if(!m) return;
       m[mx.dataset.mf] = mx.value;
-      // تغيير اللون أو المقاس بيغيّر الكود المعروض، فمحتاج إعادة رسم
-      if(mx.dataset.mf === "qty") renderPCalc(); else renderPLines();
+      if(mx.dataset.mf !== "qty"){
+        // اللون والمقاس خانات نص حرّة — نحدّث الكود في مكانه بدل إعادة رسم
+        var cell = mx.closest(".lmix-row");
+        cell = cell && cell.querySelector(".mcode");
+        if(cell) cell.textContent = vCode(lx.itemId, m.color, m.size) || "—";
+      }
+      renderPCalc();
       return;
     }
     var el = e.target.closest("[data-pli][data-pf]");
@@ -5188,9 +5224,8 @@
     var f = el.dataset.pf;
     l[f] = el.value;
     if(f === "itemId"){
-      // صنف جديد: نبدأ بسطر تفصيل واحد جاهز لو ليه ألوان أو مقاسات
-      l.mix = itemHasVars(l.itemId) ? [newMix()] : [];
-      renderPLines();
+      l.mix = [newMix()];        // صنف جديد = تفصيل جديد
+      renderPLinesSoon();
     }
     else renderPCalc();
   }
