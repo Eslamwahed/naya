@@ -919,7 +919,7 @@
 
   <div class="panel" id="vars-panel" hidden>
     <h3 id="vars-title"></h3>
-    <p class="hint" style="margin-bottom:12px">اكتب الألوان والمقاسات مفصولة بفاصلة. السيستم هيتابع رصيد كل تركيبة لوحدها. سيبهم فاضيين لو الصنف مالوش ألوان ولا مقاسات.</p>
+    <p class="hint" style="margin-bottom:12px">اكتب الألوان والمقاسات مفصولة بفاصلة. الجدول تحت بيوريك رصيد كل لون ومقاس اشتريته فعلاً. ومش لازم تكتبهم هنا — أي لون أو مقاس جديد بتكتبه في فاتورة الشراء بيتسجّل لوحده.</p>
     <form class="grid" id="f-vars">
       <div style="grid-column:span 2"><label for="v-colors">الألوان</label>
         <input id="v-colors" placeholder="بني، أسود، أزرق" autocomplete="off"></div>
@@ -928,6 +928,11 @@
       <div><button class="act" type="button" id="b-savevars">حفظ</button></div>
     </form>
     <div class="tbl-wrap" style="margin-top:14px"><table id="t-vars"></table></div>
+    <details class="explain" id="vars-rest" hidden style="margin-top:10px">
+      <summary>ألوان ومقاسات معرّفة لسه ما اشتريتش منها (<span id="vars-rest-n">0</span>)</summary>
+      <p class="hintline">دي مش في مخزنك — بتظهر هنا بس عشان تقدر تحطّ لها كود قبل ما توصلك. مش بتتحسب في المخزون ولا في تنبيهات النواقص.</p>
+      <div class="tbl-wrap"><table id="t-vars-rest"></table></div>
+    </details>
   </div>
 
   <div class="panel" id="offers-panel" hidden>
@@ -1116,7 +1121,7 @@
 
 <section id="tab-inv" hidden>
   <h2>المخزون</h2>
-  <p class="hint">الأرصدة تراكمية دايمًا. المشترى والمباع والمرتجع بيتبعوا الفترة المختارة. اضغط على أي تركيبة تشوف حركتها بالتفصيل.</p>
+  <p class="hint">كل سطر هنا = <strong>لون ومقاس معيّن</strong> من صنف (زي «شبشب · بني · 38»)، لأن ده اللي بتبيعه وبتجرده فعلاً. بتظهر بس الألوان والمقاسات اللي اشتريتها. الأرصدة تراكمية، والمشترى والمباع والمرتجع بيتبعوا الفترة المختارة. اضغط على أي سطر تشوف حركته بالتفصيل.</p>
 
   <div class="panel" style="padding:12px 14px">
     <div class="grid" style="align-items:end">
@@ -1133,7 +1138,7 @@
       <div><label for="inv-item">الصنف</label><select id="inv-item"></select></div>
       <div><label for="inv-only">اعرض</label>
         <select id="inv-only">
-          <option value="all">كل التركيبات</option>
+          <option value="all">كل الألوان والمقاسات</option>
           <option value="instock">اللي فيه رصيد بس</option>
           <option value="out">الخلصان بس</option>
           <option value="low">اللي قرب يخلص</option>
@@ -1145,7 +1150,7 @@
   <div class="band" id="inv-kpis"></div>
 
   <div class="panel">
-    <h3>التركيبات</h3>
+    <h3>الرصيد بكل لون ومقاس</h3>
     <div class="tbl-wrap"><table id="t-inv"></table></div>
   </div>
 
@@ -1439,8 +1444,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "29";
+  var VERSION = "30";
   var CHANGELOG = [
+    { v:"30", d:"2026-09-23", items:[
+      "إصلاح: المخزون كان بيضرب الألوان في المقاسات ويطلّع تركيبات وهمية «خلصانة» وإنت أصلاً ما اشتريتهاش",
+      "إصلاح: «قرب يخلص» كان بينبّه أول ما تشتري كمية صغيرة — بقى بعد ما يتباع منها فعلاً",
+      "كلمة «تركيبة» اتشالت — بقى «لون ومقاس» في كل الشاشات",
+      "الألوان والمقاسات المعرّفة اللي لسه ما اشتريتش منها بقت في قسم مطوي لتخصيص الأكواد"
+    ]},
     { v:"29", d:"2026-09-23", items:[
       "وحدة الشراء بقت اختيار واحد: قطعة أو كرتونة — مفيش وحدات تانية",
       "تفصيل المقاسات والألوان بيظهر دايماً، حتى لو الصنف لسه ما اتعرّفتلوش",
@@ -2107,19 +2118,29 @@
     return c ? " · " + c : "";
   }
 
-  // كل التركيبات اللي ليها حركة فعلية أو معرّفة في الصنف
-  function variantsOf(itemId){
+  // الألوان والمقاسات اللي ليها حركة فعلية — مش كل الاحتمالات.
+  // قبل كده كانت بتضرب الألوان في المقاسات: صنف بـ٤ ألوان و٤ مقاسات
+  // يطلع ١٦ صف، وإنت مشتري منهم ٤ بس، فالـ١٢ الباقيين كانوا بيبانوا
+  // «خلصان» وهما أصلاً معندكش ولا هتطلبهم.
+  // شبكة كل الاحتمالات (ألوان × مقاسات). مالهاش لزمة في المخزون —
+  // بتتستعمل في شاشة الأصناف بس، عشان تحط كود لتركيبة قبل ما تشتريها.
+  function variantsAll(itemId){
     var it = db.items.find(function(x){ return x.id===itemId; }) || {};
     var out = {}, add = function(c,z){ out[vKey(itemId,c,z)] = { color:c||"", size:z||"" }; };
     var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
     if(cs.length && zs.length) cs.forEach(function(c){ zs.forEach(function(z){ add(c,z); }); });
     else if(cs.length) cs.forEach(function(c){ add(c,""); });
     else if(zs.length) zs.forEach(function(z){ add("",z); });
+    return Object.keys(out).map(function(k){ return out[k]; });
+  }
+
+  function variantsOf(itemId){
+    var out = {}, add = function(c,z){ out[vKey(itemId,c,z)] = { color:c||"", size:z||"" }; };
     live("purchases").forEach(function(r){ if(r.itemId===itemId) add(vColor(r), vSize(r)); });
     live("sales").forEach(function(r){
       SL(r).forEach(function(l){ if(l.itemId===itemId) add(vColor(l), vSize(l)); });
     });
-    if(!Object.keys(out).length) add("","");
+    if(!Object.keys(out).length) add("","");   // صنف لسه ماتحركش: صف واحد بصفر
     return Object.keys(out).map(function(k){ return out[k]; });
   }
 
@@ -2888,7 +2909,13 @@
             if(isCancelled(x)) cancQ += Number(l.qty)||0;
           });
         });
-        out.push({ item:i, color:v.color, size:v.size, key:k,
+        // اتباع منه أي حاجة قبل كده؟ ده اللي بيفرّق بين «قرب يخلص»
+        // و«لسه مشتريه كمية صغيرة»
+        var soldEver = live("sales").some(function(x){
+          return isDelivered(x) && SL(x).some(function(l){
+            return keyOf(l) === k && lineSold(l,x) > 0; });
+        });
+        out.push({ item:i, color:v.color, size:v.size, key:k, soldEver:soldEver,
           bought:bought, sold:sold, ret:ret, canc:cancQ, pret:pret,
           stock:stockOfV(i.id,v.color,v.size),
           rsv:reservedOfV(i.id,v.color,v.size),
@@ -2903,7 +2930,11 @@
   function isLow(x){
     var free = x.stock - x.rsv, min = Number(x.item.min)||0;
     if(x.stock <= 0) return false;
-    return min > 0 ? (free <= min) : (free <= LOW_DEFAULT);
+    // حد التنبيه اللي إنت حدّدته بنفسك بيشتغل دايماً
+    if(min > 0) return free <= min;
+    // من غير حد محدّد: مننبّهش على حاجة لسه ما اتباعت منها ولا قطعة.
+    // لو اشتريت قطعتين بس، دي مش «قربت تخلص» — دي كمية صغيرة اشتريتها.
+    return x.soldEver && free <= LOW_DEFAULT;
   }
 
   function renderInventory(){
@@ -2942,8 +2973,8 @@
       ["قطع اتباعت", qty(sold), "v-gain", "<span class='sub'>في الفترة</span>"],
       ["قطع رجعت للمورد", qty(prets), prets?"v-due":"", "<span class='sub'>في الفترة</span>"],
       ["قطع رجعت من العملاء", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
-      ["تركيبات خلصانة", qty(outCount), outCount?"v-due":"", scope],
-      ["تركيبات قربت تخلص", qty(lowCount), lowCount?"v-due":"", scope]
+      ["خلص من المخزن", qty(outCount), outCount?"v-due":"", scope || "<span class='sub'>لون/مقاس رصيده صفر</span>"],
+      ["قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"]
     ];
     document.getElementById("inv-kpis").innerHTML = cells.map(function(c){
       return '<div><span>'+c[0]+'</span><strong class="num '+c[2]+'">'+esc(c[1])+'</strong>'+(c[3]||'')+'</div>';
@@ -2970,12 +3001,12 @@
     var emptyMsg = "مفيش أصناف لسه.";
     if(all.length){
       emptyMsg = only === "low"
-        ? "مفيش تركيبة قربت تخلص. التنبيه بيشتغل على حد التنبيه بتاع الصنف، ولو مش متحدد بيتنبّه عند " + qty(LOW_DEFAULT) + " قطعة أو أقل."
-        : only === "out" ? "مفيش تركيبة خلصانة — كله لسه فيه رصيد."
-        : only === "instock" ? "مفيش تركيبة فيها رصيد بالمواصفات دي."
-        : "مفيش تركيبات بالمواصفات دي — جرّب تمسح الفلاتر.";
+        ? "مفيش حاجة قربت تخلص. لو حدّدت «حد التنبيه» للصنف، بينبّهك عنده. ومن غير حد، بينبّهك عند " + qty(LOW_DEFAULT) + " قطعة أو أقل — بس بعد ما يكون اتباع منه فعلاً."
+        : only === "out" ? "مفيش حاجة خلصانة — كله لسه فيه رصيد."
+        : only === "instock" ? "مفيش لون أو مقاس فيه رصيد بالمواصفات دي."
+        : "مفيش حاجة بالمواصفات دي — جرّب تمسح الفلاتر.";
     }
-    table("t-inv", ["الصنف / التركيبة","اتشترى","رجع للمورد","اتباع","رجع من عميل","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
+    table("t-inv", ["الصنف · اللون · المقاس","اتشترى","رجع للمورد","اتباع","رجع من عميل","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
       rows, emptyMsg);
 
     renderMovement();
@@ -3029,7 +3060,7 @@
         "<td class='num "+(run<0?"v-due":"")+"'>"+qty(run)+"</td></tr>";
     });
     table("t-move", ["التاريخ","الحركة","الجهة","داخل","خارج","الرصيد بعدها"], rows,
-      "مفيش حركة على التركيبة دي.");
+      "مفيش حركة على اللون والمقاس ده.");
   }
 
   function renderShipping(){
@@ -3842,8 +3873,8 @@
       var n = g.rows.length, h = g.head;
       var isRet = isPRet(h);
       var nItems = Object.keys(g.rows.reduce(function(a,x){ a[x.itemId]=1; return a; }, {})).length;
-      var gLabel = nItems > 1 ? qty(nItems) + " أصناف · " + qty(n) + " تركيبة"
-                              : qty(n) + " تركيبة";
+      var gLabel = nItems > 1 ? qty(nItems) + " أصناف · " + qty(n) + " سطر"
+                              : qty(n) + " ألوان ومقاسات";
       var goods = g.rows.reduce(function(a,x){ return a + goodsTotal(x); }, 0);
       var fr    = g.rows.reduce(function(a,x){ return a + pFreight(x); }, 0);
       var paid  = g.rows.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
@@ -4087,7 +4118,7 @@
       return "<tr><td class='wide'>"+thumbHTML(i.id)+esc(i.name)+"</td><td>"+esc(i.unit||"—")+"</td>"+
         "<td class='num'>"+money(i.price)+"</td><td class='num'>"+qty(stockOf(i.id))+"</td>"+
         "<td><button class='del' style='color:var(--teal)' data-vars='"+i.id+"'>"+
-        (hasVariants(i) ? qty(nv)+" تركيبة" : "ألوان ومقاسات")+"</button></td>"+
+        (nv > 1 ? qty(nv)+" لون/مقاس" : "ألوان ومقاسات")+"</button></td>"+
         "<td><button class='del' style='color:var(--teal)' data-offers='"+i.id+"'>"+
         (n ? n+" عروض" : "إضافة عرض")+"</button></td>"+
         "<td><button class='del' style='color:var(--teal)' data-edit='items|"+i.id+"'>تعديل</button></td>"+
@@ -4106,7 +4137,7 @@
     document.getElementById("vars-title").textContent = "ألوان ومقاسات: " + it.name;
     document.getElementById("v-colors").value = it.colors || "";
     document.getElementById("v-sizes").value = it.sizes || "";
-    var rows = variantsOf(it.id).map(function(v){
+    var rowFor = function(v){
       var st = stockOfV(it.id,v.color,v.size), rs = reservedOfV(it.id,v.color,v.size);
       var label = vLabel(v.color, v.size) || "بدون لون/مقاس";
       var ck = esc(codeKey(v.color, v.size));
@@ -4117,8 +4148,27 @@
         "<td class='num'>"+(rs?"<span class='pill due'>"+qty(rs)+"</span>":"—")+"</td>"+
         "<td class='num'>"+qty(st-rs)+"</td>"+
         "<td class='num'>"+money(avgCostV(it.id,v.color,v.size))+"</td></tr>";
+    };
+    var HEAD = ["اللون / المقاس","الكود","الرصيد","محجوز","متاح","متوسط التكلفة"];
+
+    var have = variantsOf(it.id).filter(function(v){
+      return stockOfV(it.id,v.color,v.size) !== 0 || avgCostV(it.id,v.color,v.size) > 0;
     });
-    table("t-vars", ["اللون / المقاس","الكود","الرصيد","محجوز","متاح","متوسط التكلفة"], rows, "");
+    var haveKeys = {};
+    have.forEach(function(v){ haveKeys[vKey(it.id,v.color,v.size)] = 1; });
+    table("t-vars", HEAD, have.map(rowFor),
+      "لسه ما اشتريتش حاجة من الصنف ده. أول فاتورة شراء والألوان والمقاسات هتظهر هنا لوحدها.");
+
+    // الباقي مطوي: تركيبات معرّفة بس لسه ما اشتريتش منها
+    var rest = variantsAll(it.id).filter(function(v){ return !haveKeys[vKey(it.id,v.color,v.size)]; });
+    var box = document.getElementById("vars-rest");
+    if(box){
+      box.hidden = !rest.length;
+      if(rest.length){
+        document.getElementById("vars-rest-n").textContent = qty(rest.length);
+        table("t-vars-rest", HEAD, rest.map(rowFor), "");
+      }
+    }
   }
 
   var offersFor = null;
@@ -5002,7 +5052,7 @@
         var kk = parts0[k].color + "|" + parts0[k].size;
         if(seen[kk]){
           toast(itemName(live_[i].itemId) + ": " +
-            (vLabel(parts0[k].color, parts0[k].size) || "التركيبة") + " مكرّرة — اجمعها في سطر واحد");
+            (vLabel(parts0[k].color, parts0[k].size) || "السطر ده") + " مكرّر — اجمعه في سطر واحد");
           return;
         }
         seen[kk] = 1;
@@ -5089,7 +5139,7 @@
     clearPOver(); closeEntry();
     renderAll();
     toast(wasEdit ? "اتعدّلت الفاتورة"
-                  : ("اتسجّلت الفاتورة · " + qty(recs.length) + " تركيبة · " +
+                  : ("اتسجّلت الفاتورة · " + qty(recs.length) + " لون/مقاس · " +
                      qty(recs.reduce(function(a,x){ return a + x.qty; },0)) + " قطعة"));
   });
 
@@ -5230,7 +5280,8 @@
     else renderPCalc();
   }
   // كود التركيبة بيتحفظ وانت بتكتب
-  document.getElementById("t-vars").addEventListener("change", function(e){
+  ["t-vars","t-vars-rest"].forEach(function(tid){
+  document.getElementById(tid).addEventListener("change", function(e){
     var el = e.target.closest("[data-vcode]");
     if(!el || !varsFor) return;
     var parts = el.dataset.vcode.split("|");
@@ -5241,6 +5292,7 @@
     if(pdraft && openEntryKey === "purchases") renderPLines();
     renderPurch();
     toast(el.value.trim() ? "اتسجّل الكود" : "اتشال الكود");
+  });
   });
 
   document.getElementById("p-lines").addEventListener("input", pLineEdit);
