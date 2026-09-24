@@ -359,6 +359,12 @@
   .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
   .lmix-sum b{color:var(--ink);font-weight:600}
+  .codebar{display:grid;gap:5px}
+  .codebar input{width:100%;padding:9px 11px;font-size:.88rem;
+    font-family:ui-monospace,monospace;border-radius:9px}
+  .codebar .codemsg{font-size:.76rem;color:var(--ink-soft);min-height:1.1em}
+  .codebar .codemsg.ok{color:var(--teal);font-weight:500}
+  .codebar .codemsg.bad{color:var(--due)}
   .more-wrap{margin-top:10px;text-align:center}
   .more-wrap[hidden],.more-wrap button[hidden]{display:none}
   td.acts{white-space:nowrap}
@@ -673,7 +679,7 @@
   <div class="panel">
     <div class="grid">
       <div style="grid-column:span 2"><label for="find-q">ابحث</label>
-        <input id="find-q" placeholder="رقم أوردر · كود شحن · اسم · تليفون · صنف" autocomplete="off"></div>
+        <input id="find-q" placeholder="رقم أوردر · كود شحن · كود الصنف · اسم · تليفون" autocomplete="off"></div>
       <div><label>&nbsp;</label><button class="act ghost" type="button" id="b-find-clear">مسح</button></div>
     </div>
     <p class="note ok" id="find-msg"></p>
@@ -697,6 +703,10 @@
     <div class="dbody">
     <p class="impact" id="impact-purchases"></p>
     <form id="f-purch">
+      <p class="note" id="p-draft-note" hidden style="margin-top:0">
+        بتكمّل فاتورة لسه ما اتحفظتش — بياناتها محفوظة لحد ما تحفظها أو تفرّغها.
+        <button class="rowact" type="button" id="b-pclear">فرّغ وابدأ من جديد</button>
+      </p>
       <div class="fset">
         <h3>الفاتورة</h3>
         <div class="grid">
@@ -708,6 +718,10 @@
 
       <div class="fset">
         <h3>البضاعة</h3>
+        <div class="codebar">
+          <input id="p-code" placeholder="امسح الكود بالقارئ أو اكتبه واضغط Enter" autocomplete="off" dir="ltr">
+          <span class="codemsg" id="p-code-msg"></span>
+        </div>
         <div id="p-lines"></div>
         <div class="row-actions" style="gap:8px">
           <button class="addline" type="button" id="b-addpline" style="flex:1">+ صنف تاني</button>
@@ -757,7 +771,11 @@
         </label>
       </div>
       <div class="grid">
-        <div><button class="act" type="button" id="b-purch">حفظ الشراء</button> <button class="act ghost" type="button" id="x-purch" hidden>إلغاء</button></div>
+        <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act" type="button" id="b-purch">حفظ الشراء</button>
+          <button class="act ghost" type="button" id="b-purch-next">حفظ وابدأ واحدة جديدة</button>
+          <button class="act ghost" type="button" id="x-purch" hidden>إلغاء</button>
+        </div>
       </div>
     </form>
     <p class="note" id="p-note-msg"></p>
@@ -1454,8 +1472,17 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "33";
+  var VERSION = "34";
   var CHANGELOG = [
+    { v:"34", d:"2026-09-24", items:[
+      "الأرقام العربية (٥٠٠) بقت تتقبل وتتحوّل لوحدها — كانت بتتكل من غير أي رسالة",
+      "كل خانات الأرقام بتفتح كيبورد رقمي على الموبايل",
+      "مسودة الفاتورة بتفضل كاملة لو قفلت الدرج، وفيه زرار «فرّغ وابدأ من جديد»",
+      "المسافات الزيادة في الأسماء والألوان والمقاسات بتتنضّف لوحدها",
+      "زرار «حفظ وابدأ واحدة جديدة» بيحتفظ بالمورد والتاريخ",
+      "الفاتورة المحفوظة بتتلوّن لحظة في الجدول",
+      "إدخال بالكود: امسح بقارئ باركود أو اكتب الكود والسطر يتملّي لوحده"
+    ]},
     { v:"33", d:"2026-09-24", items:[
       "السيستم بقى أسرع ١٥ مرة: حفظ الحركة على الموبايل من ١٨٫٧ ثانية لـ١٫٢",
       "الشاشة المفتوحة بس هي اللي بترسم، والباقي بيترسم أول ما تفتحه",
@@ -1965,6 +1992,40 @@
     return v.toLocaleString("en-US",{maximumFractionDigits:3});
   }
   function today(){ return new Date().toISOString().slice(0,10); }
+  /* ---------- ١) الأرقام العربية ----------
+     كيبورد الموبايل العربي بيكتب ٠١٢٣. خانة type=number بترفضها
+     وبتفضى من غير أي رسالة — الموظف بيكتب المبلغ ويلاقيه اختفى.
+     بنحوّل الخانات لنص بكيبورد رقمي ونعرّب الأرقام وهو بيكتب. */
+  function toEn(str){
+    return String(str == null ? "" : str).replace(/[\u0660-\u0669\u06F0-\u06F9]/g, function(d){
+      var c = d.charCodeAt(0);
+      return String(c >= 0x06F0 ? c - 0x06F0 : c - 0x0660);
+    }).replace(/\u066B/g, ".").replace(/\u066C/g, "");   // الفاصلة العشرية والألفية العربية
+  }
+  // بتشيل المسافات الزيادة: «صنف  تجريبي» = «صنف تجريبي»
+  function squish(s){ return String(s == null ? "" : s).trim().replace(/\s+/g, " "); }
+
+  function numify(root){
+    var list = (root || document).querySelectorAll('input[type="number"]');
+    Array.prototype.forEach.call(list, function(el){
+      el.type = "text";
+      el.setAttribute("inputmode", "decimal");
+      el.setAttribute("autocomplete", "off");
+    });
+  }
+  // أي خانة رقمية — حتى لو اتولدت دلوقتي — بتتعرّب وهو بيكتب
+  document.addEventListener("input", function(e){
+    var el = e.target;
+    if(!el || el.tagName !== "INPUT" || el.getAttribute("inputmode") !== "decimal") return;
+    var raw = el.value;
+    var fixed = toEn(raw).replace(/[^\d.\-]/g, "");
+    if(fixed === raw) return;
+    var pos = el.selectionStart;
+    var cut = raw.length - fixed.length;
+    el.value = fixed;
+    try{ el.setSelectionRange(pos - cut, pos - cut); }catch(err){}
+  }, true);
+
   function esc(s){
     return String(s==null?"":s).replace(/[&<>"']/g,function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
@@ -2108,26 +2169,26 @@
   }
   // ---------- الألوان والمقاسات ----------
   // كل حركة ممكن يكون معاها لون ومقاس. السجلات القديمة من غيرهم = نسخة "عام"
-  function vColor(r){ return (r && r.color ? String(r.color).trim() : ""); }
-  function vSize(r){ return (r && r.size ? String(r.size).trim() : ""); }
+  function vColor(r){ return r ? squish(r.color) : ""; }
+  function vSize(r){ return r ? squish(r.size) : ""; }
   function vKey(itemId, color, size){
-    return itemId + "|" + (color||"").trim() + "|" + (size||"").trim();
+    return itemId + "|" + squish(color) + "|" + squish(size);
   }
   function keyOf(r){ return vKey(r.itemId, vColor(r), vSize(r)); }
   function vLabel(color, size){
-    var a = [(color||"").trim(), (size||"").trim()].filter(Boolean);
+    var a = [squish(color), squish(size)].filter(Boolean);
     return a.length ? a.join(" · ") : "";
   }
   function listOf(item, which){
     var raw = item && item[which];
     if(!raw) return [];
-    // بيقبل الفاصلة العربية والإنجليزية وسطر جديد
-    return String(raw).split(/[,،؛;\n]/).map(function(x){ return x.trim(); }).filter(Boolean);
+    // بيقبل الفاصلة العربية والإنجليزية وسطر جديد، وبيوحّد المسافات
+    return String(raw).split(/[,،؛;\n]/).map(squish).filter(Boolean);
   }
   function hasVariants(item){ return listOf(item,"colors").length > 0 || listOf(item,"sizes").length > 0; }
 
   // كود لكل تركيبة لون/مقاس — بيتخزّن في الصنف نفسه {"أحمر|M":"LR-102"}
-  function codeKey(color, size){ return (color||"").trim() + "|" + (size||"").trim(); }
+  function codeKey(color, size){ return squish(color) + "|" + squish(size); }
   function vCode(itemId, color, size){
     var it = db.items.find(function(x){ return x.id===itemId; });
     if(!it || !it.codes) return "";
@@ -2140,6 +2201,24 @@
     var k = codeKey(color,size), v = String(code||"").trim();
     if(v) it.codes[k] = v; else delete it.codes[k];
   }
+  // الكود بيوصّلك للصنف واللون والمقاس مرة واحدة — قارئ الباركود
+  // بيكتب الكود وبيبعت Enter، فبيشتغل من غير أي إعداد
+  function findByCode(code){
+    var q = squish(code).toLowerCase();
+    if(!q) return null;
+    var hit = null;
+    live("items").some(function(it){
+      if(!it.codes) return false;
+      return Object.keys(it.codes).some(function(k){
+        if(squish(it.codes[k]).toLowerCase() !== q) return false;
+        var parts = k.split("|");
+        hit = { itemId:it.id, color:parts[0]||"", size:parts[1]||"" };
+        return true;
+      });
+    });
+    return hit;
+  }
+
   function vCodeLabel(itemId, color, size){
     var c = vCode(itemId, color, size);
     return c ? " · " + c : "";
@@ -3247,8 +3326,9 @@
   }
 
   function renderDrawerLines(){
-    document.getElementById("e-lines").innerHTML =
-      draft.lines.map(function(l,i){ return lineRowHTML(l,i); }).join("");
+    var box = document.getElementById("e-lines");
+    box.innerHTML = draft.lines.map(function(l,i){ return lineRowHTML(l,i); }).join("");
+    numify(box);
     updateEntryCalc();
   }
 
@@ -3593,7 +3673,7 @@
   function plGoods(l){ return plPacks(l) * (Number(l.packCost)||0); }
   function plParts(l){
     return (l.mix||[]).filter(function(m){ return (Number(m.qty)||0) > 0; })
-      .map(function(m){ return { color:(m.color||"").trim(), size:(m.size||"").trim(),
+      .map(function(m){ return { color:squish(m.color), size:squish(m.size),
                                  qty:Number(m.qty)||0 }; });
   }
   function pdGoods(){ return pdraft.lines.reduce(function(a,l){ return a + plGoods(l); }, 0); }
@@ -3678,8 +3758,9 @@
   }
 
   function renderPLines(){
-    document.getElementById("p-lines").innerHTML =
-      pdraft.lines.map(function(l,i){ return pLineHTML(l,i); }).join("");
+    var box = document.getElementById("p-lines");
+    box.innerHTML = pdraft.lines.map(function(l,i){ return pLineHTML(l,i); }).join("");
+    numify(box);
     renderPCalc();
   }
   // نداء آمن من جوّه change/blur: المتصفح بيخلّص الحدث الأول
@@ -3908,6 +3989,7 @@
       var fr    = g.rows.reduce(function(a,x){ return a + pFreight(x); }, 0);
       var paid  = g.rows.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
       var rest  = goods - paid;
+      var isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
       g.rows.forEach(function(p, i){
         var vl = vLabel(vColor(p), vSize(p));
         var code = vCode(p.itemId, vColor(p), vSize(p));
@@ -3917,7 +3999,7 @@
           ? qty(packs) + " " + esc(pn) + " × " + qty(pq) + " قطعة"
           : (packs !== (Number(p.qty)||0) ? "" : "");
         return rows.push(
-          "<tr>" +
+          "<tr" + (isFresh ? " class='fresh'" : "") + ">" +
           (i === 0
             ? "<td class='num' rowspan='"+n+"'>"+esc(h.date)+
                 (isRet ? "<span class='sub'><span class='pill due'>مرتجع</span></span>"
@@ -3953,6 +4035,7 @@
     table("t-purch",
       ["التاريخ","المورد","الصنف","القطع","تكلفة القطعة","قيمة البضاعة","النقل","المدفوع","المتبقي","",""],
       rows, "مفيش مشتريات لسه. سجّل أول فاتورة عشان يبقى عندك مخزون تبيع منه.");
+    if(freshBatch) setTimeout(function(){ freshBatch = null; }, 1600);
   }
 
   function cashLabel(t){
@@ -4476,8 +4559,9 @@
     return live("sales").filter(function(s){
       if(exact(s)) return true;
       var p = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
+      var codes = SL(s).map(function(l){ return vCode(l.itemId, vColor(l), vSize(l)); }).join(" ");
       var hay = [s.shipCode, s.shipCo, partyName(s.partyId), p.phone, p.fb, p.gov,
-                 itemsLabel(s), s.owner, s.note, s.date].join(" ").toLowerCase();
+                 itemsLabel(s), codes, s.owner, s.note, s.date].join(" ").toLowerCase();
       return hay.indexOf(q) > -1;
     }).sort(function(a,b){
       // الأوردر اللي رقمه مطابق بيطلع الأول، وبعده الأحدث
@@ -4659,6 +4743,7 @@
 
   // بيحفظ جديد أو بيعدّل القديم حسب الحالة
   var freshId = null;        // آخر سجل اتحفظ — بيتلوّن لحظة في الجدول
+  var freshBatch = null;     // وآخر فاتورة شراء
   var savedId = null;
 
   function commit(list, fields, form, addMsg){
@@ -4738,11 +4823,11 @@
   function stamp(o){ o.id = uid(); o.by = me || "غير محدد"; o.at = Date.now(); return o; }
 
   bind("f-item","b-item", function(form){
-    var name = document.getElementById("i-name").value.trim();
+    var name = squish(document.getElementById("i-name").value);
     if(!name){ toast("اكتب اسم الصنف"); return; }
     // صنفين بنفس الاسم بيخلّوا كل القوايم ملخبطة ومحدش يعرف يختار الصح
     var dupI = live("items").find(function(x){
-      return x.id !== editing.items && (x.name||"").trim() === name; });
+      return x.id !== editing.items && squish(x.name) === name; });
     if(dupI){ toast("فيه صنف بنفس الاسم — اختاره من القايمة أو غيّر الاسم"); return; }
     commit("items", { name:name, unit:document.getElementById("i-unit").value.trim(),
       price:Number(document.getElementById("i-price").value)||0,
@@ -4801,7 +4886,7 @@
   });
 
   bind("f-party","b-party", function(form){
-    var name = document.getElementById("pt-name").value.trim();
+    var name = squish(document.getElementById("pt-name").value);
     if(!name){ toast("اكتب الاسم"); return; }
     var phone = document.getElementById("pt-phone").value.trim();
     if(phone && !editing.parties){
@@ -5112,7 +5197,7 @@
     document.getElementById("newcust-box").hidden = true;
   });
   document.getElementById("b-savecust").addEventListener("click", function(){
-    var name = document.getElementById("nc-name").value.trim();
+    var name = squish(document.getElementById("nc-name").value);
     if(!name){ toast("اكتب اسم العميل"); return; }
     var phone = document.getElementById("nc-phone").value.trim();
     if(phone){
@@ -5136,6 +5221,7 @@
 
   /* ---------- حفظ فاتورة الشراء ---------- */
   function readPHead(){
+    if(!pdraft) return;
     pdraft.date    = document.getElementById("p-date").value || today();
     pdraft.partyId = document.getElementById("p-party").value;
     pdraft.inv     = document.getElementById("p-inv").value.trim();
@@ -5143,6 +5229,12 @@
     pdraft.paid    = Number(document.getElementById("p-paid").value)||0;
     pdraft.note    = document.getElementById("p-note").value.trim();
   }
+
+  var keepOpenAfterSave = false;
+  document.getElementById("b-purch-next").addEventListener("click", function(){
+    keepOpenAfterSave = true;
+    document.getElementById("b-purch").click();
+  });
 
   bind("f-purch","b-purch", function(){
     if(!pdraft) return;
@@ -5278,15 +5370,28 @@
     old.slice(recs.length).forEach(function(r){ r.deleted = true; r.at = now; });
 
     var wasEdit = !!pdraft.batchId;
+    var again = keepOpenAfterSave && !wasEdit;
+    var keepParty = pdraft.partyId, keepDate = pdraft.date;
+    keepOpenAfterSave = false;
+    freshBatch = batchId;
     editing.purchases = null; setEditUI("purchases");
     saveSoon("purchases");
     pdraft = newPDraft();
-    renderPLines(); syncPHead();
-    clearPOver(); closeEntry();
+    // «حفظ وابدأ واحدة جديدة»: نفس المورد ونفس التاريخ عشان إدخال
+    // عشر فواتير من نفس المورد ما يبقاش عشر مرات اختيار
+    if(again){ pdraft.partyId = keepParty; pdraft.date = keepDate; }
+    renderPLines(); syncPHead(); renderPDraftNote();
+    clearPOver();
+    if(!again) closeEntry();
     renderAll();
+    if(again){
+      renderPLines(); syncPHead();
+      var f = document.getElementById("pl-item-0");
+      if(f) setTimeout(function(){ try{ f.focus(); }catch(e){} }, 60);
+    }
     toast(wasEdit ? "اتعدّلت الفاتورة"
-                  : ("اتسجّلت الفاتورة · " + qty(recs.length) + " لون/مقاس · " +
-                     qty(recs.reduce(function(a,x){ return a + x.qty; },0)) + " قطعة"));
+                  : ("اتسجّلت الفاتورة · " + qty(recs.reduce(function(a,x){ return a + x.qty; },0)) +
+                     " قطعة" + (again ? " — ابدأ اللي بعدها" : "")));
   });
 
   // بيكتب رأس الفاتورة في الفورم من المسوّدة
@@ -5325,9 +5430,9 @@
   });
   document.getElementById("b-cancelitem2").addEventListener("click", closeNewItem);
   document.getElementById("b-saveitem2").addEventListener("click", function(){
-    var name = document.getElementById("ni-name").value.trim();
+    var name = squish(document.getElementById("ni-name").value);
     if(!name){ toast("اكتب اسم الصنف"); return; }
-    var dup = live("items").find(function(x){ return (x.name||"").trim() === name; });
+    var dup = live("items").find(function(x){ return squish(x.name) === name; });
     if(dup){ toast("فيه صنف بنفس الاسم — اختاره من القايمة"); return; }
     var rec = stamp({
       name: name,
@@ -5352,6 +5457,56 @@
     var sel = document.getElementById("pl-item-" + newItemFor);
     if(sel) sel.scrollIntoView({block:"nearest"});
     toast("اتضاف الصنف واتختار في السطر");
+  });
+
+  /* ---------- الإدخال بالكود ---------- */
+  function pCodeMsg(txt, cls){
+    var el = document.getElementById("p-code-msg");
+    if(el){ el.textContent = txt || ""; el.className = "codemsg" + (cls ? " " + cls : ""); }
+  }
+  function addByCode(code){
+    var hit = findByCode(code);
+    if(!hit){ pCodeMsg("مفيش لون/مقاس بالكود ده — راجعه من شاشة الأصناف", "bad"); return false; }
+    var label = itemName(hit.itemId) + (vLabel(hit.color, hit.size) ? " · " + vLabel(hit.color, hit.size) : "");
+    // سطر لنفس الصنف موجود؟ نزوّد جوّاه. غير كده نستعمل سطر فاضي أو نضيف واحد
+    var li = pdraft.lines.findIndex(function(l){ return l.itemId === hit.itemId; });
+    if(li < 0) li = pdraft.lines.findIndex(function(l){ return !l.itemId; });
+    if(li < 0){ pdraft.lines.push(newPLine()); li = pdraft.lines.length - 1; }
+    var l = pdraft.lines[li];
+    if(l.itemId !== hit.itemId){ l.itemId = hit.itemId; l.mix = [newMix()]; }
+    if(!l.mix || !l.mix.length) l.mix = [newMix()];
+    var m = l.mix.filter(function(x){
+      return squish(x.color) === hit.color && squish(x.size) === hit.size; })[0];
+    if(m){ m.qty = (Number(m.qty)||0) + 1; }
+    else {
+      var blank = l.mix.filter(function(x){ return !squish(x.color) && !squish(x.size) && !Number(x.qty); })[0];
+      if(blank){ blank.color = hit.color; blank.size = hit.size; blank.qty = 1; m = blank; }
+      else { m = { color:hit.color, size:hit.size, qty:1 }; l.mix.push(m); }
+    }
+    renderPLines();
+    pCodeMsg(label + " ← العدد " + qty(m.qty), "ok");
+    return true;
+  }
+  document.getElementById("p-code").addEventListener("keydown", function(e){
+    if(e.key !== "Enter") return;
+    e.preventDefault(); e.stopPropagation();
+    var v = this.value;
+    if(!squish(v)) return;
+    if(addByCode(v)) this.value = "";
+    // كود غلط: بنظلّله بدل ما نسيبه. القارئ بيكتب فوق المظلّل، فالكود
+    // اللي بعده ما يتلزقش عليه ويطلع خليط ملهوش معنى.
+    else this.select();
+    this.focus();
+  });
+  document.getElementById("p-code").addEventListener("input", function(){
+    if(!squish(this.value)) pCodeMsg("");
+  });
+
+  document.getElementById("b-pclear").addEventListener("click", function(){
+    pdraft = newPDraft();
+    editing.purchases = null; setEditUI("purchases");
+    clearPOver(); syncPHead(); renderPLines(); renderPDraftNote();
+    toast("اتفرّغت الفاتورة");
   });
 
   document.getElementById("b-addpline").addEventListener("click", function(){
@@ -5443,13 +5598,34 @@
 
   document.getElementById("p-lines").addEventListener("input", pLineEdit);
   document.getElementById("p-lines").addEventListener("change", pLineEdit);
-  ["p-freight","p-paid"].forEach(function(id){
-    document.getElementById(id).addEventListener("input", function(){
-      pdraft.freight = Number(document.getElementById("p-freight").value)||0;
-      pdraft.paid    = Number(document.getElementById("p-paid").value)||0;
-      clearPOver(); renderPCalc();
-    });
+  /* رأس الفاتورة كان بيتقرا وقت الحفظ بس، فلما الدرج يتقفل ويتفتح
+     تاني syncPHead كانت بتكتب فوق اللي اتكتب بقيم قديمة فاضية —
+     نص المسودة يروح ونصها يفضل. دلوقتي كل خانة بتتحدّث وانت بتكتب. */
+  ["p-date","p-party","p-inv","p-freight","p-paid","p-note"].forEach(function(id){
+    var el = document.getElementById(id);
+    var h = function(){
+      if(!pdraft) return;
+      readPHead();
+      clearPOver(); renderPCalc(); renderPDraftNote();
+    };
+    el.addEventListener("input", h);
+    el.addEventListener("change", h);
   });
+
+  // بيقول للمستخدم إنه بيكمّل مسودة، ويديله طريقة يفرّغها
+  function pDraftDirty(){
+    if(!pdraft || editing.purchases || pdraft.batchId) return false;
+    if(pdraft.partyId || pdraft.inv || pdraft.note) return true;
+    if(Number(pdraft.freight) || Number(pdraft.paid)) return true;
+    return pdraft.lines.some(function(l){
+      return l.itemId || Number(l.packCost) || Number(l.packs) || mixPieces(l) > 0;
+    });
+  }
+  function renderPDraftNote(){
+    var el = document.getElementById("p-draft-note");
+    if(!el) return;
+    el.hidden = !pDraftDirty();
+  }
 
   document.getElementById("c-type").addEventListener("change", fillSelects);
 
@@ -6363,11 +6539,11 @@
   }
 
   document.getElementById("b-savepartner").addEventListener("click", function(){
-    var name = document.getElementById("np-name").value.trim();
+    var name = squish(document.getElementById("np-name").value);
     var phone = document.getElementById("np-phone").value.trim();
     if(!name){ toast("اكتب اسم الشريك"); return; }
     var dup = live("parties").find(function(x){
-      return isPartner(x) && x.id !== editingPartner && x.name.trim() === name; });
+      return isPartner(x) && x.id !== editingPartner && squish(x.name) === name; });
     if(dup){ toast("فيه شريك تاني بنفس الاسم"); return; }
 
     if(editingPartner){
@@ -6641,8 +6817,9 @@
     if(key === "purchases"){
       closeNewItem();
       if(!pdraft) pdraft = newPDraft();
-      if(!editing.purchases && !pdraft.batchId) pdraft.date = firstOpenDate();
-      clearPOver(); syncPHead(); renderPLines();
+      // تاريخ النهاردة للمسودة الفاضية بس — المسودة اللي فيها شغل تفضل بتاريخها
+      if(!editing.purchases && !pdraft.batchId && !pDraftDirty()) pdraft.date = firstOpenDate();
+      clearPOver(); syncPHead(); renderPLines(); renderPDraftNote();
     }
     box.classList.add("as-drawer");
     box.hidden = false;
@@ -6914,6 +7091,7 @@
     backfillSaleNos();
     readFilters();
     readCashFilters();
+    numify();
     var cur = document.querySelector('#nav button[aria-current="true"]');
     activeTab = cur ? cur.dataset.tab : "dash";
     renderAll();
