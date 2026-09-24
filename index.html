@@ -359,6 +359,8 @@
   .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
   .lmix-sum b{color:var(--ink);font-weight:600}
+  .more-wrap{margin-top:10px;text-align:center}
+  .more-wrap[hidden],.more-wrap button[hidden]{display:none}
   td.acts{white-space:nowrap}
   td.acts .del + .del{margin-inline-start:10px}
   .vcode{width:100%;min-width:92px;padding:5px 8px;font-size:.82rem;font-family:ui-monospace,monospace}
@@ -660,6 +662,7 @@
   <div class="stats" id="s-stats"></div>
 
   <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
   <datalist id="ship-list"></datalist>
   <datalist id="owner-list"></datalist>
 </section>
@@ -789,6 +792,7 @@
   </div>
 
   <div class="tbl-wrap"><table id="t-purch"></table></div>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="purch" hidden></button></p>
 </section>
 
 <!-- الخزنة -->
@@ -880,6 +884,7 @@
   </div>
 
   <div class="tbl-wrap"><table id="t-cash"></table></div>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="cash" hidden></button></p>
 </section>
 
 <!-- الأصناف -->
@@ -1449,8 +1454,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "32";
+  var VERSION = "33";
   var CHANGELOG = [
+    { v:"33", d:"2026-09-24", items:[
+      "السيستم بقى أسرع ١٥ مرة: حفظ الحركة على الموبايل من ١٨٫٧ ثانية لـ١٫٢",
+      "الشاشة المفتوحة بس هي اللي بترسم، والباقي بيترسم أول ما تفتحه",
+      "الجداول الكبيرة بتعرض ١٠٠ صف وتحتها «وريني كمان» — الأرقام فوق لسه على الكل",
+      "منع حذف صنف أو جهة عليهم حركات (كان بيكسر توازن الميزانية من غير تحذير)",
+      "منع تسجيل صنفين بنفس الاسم"
+    ]},
     { v:"32", d:"2026-09-24", items:[
       "زرار «المبالغ» جنب كل شريك بيوديك لحركته للتعديل على طول",
       "سجل حركات رأس المال اتنقل جنب جدول الشركاء بدل ما يكون تحت في آخر الشاشة"
@@ -3521,9 +3533,10 @@
       if(!list.some(function(s){ return s.id === id; })) delete openRows[id];
     });
 
+    var page = pageRows("sales", list);   // الإحصائيات فوق على الكل، والجدول على الدفعة
     var t = document.getElementById("t-sales");
     t.innerHTML = "<thead><tr>" + SALE_HEAD.map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("") +
-      "</tr></thead><tbody>" + list.map(saleRowHTML).join("") +
+      "</tr></thead><tbody>" + page.map(saleRowHTML).join("") +
       (list.length ? "" : "<tr><td class='empty' colspan='"+SALE_HEAD.length+"'>" +
         esc(live("sales").length ? "مفيش أوردرات بالمواصفات دي." : "مفيش أوردرات لسه — ابدأ بزرار «أوردر جديد» فوق.") +
         "</td></tr>") + "</tbody>";
@@ -3884,6 +3897,7 @@
     });
 
     var rows = [];
+    groups = pageRows("purch", groups);   // دفعة فواتير كاملة مش أسطر مقطوعة
     groups.forEach(function(g){
       var n = g.rows.length, h = g.head;
       var isRet = isPRet(h);
@@ -4124,6 +4138,8 @@
           : "<span style='font-size:.75rem;color:var(--ink-soft)' title='الحركة دي جاية من أوردر أو شراء — عدّلها من شاشتها'>تلقائي</span>")+"</td></tr>");
     });
     renderCashChips();
+    // الرصيد التراكمي اتحسب فوق على الدفتر كامل، فالتقسيم ما بيأثّرش عليه
+    rows = pageRows("cash", rows, true);
     table("t-cash", ["التاريخ","الحركة","الجهة","داخل","خارج","الرصيد بعدها",""], rows,
       L.length ? "مفيش حركات مطابقة للفلتر. امسح الفلاتر عشان تشوف الدفتر كامل."
                : "الخزنة فاضية. أول حركة في السيستم هي تسجيل رأس المال من تبويب «رأس المال» — وهو اللي بتشتري بيه بضاعة وتدفع منه المصاريف.");
@@ -4279,6 +4295,37 @@
 
   function byDate(a,b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : (b.at||0)-(a.at||0)); }
 
+  /* ---------- الجداول الكبيرة بتتعرض على دفعات ----------
+     رسم ٣ آلاف صف مرة واحدة كان بياخد ثواني على الموبايل، وإنت أصلاً
+     مش بتبص غير على آخر حركات. بنعرض دفعة وتحتها «وريني كمان». */
+  var PAGE = 100;
+  var shownRows = { sales:PAGE, purch:PAGE, cash:PAGE };
+
+  // fromEnd: الخزنة مرتّبة من الأقدم للأحدث، فالمهم آخر الصفوف
+  function pageRows(key, rows, fromEnd){
+    var n = shownRows[key] || PAGE, total = rows.length;
+    var out = total <= n ? rows : (fromEnd ? rows.slice(total - n) : rows.slice(0, n));
+    var btn = document.querySelector('[data-more="' + key + '"]');
+    if(btn){
+      var rest = total - out.length;
+      btn.hidden = rest <= 0;
+      if(rest > 0) btn.textContent = "وريني " + qty(Math.min(PAGE, rest)) +
+        " كمان · باقي " + qty(rest) + " من " + qty(total);
+      var wrap = btn.parentNode;
+      if(wrap) wrap.hidden = rest <= 0;
+    }
+    return out;
+  }
+  function resetPage(key){ shownRows[key] = PAGE; }
+
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-more]");
+    if(!b) return;
+    var k = b.dataset.more;
+    shownRows[k] = (shownRows[k] || PAGE) + PAGE;
+    renderTab(k === "sales" ? "sales" : k === "purch" ? "purch" : "cash");
+  });
+
   function fillSelects(){
     function opts(list, sel, placeholder, withStock){
       var el = document.getElementById(sel);
@@ -4377,14 +4424,47 @@
     if(oldZ) zSel.value = oldZ;
   }
 
-  function renderAll(){
-    fillSelects();
-    syncPeriodUI(); renderKPIs(); renderDashPartners(); renderStock(); renderLowStock(); renderShipping(); renderInventory(); renderReports(); renderBalances();
-    renderSales(); renderPurch(); renderWallets(); renderCash();
-    renderItems(); renderVars(); renderOffers(); renderParties(); renderStatement(); renderLog();
-    renderFind();
-    renderOpening(); renderLock(); renderCapital(); renderDistLimits();
+  /* ================= الرسم الكسول =================
+     قبل كده كل حفظة كانت بتعيد رسم الـ١٢ شاشة كلهم — بما فيهم جدول
+     مبيعات بآلاف الصفوف مخفي ورا. على موبايل متوسط ده كان بيوصل
+     لـ١٨ ثانية للحركة الواحدة. دلوقتي بنرسم الشاشة المفتوحة بس،
+     والباقي بيتعلّم "محتاج رسم" وبيترسم أول ما تفتحه. */
+  var TAB_RENDER = {
+    dash:    function(){ syncPeriodUI(); renderKPIs(); renderDashPartners(); renderStock();
+                         renderLowStock(); renderShipping(); renderBalances(); },
+    capital: function(){ renderCapital(); renderDistLimits(); },
+    cash:    function(){ renderWallets(); renderCash(); },
+    purch:   function(){ renderPurch(); },
+    items:   function(){ renderItems(); renderVars(); renderOffers(); },
+    inv:     function(){ renderInventory(); },
+    sales:   function(){ renderSales(); },
+    find:    function(){ renderFind(); },
+    parties: function(){ renderParties(); renderStatement(); },
+    rep:     function(){ renderReports(); },
+    log:     function(){ renderLog(); },
+    backup:  function(){ renderOpening(); renderLock(); }
+  };
+  var dirtyTabs = {};          // تبويبات محتاجة رسم لما تتفتح
+  var activeTab = "dash";
+
+  function renderTab(tab){
+    var fn = TAB_RENDER[tab];
+    if(!fn) return;
+    fn();
+    delete dirtyTabs[tab];
   }
+  // بتتنادى بعد أي تغيير في البيانات
+  function renderAll(){
+    fillSelects();                       // القوايم بتتغذّى في كل الأدراج
+    Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
+    renderTab(activeTab);
+  }
+  // بتتنادى عند تغيير التبويب
+  function showTab(tab){
+    activeTab = tab;
+    if(dirtyTabs[tab]) renderTab(tab);
+  }
+
 
   /* ---------- البحث عن أوردر ---------- */
   function findMatches(q){
@@ -4469,6 +4549,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("main > section[id^='tab-']"), function(sec){
       sec.hidden = (sec.id !== "tab-" + b.dataset.tab);
     });
+    showTab(b.dataset.tab);          // يترسم دلوقتي لو كان محتاج
     window.scrollTo(0,0);
   });
 
@@ -4612,11 +4693,57 @@
     if(openEntryKey === list) closeEntry();
   }
 
+  /* ---------- حاجز الحذف اللي بيكسر الميزانية ----------
+     الصنف أو الجهة بيتشالوا من live() فبيختفوا من صافي الأصول، بس
+     الفلوس اللي اتصرفت عليهم والأوردرات بتاعتهم بتفضل مسجّلة.
+     النتيجة: صافي الأصول ≠ حقوق الملكية من غير ما حد ياخد باله. */
+  // «٩ حركة» غلط — العربي بيفرّق بين المفرد والمثنى والجمع
+  function plural(n, one, two, few){
+    n = Math.abs(Number(n)||0);
+    if(n === 1) return one;
+    if(n === 2) return two;
+    if(n >= 3 && n <= 10) return qty(n) + " " + few;
+    return qty(n) + " " + one;
+  }
+  function nMoves(n){ return plural(n, "حركة", "حركتين", "حركات"); }
+
+  function itemMoves(id){
+    var n = live("purchases").filter(function(x){ return x.itemId === id; }).length;
+    live("sales").forEach(function(sx){
+      if(SL(sx).some(function(l){ return l.itemId === id; })) n++;
+    });
+    return n;
+  }
+  function partyMoves(id){
+    var n = 0;
+    live("sales").forEach(function(x){ if(x.partyId === id) n++; });
+    live("purchases").forEach(function(x){ if(x.partyId === id) n++; });
+    live("cash").forEach(function(x){ if(x.partyId === id) n++; });
+    return n;
+  }
+  function deleteBlock(list, rec){
+    if(list === "items"){
+      var n = itemMoves(rec.id);
+      if(n) return "«" + (rec.name||"الصنف") + "» عليه " + nMoves(n) +
+        " — حذفه هيبوّظ أرقام المخزون والأرباح. سيبه، رصيده صفر مش هيزعجك.";
+    }
+    if(list === "parties"){
+      var m = partyMoves(rec.id);
+      if(m) return "«" + (rec.name||"الجهة") + "» عليها " + nMoves(m) +
+        " — حذفها هيضيّع رصيدها من الميزانية. سيبها في الكشف.";
+    }
+    return "";
+  }
+
   function stamp(o){ o.id = uid(); o.by = me || "غير محدد"; o.at = Date.now(); return o; }
 
   bind("f-item","b-item", function(form){
     var name = document.getElementById("i-name").value.trim();
     if(!name){ toast("اكتب اسم الصنف"); return; }
+    // صنفين بنفس الاسم بيخلّوا كل القوايم ملخبطة ومحدش يعرف يختار الصح
+    var dupI = live("items").find(function(x){
+      return x.id !== editing.items && (x.name||"").trim() === name; });
+    if(dupI){ toast("فيه صنف بنفس الاسم — اختاره من القايمة أو غيّر الاسم"); return; }
     commit("items", { name:name, unit:document.getElementById("i-unit").value.trim(),
       price:Number(document.getElementById("i-price").value)||0,
       min:Number(document.getElementById("i-min").value)||0,
@@ -4824,21 +4951,21 @@
     this.setAttribute("aria-expanded", String(!pnl.hidden));
   });
   ["cf-dir","cf-kind","cf-src","cf-from","cf-to"].forEach(function(id){
-    document.getElementById(id).addEventListener("change", function(){ readCashFilters(); renderCash(); });
+    document.getElementById(id).addEventListener("change", function(){ readCashFilters(); resetPage("cash"); renderCash(); });
   });
-  document.getElementById("cf-text").addEventListener("input", function(){ readCashFilters(); renderCash(); });
+  document.getElementById("cf-text").addEventListener("input", function(){ readCashFilters(); resetPage("cash"); renderCash(); });
   document.getElementById("cf-chips").addEventListener("click", function(e){
     var rm = e.target.closest("[data-rmcf]");
     if(rm){
       var el = document.getElementById(CF_ID[rm.dataset.rmcf]);
-      if(el){ el.value = ""; readCashFilters(); renderCash(); }
+      if(el){ el.value = ""; readCashFilters(); resetPage("cash"); renderCash(); }
       return;
     }
     if(e.target.id === "b-clearcf"){
       Object.keys(CF_ID).forEach(function(k){
         var el = document.getElementById(CF_ID[k]); if(el) el.value = "";
       });
-      readCashFilters(); renderCash();
+      readCashFilters(); resetPage("cash"); renderCash();
     }
   });
 
@@ -4854,13 +4981,13 @@
       var id = { status:"flt-status", party:"flt-party", item:"flt-item", ship:"flt-ship",
                  owner:"flt-owner", from:"flt-from", to:"flt-to", text:"flt-text" }[rm.dataset.rmflt];
       var el = document.getElementById(id);
-      if(el){ el.value = ""; readFilters(); renderSales(); }
+      if(el){ el.value = ""; readFilters(); resetPage("sales"); renderSales(); }
       return;
     }
     if(e.target.id === "b-clearf"){
       ["flt-status","flt-party","flt-item","flt-ship","flt-owner","flt-from","flt-to","flt-text"]
         .forEach(function(x){ var el = document.getElementById(x); if(el) el.value = ""; });
-      readFilters(); renderSales();
+      readFilters(); resetPage("sales"); renderSales();
     }
   });
 
@@ -5511,6 +5638,11 @@
     if(!rec) return;
     var locked = (list === "sales") ? saleLocked(rec) : isLocked(rec.date);
     if(locked){ toast("السجل ده في فترة مقفولة — مينفعش يتحذف"); return; }
+    var block = deleteBlock(list, rec);
+    if(block){
+      d.dataset.armed = ""; d.textContent = "حذف";
+      toast(block); return;
+    }
 
     // التوزيع حركتين لكل شريك (استحقاق + صرف). مسح واحدة بتسيب التانية
     // يتيمة وبتخلي الأرباح المستحقة سالبة، فبيتحذف كوحدة واحدة.
@@ -5828,7 +5960,7 @@
   ["flt-status","flt-party","flt-item","flt-ship","flt-owner","flt-from","flt-to","flt-text"].forEach(function(id){
     var el = document.getElementById(id);
     el.addEventListener(id === "flt-text" ? "input" : "change", function(){
-      readFilters(); renderSales();
+      readFilters(); resetPage("sales"); renderSales();
     });
   });
   Array.prototype.forEach.call(document.querySelectorAll(".per"), function(el){
@@ -6283,7 +6415,8 @@
     var dl = e.target.closest("[data-delpartner]");
     if(dl){
       var id = dl.dataset.delpartner;
-      if(capMoves(id).length){ toast("الشريك ده عليه حركات — احذفها الأول"); return; }
+      if(capMoves(id).length){
+        toast("الشريك ده عليه " + nMoves(capMoves(id).length) + " — احذفها الأول"); return; }
       if(dl.dataset.armed !== "1"){
         dl.dataset.armed = "1"; dl.textContent = "متأكد؟";
         setTimeout(function(){
@@ -6781,6 +6914,8 @@
     backfillSaleNos();
     readFilters();
     readCashFilters();
+    var cur = document.querySelector('#nav button[aria-current="true"]');
+    activeTab = cur ? cur.dataset.tab : "dash";
     renderAll();
     renderStorageState();
 
