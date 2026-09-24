@@ -359,12 +359,6 @@
   .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
   .lmix-sum b{color:var(--ink);font-weight:600}
-  .codebar{display:grid;gap:5px}
-  .codebar input{width:100%;padding:9px 11px;font-size:.88rem;
-    font-family:ui-monospace,monospace;border-radius:9px}
-  .codebar .codemsg{font-size:.76rem;color:var(--ink-soft);min-height:1.1em}
-  .codebar .codemsg.ok{color:var(--teal);font-weight:500}
-  .codebar .codemsg.bad{color:var(--due)}
   .more-wrap{margin-top:10px;text-align:center}
   .more-wrap[hidden],.more-wrap button[hidden]{display:none}
   td.acts{white-space:nowrap}
@@ -718,10 +712,6 @@
 
       <div class="fset">
         <h3>البضاعة</h3>
-        <div class="codebar">
-          <input id="p-code" placeholder="امسح الكود بالقارئ أو اكتبه واضغط Enter" autocomplete="off" dir="ltr">
-          <span class="codemsg" id="p-code-msg"></span>
-        </div>
         <div id="p-lines"></div>
         <div class="row-actions" style="gap:8px">
           <button class="addline" type="button" id="b-addpline" style="flex:1">+ صنف تاني</button>
@@ -1472,8 +1462,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "34";
+  var VERSION = "35";
   var CHANGELOG = [
+    { v:"35", d:"2026-09-24", items:[
+      "شيل خانة مسح الباركود من درج الشراء — الأكواد والبحث بيها زي ما هما"
+    ]},
     { v:"34", d:"2026-09-24", items:[
       "الأرقام العربية (٥٠٠) بقت تتقبل وتتحوّل لوحدها — كانت بتتكل من غير أي رسالة",
       "كل خانات الأرقام بتفتح كيبورد رقمي على الموبايل",
@@ -1481,7 +1474,7 @@
       "المسافات الزيادة في الأسماء والألوان والمقاسات بتتنضّف لوحدها",
       "زرار «حفظ وابدأ واحدة جديدة» بيحتفظ بالمورد والتاريخ",
       "الفاتورة المحفوظة بتتلوّن لحظة في الجدول",
-      "إدخال بالكود: امسح بقارئ باركود أو اكتب الكود والسطر يتملّي لوحده"
+      "البحث بالكود من شاشة «بحث»"
     ]},
     { v:"33", d:"2026-09-24", items:[
       "السيستم بقى أسرع ١٥ مرة: حفظ الحركة على الموبايل من ١٨٫٧ ثانية لـ١٫٢",
@@ -2201,24 +2194,6 @@
     var k = codeKey(color,size), v = String(code||"").trim();
     if(v) it.codes[k] = v; else delete it.codes[k];
   }
-  // الكود بيوصّلك للصنف واللون والمقاس مرة واحدة — قارئ الباركود
-  // بيكتب الكود وبيبعت Enter، فبيشتغل من غير أي إعداد
-  function findByCode(code){
-    var q = squish(code).toLowerCase();
-    if(!q) return null;
-    var hit = null;
-    live("items").some(function(it){
-      if(!it.codes) return false;
-      return Object.keys(it.codes).some(function(k){
-        if(squish(it.codes[k]).toLowerCase() !== q) return false;
-        var parts = k.split("|");
-        hit = { itemId:it.id, color:parts[0]||"", size:parts[1]||"" };
-        return true;
-      });
-    });
-    return hit;
-  }
-
   function vCodeLabel(itemId, color, size){
     var c = vCode(itemId, color, size);
     return c ? " · " + c : "";
@@ -5457,49 +5432,6 @@
     var sel = document.getElementById("pl-item-" + newItemFor);
     if(sel) sel.scrollIntoView({block:"nearest"});
     toast("اتضاف الصنف واتختار في السطر");
-  });
-
-  /* ---------- الإدخال بالكود ---------- */
-  function pCodeMsg(txt, cls){
-    var el = document.getElementById("p-code-msg");
-    if(el){ el.textContent = txt || ""; el.className = "codemsg" + (cls ? " " + cls : ""); }
-  }
-  function addByCode(code){
-    var hit = findByCode(code);
-    if(!hit){ pCodeMsg("مفيش لون/مقاس بالكود ده — راجعه من شاشة الأصناف", "bad"); return false; }
-    var label = itemName(hit.itemId) + (vLabel(hit.color, hit.size) ? " · " + vLabel(hit.color, hit.size) : "");
-    // سطر لنفس الصنف موجود؟ نزوّد جوّاه. غير كده نستعمل سطر فاضي أو نضيف واحد
-    var li = pdraft.lines.findIndex(function(l){ return l.itemId === hit.itemId; });
-    if(li < 0) li = pdraft.lines.findIndex(function(l){ return !l.itemId; });
-    if(li < 0){ pdraft.lines.push(newPLine()); li = pdraft.lines.length - 1; }
-    var l = pdraft.lines[li];
-    if(l.itemId !== hit.itemId){ l.itemId = hit.itemId; l.mix = [newMix()]; }
-    if(!l.mix || !l.mix.length) l.mix = [newMix()];
-    var m = l.mix.filter(function(x){
-      return squish(x.color) === hit.color && squish(x.size) === hit.size; })[0];
-    if(m){ m.qty = (Number(m.qty)||0) + 1; }
-    else {
-      var blank = l.mix.filter(function(x){ return !squish(x.color) && !squish(x.size) && !Number(x.qty); })[0];
-      if(blank){ blank.color = hit.color; blank.size = hit.size; blank.qty = 1; m = blank; }
-      else { m = { color:hit.color, size:hit.size, qty:1 }; l.mix.push(m); }
-    }
-    renderPLines();
-    pCodeMsg(label + " ← العدد " + qty(m.qty), "ok");
-    return true;
-  }
-  document.getElementById("p-code").addEventListener("keydown", function(e){
-    if(e.key !== "Enter") return;
-    e.preventDefault(); e.stopPropagation();
-    var v = this.value;
-    if(!squish(v)) return;
-    if(addByCode(v)) this.value = "";
-    // كود غلط: بنظلّله بدل ما نسيبه. القارئ بيكتب فوق المظلّل، فالكود
-    // اللي بعده ما يتلزقش عليه ويطلع خليط ملهوش معنى.
-    else this.select();
-    this.focus();
-  });
-  document.getElementById("p-code").addEventListener("input", function(){
-    if(!squish(this.value)) pCodeMsg("");
   });
 
   document.getElementById("b-pclear").addEventListener("click", function(){
