@@ -359,6 +359,8 @@
   .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
   .lmix-sum b{color:var(--ink);font-weight:600}
+  td.acts{white-space:nowrap}
+  td.acts .del + .del{margin-inline-start:10px}
   .vcode{width:100%;min-width:92px;padding:5px 8px;font-size:.82rem;font-family:ui-monospace,monospace}
   .ptot{background:var(--teal-soft);border-radius:10px;padding:11px 13px;display:grid;gap:5px;font-size:.85rem}
   .ptot div{display:flex;justify-content:space-between;gap:12px}
@@ -1030,8 +1032,14 @@
 
   <div class="panel">
     <h3>الشركاء</h3>
+    <p class="hint" style="margin-bottom:10px">«الاسم» بيغيّر اسم الشريك وتليفونه. «المبالغ» بتوديك لحركاته عشان تعدّل مبلغ أو تاريخ. والنسب بتتحسب لوحدها بعد أي تعديل.</p>
     <div class="tbl-wrap"><table id="t-partners"></table></div>
     <p class="hint" style="margin-top:10px">سجّل الشريك ورأس ماله من زرار <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة لو الشريك لسه مش مسجّل.</p>
+  </div>
+
+  <div class="panel">
+    <h3 id="caplog-title">سجل حركات رأس المال</h3>
+    <div class="tbl-wrap"><table id="t-cap-log"></table></div>
   </div>
 
   <div class="tbar">
@@ -1114,10 +1122,6 @@
     <div class="tbl-wrap"><table id="t-recon"></table></div>
   </div>
 
-  <div class="panel">
-    <h3 id="caplog-title">سجل حركات رأس المال</h3>
-    <div class="tbl-wrap"><table id="t-cap-log"></table></div>
-  </div>
 </section>
 
 <section id="tab-inv" hidden>
@@ -1445,8 +1449,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "31";
+  var VERSION = "32";
   var CHANGELOG = [
+    { v:"32", d:"2026-09-24", items:[
+      "زرار «المبالغ» جنب كل شريك بيوديك لحركته للتعديل على طول",
+      "سجل حركات رأس المال اتنقل جنب جدول الشركاء بدل ما يكون تحت في آخر الشاشة"
+    ]},
     { v:"31", d:"2026-09-24", items:[
       "تعديل اسم الشريك وتليفونه من شاشة رأس المال (كان مستحيل بعد إصدار 29)",
       "تعديل مبلغ أو تاريخ أو نوع أي حركة رأس مال بدل ما تحذفها وتسجّلها من تاني",
@@ -5990,11 +5998,11 @@
         "<td class='num'>"+(r*100).toFixed(2)+"%</td>"+
         "<td class='num "+(cur>0?"v-gain":"")+"'>"+money(cur)+"</td>"+
         "<td class='num' style='font-weight:600'>"+money(cap+cur)+"</td>"+
-        "<td><button class='del' style='color:var(--teal)' data-editpartner='"+p.id+"'>تعديل الاسم</button></td>"+
-        "<td>"+(n ? "<span style='font-size:.75rem;color:var(--ink-soft)' title='عليه "+qty(n)+" حركة'>"+qty(n)+" حركة</span>"
-                  : "<button class='del' data-delpartner='"+p.id+"'>حذف</button>")+"</td></tr>";
+        "<td class='acts'><button class='del' style='color:var(--teal)' data-editpartner='"+p.id+"'>الاسم</button>"+
+          (n ? "<button class='del' style='color:var(--teal)' data-editamt='"+p.id+"'>المبالغ</button>"
+             : "<button class='del' data-delpartner='"+p.id+"'>حذف</button>")+"</td></tr>";
     });
-    table("t-partners", ["الشريك","رأس ماله","نسبته","أرباح مستحقة له","إجمالي حقه","",""], rows,
+    table("t-partners", ["الشريك","رأس ماله","نسبته","أرباح مستحقة له","إجمالي حقه","تعديل"], rows,
       "مفيش شركاء لسه — اضغط «+ حركة رأس مال» فوق، وجوه الدرج هتلاقي «+ شريك».");
   }
 
@@ -6260,6 +6268,18 @@
   document.getElementById("t-partners").addEventListener("click", function(e){
     var ed = e.target.closest("[data-editpartner]");
     if(ed){ openPartnerBox(ed.dataset.editpartner); openEntry("capital"); return; }
+    var am = e.target.closest("[data-editamt]");
+    if(am){
+      // فيه حركة واحدة بس؟ نفتحها للتعديل على طول. أكتر من واحدة؟
+      // نفلتر السجل على الشريك ده عشان يختار اللي عايز يعدّله
+      var mv = capMoves(am.dataset.editamt).filter(function(c){ return !c.distId; });
+      capLogFor = am.dataset.editamt;
+      renderCapLog();
+      if(mv.length === 1){ startEditCap(mv[0].id); return; }
+      document.getElementById("t-cap-log").scrollIntoView({block:"nearest"});
+      toast(mv.length ? "اختار الحركة اللي عايز تعدّلها" : "مفيش حركات تتعدّل");
+      return;
+    }
     var dl = e.target.closest("[data-delpartner]");
     if(dl){
       var id = dl.dataset.delpartner;
