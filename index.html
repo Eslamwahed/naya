@@ -1061,11 +1061,12 @@
         </select></div>
       <div><label for="cp-amount">المبلغ</label><input type="number" id="cp-amount" step="any" min="0" autocomplete="off"></div>
       <div><label for="cp-note">البيان</label><input id="cp-note" autocomplete="off"></div>
-      <div><button class="tbtn primary" type="button" id="b-cap">حفظ الحركة</button></div>
+      <div><button class="tbtn primary" type="button" id="b-cap">حفظ الحركة</button>
+        <button class="tbtn" type="button" id="x-cap" hidden>إلغاء التعديل</button></div>
     </form>
 
     <div class="newcust" id="newpartner-box" hidden style="margin-top:12px">
-      <h4>شريك جديد</h4>
+      <h4 id="np-title">شريك جديد</h4>
       <div class="fgrid">
         <div><label for="np-name">الاسم</label><input id="np-name" autocomplete="off"></div>
         <div><label for="np-phone">التليفون (اختياري)</label><input id="np-phone" autocomplete="off"></div>
@@ -1444,8 +1445,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "30";
+  var VERSION = "31";
   var CHANGELOG = [
+    { v:"31", d:"2026-09-24", items:[
+      "تعديل اسم الشريك وتليفونه من شاشة رأس المال (كان مستحيل بعد إصدار 29)",
+      "تعديل مبلغ أو تاريخ أو نوع أي حركة رأس مال بدل ما تحذفها وتسجّلها من تاني",
+      "حذف الشريك اللي لسه مالوش أي حركة",
+      "إصلاح: حركة رأس المال في دفتر الخزنة كانت بتفتح درج الخزنة بنوع فاضي"
+    ]},
     { v:"30", d:"2026-09-23", items:[
       "إصلاح: المخزون كان بيضرب الألوان في المقاسات ويطلّع تركيبات وهمية «خلصانة» وإنت أصلاً ما اشتريتهاش",
       "إصلاح: «قرب يخلص» كان بينبّه أول ما تشتري كمية صغيرة — بقى بعد ما يتباع منها فعلاً",
@@ -3980,7 +3987,7 @@
       if(isCapType(c.type) && CAP[c.type].cash === 0) return;   // حركة رأس مال من غير نقدية
       var isIn = (c.type==="in" || c.type==="settle" || c.type==="opening" ||
                   (isCapType(c.type) && CAP[c.type].cash > 0));
-      L.push({d:c.date, at:c.at, t:cashLabel(c.type), kind:cashKind(c.type),
+      L.push({d:c.date, at:c.at, t:cashLabel(c.type), kind:cashKind(c.type), cap:isCapType(c.type),
         who:(c.type==="settle" ? (c.shipCo||"شركة شحن") : (c.partyId?partyName(c.partyId):"—")),
         note:((c.note||"") === cashLabel(c.type) ? "" : (c.note||"")), inn:(isIn?a:0), out:(isIn?0:a),
         src:(c.type==="opening" ? "افتتاحي" : "يدوي"), id:c.id});
@@ -4099,8 +4106,12 @@
         "<td class='num "+(x.inn?"v-gain":"")+"'>"+(x.inn?money(x.inn):"—")+"</td>"+
         "<td class='num "+(x.out?"v-due":"")+"'>"+(x.out?money(x.out):"—")+"</td>"+
         "<td class='num "+(run<0?"v-due":"")+"'>"+money(run)+"</td>"+
+        // حركة رأس المال ليها درجها الخاص. درج الخزنة مافيهوش نوعها،
+        // فلو اتفتحت منه ممكن تتحوّل بالغلط لتحصيل عادي وتضيع من رأس المال.
         "<td>"+(x.id
-          ? "<button class='del' style='color:var(--teal)' data-edit='cash|"+x.id+"'>تعديل</button>"+
+          ? (x.cap
+              ? "<button class='del' style='color:var(--teal)' data-editcap='"+x.id+"'>تعديل</button>"
+              : "<button class='del' style='color:var(--teal)' data-edit='cash|"+x.id+"'>تعديل</button>") +
             "<button class='del' data-del='cash' data-id='"+x.id+"'>حذف</button>"
           : "<span style='font-size:.75rem;color:var(--ink-soft)' title='الحركة دي جاية من أوردر أو شراء — عدّلها من شاشتها'>تلقائي</span>")+"</td></tr>");
     });
@@ -5964,19 +5975,26 @@
     }).join("");
   }
 
+  function capMoves(pid){
+    return live("cash").filter(function(c){ return isCapType(c.type) && c.partyId === pid; });
+  }
   function renderPartners(){
     var ps = partners();
     var rows = ps.map(function(p){
       var cap = capitalOf(p.id), cur = currentOf(p.id), r = ratioOf(p.id);
-      return "<tr style='cursor:pointer' data-caplog='"+p.id+"' title='وريني حركاته'>" +
-          "<td class='wide'>"+esc(p.name)+
+      var n = capMoves(p.id).length;
+      return "<tr data-caplog='"+p.id+"' title='وريني حركاته'>" +
+          "<td class='wide' style='cursor:pointer'>"+esc(p.name)+
           (p.phone ? "<span class='sub'>"+esc(p.phone)+"</span>" : "")+"</td>"+
         "<td class='num'>"+money(cap)+"</td>"+
         "<td class='num'>"+(r*100).toFixed(2)+"%</td>"+
         "<td class='num "+(cur>0?"v-gain":"")+"'>"+money(cur)+"</td>"+
-        "<td class='num' style='font-weight:600'>"+money(cap+cur)+"</td></tr>";
+        "<td class='num' style='font-weight:600'>"+money(cap+cur)+"</td>"+
+        "<td><button class='del' style='color:var(--teal)' data-editpartner='"+p.id+"'>تعديل الاسم</button></td>"+
+        "<td>"+(n ? "<span style='font-size:.75rem;color:var(--ink-soft)' title='عليه "+qty(n)+" حركة'>"+qty(n)+" حركة</span>"
+                  : "<button class='del' data-delpartner='"+p.id+"'>حذف</button>")+"</td></tr>";
     });
-    table("t-partners", ["الشريك","رأس ماله","نسبته","أرباح مستحقة له","إجمالي حقه"], rows,
+    table("t-partners", ["الشريك","رأس ماله","نسبته","أرباح مستحقة له","إجمالي حقه","",""], rows,
       "مفيش شركاء لسه — اضغط «+ حركة رأس مال» فوق، وجوه الدرج هتلاقي «+ شريك».");
   }
 
@@ -6031,9 +6049,12 @@
             (d.capital ? (d.capital>0?"+":"−")+money(a) : "—")+"</td>"+
           "<td class='num "+(d.current>0?"v-gain":(d.current<0?"v-due":""))+"'>"+
             (d.current ? (d.current>0?"+":"−")+money(a) : "—")+"</td>"+
+          "<td>"+(c.distId
+            ? "<span style='font-size:.75rem;color:var(--ink-soft)'>من توزيع</span>"
+            : "<button class='del' style='color:var(--teal)' data-editcap='"+c.id+"'>تعديل</button>")+"</td>"+
           "<td><button class='del' data-del='cash' data-id='"+c.id+"'>حذف</button></td></tr>";
       });
-    table("t-cap-log", ["التاريخ","الشريك","الحركة","رأس المال","أرباح مستحقة",""], rows,
+    table("t-cap-log", ["التاريخ","الشريك","الحركة","رأس المال","أرباح مستحقة","",""], rows,
       capLogFor ? "مفيش حركات للشريك ده." : "مفيش حركات رأس مال لسه.");
     var ttl = document.getElementById("caplog-title");
     if(ttl) ttl.innerHTML = capLogFor
@@ -6072,6 +6093,64 @@
   }
 
   /* ---------- حفظ حركة رأس مال ---------- */
+  /* ---------- تعديل حركة رأس مال ---------- */
+  var editingCap = null;
+
+  // بيحسب الحدود كأن الحركة اللي بنعدّلها مش موجودة. من غير كده الشريك
+  // اللي ضخّ ٥٠ ألف مش هيقدر يعدّلهم لـ٤٠، لأن السيستم بيقارن برصيد
+  // الحركة نفسها جوّاه.
+  function withoutCap(id, fn){
+    var rec = id && db.cash.find(function(x){ return x.id === id; });
+    if(!rec || rec.deleted) return fn();
+    rec.deleted = true;
+    try { return fn(); } finally { delete rec.deleted; }
+  }
+
+  function setCapEditUI(){
+    var on = !!editingCap;
+    document.getElementById("b-cap").textContent = on ? "حفظ التعديل" : "حفظ الحركة";
+    document.getElementById("x-cap").hidden = !on;
+    var t = document.getElementById("title-capital");
+    if(t) t.textContent = on ? "تعديل حركة رأس مال" : "حركة رأس مال";
+  }
+  function startEditCap(id){
+    var rec = db.cash.find(function(x){ return x.id===id; });
+    if(!rec || rec.deleted || !isCapType(rec.type)) return;
+    if(rec.distId){
+      toast("الحركة دي جزء من توزيع أرباح — احذف التوزيع كله وأعد توزيعه"); return;
+    }
+    if(isLocked(rec.date)){ toast("السجل ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+    editingCap = id;
+    document.getElementById("cp-date").value    = rec.date || today();
+    document.getElementById("cp-partner").value = rec.partyId || "";
+    document.getElementById("cp-type").value    = rec.type;
+    document.getElementById("cp-amount").value  = rec.amount || "";
+    document.getElementById("cp-note").value    =
+      (rec.note === CAP[rec.type].label) ? "" : (rec.note || "");
+    setCapEditUI();
+    goTab("capital"); openEntry("capital");
+    renderCapHint(); updateImpact("capital");
+    toast("بتعدّل حركة موجودة");
+  }
+  function cancelEditCap(){
+    editingCap = null;
+    ["cp-amount","cp-note"].forEach(function(x){ document.getElementById(x).value = ""; });
+    setCapEditUI(); renderCapHint(); updateImpact("capital");
+  }
+  document.getElementById("x-cap").addEventListener("click", function(){
+    cancelEditCap();
+    if(openEntryKey === "capital") closeEntry();
+  });
+  document.getElementById("t-cash").addEventListener("click", function(e){
+    var b = e.target.closest("[data-editcap]");
+    if(b) startEditCap(b.dataset.editcap);
+  });
+
+  document.getElementById("t-cap-log").addEventListener("click", function(e){
+    var b = e.target.closest("[data-editcap]");
+    if(b) startEditCap(b.dataset.editcap);
+  });
+
   document.getElementById("b-cap").addEventListener("click", function(){
     var d   = document.getElementById("cp-date").value || firstOpenDate();
     var pid = document.getElementById("cp-partner").value;
@@ -6081,18 +6160,35 @@
     if(!a){ toast("اكتب المبلغ"); return; }
     if(!guardLock(d, "حركة رأس المال")) return;
 
-    if(t === "cap_out" && a > capitalOf(pid) + 0.009){
-      toast("رأس مال " + partyName(pid) + " " + money(capitalOf(pid)) + " بس"); return;
-    }
-    if((t === "cap_payout" || t === "cap_reinvest") && a > currentOf(pid) + 0.009){
-      toast("الأرباح المستحقة لـ" + partyName(pid) + " " + money(currentOf(pid)) + " بس"); return;
-    }
-    if(CAP[t].cash < 0 && a > cashBox() + 0.009){
-      toast("الخزنة فيها " + money(cashBox()) + " بس"); return;
+    var prev = editingCap ? db.cash.find(function(x){ return x.id===editingCap; }) : null;
+    if(prev && prev.date && isLocked(prev.date)){
+      toast("السجل ده في فترة مقفولة — مينفعش يتعدّل"); return;
     }
 
-    db.cash.push(stamp({ date:d, type:t, partyId:pid, amount:a, shipCo:"",
-      note: document.getElementById("cp-note").value.trim() || CAP[t].label }));
+    var bad = withoutCap(editingCap, function(){
+      if(t === "cap_out" && a > capitalOf(pid) + 0.009)
+        return "رأس مال " + partyName(pid) + " " + money(capitalOf(pid)) + " بس";
+      if((t === "cap_payout" || t === "cap_reinvest") && a > currentOf(pid) + 0.009)
+        return "الأرباح المستحقة لـ" + partyName(pid) + " " + money(currentOf(pid)) + " بس";
+      if(CAP[t].cash < 0 && a > cashBox() + 0.009)
+        return "الخزنة فيها " + money(cashBox()) + " بس";
+      return "";
+    });
+    if(bad){ toast(bad); return; }
+
+    var note = document.getElementById("cp-note").value.trim() || CAP[t].label;
+    if(prev){
+      prev.date = d; prev.type = t; prev.partyId = pid; prev.amount = a; prev.note = note;
+      prev.editedBy = me || "غير محدد"; prev.at = Date.now();
+      editingCap = null; setCapEditUI();
+      ["cp-amount","cp-note"].forEach(function(x){ document.getElementById(x).value = ""; });
+      saveSoon("cash"); renderAll();
+      if(openEntryKey === "capital") closeEntry();
+      toast("اتعدّلت الحركة");
+      return;
+    }
+
+    db.cash.push(stamp({ date:d, type:t, partyId:pid, amount:a, shipCo:"", note:note }));
     document.getElementById("cp-amount").value = "";
     document.getElementById("cp-note").value = "";
     saveSoon("cash"); renderAll();
@@ -6100,44 +6196,92 @@
     toast(CAP[t].label + " اتسجّل");
   });
 
+  document.body.addEventListener("click", function(e){
+    if(e.target.id === "b-caplog-all"){ capLogFor = null; renderCapLog(); }
+  });
+
+  document.getElementById("b-newpartner").addEventListener("click", function(){ openPartnerBox(null); });
+  document.getElementById("b-cancelpartner").addEventListener("click", closePartnerBox);
+  var editingPartner = null;
+
+  function openPartnerBox(id){
+    editingPartner = id || null;
+    var box = document.getElementById("newpartner-box");
+    var rec = id ? db.parties.find(function(x){ return x.id===id; }) : null;
+    document.getElementById("np-title").textContent = rec ? "تعديل بيانات الشريك" : "شريك جديد";
+    document.getElementById("b-savepartner").textContent = rec ? "حفظ التعديل" : "حفظ الشريك";
+    document.getElementById("np-name").value  = rec ? (rec.name || "")  : "";
+    document.getElementById("np-phone").value = rec ? (rec.phone || "") : "";
+    box.hidden = false;
+    document.getElementById("np-name").focus();
+    box.scrollIntoView({block:"nearest"});
+  }
+  function closePartnerBox(){
+    editingPartner = null;
+    document.getElementById("newpartner-box").hidden = true;
+    ["np-name","np-phone"].forEach(function(x){ document.getElementById(x).value = ""; });
+  }
+
+  document.getElementById("b-savepartner").addEventListener("click", function(){
+    var name = document.getElementById("np-name").value.trim();
+    var phone = document.getElementById("np-phone").value.trim();
+    if(!name){ toast("اكتب اسم الشريك"); return; }
+    var dup = live("parties").find(function(x){
+      return isPartner(x) && x.id !== editingPartner && x.name.trim() === name; });
+    if(dup){ toast("فيه شريك تاني بنفس الاسم"); return; }
+
+    if(editingPartner){
+      // تغيير الاسم بس — الحركات مربوطة بالـ id مش بالاسم، فالأرقام ما بتتأثرش
+      var rec = db.parties.find(function(x){ return x.id===editingPartner; });
+      if(rec){
+        rec.name = name; rec.phone = phone;
+        rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+      }
+      closePartnerBox();
+      saveSoon("parties"); renderAll();
+      // كان بيعدّل اسم مش بيسجّل حركة — نقفل الدرج بدل ما نسيبه مفتوح
+      if(openEntryKey === "capital" && !editingCap) closeEntry();
+      toast("اتعدّل اسم الشريك");
+      return;
+    }
+
+    var rec2 = stamp({ name:name, type:"partner", phone:phone,
+      gov:"", address:"", fb:"", note:"" });
+    db.parties.push(rec2);
+    closePartnerBox();
+    saveSoon("parties");
+    renderAll();
+    var sel = document.getElementById("cp-partner");
+    if(sel) sel.value = rec2.id;   // يتختار على طول
+    updateImpact("capital"); renderCapHint();
+    toast("اتضاف الشريك واتختار");
+  });
+
   document.getElementById("t-partners").addEventListener("click", function(e){
+    var ed = e.target.closest("[data-editpartner]");
+    if(ed){ openPartnerBox(ed.dataset.editpartner); openEntry("capital"); return; }
+    var dl = e.target.closest("[data-delpartner]");
+    if(dl){
+      var id = dl.dataset.delpartner;
+      if(capMoves(id).length){ toast("الشريك ده عليه حركات — احذفها الأول"); return; }
+      if(dl.dataset.armed !== "1"){
+        dl.dataset.armed = "1"; dl.textContent = "متأكد؟";
+        setTimeout(function(){
+          if(dl.dataset.armed === "1"){ dl.dataset.armed = ""; dl.textContent = "حذف"; }
+        }, 4000);
+        return;
+      }
+      var rec = db.parties.find(function(x){ return x.id===id; });
+      if(rec){ rec.deleted = true; rec.at = Date.now(); }
+      saveSoon("parties"); renderAll(); toast("اتحذف الشريك");
+      return;
+    }
+    // الضغط على أي مكان تاني في السطر بيفتح سجل حركات الشريك
     var tr = e.target.closest("[data-caplog]");
     if(!tr) return;
     capLogFor = (capLogFor === tr.dataset.caplog) ? null : tr.dataset.caplog;
     renderCapLog();
     document.getElementById("t-cap-log").scrollIntoView({block:"nearest"});
-  });
-  document.body.addEventListener("click", function(e){
-    if(e.target.id === "b-caplog-all"){ capLogFor = null; renderCapLog(); }
-  });
-
-  document.getElementById("b-newpartner").addEventListener("click", function(){
-    var box = document.getElementById("newpartner-box");
-    box.hidden = false;
-    document.getElementById("np-name").focus();
-    box.scrollIntoView({block:"nearest"});
-  });
-  document.getElementById("b-cancelpartner").addEventListener("click", function(){
-    document.getElementById("newpartner-box").hidden = true;
-    ["np-name","np-phone"].forEach(function(x){ document.getElementById(x).value = ""; });
-  });
-  document.getElementById("b-savepartner").addEventListener("click", function(){
-    var name = document.getElementById("np-name").value.trim();
-    if(!name){ toast("اكتب اسم الشريك"); return; }
-    var dup = live("parties").find(function(x){
-      return isPartner(x) && x.name.trim() === name; });
-    if(dup){ toast("فيه شريك بنفس الاسم"); return; }
-    var rec = stamp({ name:name, type:"partner",
-      phone: document.getElementById("np-phone").value.trim(),
-      gov:"", address:"", fb:"", note:"" });
-    db.parties.push(rec);
-    ["np-name","np-phone"].forEach(function(x){ document.getElementById(x).value = ""; });
-    document.getElementById("newpartner-box").hidden = true;
-    saveSoon("parties");
-    renderAll();
-    document.getElementById("cp-partner").value = rec.id;   // يتختار على طول
-    updateImpact("capital"); renderCapHint();
-    toast("اتضاف الشريك واتختار");
   });
 
   ["cp-partner","cp-type"].forEach(function(id){
@@ -6334,7 +6478,10 @@
     if(openEntryKey && openEntryKey !== key) closeEntry(true);
 
     var t = document.getElementById("title-" + key);
-    if(t) t.textContent = (key !== "capital" && editing[key]) ? cfg.edit : cfg.title;
+    // رأس المال بيمسك حالة التعديل بتاعته لوحده (editingCap) مش في editing[]
+    if(t) t.textContent = (key === "capital")
+      ? (editingCap ? "تعديل حركة رأس مال" : cfg.title)
+      : (editing[key] ? cfg.edit : cfg.title);
 
     if(key === "cash") clearOver();
     if(key === "pret"){ renderPRetSrc(); renderPRetCalc(); }
