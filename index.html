@@ -1673,8 +1673,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "45";
+  var VERSION = "46";
   var CHANGELOG = [
+    { v:"46", d:"2026-09-25", items:[
+      "جدول نصيب الشركاء بقى بيقول من إمتى فلوس كل شريك بتتحسب وكام يوم من الفترة",
+      "وتوضيح ليه شريكين بنفس المبلغ ليهم نسبتين مختلفتين"
+    ]},
     { v:"45", d:"2026-09-25", items:[
       "اختيار متعدد في جدول المبيعات: «سلّم وحصّل» لعشرين أوردر مرة واحدة بدل ٦٠ خطوة",
       "الإجراء الجماعي بيعدّي على نفس الحواجز، وبيقولك أنهي أوردر اتخطّى وليه",
@@ -2808,6 +2812,27 @@
     return Object.keys(seen).sort();
   }
 
+  /* أول يوم دخل فيه الشريك فلوس. لازم يبان في الجدول، لأن شريكين بنفس
+     المبلغ بنسبتين مختلفتين بيبانوا غلط من غير ما تعرف إن واحد دفع
+     متأخّر — وده السبب الوحيد للفرق. */
+  function capStartOf(id){
+    var d = "";
+    live("cash").forEach(function(c){
+      if(c.partyId !== id || !c.date) return;
+      if(!isCapType(c.type) || CAP[c.type].capital <= 0) return;
+      if(!d || c.date < d) d = c.date;
+    });
+    return d;
+  }
+  // كام يوم من الفترة فلوسه كانت شغّالة فيها
+  function capDaysIn(id, from, to){
+    var st = capStartOf(id);
+    if(!st || !from || !to) return null;
+    var a = st > from ? st : from;
+    if(a > to) return 0;
+    return daysBetween(a, to) + 1;
+  }
+
   // النسبة المرجّحة بالزمن — الأساس المعتمد في محاسبة شركات الأشخاص.
   // الشريك اللي ضخّ فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.
   function weightedRatio(id, from, to){
@@ -3382,7 +3407,16 @@
       (paidOut > 0.009
         ? "<strong>اتوزّع منه " + esc(money(paidOut)) + " بالفعل، فاضل " + esc(money(left)) + ".</strong> "
         : "") +
-      "التوزيع الفعلي بيتم من تبويب رأس المال.";
+      "التوزيع الفعلي بيتم من تبويب رأس المال." +
+      (ps.some(function(x){
+          var d = capDaysIn(x.id, from, to);
+          return d !== null && d < daysBetween(from, to) + 1;
+        })
+        ? "<br><strong>ليه شريكين بنفس المبلغ ليهم نسبتين مختلفتين؟</strong> " +
+          "لأن النسبة بتتحسب بعدد أيام ما فلوسه شغّالة، مش بالمبلغ لوحده. " +
+          "اللي دفع متأخّر فلوسه اشتغلت أيام أقل، فنصيبه أقل. التاريخ وعدد " +
+          "الأيام مكتوبين جنب كل شريك."
+        : "");
     note.className = paidOut > 0.009 ? "hint" : "hint";
 
     var rows = ps.map(function(x){
@@ -3398,10 +3432,16 @@
       rounded[big] = Math.round((rounded[big]+diff)*100)/100;
     }
 
+    var allDays = daysBetween(from, to) + 1;
     var body = rows.map(function(x, i){
       var cur = currentOf(x.p.id), capi = capitalOf(x.p.id);
+      var st = capStartOf(x.p.id), dz = capDaysIn(x.p.id, from, to);
+      // الشريك اللي فلوسه ما كملتش الفترة: قول له من إمتى وكام يوم
+      var when = (st && dz !== null && dz < allDays)
+        ? " · من " + esc(st) + " (" + qty(dz) + " من " + qty(allDays) + " يوم)"
+        : "";
       return "<tr><td class='wide'>" + esc(x.p.name) +
-          "<span class='sub'>رأس ماله " + money(capi) + "</span></td>" +
+          "<span class='sub'>رأس ماله " + money(capi) + when + "</span></td>" +
         "<td class='num'>" + (x.w*100).toFixed(2) + "%</td>" +
         "<td class='num " + (rounded[i] >= 0 ? "v-gain" : "v-due") + "' style='font-weight:600'>" +
           money(rounded[i]) + "</td>" +
