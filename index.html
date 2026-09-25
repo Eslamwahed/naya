@@ -1381,6 +1381,7 @@
         </select></div>
       <div class="per-cust" hidden><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
       <div class="per-cust" hidden><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
+      <div style="grid-column:1/-1"><p class="note ok" id="per-label-rep" style="margin:0"></p></div>
     </div>
   </div>
 
@@ -1741,8 +1742,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "49";
+  var VERSION = "50";
   var CHANGELOG = [
+    { v:"50", d:"2026-09-25", items:[
+      "إصلاح: «مفيش مبيعات في الفترة» كانت بتطلّع رسالة «هامش المساهمة سالب» — رسالة غلط ومرعبة",
+      "لما الفترة مفيهاش مبيعات، الشاشة بتقولك عندك كام أوردر بره الفترة وآخر تاريخ ليهم",
+      "الفترة المختارة بقت مكتوبة فوق التقارير زي لوحة المتابعة"
+    ]},
     { v:"49", d:"2026-09-25", items:[
       "مقارنة الربح شهر بشهر بأعمدة مصغّرة من خط الصفر، والتغيّر عن الشهر اللي فات",
       "تحليل الحساسية: غيّر السعر أو التكلفة أو الحجم أو الثابت وشوف الربح والتعادل بيتحرّكوا",
@@ -3135,11 +3141,12 @@
     Array.prototype.forEach.call(document.querySelectorAll(".per-cust"), function(el){
       el.hidden = period.mode !== "custom";
     });
-    var lbl = document.getElementById("per-label");
-    if(lbl){
-      var r = periodRange();
-      lbl.textContent = r ? ("الفترة: من " + r.from + " لـ " + r.to) : "كل الحركات المسجّلة من البداية";
-    }
+    var r0 = periodRange();
+    var txt = r0 ? ("الفترة: من " + r0.from + " لـ " + r0.to) : "كل الحركات المسجّلة من البداية";
+    ["per-label","per-label-rep"].forEach(function(id){
+      var lbl = document.getElementById(id);
+      if(lbl) lbl.textContent = txt;
+    });
   }
 
   function renderKPIs(){
@@ -3768,6 +3775,17 @@
       rows.join("") + (note ? "<p class='mnote'>" + note + "</p>" : "") + "</div>";
   }
 
+  /* «مفيش مبيعات في الفترة» حاجة، و«الهامش سالب» حاجة تانية خالص.
+     الاتنين كانوا بيدّوا نفس الرسالة — وهي رسالة مرعبة وغلط. */
+  function noSalesNote(){
+    var out = live("sales").filter(isDelivered);
+    if(!out.length) return "لسه مفيش أوردرات مسلّمة أصلاً — التعادل بيتحسب على مبيعات فعلية.";
+    var last = out.slice().sort(byDate)[0];
+    return "مفيش مبيعات مسلّمة في <strong>الفترة المختارة</strong>. عندك " + qty(out.length) +
+      " أوردر مسلّم بره الفترة دي (آخر واحد " + esc(revDate(last)) +
+      ") — غيّر «الفترة» فوق لـ<strong>كل الفترات</strong> أو وسّع التاريخ.";
+  }
+
   function renderBreakEven(){
     var r = periodRange(), c = periodStats(r);
     var days = r ? daysBetween(r.from, r.to) + 1 : null;
@@ -3784,8 +3802,12 @@
         mRow(c.netShip >= 0 ? "+ صافي الشحن" : "− تكلفة الشحن", Math.abs(c.netShip)),
         mRow("− مصاريف متغيّرة", c.varExp),
         mRow("هامش المساهمة", c.cm, "tot " + (c.cm>=0?"v-gain":"v-due"))
-      ], "<b>" + esc(pctTxt(c.cmPct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.") +
-      (be === null
+      ], c.revenue <= 0.009
+           ? "مفيش مبيعات في الفترة دي عشان يتحسب منها هامش."
+           : "<b>" + esc(pctTxt(c.cmPct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.") +
+      (c.revenue <= 0.009
+        ? beBox("مبيعات التعادل", [], noSalesNote(), "—", "")
+        : be === null
         ? beBox("مبيعات التعادل", [], "هامش المساهمة سالب — كل قطعة بتبيعها بتزوّد الخسارة. " +
             "مينفعش يتحسب تعادل قبل ما السعر يغطّي التكلفة المتغيّرة.", "—", "v-due")
         : beBox("لازم تبيع بكام؟", [
@@ -3823,9 +3845,13 @@
     var t = Number(toEn((document.getElementById("be-target")||{}).value))||0;
     var d = Number(toEn((document.getElementById("be-days")||{}).value))||0;
     if(!t){ box.innerHTML = ""; return; }
+    if(c.revenue <= 0.009){
+      box.innerHTML = beBox("مينفعش يتحسب", [], noSalesNote(), "—", "");
+      return;
+    }
     if(c.cmPct <= 0){
       box.innerHTML = beBox("مينفعش يتحسب", [],
-        "هامش المساهمة سالب أو صفر — لازم السعر يغطّي التكلفة المتغيّرة الأول.", "—", "v-due");
+        "هامش المساهمة سالب — لازم السعر يغطّي التكلفة المتغيّرة الأول.", "—", "v-due");
       return;
     }
     var need = (c.fixedExp + t) / c.cmPct;
