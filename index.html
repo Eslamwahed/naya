@@ -312,6 +312,14 @@
   #t-kpi a:hover{text-decoration:underline}
   tr.sumrow > td{border-top:2px solid var(--line);font-weight:600;background:var(--paper)}
 
+  /* القوايم المالية جنب بعض */
+  .fsgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:900px){ .fsgrid{grid-template-columns:1fr} }
+  .fsh{margin:0 0 8px;font-size:.88rem;font-weight:600;color:var(--ink-soft)}
+  tr.fs-h > td{background:var(--teal-soft);font-weight:600;font-size:.84rem}
+  tr.fs-t > td{border-top:2px solid var(--line);font-weight:700}
+  td.fs-in{padding-inline-start:26px}
+
   /* عمود مصغّر جوّه الجدول: خط صفر في النص، ربح يمين وخسارة شمال.
      اللون لوحده ما ينفعش — الأخضر والأحمر متقاربين عند عمى الألوان
      (ΔE 3.6 deutan) — فالموضع والإشارة والرقم المكتوب هم الدليل. */
@@ -1388,6 +1396,37 @@
   <p class="note bad" id="rep-unclass" hidden></p>
 
   <div class="panel">
+    <div class="dhead"><h3>القوايم المالية</h3>
+      <button class="tbtn" type="button" id="b-fs-print" style="margin-inline-start:auto">طباعة / PDF</button>
+      <button class="tbtn" type="button" id="b-fs-csv">تنزيل CSV</button>
+    </div>
+    <p class="hint" style="margin:6px 0 12px">
+      قايمة الدخل على <strong>الفترة المختارة</strong>. المركز المالي والتدفقات النقدية
+      <strong>من بداية التشغيل لحد النهاردة</strong> — أرصدة مش حركة فترة.
+    </p>
+    <div class="fsgrid">
+      <div><h4 class="fsh">قائمة الدخل</h4>
+        <div class="tbl-wrap"><table id="t-fs-pl"></table></div></div>
+      <div><h4 class="fsh">قائمة المركز المالي</h4>
+        <div class="tbl-wrap"><table id="t-fs-bs"></table></div></div>
+    </div>
+    <div class="fsgrid" style="margin-top:14px">
+      <div><h4 class="fsh">قائمة التدفقات النقدية</h4>
+        <div class="tbl-wrap"><table id="t-fs-cf"></table></div></div>
+      <div><h4 class="fsh">ليه الربح مش زي الخزنة؟</h4>
+        <div class="tbl-wrap"><table id="t-fs-bridge"></table></div></div>
+    </div>
+    <p class="hintline" id="fs-check" style="margin-top:12px"></p>
+  </div>
+
+  <div class="panel">
+    <h3>أعمار الديون — مين عليه فلوس وبقاله قد إيه</h3>
+    <p class="hint" style="margin-bottom:12px">العمر بيتحسب من تاريخ تسليم الأوردر. كل ما الدين يقدم، فرصة تحصيله بتقل.</p>
+    <div class="stats" id="age-stats"></div>
+    <div class="tbl-wrap"><table id="t-fs-age"></table></div>
+  </div>
+
+  <div class="panel">
     <h3>تقييم الأداء</h3>
     <p class="hint" style="margin-bottom:12px">النسب دي بتتحسب على الفترة المختارة فوق. الهوامش بتتحسب على مبيعات البضاعة.</p>
     <div class="stats" id="rep-kpi"></div>
@@ -1742,8 +1781,19 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "50";
+  var VERSION = "52";
   var CHANGELOG = [
+    { v:"52", d:"2026-09-25", items:[
+      "إصلاح مهم: الأرصدة الافتتاحية كانت بتزوّد الأصول من غير ما تزوّد حقوق الملكية، فالميزانية تختل بنفس مبلغها",
+      "«صافي الأصول الافتتاحية» بقى بند في حقوق الملكية وفي جدول المطابقة"
+    ]},
+    { v:"51", d:"2026-09-25", items:[
+      "القوايم المالية: قائمة الدخل · المركز المالي · التدفقات النقدية (الطريقة المباشرة)",
+      "«ليه الربح مش زي الخزنة؟» — جسر بيوضّح الفرق بند بند",
+      "أعمار الديون: مين عليه فلوس وبقاله قد إيه (لحد ٣٠ · ٦٠ · ٩٠ · أكتر)",
+      "طباعة القوايم كصفحة واحدة، وتنزيلها CSV للمحاسب",
+      "فحص ذاتي: لو القوايم ما طابقتش بعضها بيظهر تحذير مش بيعدّي في صمت"
+    ]},
     { v:"50", d:"2026-09-25", items:[
       "إصلاح: «مفيش مبيعات في الفترة» كانت بتطلّع رسالة «هامش المساهمة سالب» — رسالة غلط ومرعبة",
       "لما الفترة مفيهاش مبيعات، الشاشة بتقولك عندك كام أوردر بره الفترة وآخر تاريخ ليهم",
@@ -2973,7 +3023,7 @@
   function totalEquity(){
     return partners().reduce(function(a,p){
       return a + capitalOf(p.id) + currentOf(p.id);
-    }, 0) + retainedEarnings();
+    }, 0) + retainedEarnings() + openingEquity();
   }
 
   /* ---------- حساب التوزيع ---------- */
@@ -3003,6 +3053,23 @@
     return live("cash").filter(function(c){ return c.type === "opening"; })
       .reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
   }
+  /* الأرصدة الافتتاحية هي صافي ثروة الشغل يوم ما بدأت تستخدم السيستم.
+     محاسبيًا كل واحد فيهم قيده: مدين الأصل / دائن حقوق الملكية.
+     الطرف الدائن ده مكانش بيتسجّل خالص، فالميزانية كانت بتختل بمقدار
+     الأرصدة الافتتاحية كلها. (IAS 1.54 — الأصول = الالتزامات + حقوق الملكية) */
+  function openingStock(){
+    return live("purchases").reduce(function(a,x){
+      return x.opening ? a + (Number(x.qty)||0) * (Number(x.cost)||0) : a; }, 0);
+  }
+  function openingParties(){
+    return live("cash").reduce(function(a,c){
+      return c.type === "opening_party" ? a + (Number(c.amount)||0) : a; }, 0);
+  }
+  // إجمالي الطرف الدائن للأرصدة الافتتاحية
+  function openingEquity(){
+    return openingCash() + openingStock() + openingParties();
+  }
+
   function hasOpening(){
     return live("cash").some(function(c){ return c.type==="opening" || c.type==="opening_party"; })
         || live("purchases").some(function(p){ return p.opening; });
@@ -4081,8 +4148,229 @@
     table("t-rep-itembe", IBE_HEAD, rows, "مفيش مبيعات مسلّمة في الفترة دي.");
   }
 
+  /* ================= القوايم المالية ================= */
+  /* الأرقام كلها بتتحسب من نفس الدوال اللي الميزانية بتتطابق بيها
+     (netAssets/totalEquity/cashBox)، فالقوايم مايقدروش يختلفوا عنها.
+     الإطار: IFRS — قايمة الدخل (IAS 1.82)، المركز المالي (IAS 1.54)،
+     التدفقات النقدية بالطريقة المباشرة (IAS 7.18(a)، والمعيار بيشجّع
+     عليها في 7.19 لأنها بتقرا من حركة نقدية فعلية مش من تقديرات). */
+
+  function fsRow(label, val, cls, indent){
+    return "<tr" + (cls ? " class='" + cls + "'" : "") + ">" +
+      "<td class='wide" + (indent ? " fs-in" : "") + "'>" + esc(label) + "</td>" +
+      "<td class='num'>" + (val === null ? "" : money(val)) + "</td></tr>";
+  }
+  function fsHead(label){
+    return "<tr class='fs-h'><td class='wide'>" + esc(label) + "</td><td></td></tr>";
+  }
+
+  // أرصدة الجهات مفصولة زي ما IAS 1.54 بيطلب
+  function partyBuckets(){
+    var recv = 0, pay = 0, adv = 0;
+    live("parties").forEach(function(p){
+      if(isPartner(p)) return;
+      var b = partyBalance(p.id);
+      if(b > 0.009){ recv += b; return; }
+      if(b < -0.009){
+        // عميل رصيده سالب = دفع عربون قبل التسليم → التزام عقد (IFRS 15.106)
+        if(p.type === "customer") adv += -b; else pay += -b;
+      }
+    });
+    return { recv:recv, pay:pay, adv:adv };
+  }
+  function stockValue(){
+    return live("items").reduce(function(a,i){
+      return a + variantsOf(i.id).reduce(function(b,v){
+        return b + Math.max(0, stockOfV(i.id,v.color,v.size)) * avgCostV(i.id,v.color,v.size);
+      }, 0); }, 0);
+  }
+  // مجموع حركات خزنة من نوع واحد. (مش capSum — دي اسم محجوز لحساب
+  //  رأس مال الشريك، وتسميتها كده كانت بتدهسها وتصفّر رأس المال كله.)
+  function cashTypeTotal(type){
+    return live("cash").reduce(function(a,c){
+      return c.type === type ? a + (Number(c.amount)||0) : a; }, 0);
+  }
+
+  function fsData(){
+    var r = periodRange(), c = periodStats(r);
+    var b = partyBuckets(), stock = stockValue(), wallets = walletsTotal(), cash = cashBox();
+    var cur = partners().reduce(function(a,p){ return a + currentOf(p.id); }, 0);
+    return { r:r, c:c, b:b, stock:stock, wallets:wallets, cash:cash, cur:cur,
+             capital: totalCapital(), retained: retainedEarnings(),
+             opening: openingEquity(),
+             assets: cash + wallets + stock + b.recv,
+             liab: b.pay + b.adv, equity: totalEquity() };
+  }
+
+  function renderFS(){
+    var d = fsData(), c = d.c;
+
+    /* ---- قائمة الدخل (IAS 1.82) ---- */
+    var gross = c.revenue - c.cogs;
+    table("t-fs-pl", ["البند", d.r ? (d.r.from + " ← " + d.r.to) : "كل الفترات"], [
+      fsRow("الإيرادات", c.revenue),
+      fsRow("تكلفة البضاعة المباعة", -c.cogs, "", true),
+      fsRow("مجمل الربح", gross, "fs-t"),
+      fsHead("مصاريف التشغيل"),
+      fsRow(c.netShip >= 0 ? "صافي الشحن (إيراد)" : "صافي تكلفة الشحن", c.netShip, "", true),
+      fsRow("مصاريف متغيّرة", -c.varExp, "", true),
+      fsRow("مصاريف ثابتة", -c.fixedExp, "", true),
+      fsRow("إجمالي المصاريف", c.netShip - c.varExp - c.fixedExp, "fs-t"),
+      fsRow("صافي ربح الفترة", c.net, "fs-t")
+    ], "");
+
+    /* ---- المركز المالي (IAS 1.54) ---- */
+    table("t-fs-bs", ["البند","الرصيد اليوم"], [
+      fsHead("الأصول"),
+      fsRow("النقدية بالخزنة", d.cash, "", true),
+      fsRow("عند شركات الشحن", d.wallets, "", true),
+      fsRow("المخزون", d.stock, "", true),
+      fsRow("مدينون (عملاء)", d.b.recv, "", true),
+      fsRow("إجمالي الأصول", d.assets, "fs-t"),
+      fsHead("الالتزامات"),
+      fsRow("دائنون (موردون)", d.b.pay, "", true),
+      fsRow("عرابين عملاء", d.b.adv, "", true),
+      fsRow("إجمالي الالتزامات", d.liab, "fs-t"),
+      fsHead("حقوق الملكية"),
+      fsRow("رأس مال الشركاء", d.capital, "", true),
+      fsRow("أرباح مستحقة للشركاء", d.cur, "", true),
+      fsRow("أرباح محتجزة", d.retained, "", true),
+      fsRow("صافي الأصول الافتتاحية", d.opening, "", true),
+      fsRow("إجمالي حقوق الملكية", d.equity, "fs-t"),
+      fsRow("الالتزامات + حقوق الملكية", d.liab + d.equity, "fs-t")
+    ], "");
+
+    /* ---- التدفقات النقدية — الطريقة المباشرة (IAS 7.18(a)) ---- */
+    var inDirect = live("sales").reduce(function(a,s){
+      if(viaShip(s)) return a;
+      return a + (isCancelled(s) ? shipIn(s) : (Number(s.paid)||0)); }, 0);
+    var fromShip  = cashTypeTotal("settle");
+    var toSuppl   = live("purchases").reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
+    var freightPd = live("purchases").reduce(function(a,x){ return a + pFreight(x); }, 0);
+    var opex      = live("cash").reduce(function(a,x){
+      return x.type === "expense" ? a + (Number(x.amount)||0) : a; }, 0);
+    var manualIn  = live("cash").reduce(function(a,x){
+      return x.type === "in" ? a + (Number(x.amount)||0) : a; }, 0);
+    var manualOut = live("cash").reduce(function(a,x){
+      return x.type === "out" ? a + (Number(x.amount)||0) : a; }, 0);
+    var capIn = cashTypeTotal("cap_in"), capOut = cashTypeTotal("cap_out"),
+        payout = cashTypeTotal("cap_payout");
+    var oc = openingCash();
+    var oper = inDirect + fromShip + manualIn - toSuppl - freightPd - opex - manualOut;
+    var fin  = capIn - capOut - payout;
+
+    table("t-fs-cf", ["البند","من البداية"], [
+      fsHead("الأنشطة التشغيلية"),
+      fsRow("محصّل من العملاء مباشرة", inDirect, "", true),
+      fsRow("مستلم من شركات الشحن", fromShip, "", true),
+      fsRow("تحصيلات يدوية", manualIn, "", true),
+      fsRow("مدفوع للموردين", -toSuppl, "", true),
+      fsRow("مصاريف نقل المشتريات", -freightPd, "", true),
+      fsRow("مصاريف تشغيل", -opex, "", true),
+      fsRow("مدفوعات يدوية", -manualOut, "", true),
+      fsRow("صافي التشغيل", oper, "fs-t"),
+      fsHead("الأنشطة التمويلية"),
+      fsRow("رأس مال مدفوع", capIn, "", true),
+      fsRow("سحب من رأس المال", -capOut, "", true),
+      fsRow("أرباح مصروفة للشركاء", -payout, "", true),
+      fsRow("صافي التمويل", fin, "fs-t"),
+      fsRow("صافي التغيّر في النقدية", oper + fin, "fs-t"),
+      fsRow("رصيد افتتاحي", oc, "", true),
+      fsRow("رصيد الخزنة اليوم", oper + fin + oc, "fs-t")
+    ], "");
+
+    /* ---- الجسر: الربح مقابل النقدية (IAS 7.20) ---- */
+    var profitAll = netProfitAll();
+    var bridge = [
+      fsRow("صافي الربح من البداية", profitAll),
+      fsHead("فلوس ربحتها بس مش في الخزنة"),
+      fsRow("بضاعة في المخزن", -d.stock, "", true),
+      fsRow("عند العملاء لسه ما اتحصّلش", -d.b.recv, "", true),
+      fsRow("عند شركات الشحن", -d.wallets, "", true),
+      fsHead("فلوس في الخزنة بس مش ربح"),
+      fsRow("بضاعة أخدتها ولسه ما دفعتش تمنها", d.b.pay, "", true),
+      fsRow("عرابين عملاء", d.b.adv, "", true),
+      fsRow("رأس مال مدفوع", capIn, "", true),
+      fsRow("أرصدة افتتاحية", d.opening, "", true),
+      fsRow("سحوبات وأرباح مصروفة", -(capOut + payout), "", true),
+      fsRow("= رصيد الخزنة", d.cash, "fs-t")
+    ];
+    table("t-fs-bridge", ["البند","المبلغ"], bridge, "");
+
+    // فحص ذاتي: القوايم لازم تطابق بعضها ولا تطلع للمستخدم غلط في صمت
+    var dBS = d.assets - (d.liab + d.equity);
+    var dCF = (oper + fin + oc) - d.cash;
+    var dBR = (profitAll - d.stock - d.b.recv - d.wallets + d.b.pay + d.b.adv
+               + capIn + d.opening - capOut - payout) - d.cash;
+    var bad = [];
+    if(Math.abs(dBS) > 0.02) bad.push("المركز المالي " + money(dBS));
+    if(Math.abs(dCF) > 0.02) bad.push("التدفقات " + money(dCF));
+    if(Math.abs(dBR) > 0.02) bad.push("الجسر " + money(dBR));
+    var fn = document.getElementById("fs-check");
+    if(fn){
+      fn.innerHTML = bad.length
+        ? "<span class='v-due'>⚠ في فرق في: " + esc(bad.join(" · ")) +
+          " — فيه حركة مسجّلة بشكل مش متوقّع، ابعتلي صورة من الشاشة دي.</span>"
+        : "<span class='v-gain'>✓ القوايم التلاتة متطابقة</span> — الأصول = الالتزامات + حقوق الملكية، " +
+          "والتدفقات بتوصل لرصيد الخزنة بالظبط. " +
+          "<strong>الإطار المحاسبي:</strong> IFRS — قائمة الدخل (IAS 1.82)، " +
+          "المركز المالي (IAS 1.54)، التدفقات بالطريقة المباشرة (IAS 7.18). " +
+          "دي قوايم إدارية للمتابعة، مش قوايم مراجَعة.";
+    }
+  }
+
+  /* ---------- أعمار الديون ---------- */
+  var AGE_BUCKETS = [[0,30,"لحد ٣٠ يوم"],[31,60,"٣١–٦٠"],[61,90,"٦١–٩٠"],[91,1e9,"أكتر من ٩٠"]];
+
+  function renderAging(){
+    var t = today(), rows = {}, tot = [0,0,0,0], grand = 0;
+    live("sales").forEach(function(s){
+      if(!isDelivered(s)) return;
+      var due = saleTotal(s) + shipIn(s) - (Number(s.paid)||0);
+      if(due <= 0.009) return;
+      var age = daysBetween(revDate(s) || s.date, t);
+      var bi = 0;
+      AGE_BUCKETS.forEach(function(bk, i){ if(age >= bk[0] && age <= bk[1]) bi = i; });
+      var k = s.partyId || "_";
+      if(!rows[k]) rows[k] = { b:[0,0,0,0], tot:0, ship:0, oldest:age };
+      rows[k].b[bi] += due; rows[k].tot += due;
+      if(viaShip(s)) rows[k].ship += due;
+      if(age > rows[k].oldest) rows[k].oldest = age;
+      tot[bi] += due; grand += due;
+    });
+
+    document.getElementById("age-stats").innerHTML = AGE_BUCKETS.map(function(bk, i){
+      return "<div><span>" + esc(bk[2]) + "</span><strong class='num " +
+        (i >= 2 && tot[i] > 0.009 ? "v-due" : "") + "'>" + esc(money(tot[i])) + "</strong>" +
+        "<small>" + (grand ? pctTxt(tot[i]/grand) + " من المستحق" : "—") + "</small></div>";
+    }).join("") + "<div><span>الإجمالي المستحق</span><strong class='num'>" +
+      esc(money(grand)) + "</strong><small>على أوردرات مسلّمة</small></div>";
+
+    var list = Object.keys(rows).map(function(k){
+      var x = rows[k];
+      return { v:x.tot, h: "<tr><td class='wide'>" + esc(partyName(k)) +
+        (x.ship > 0.009 ? "<span class='sub'>منه " + esc(money(x.ship)) + " مع شركة الشحن</span>" : "") +
+        "</td>" +
+        x.b.map(function(v, i){
+          return "<td class='num " + (i >= 2 && v > 0.009 ? "v-due" : "") + "'>" +
+            (v > 0.009 ? money(v) : "—") + "</td>"; }).join("") +
+        "<td class='num' style='font-weight:600'>" + money(x.tot) + "</td>" +
+        "<td class='num'>" + qty(x.oldest) + " يوم</td></tr>" };
+    }).sort(function(a,b){ return b.v - a.v; }).map(function(x){ return x.h; });
+
+    if(list.length){
+      list.push("<tr class='sumrow'><td class='wide'>الإجمالي</td>" +
+        tot.map(function(v){ return "<td class='num'>" + money(v) + "</td>"; }).join("") +
+        "<td class='num'>" + money(grand) + "</td><td></td></tr>");
+    }
+    table("t-fs-age", ["العميل"].concat(AGE_BUCKETS.map(function(b){ return b[2]; }))
+      .concat(["الإجمالي","أقدم دين"]), list, "مفيش مديونيات على العملاء دلوقتي.");
+  }
+
   function renderReports(){
     clearMonthly();
+    renderFS();
+    renderAging();
     renderPerf();
     renderBreakEven();
     renderPayback();
@@ -7473,6 +7761,62 @@
   Array.prototype.forEach.call(document.querySelectorAll(".sn"), function(el){
     el.addEventListener("input", renderSens);
   });
+
+  /* ---------- طباعة وتصدير القوايم ---------- */
+  function fsTableText(id){
+    var t = document.getElementById(id);
+    return t ? t.outerHTML : "";
+  }
+  document.getElementById("b-fs-print").addEventListener("click", function(){
+    var r = periodRange();
+    var head = "Lora Collection — القوايم المالية";
+    var sub = (r ? "قائمة الدخل: من " + r.from + " لـ " + r.to : "قائمة الدخل: كل الفترات") +
+      " · المركز المالي والتدفقات: من بداية التشغيل لحد " + today();
+    var html = '<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="utf-8">' +
+      '<title>' + esc(head) + '</title><style>' +
+      'body{font-family:"Segoe UI",Tahoma,sans-serif;padding:24px;color:#1a1a1a}' +
+      'h1{font-size:1.15rem;margin:0 0 3px}h2{font-size:.95rem;margin:22px 0 7px}' +
+      '.sub{color:#666;font-size:.78rem;margin-bottom:6px}' +
+      'table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:6px}' +
+      'th,td{border:1px solid #bbb;padding:5px 8px;text-align:right}' +
+      'th{background:#f0f0f0;font-weight:600}td.num{text-align:left;direction:ltr}' +
+      'tr.fs-h>td{background:#f6f6f6;font-weight:600}tr.fs-t>td{font-weight:700;border-top:2px solid #555}' +
+      'tr.sumrow>td{font-weight:700;background:#f6f6f6}td.fs-in{padding-right:24px}' +
+      '.foot{margin-top:18px;font-size:.72rem;color:#666;border-top:1px solid #ccc;padding-top:8px}' +
+      '@media print{body{padding:0}h2{page-break-after:avoid}table{page-break-inside:avoid}}' +
+      '</style></head><body>' +
+      '<h1>' + esc(head) + '</h1><div class="sub">' + esc(sub) + '</div>' +
+      '<h2>قائمة الدخل</h2>' + fsTableText("t-fs-pl") +
+      '<h2>قائمة المركز المالي</h2>' + fsTableText("t-fs-bs") +
+      '<h2>قائمة التدفقات النقدية</h2>' + fsTableText("t-fs-cf") +
+      '<h2>مطابقة الربح بالنقدية</h2>' + fsTableText("t-fs-bridge") +
+      '<h2>أعمار الديون</h2>' + fsTableText("t-fs-age") +
+      '<div class="foot">الإطار المحاسبي: IFRS — قائمة الدخل (IAS 1.82)، المركز المالي (IAS 1.54)، ' +
+      'التدفقات النقدية بالطريقة المباشرة (IAS 7.18). المخزون بمتوسط التكلفة المرجّح (IAS 2.25). ' +
+      'قوايم إدارية للمتابعة الداخلية — مش قوايم مراجَعة من مراقب حسابات.<br>' +
+      'اتطبعت في ' + esc(today()) + '</div>' +
+      '<scr'+'ipt>window.onload=function(){window.print()}</scr'+'ipt></body></html>';
+    var w = window.open("", "_blank");
+    if(!w){ toast("المتصفح منع فتح نافذة الطباعة"); return; }
+    w.document.write(html); w.document.close();
+  });
+
+  document.getElementById("b-fs-csv").addEventListener("click", function(){
+    var out = [], q = function(v){ return '"' + String(v).replace(/"/g,'""') + '"'; };
+    [["قائمة الدخل","t-fs-pl"],["المركز المالي","t-fs-bs"],
+     ["التدفقات النقدية","t-fs-cf"],["مطابقة الربح بالنقدية","t-fs-bridge"],
+     ["أعمار الديون","t-fs-age"]].forEach(function(sec){
+      out.push(q(sec[0]));
+      var t = document.getElementById(sec[1]);
+      if(t) Array.prototype.forEach.call(t.querySelectorAll("tr"), function(tr){
+        out.push(Array.prototype.map.call(tr.children, function(td){
+          return q(td.textContent.trim()); }).join(","));
+      });
+      out.push("");
+    });
+    download("lora-financials-" + today() + ".csv", out.join("\n"), "text/csv");
+    toast("اتنزّل الملف — افتحه بالإكسل");
+  });
   document.getElementById("b-sens-reset").addEventListener("click", function(){
     Array.prototype.forEach.call(document.querySelectorAll(".sn"), function(el){ el.value = ""; });
     renderSens();
@@ -8257,6 +8601,7 @@
       ["رأس المال", totalCapital(), ""],
       ["أرباح مستحقة للشركاء", partners().reduce(function(x,p){ return x + currentOf(p.id); },0), ""],
       ["الأرباح المحتجزة", retainedEarnings(), ""],
+      ["صافي الأصول الافتتاحية", openingEquity(), ""],
       ["حقوق الملكية", e, "tot"],
       ["الفرق", d, "diff"]
     ].map(function(x){
