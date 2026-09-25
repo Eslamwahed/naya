@@ -359,6 +359,14 @@
   .lmix-empty{margin:0;font-size:.76rem;color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:.78rem;color:var(--ink-soft);text-align:end}
   .lmix-sum b{color:var(--ink);font-weight:600}
+  /* أزرار اختصار للفلتر الأكثر استعمالاً — أسرع من فتح قايمة */
+  .quick{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .quick button{background:var(--card);border:1px solid var(--line);border-radius:99px;
+    color:var(--ink-soft);font:inherit;font-size:.82rem;font-weight:500;
+    padding:6px 14px;cursor:pointer;transition:background .12s,color .12s,border-color .12s}
+  .quick button:hover{border-color:var(--teal);color:var(--teal)}
+  .quick button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+  [data-theme="dark"] .quick button.on{color:#1A141C}
   .more-wrap{margin-top:10px;text-align:center}
   .more-wrap[hidden],.more-wrap button[hidden]{display:none}
   td.acts{white-space:nowrap}
@@ -1141,36 +1149,49 @@
   <h2>المخزون</h2>
   <p class="hint">كل سطر هنا = <strong>لون ومقاس معيّن</strong> من صنف (زي «شبشب · بني · 38»)، لأن ده اللي بتبيعه وبتجرده فعلاً. بتظهر بس الألوان والمقاسات اللي اشتريتها. الأرصدة تراكمية، والمشترى والمباع والمرتجع بيتبعوا الفترة المختارة. اضغط على أي سطر تشوف حركته بالتفصيل.</p>
 
-  <div class="panel" style="padding:12px 14px">
-    <div class="grid" style="align-items:end">
-      <div><label for="per-inv">الفترة</label>
-        <select id="per-inv" class="per">
-          <option value="all">كل الفترات</option>
-          <option value="month">الشهر ده</option>
-          <option value="prev">الشهر اللي فات</option>
-          <option value="d30">آخر ٣٠ يوم</option>
-          <option value="custom">فترة محددة</option>
-        </select></div>
-      <div class="per-cust" hidden><label for="per-from-inv">من</label><input type="date" id="per-from-inv" class="per-from"></div>
-      <div class="per-cust" hidden><label for="per-to-inv">لـ</label><input type="date" id="per-to-inv" class="per-to"></div>
-      <div><label for="inv-item">الصنف</label><select id="inv-item"></select></div>
-      <div><label for="inv-only">اعرض</label>
-        <select id="inv-only">
-          <option value="all">كل الألوان والمقاسات</option>
-          <option value="instock">اللي فيه رصيد بس</option>
-          <option value="out">الخلصان بس</option>
-          <option value="low">اللي قرب يخلص</option>
-        </select></div>
-      <div><label>&nbsp;</label><button class="act ghost" type="button" id="b-clear-inv">مسح الفلاتر</button></div>
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="inv-q" type="search" placeholder="دوّر بالصنف أو اللون أو المقاس أو الكود…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
     </div>
+    <button class="tbtn" type="button" id="b-invfilters" aria-expanded="false" aria-controls="inv-filters">
+      فلاتر <span class="fcount" id="inv-count" hidden>0</span>
+    </button>
   </div>
 
-  <div class="band" id="inv-kpis"></div>
+  <div class="quick" id="inv-quick">
+    <button type="button" data-invonly="all" class="on">الكل</button>
+    <button type="button" data-invonly="instock">فيه رصيد</button>
+    <button type="button" data-invonly="low">قرب يخلص</button>
+    <button type="button" data-invonly="out">خلصان</button>
+  </div>
+
+  <div class="filters" id="inv-filters" hidden>
+    <div><label for="inv-item">الصنف</label><select id="inv-item"></select></div>
+    <div><label for="inv-color">اللون</label><select id="inv-color"></select></div>
+    <div><label for="inv-size">المقاس</label><select id="inv-size"></select></div>
+    <div><label for="per-inv">فترة الحركة</label>
+      <select id="per-inv" class="per">
+        <option value="all">كل الفترات</option>
+        <option value="month">الشهر ده</option>
+        <option value="prev">الشهر اللي فات</option>
+        <option value="d30">آخر ٣٠ يوم</option>
+        <option value="custom">فترة محددة</option>
+      </select></div>
+    <div class="per-cust" hidden><label for="per-from-inv">من</label><input type="date" id="per-from-inv" class="per-from"></div>
+    <div class="per-cust" hidden><label for="per-to-inv">لـ</label><input type="date" id="per-to-inv" class="per-to"></div>
+  </div>
+
+  <div class="chips" id="inv-chips"></div>
 
   <div class="panel">
     <h3>الرصيد بكل لون ومقاس</h3>
     <div class="tbl-wrap"><table id="t-inv"></table></div>
   </div>
+
+  <div class="band" id="inv-kpis"></div>
 
   <div class="panel" id="move-panel" hidden>
     <h3 id="move-title"></h3>
@@ -1462,8 +1483,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "35";
+  var VERSION = "36";
   var CHANGELOG = [
+    { v:"36", d:"2026-09-25", items:[
+      "فلتر باللون وفلتر بالمقاس في المخزون",
+      "جدول المخزون بقى فوق الكروت — بيبان من غير ما تنزل",
+      "بحث في المخزون بالصنف أو اللون أو المقاس أو الكود",
+      "أزرار اختصار: الكل · فيه رصيد · قرب يخلص · خلصان",
+      "باقي الفلاتر اتلمّت في زرار «فلاتر» زي المبيعات والخزنة، مع شرايح توريك المفعّل"
+    ]},
     { v:"35", d:"2026-09-24", items:[
       "شيل خانة مسح الباركود من درج الشراء — الأكواد والبحث بيها زي ما هما"
     ]},
@@ -3018,18 +3046,84 @@
     return x.soldEver && free <= LOW_DEFAULT;
   }
 
+  /* ---------- فلاتر المخزون ---------- */
+  var ifilt = { item:"", color:"", size:"", only:"all", text:"" };
+  var IF_LABEL = { item:"الصنف", color:"اللون", size:"المقاس", only:"اعرض", text:"بحث" };
+  var IF_ID = { item:"inv-item", color:"inv-color", size:"inv-size", text:"inv-q" };
+  var ONLY_LABEL = { instock:"فيه رصيد", out:"خلصان", low:"قرب يخلص" };
+
+  function readInvFilters(){
+    ["item","color","size","text"].forEach(function(k){
+      var el = document.getElementById(IF_ID[k]);
+      ifilt[k] = el ? squish(el.value) : "";
+    });
+  }
+  // قوايم الألوان والمقاسات بتتبني من اللي موجود فعلاً في المخزون،
+  // ولو اخترت صنف بتتقلّب على ألوانه ومقاساته هو بس
+  function fillInvVarSelects(all){
+    var cs = {}, zs = {};
+    all.forEach(function(x){
+      if(ifilt.item && x.item.id !== ifilt.item) return;
+      if(x.color) cs[x.color] = 1;
+      if(x.size)  zs[x.size]  = 1;
+    });
+    [["inv-color", Object.keys(cs).sort(), ifilt.color, "كل الألوان"],
+     ["inv-size",  Object.keys(zs).sort(), ifilt.size,  "كل المقاسات"]].forEach(function(cfg){
+      var el = document.getElementById(cfg[0]);
+      if(!el) return;
+      el.innerHTML = "<option value=''>" + esc(cfg[3]) + "</option>" +
+        cfg[1].map(function(v){ return "<option value='"+esc(v)+"'>"+esc(v)+"</option>"; }).join("");
+      el.value = cfg[1].indexOf(cfg[2]) >= 0 ? cfg[2] : "";
+      if(el.value !== cfg[2]) ifilt[cfg[0] === "inv-color" ? "color" : "size"] = "";
+      el.disabled = !cfg[1].length;
+    });
+  }
+  function ifChipText(k){
+    if(k === "item") return itemName(ifilt.item);
+    if(k === "only") return ONLY_LABEL[ifilt.only] || ifilt.only;
+    return ifilt[k];
+  }
+  function renderInvChips(){
+    var keys = Object.keys(IF_LABEL).filter(function(k){
+      return k === "only" ? ifilt.only !== "all" : !!ifilt[k]; });
+    var c = document.getElementById("inv-count");
+    // «اعرض» ليه أزرار ظاهرة فوق، فمش بنعدّه في عدّاد الفلاتر المخفية
+    var hidden = keys.filter(function(k){ return k !== "only"; }).length;
+    if(c){ c.textContent = hidden; c.hidden = !hidden; }
+    var box = document.getElementById("inv-chips");
+    if(!box) return;
+    box.innerHTML = !keys.length ? "" :
+      keys.map(function(k){
+        return "<span class='chip'>" + esc(IF_LABEL[k]) + ": <b>" + esc(ifChipText(k)) + "</b>" +
+          "<button type='button' data-rmif='" + k + "' aria-label='شيل فلتر " + esc(IF_LABEL[k]) + "'>&times;</button></span>";
+      }).join("") + "<button class='clearall' type='button' id='b-clear-inv'>مسح الكل</button>";
+    Array.prototype.forEach.call(document.querySelectorAll("#inv-quick button"), function(b){
+      b.classList.toggle("on", b.dataset.invonly === ifilt.only);
+    });
+  }
+
   function renderInventory(){
     var all = invRows();
-    var fItem = document.getElementById("inv-item").value;
-    var only  = document.getElementById("inv-only").value;
+    readInvFilters();
+    fillInvVarSelects(all);
+    var q = ifilt.text.toLowerCase();
     var list = all.filter(function(x){
-      if(fItem && x.item.id !== fItem) return false;
-      if(only === "instock" && x.stock <= 0) return false;
-      if(only === "out" && x.stock > 0) return false;
-      if(only === "low" && !isLow(x)) return false;
+      if(ifilt.item && x.item.id !== ifilt.item) return false;
+      if(ifilt.color && x.color !== ifilt.color) return false;
+      if(ifilt.size  && x.size  !== ifilt.size)  return false;
+      if(ifilt.only === "instock" && x.stock <= 0) return false;
+      if(ifilt.only === "out" && x.stock > 0) return false;
+      if(ifilt.only === "low" && !isLow(x)) return false;
+      if(q){
+        var hay = [x.item.name, x.color, x.size,
+                   vCode(x.item.id, x.color, x.size)].join(" ").toLowerCase();
+        if(hay.indexOf(q) < 0) return false;
+      }
       return true;
     });
-    var filtered = !!fItem || only !== "all";
+    renderInvChips();
+    var fItem = ifilt.item, only = ifilt.only;
+    var filtered = !!fItem || !!ifilt.color || !!ifilt.size || !!ifilt.text || only !== "all";
 
     // الكروت بتتحسب على اللي ظاهر قدامك — لو في فلتر، بيتقال كده صراحة
     var src      = filtered ? list : all;
@@ -3065,9 +3159,11 @@
     var rows = list.sort(function(a,b){ return (b.sold - a.sold) || (b.stock - a.stock); })
       .map(function(x){
         var free = x.stock - x.rsv, lbl = vLabel(x.color, x.size);
+        var code = vCode(x.item.id, x.color, x.size);
         return "<tr><td class='wide'>"+thumbHTML(x.item.id)+
             "<button class='del' style='color:var(--teal)' data-move='"+esc(x.key)+"'>"+
-            esc(x.item.name)+(lbl?" · "+esc(lbl):"")+"</button></td>"+
+            esc(x.item.name)+(lbl?" · "+esc(lbl):"")+"</button>"+
+            (code ? " <span class='pill'>"+esc(code)+"</span>" : "")+"</td>"+
           "<td class='num'>"+qty(x.bought)+"</td>"+
           "<td class='num "+(x.pret?"v-due":"")+"'>"+(x.pret?qty(x.pret):"—")+"</td>"+
           "<td class='num'>"+qty(x.sold)+"</td>"+
@@ -6084,13 +6180,40 @@
     el.addEventListener("change", function(){ period.to = this.value; period.mode="custom"; syncPeriodUI(); renderAll(); });
   });
 
-  ["inv-item","inv-only"].forEach(function(id){
-    document.getElementById(id).addEventListener("change", renderInventory);
+  document.getElementById("b-invfilters").addEventListener("click", function(){
+    var pnl = document.getElementById("inv-filters");
+    pnl.hidden = !pnl.hidden;
+    this.setAttribute("aria-expanded", String(!pnl.hidden));
   });
-  document.getElementById("b-clear-inv").addEventListener("click", function(){
-    document.getElementById("inv-item").value = "";
-    document.getElementById("inv-only").value = "all";
+  ["inv-item","inv-color","inv-size"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){
+      // تغيير الصنف بيقلّب قوايم اللون والمقاس، فالاختيار القديم ممكن ما يبقاش موجود
+      if(id === "inv-item"){ ifilt.color = ""; ifilt.size = ""; }
+      renderInventory();
+    });
+  });
+  document.getElementById("inv-q").addEventListener("input", renderInventory);
+  document.getElementById("inv-quick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-invonly]");
+    if(!b) return;
+    ifilt.only = b.dataset.invonly;
     renderInventory();
+  });
+  document.getElementById("inv-chips").addEventListener("click", function(e){
+    var rm = e.target.closest("[data-rmif]");
+    if(rm){
+      var k = rm.dataset.rmif;
+      if(k === "only") ifilt.only = "all";
+      else { var el = document.getElementById(IF_ID[k]); if(el) el.value = ""; ifilt[k] = ""; }
+      renderInventory(); return;
+    }
+    if(e.target.id === "b-clear-inv"){
+      ifilt.only = "all";
+      ["item","color","size","text"].forEach(function(k){
+        var el = document.getElementById(IF_ID[k]); if(el) el.value = ""; ifilt[k] = "";
+      });
+      renderInventory();
+    }
   });
 
   // ---------- تهيئة السيستم ----------
