@@ -312,6 +312,18 @@
   #t-kpi a:hover{text-decoration:underline}
   tr.sumrow > td{border-top:2px solid var(--line);font-weight:600;background:var(--paper)}
 
+  /* عمود مصغّر جوّه الجدول: خط صفر في النص، ربح يمين وخسارة شمال.
+     اللون لوحده ما ينفعش — الأخضر والأحمر متقاربين عند عمى الألوان
+     (ΔE 3.6 deutan) — فالموضع والإشارة والرقم المكتوب هم الدليل. */
+  .mbar{direction:ltr;display:grid;grid-template-columns:1fr 1px 1fr;
+    align-items:center;min-width:110px;height:14px;gap:0}
+  .mbar .half{height:10px;display:flex}
+  .mbar .half.neg{justify-content:flex-end}
+  .mbar .zero{background:var(--line);height:14px;width:1px}
+  .mbar i{display:block;height:10px;background:var(--gain);border-radius:0 4px 4px 0}
+  .mbar .half.neg i{background:var(--due);border-radius:4px 0 0 4px}
+  td.barcell{padding-inline:10px;width:130px}
+
   /* سطر جدول بيتفتح بالدوس */
   tr.pick{cursor:pointer}
   tr.pick:hover > td{background:var(--teal-soft)}
@@ -1408,6 +1420,35 @@
     <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
   </div>
 
+  <div class="panel">
+    <h3>الربح شهر بشهر</h3>
+    <p class="hint" style="margin-bottom:12px">كل الشهور اللي فيها حركة، من الأقدم للأحدث. العمود بيبدأ من خط الصفر: لليمين ربح ولليسار خسارة.</p>
+    <div class="tbl-wrap"><table id="t-rep-months"></table></div>
+  </div>
+
+  <div class="panel">
+    <h3>تحليل الحساسية — لو حصل كذا يبقى إيه؟</h3>
+    <p class="hint" style="margin-bottom:12px">غيّر النسب وشوف صافي الربح ونقطة التعادل بيتحرّكوا إزاي. الأرقام دي تقديرية على أرقام الفترة المختارة — مش بتتسجّل في أي مكان.</p>
+    <div class="fgrid" id="sens-in">
+      <div><label for="sn-price">سعر البيع %</label><input id="sn-price" class="sn" inputmode="decimal" placeholder="0"></div>
+      <div><label for="sn-cost">تكلفة الشراء %</label><input id="sn-cost" class="sn" inputmode="decimal" placeholder="0"></div>
+      <div><label for="sn-vol">حجم المبيعات %</label><input id="sn-vol" class="sn" inputmode="decimal" placeholder="0"></div>
+      <div><label for="sn-fixed">المصاريف الثابتة %</label><input id="sn-fixed" class="sn" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <p class="hintline">اكتب <strong>10</strong> يعني زيادة ١٠٪، و<strong>-10</strong> يعني نقص ١٠٪.</p>
+    <div class="tbl-wrap" style="margin-top:10px"><table id="t-rep-sens"></table></div>
+    <div class="row-actions"><button class="tbtn" type="button" id="b-sens-reset">صفّر الكل</button></div>
+  </div>
+
+  <div class="panel">
+    <h3>تعادل الأصناف — أنهي صنف بيغطّي نفسه؟</h3>
+    <p class="hint" style="margin-bottom:12px">
+      هامش المساهمة للقطعة = سعر بيعها − تكلفتها. الصنف اللي هامشه سالب بتخسر في كل قطعة بتبيعها.
+      و«قطع لتغطية الثابت» يعني لو ده الصنف الوحيد اللي بتبيعه، هتحتاج تبيع منه كام قطعة عشان تغطّي مصاريفك الثابتة.
+    </p>
+    <div class="tbl-wrap"><table id="t-rep-itembe"></table></div>
+  </div>
+
   <div class="panel"><h3>أفضل الأصناف</h3>
     <div class="tbl-wrap"><table id="t-rep-items"></table></div></div>
   <div class="panel"><h3>أداء المحافظات</h3>
@@ -1700,8 +1741,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "48";
+  var VERSION = "49";
   var CHANGELOG = [
+    { v:"49", d:"2026-09-25", items:[
+      "مقارنة الربح شهر بشهر بأعمدة مصغّرة من خط الصفر، والتغيّر عن الشهر اللي فات",
+      "تحليل الحساسية: غيّر السعر أو التكلفة أو الحجم أو الثابت وشوف الربح والتعادل بيتحرّكوا",
+      "تعادل الأصناف: هامش القطعة، مساهمة كل صنف في تغطية الثابت، وتحذير للأصناف اللي بتخسر",
+      "الأعمدة مش معتمدة على اللون لوحده — الموضع والإشارة بيقولوا الاتجاه"
+    ]},
     { v:"48", d:"2026-09-25", items:[
       "تصنيف المصاريف ثابت/متغيّر — أساس أي تحليل تعادل",
       "تقرير تقييم الأداء: هوامش الربح والمساهمة والأمان، دوران المخزون، متوسط الأوردر، الإلغاء والمرتجع",
@@ -3857,11 +3904,165 @@
     table("t-rep-payback", PB_HEAD, rows, "");
   }
 
+  /* ---------- الربح شهر بشهر ---------- */
+  // عمود مصغّر: الموضع والإشارة بيقولوا الاتجاه، مش اللون لوحده
+  function miniBar(v, max){
+    var w = max > 0 ? Math.min(Math.abs(v) / max * 100, 100) : 0;
+    var t = (v >= 0 ? "ربح " : "خسارة ") + money(Math.abs(v));
+    return "<div class='mbar' title='" + esc(t) + "'>" +
+      "<div class='half neg'>" + (v < 0 ? "<i style='width:" + w.toFixed(1) + "%'></i>" : "") + "</div>" +
+      "<div class='zero'></div>" +
+      "<div class='half pos'>" + (v >= 0 ? "<i style='width:" + w.toFixed(1) + "%'></i>" : "") + "</div>" +
+      "</div>";
+  }
+  function signed(v){ return (v > 0.009 ? "+" : "") + money(v); }
+
+  var MON_HEAD = ["الشهر","الإيرادات","تكلفة البضاعة","مجمل الربح","مصاريف","صافي الربح","","التغيّر"];
+
+  function renderMonths(){
+    var ms = monthlyNets().filter(function(mo){ return mo.active; });
+    if(!ms.length){ table("t-rep-months", ["الشهر"], [], "مفيش شهور فيها حركة لسه."); return; }
+    var stats = ms.map(function(mo){ var c = periodStats(mo); c.key = mo.key; return c; });
+    var max = stats.reduce(function(a,c){ return Math.max(a, Math.abs(c.net)); }, 0);
+
+    var rows = stats.map(function(c, i){
+      var prev = i ? stats[i-1].net : null;
+      var d = prev === null ? null : c.net - prev;
+      return "<tr><td class='wide num'>" + esc(c.key) + "</td>" +
+        "<td class='num'>" + money(c.revenue) + "</td>" +
+        "<td class='num'>" + money(c.cogs) + "</td>" +
+        "<td class='num " + ((c.revenue-c.cogs)>=0?"v-gain":"v-due") + "'>" + money(c.revenue-c.cogs) + "</td>" +
+        "<td class='num'>" + money(c.expenses) + "</td>" +
+        "<td class='num " + (c.net>=0?"v-gain":"v-due") + "' style='font-weight:600'>" +
+          esc(signed(c.net)) + "</td>" +
+        "<td class='barcell'>" + miniBar(c.net, max) + "</td>" +
+        "<td class='num " + (d === null ? "" : (d>=0?"v-gain":"v-due")) + "'>" +
+          (d === null ? "—" : esc(signed(d))) + "</td></tr>";
+    });
+    var T = stats.reduce(function(a,c){
+      a.rev += c.revenue; a.cogs += c.cogs; a.exp += c.expenses; a.net += c.net; return a;
+    }, { rev:0, cogs:0, exp:0, net:0 });
+    rows.push("<tr class='sumrow'><td class='wide'>الإجمالي</td>" +
+      "<td class='num'>" + money(T.rev) + "</td><td class='num'>" + money(T.cogs) + "</td>" +
+      "<td class='num'>" + money(T.rev - T.cogs) + "</td><td class='num'>" + money(T.exp) + "</td>" +
+      "<td class='num'>" + esc(signed(T.net)) + "</td><td></td><td></td></tr>");
+    table("t-rep-months", MON_HEAD, rows, "");
+  }
+
+  /* ---------- تحليل الحساسية ---------- */
+  /* كل نسبة بتضرب في البند اللي بتخصّه:
+       السعر  → الإيراد بس
+       التكلفة → تكلفة البضاعة بس
+       الحجم  → الإيراد والتكلفة والشحن والمصاريف المتغيّرة مع بعض
+       الثابت → المصاريف الثابتة بس
+     وبعدين نعيد بناء هامش المساهمة وصافي الربح ونقطة التعادل. */
+  function sensVal(id){
+    var el = document.getElementById(id);
+    return 1 + (Number(toEn(el ? el.value : "")) || 0) / 100;
+  }
+  function renderSens(){
+    var r = periodRange(), c = periodStats(r);
+    var kp = sensVal("sn-price"), kc = sensVal("sn-cost"),
+        kv = sensVal("sn-vol"),   kf = sensVal("sn-fixed");
+
+    var rev  = c.revenue * kp * kv;
+    var cogs = c.cogs * kc * kv;
+    var ship = c.netShip * kv;
+    var vexp = c.varExp * kv;
+    var fx   = c.fixedExp * kf;
+    var cm   = rev - cogs + ship - vexp;
+    var pct  = rev ? cm / rev : 0;
+    var net  = cm - fx;
+    var be   = pct > 0 ? fx / pct : null;
+    var be0  = c.cmPct > 0 ? c.fixedExp / c.cmPct : null;
+
+    var line = function(name, now, then, cls){
+      var d = then - now;
+      return "<tr><td class='wide'>" + esc(name) + "</td>" +
+        "<td class='num'>" + money(now) + "</td>" +
+        "<td class='num " + (cls || "") + "' style='font-weight:600'>" + money(then) + "</td>" +
+        "<td class='num " + (Math.abs(d)<0.009 ? "" : (d>0?"v-gain":"v-due")) + "'>" +
+          (Math.abs(d)<0.009 ? "—" : esc(signed(d))) + "</td></tr>";
+    };
+    var rows = [
+      line("الإيرادات", c.revenue, rev),
+      line("تكلفة البضاعة", c.cogs, cogs),
+      line("المصاريف الثابتة", c.fixedExp, fx),
+      "<tr><td class='wide'>نسبة هامش المساهمة</td>" +
+        "<td class='num'>" + pctTxt(c.cmPct) + "</td>" +
+        "<td class='num' style='font-weight:600'>" + pctTxt(pct) + "</td>" +
+        "<td class='num " + (pct>=c.cmPct?"v-gain":"v-due") + "'>" +
+          ((pct-c.cmPct)*100).toFixed(1) + " نقطة</td></tr>",
+      "<tr class='sumrow'><td class='wide'>صافي الربح</td>" +
+        "<td class='num'>" + money(c.net) + "</td>" +
+        "<td class='num " + (net>=0?"v-gain":"v-due") + "'>" + esc(signed(net)) + "</td>" +
+        "<td class='num " + ((net-c.net)>=0?"v-gain":"v-due") + "'>" + esc(signed(net-c.net)) + "</td></tr>",
+      "<tr class='sumrow'><td class='wide'>مبيعات التعادل</td>" +
+        "<td class='num'>" + (be0 === null ? "—" : money(be0)) + "</td>" +
+        "<td class='num'>" + (be === null ? "—" : money(be)) + "</td>" +
+        "<td class='num " + ((be !== null && be0 !== null && be <= be0) ? "v-gain" : "v-due") + "'>" +
+          (be === null || be0 === null ? "—" : esc(signed(be - be0))) + "</td></tr>"
+    ];
+    table("t-rep-sens", ["البند","دلوقتي","بعد التغيير","الفرق"], rows, "");
+  }
+
+  /* ---------- تعادل الأصناف ---------- */
+  var IBE_HEAD = ["الصنف","اتباع","هامش القطعة","نسبة الهامش","إجمالي المساهمة",
+                  "% من الثابت","قطع لتغطية الثابت","الحكم"];
+
+  function renderItemBE(){
+    var r = periodRange(), c = periodStats(r);
+    var m = {};
+    c.deliv.forEach(function(s){
+      SL(s).forEach(function(l){
+        var n = lineSold(l, s); if(!l.itemId || !n) return;
+        if(!m[l.itemId]) m[l.itemId] = { q:0, rev:0, cost:0 };
+        m[l.itemId].q += n;
+        m[l.itemId].rev += n * (Number(l.price)||0);
+        m[l.itemId].cost += n * lineCost(l);
+      });
+    });
+    var totalCM = Object.keys(m).reduce(function(a,k){ return a + (m[k].rev - m[k].cost); }, 0);
+    var rows = Object.keys(m).map(function(id){
+      var x = m[id], cm = x.rev - x.cost, unit = x.q ? cm / x.q : 0;
+      var pct = x.rev ? cm / x.rev : 0;
+      var cover = c.fixedExp > 0 ? cm / c.fixedExp : 0;
+      var need = unit > 0.009 && c.fixedExp > 0 ? Math.ceil(c.fixedExp / unit) : null;
+      var verdict = unit < -0.009
+        ? "<span class='v-due'>بتخسر في كل قطعة — راجع السعر أو التكلفة</span>"
+        : (pct > 0 && pct < 0.15
+            ? "<span class='v-due'>هامش ضعيف</span>"
+            : (unit > 0.009 ? "<span class='v-gain'>بيساهم</span>" : "—"));
+      return { v: cm, h:
+        "<tr><td class='wide'>" + thumbHTML(id) + esc(itemName(id)) + "</td>" +
+        "<td class='num'>" + qty(x.q) + "</td>" +
+        "<td class='num " + (unit>=0?"v-gain":"v-due") + "'>" + money(unit) + "</td>" +
+        "<td class='num'>" + pctTxt(pct) + "</td>" +
+        "<td class='num " + (cm>=0?"v-gain":"v-due") + "' style='font-weight:600'>" + money(cm) + "</td>" +
+        "<td class='num'>" + (c.fixedExp > 0 ? pctTxt(cover) : "—") + "</td>" +
+        "<td class='num'>" + (need === null ? "—" : qty(need)) + "</td>" +
+        "<td>" + verdict + "</td></tr>" };
+    }).sort(function(a,b){ return b.v - a.v; }).map(function(x){ return x.h; });
+
+    if(rows.length){
+      rows.push("<tr class='sumrow'><td class='wide'>إجمالي المساهمة</td><td></td><td></td><td></td>" +
+        "<td class='num'>" + money(totalCM) + "</td>" +
+        "<td class='num'>" + (c.fixedExp > 0 ? pctTxt(totalCM / c.fixedExp) : "—") + "</td>" +
+        "<td></td><td>" + (totalCM >= c.fixedExp
+          ? "<span class='v-gain'>بتغطّي الثابت</span>"
+          : "<span class='v-due'>ناقص " + esc(money(c.fixedExp - totalCM)) + "</span>") + "</td></tr>");
+    }
+    table("t-rep-itembe", IBE_HEAD, rows, "مفيش مبيعات مسلّمة في الفترة دي.");
+  }
+
   function renderReports(){
     clearMonthly();
     renderPerf();
     renderBreakEven();
     renderPayback();
+    renderMonths();
+    renderSens();
+    renderItemBE();
     var r = periodRange();
     var list = salesIn(r);
 
@@ -7242,6 +7443,13 @@
   ["be-target","be-days"].forEach(function(id){
     var el = document.getElementById(id);
     if(el) el.addEventListener("input", renderTarget);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".sn"), function(el){
+    el.addEventListener("input", renderSens);
+  });
+  document.getElementById("b-sens-reset").addEventListener("click", function(){
+    Array.prototype.forEach.call(document.querySelectorAll(".sn"), function(el){ el.value = ""; });
+    renderSens();
   });
 
   document.getElementById("c-type").addEventListener("change", fillSelects);
