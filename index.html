@@ -1023,9 +1023,19 @@
       </div>
       <div class="cash-ship" hidden><label for="c-shipco">شركة الشحن</label>
         <select id="c-shipco"></select></div>
+      <div class="cash-kind" hidden><label for="c-kind">نوع المصروف</label>
+        <select id="c-kind">
+          <option value="fixed">ثابت — بيتدفع حتى لو ما بعتش</option>
+          <option value="var">متغيّر — بيزيد مع البيع</option>
+        </select></div>
       <div><label for="c-party">الجهة</label><select id="c-party"></select></div>
       <div><label for="c-amount">المبلغ</label><input type="number" id="c-amount" step="any" min="0" required></div>
       <div><label for="c-note">البيان</label><input id="c-note" autocomplete="off"></div>
+      <div class="cash-kind span2" hidden><p class="hintline" style="margin:0">
+        <strong>ثابت</strong>: إيجار · مرتبات · كهربا ونت · اشتراكات — بتتدفع كل شهر مهما بعت.
+        <strong>متغيّر</strong>: تغليف · عمولة · مصاريف بتزيد كل ما تبيع أكتر.
+        التفرقة دي هي اللي بتخلّي <strong>نقطة التعادل</strong> تطلع صح.
+      </p></div>
       <div id="c-over" hidden style="grid-column:1/-1">
         <p class="note bad" id="c-over-msg" style="margin-top:0"></p>
         <label style="display:flex;align-items:center;gap:8px;font-size:.84rem;cursor:pointer;margin-top:6px">
@@ -1362,6 +1372,42 @@
     </div>
   </div>
 
+  <p class="note bad" id="rep-unclass" hidden></p>
+
+  <div class="panel">
+    <h3>تقييم الأداء</h3>
+    <p class="hint" style="margin-bottom:12px">النسب دي بتتحسب على الفترة المختارة فوق. الهوامش بتتحسب على مبيعات البضاعة.</p>
+    <div class="stats" id="rep-kpi"></div>
+  </div>
+
+  <div class="panel">
+    <h3>نقطة التعادل — أبيع بكام؟</h3>
+    <p class="hint" style="margin-bottom:12px">
+      التكاليف نوعين: <strong>متغيّرة</strong> بتزيد كل ما تبيع أكتر (تكلفة البضاعة، الشحن، التغليف)،
+      و<strong>ثابتة</strong> بتتدفع مهما حصل (إيجار، مرتبات). اللي بيفضل من كل جنيه مبيعات بعد
+      التكاليف المتغيّرة اسمه <strong>هامش المساهمة</strong>، وهو اللي بيغطّي الثابت — واللي يزيد بعده يبقى ربح.
+    </p>
+    <div class="money3" id="rep-be"></div>
+    <div class="tbl-wrap" style="margin-top:14px"><table id="t-rep-cost"></table></div>
+
+    <div class="fset" style="margin-top:16px">
+      <h3>أبيع بكام عشان أكسب كذا؟</h3>
+      <div class="fgrid">
+        <div><label for="be-target">صافي الربح اللي عايزه</label>
+          <input id="be-target" inputmode="decimal" placeholder="0"></div>
+        <div><label for="be-days">على كام يوم</label>
+          <input id="be-days" inputmode="decimal" placeholder="30"></div>
+      </div>
+      <div class="money3" id="rep-target" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>استرداد رأس المال للشركاء</h3>
+    <p class="hint" style="margin-bottom:12px" id="rep-pb-note"></p>
+    <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
+  </div>
+
   <div class="panel"><h3>أفضل الأصناف</h3>
     <div class="tbl-wrap"><table id="t-rep-items"></table></div></div>
   <div class="panel"><h3>أداء المحافظات</h3>
@@ -1654,8 +1700,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "47";
+  var VERSION = "48";
   var CHANGELOG = [
+    { v:"48", d:"2026-09-25", items:[
+      "تصنيف المصاريف ثابت/متغيّر — أساس أي تحليل تعادل",
+      "تقرير تقييم الأداء: هوامش الربح والمساهمة والأمان، دوران المخزون، متوسط الأوردر، الإلغاء والمرتجع",
+      "نقطة التعادل: أبيع بكام عشان أغطّي تكاليفي، وكام في اليوم وكام أوردر",
+      "حاسبة الربح المستهدف: أبيع بكام عشان أكسب كذا",
+      "استرداد رأس المال لكل شريك: كسب كام فعلاً · قبض كام · فاضل كام شهر"
+    ]},
     { v:"47", d:"2026-09-25", items:[
       "شريط «مرتجع» فوق جدول المبيعات بعدّاده",
       "واجهة «بحث» اتشالت — بحث المبيعات بقى بيعمل نفس الشغل",
@@ -2977,9 +3030,20 @@
   // الأوردر بيدخل الفترة بتاريخ تسليمه مش تاريخ طلبه — أوردر اتعمل آخر الشهر
   // واتسلّم أول الشهر اللي بعده إيراده بيتسجّل في شهر التسليم (IFRS 15.31)
   function salesIn(r){ return live("sales").filter(function(s){ return inRange(revDate(s), r); }); }
-  function expensesIn(r){
-    return live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r); })
-      .reduce(function(a,c){ return a + (Number(c.amount)||0); },0);
+  /* تصنيف المصروف. السجلات القديمة مالهاش تصنيف، فبتتعامل «ثابت» —
+     ده الأحوط: بيطلّع نقطة تعادل أعلى مش أقل، فما يخدعكش إنك مغطّي
+     تكاليفك وإنت لأ. الشاشة بتنبّه إنها محتاجة مراجعة. */
+  function costKindOf(c){ return (c && c.costKind === "var") ? "var" : "fixed"; }
+  function isVarCost(c){ return costKindOf(c) === "var"; }
+  function unclassifiedExpenses(){
+    return live("cash").filter(function(c){
+      return c.type === "expense" && !c.costKind; }).length;
+  }
+  function expensesIn(r, kind){
+    return live("cash").filter(function(c){
+      if(c.type !== "expense" || !inRange(c.date, r)) return false;
+      return !kind || costKindOf(c) === kind;
+    }).reduce(function(a,c){ return a + (Number(c.amount)||0); },0);
   }
 
   // ملخص أرقام الفترة
@@ -2993,8 +3057,16 @@
       return a + SL(s).reduce(function(b,l){ return b + lineCost(l) * lineSold(l,s); },0); },0);
     var netShip = list.reduce(function(a,s){ return a + (shipCounts(s) ? shipIn(s)-shipOut(s) : 0); },0);
     var exp     = expensesIn(r);
+    var fixedExp = expensesIn(r, "fixed"), varExp = expensesIn(r, "var");
+    /* هامش المساهمة = الإيراد − كل التكاليف المتغيّرة.
+       المتغيّر هنا: تكلفة البضاعة + صافي تكلفة الشحن + المصاريف المتغيّرة.
+       (netShip موجب يعني كسبت من الشحن، فبيزوّد الهامش مش بينقّصه.) */
+    var varCost = cogs - netShip + varExp;
+    var cm      = revenue - varCost;
     return { list:list, deliv:deliv, revenue:revenue, profit:profit, cogs:cogs,
-             netShip:netShip, expenses:exp, net: profit + netShip - exp };
+             netShip:netShip, expenses:exp, fixedExp:fixedExp, varExp:varExp,
+             varCost:varCost, cm:cm, cmPct: revenue ? cm / revenue : 0,
+             net: profit + netShip - exp };
   }
 
   function pct(now, before){
@@ -3514,7 +3586,282 @@
   }
 
   // ---------- التقارير ----------
+  /* ================= المحاسبة الإدارية ================= */
+  /* تحليل التكلفة–الحجم–الربح (CVP). الأساس:
+       هامش المساهمة = الإيراد − التكاليف المتغيّرة
+       صافي الربح    = هامش المساهمة − التكاليف الثابتة
+       مبيعات التعادل = التكاليف الثابتة ÷ نسبة هامش المساهمة
+     المتغيّر عندنا: تكلفة البضاعة المباعة + صافي تكلفة الشحن + المصاريف
+     المصنّفة «متغيّر». الثابت: المصاريف المصنّفة «ثابت».
+     دي مقاييس إدارية (Management Accounting) — مش بنود في القوايم
+     المالية ومالهاش معيار IFRS، بتتحسب بأرقام فعلية مسجّلة. */
+
+  // شهور من تاريخ لتاريخ، كل واحد {from,to}
+  function monthSlices(from, to){
+    if(!from || !to || from > to) return [];
+    var out = [], y = Number(from.slice(0,4)), m = Number(from.slice(5,7));
+    var guard = 0;
+    while(guard++ < 600){
+      var a = y + "-" + String(m).padStart(2,"0") + "-01";
+      var lastDay = new Date(Date.UTC(y, m, 0)).getUTCDate();
+      var b = y + "-" + String(m).padStart(2,"0") + "-" + String(lastDay).padStart(2,"0");
+      if(a > to) break;
+      out.push({ from: a < from ? from : a, to: b > to ? to : b, key: a.slice(0,7) });
+      m++; if(m > 12){ m = 1; y++; }
+    }
+    return out;
+  }
+
+  // صافي ربح كل شهر — بتتحسب مرة وبتستعملها كل حسابات الاسترداد
+  var _mnet = null;
+  function monthlyNets(){
+    if(_mnet) return _mnet;
+    var st = earliestDate(), en = today();
+    if(!st || st > en){ _mnet = []; return _mnet; }
+    _mnet = monthSlices(st, en).map(function(mo){
+      var c = periodStats(mo);
+      /* شهر من غير أي حركة مش «شهر ربحه صفر» — دي غالبًا فترة الداتا
+         واقفة فيها. لو حسبناه في المتوسط، معدل الربح بينزل غلط وفترة
+         الاسترداد بتطلع «مستحيلة» رغم إن الشغل ماشي. */
+      var active = c.list.length > 0 || c.expenses > 0.009;
+      return { from:mo.from, to:mo.to, key:mo.key, net:c.net, active:active };
+    });
+    return _mnet;
+  }
+  function clearMonthly(){ _mnet = null; }
+
+  /* الربح المحقّق للشريك = مجموع (ربح كل شهر × نسبته المرجّحة في الشهر ده).
+     مش «اللي سحبه» ولا «اللي اتوزّع رسميًا» — ده اللي فلوسه كسبته فعلاً،
+     وهو الأساس الصح لقياس استرداد رأس المال. */
+  function partnerEarned(id){
+    return monthlyNets().reduce(function(a, mo){
+      if(!mo.net) return a;
+      return a + mo.net * weightedRatio(id, mo.from, mo.to);
+    }, 0);
+  }
+  // كاش فعلي خرج للشريك: صرف أرباح + سحب من رأس ماله
+  function partnerCashOut(id){
+    return live("cash").reduce(function(a, c){
+      if(c.partyId !== id || !isCapType(c.type)) return a;
+      if(c.type === "cap_payout" || c.type === "cap_out") return a + (Number(c.amount)||0);
+      return a;
+    }, 0);
+  }
+  // معدل ربحه الشهري على آخر N شهر فيها حركة
+  // آخر N شهر **فيها حركة** — شهور السكوت مش بتتحسب في المتوسط
+  function activeMonths(n){
+    var act = monthlyNets().filter(function(mo){ return mo.active; });
+    return act.slice(Math.max(0, act.length - (n||3)));
+  }
+  function partnerMonthlyRate(id, n){
+    var take = activeMonths(n);
+    if(!take.length) return 0;
+    var sum = take.reduce(function(a, mo){
+      return a + (mo.net || 0) * weightedRatio(id, mo.from, mo.to); }, 0);
+    return sum / take.length;
+  }
+
+  function pctTxt(v){ return (isFinite(v) ? (v*100).toFixed(1) : "0.0") + "%"; }
+
+  /* ---------- تقييم الأداء ---------- */
+  function renderPerf(){
+    var r = periodRange(), c = periodStats(r);
+    var gross = c.revenue - c.cogs;
+    var stockVal = live("items").reduce(function(a,i){
+      return a + variantsOf(i.id).reduce(function(b,v){
+        return b + Math.max(0, stockOfV(i.id,v.color,v.size)) * avgCostV(i.id,v.color,v.size);
+      },0); },0);
+    var turns   = stockVal > 0 ? c.cogs / stockVal : 0;     // مرات الدوران في الفترة
+    var days    = r ? daysBetween(r.from, r.to) + 1 : null;
+    var shelf   = turns > 0 && days ? days / turns : null;  // أيام لحد ما البضاعة تتباع
+    var nDeliv  = c.deliv.length;
+    var aov     = nDeliv ? c.revenue / nDeliv : 0;
+    var nAll    = c.list.length;
+    var nCanc   = c.list.filter(isCancelled).length;
+    var retV    = c.deliv.reduce(function(a,s){
+      return a + SL(s).reduce(function(b,l){ return b + lineRet(l)*(Number(l.price)||0); },0); },0);
+    var be      = c.cmPct > 0 ? c.fixedExp / c.cmPct : null;
+    var mos     = (be !== null && c.revenue > 0) ? (c.revenue - be) / c.revenue : null;
+
+    var cells = [
+      ["هامش مجمل الربح", pctTxt(c.revenue ? gross/c.revenue : 0), gross>=0?"v-gain":"v-due",
+       "بعد تكلفة البضاعة بس"],
+      ["هامش المساهمة", pctTxt(c.cmPct), c.cm>=0?"v-gain":"v-due",
+       "اللي بيفضل من كل جنيه يغطّي الثابت"],
+      ["هامش صافي الربح", pctTxt(c.revenue ? c.net/c.revenue : 0), c.net>=0?"v-gain":"v-due",
+       "بعد كل حاجة"],
+      ["هامش الأمان", mos === null ? "—" : pctTxt(mos), (mos||0)>0?"v-gain":"v-due",
+       mos === null ? "محتاج هامش مساهمة موجب"
+                    : "المبيعات ممكن تنزل كده قبل ما تخسر"],
+      ["متوسط قيمة الأوردر", money(aov), "", qty(nDeliv) + " أوردر مسلّم"],
+      ["معدل دوران المخزون", turns ? turns.toFixed(2) + "×" : "—",
+       "", shelf ? "البضاعة بتقعد " + Math.round(shelf) + " يوم في المتوسط" : "محتاج مخزون وتكلفة مبيعات"],
+      ["نسبة الإلغاء", pctTxt(nAll ? nCanc/nAll : 0), nCanc?"v-due":"",
+       qty(nCanc) + " من " + qty(nAll) + " أوردر"],
+      ["قيمة المرتجع", money(retV), retV>0.009?"v-due":"",
+       c.revenue ? pctTxt(retV/(c.revenue+retV)) + " من المبيعات قبل المرتجع" : "—"]
+    ];
+    document.getElementById("rep-kpi").innerHTML = cells.map(function(x){
+      return "<div><span>"+esc(x[0])+"</span><strong class='num "+x[2]+"'>"+esc(x[1])+"</strong>" +
+        "<small>"+esc(x[3])+"</small></div>"; }).join("");
+
+    var u = unclassifiedExpenses(), un = document.getElementById("rep-unclass");
+    if(un){
+      un.hidden = !u;
+      un.innerHTML = u ? "⚠ في " + qty(u) + " مصروف مسجّل قبل ما نضيف التصنيف، " +
+        "واتحسبوا <strong>ثابتين</strong> مؤقتًا. راجعهم من شاشة الخزنة — " +
+        "لو فيهم مصاريف متغيّرة، نقطة التعادل دلوقتي <strong>أعلى من الحقيقة</strong>." : "";
+    }
+  }
+
+  /* ---------- نقطة التعادل ---------- */
+  function beBox(title, rows, note, big, bigCls){
+    return "<div class='mbox" + (big ? " big" : "") + "'><h4>" + esc(title) + "</h4>" +
+      (big ? "<div class='mbig num " + (bigCls||"") + "'>" + esc(big) + "</div>" : "") +
+      rows.join("") + (note ? "<p class='mnote'>" + note + "</p>" : "") + "</div>";
+  }
+
+  function renderBreakEven(){
+    var r = periodRange(), c = periodStats(r);
+    var days = r ? daysBetween(r.from, r.to) + 1 : null;
+    var be   = c.cmPct > 0 ? c.fixedExp / c.cmPct : null;
+    var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
+
+    document.getElementById("rep-be").innerHTML =
+      beBox("تكاليفك الثابتة", [
+        mRow("مصاريف ثابتة", c.fixedExp, "tot")
+      ], "دي اللي لازم تغطّيها الأول قبل ما تكسب جنيه.") +
+      beBox("كل جنيه مبيعات بيفضل منه كام؟", [
+        mRow("مبيعات البضاعة", c.revenue),
+        mRow("− تكلفة البضاعة", c.cogs),
+        mRow(c.netShip >= 0 ? "+ صافي الشحن" : "− تكلفة الشحن", Math.abs(c.netShip)),
+        mRow("− مصاريف متغيّرة", c.varExp),
+        mRow("هامش المساهمة", c.cm, "tot " + (c.cm>=0?"v-gain":"v-due"))
+      ], "<b>" + esc(pctTxt(c.cmPct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.") +
+      (be === null
+        ? beBox("مبيعات التعادل", [], "هامش المساهمة سالب — كل قطعة بتبيعها بتزوّد الخسارة. " +
+            "مينفعش يتحسب تعادل قبل ما السعر يغطّي التكلفة المتغيّرة.", "—", "v-due")
+        : beBox("لازم تبيع بكام؟", [
+            days ? mRow("في اليوم", be/days) : "",
+            aov ? "<div class='mrow'><span>يعني كام أوردر</span><b class='num'>" +
+                  esc(qty(Math.ceil(be/aov))) + "</b></div>" : ""
+          ], "عشان صافي الربح يساوي <b>صفر</b> على " +
+             (days ? qty(days) + " يوم" : "الفترة دي") + ".", money(be),
+             c.revenue >= be ? "v-gain" : "v-due"));
+
+    // جدول هيكل التكلفة
+    var rows = [
+      ["تكلفة البضاعة المباعة", "متغيّرة", c.cogs],
+      ["صافي الشحن", "متغيّرة", -c.netShip],
+      ["مصاريف متغيّرة", "متغيّرة", c.varExp],
+      ["مصاريف ثابتة", "ثابتة", c.fixedExp]
+    ].map(function(x){
+      return "<tr><td class='wide'>" + esc(x[0]) + "</td>" +
+        "<td><span class='st st-" + (x[1]==="ثابتة"?"cancelled":"progress") + "'>" + esc(x[1]) + "</span></td>" +
+        "<td class='num'>" + money(x[2]) + "</td>" +
+        "<td class='num'>" + (c.revenue ? pctTxt(x[2]/c.revenue) : "—") + "</td></tr>";
+    });
+    rows.push("<tr class='sumrow'><td class='wide'>إجمالي التكاليف</td><td></td>" +
+      "<td class='num'>" + money(c.varCost + c.fixedExp) + "</td>" +
+      "<td class='num'>" + (c.revenue ? pctTxt((c.varCost+c.fixedExp)/c.revenue) : "—") + "</td></tr>");
+    table("t-rep-cost", ["البند","النوع","المبلغ","% من المبيعات"], rows, "مفيش تكاليف في الفترة دي.");
+
+    renderTarget();
+  }
+
+  function renderTarget(){
+    var box = document.getElementById("rep-target");
+    if(!box) return;
+    var r = periodRange(), c = periodStats(r);
+    var t = Number(toEn((document.getElementById("be-target")||{}).value))||0;
+    var d = Number(toEn((document.getElementById("be-days")||{}).value))||0;
+    if(!t){ box.innerHTML = ""; return; }
+    if(c.cmPct <= 0){
+      box.innerHTML = beBox("مينفعش يتحسب", [],
+        "هامش المساهمة سالب أو صفر — لازم السعر يغطّي التكلفة المتغيّرة الأول.", "—", "v-due");
+      return;
+    }
+    var need = (c.fixedExp + t) / c.cmPct;
+    var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
+    box.innerHTML =
+      beBox("لازم تبيع بكام؟", [
+        d ? mRow("في اليوم", need/d) : "",
+        aov ? "<div class='mrow'><span>يعني كام أوردر</span><b class='num'>" +
+              esc(qty(Math.ceil(need/aov))) + "</b></div>" : ""
+      ], "عشان صافي الربح يبقى <b>" + esc(money(t)) + "</b>" +
+         (d ? " في " + qty(d) + " يوم" : "") + ".", money(need), "v-gain") +
+      beBox("المعادلة", [
+        mRow("مصاريف ثابتة", c.fixedExp),
+        mRow("+ الربح المطلوب", t),
+        mRow("= لازم تغطّي", c.fixedExp + t, "tot")
+      ], "÷ هامش المساهمة <b>" + esc(pctTxt(c.cmPct)) + "</b> = <b>" + esc(money(need)) + "</b>") +
+      beBox("مقارنة بمبيعاتك الحالية", [
+        mRow("مبيعات الفترة", c.revenue),
+        mRow(need > c.revenue ? "ناقصك" : "زيادة عندك", Math.abs(need - c.revenue),
+             "tot " + (need > c.revenue ? "v-due" : "v-gain"))
+      ], c.revenue ? "يعني تزوّد <b>" + esc(pctTxt((need - c.revenue)/c.revenue)) + "</b>." : "");
+  }
+
+  /* ---------- استرداد رأس المال ---------- */
+  var PB_HEAD = ["الشريك","رأس ماله","كسب فعلاً","نسبة الاسترداد",
+                 "قبض كاش","معدل ربحه الشهري","فاضل على الاسترداد"];
+
+  function renderPayback(){
+    var ps = partners();
+    var note = document.getElementById("rep-pb-note");
+    if(!ps.length){
+      if(note) note.textContent = "لسه مفيش شركاء مسجّلين.";
+      table("t-rep-payback", ["الشريك"], [], "");
+      return;
+    }
+    var act = activeMonths(3), nM = act.length;
+    if(note) note.innerHTML =
+      "«كسب فعلاً» = نصيبه من ربح كل شهر بنسبته المرجّحة وقتها، من أول يوم لحد النهاردة — " +
+      "سواء سحبه أو سابه في الشركة. ومعدل الربح الشهري محسوب على <strong>آخر " + qty(nM) +
+      " شهر فيها حركة</strong>" +
+      (nM ? " (" + esc(act[0].key) + (nM > 1 ? " ← " + esc(act[nM-1].key) : "") + ")" : "") + ". " +
+      "<strong>ملحوظة:</strong> فترة الاسترداد مقياس إداري للتخطيط، مش بند في القوايم المالية.";
+
+    var rows = ps.map(function(p){
+      var cap = capitalOf(p.id);
+      var earned = partnerEarned(p.id);
+      var cash = partnerCashOut(p.id);
+      var rate = partnerMonthlyRate(p.id, 3);
+      var left = cap - earned;
+      var pct  = cap > 0 ? earned / cap : 0;
+      var monthsLeft = (left > 0.009 && rate > 0.009) ? left / rate : null;
+      var when = left <= 0.009
+        ? "<span class='v-gain'>استرد بالكامل</span>"
+        : (rate <= 0.009
+            ? "<span class='v-due'>محتاج ربح موجب</span>"
+            : "<span class='num'>" + qty(Math.ceil(monthsLeft)) + " شهر</span>" +
+              "<span class='sub'>باقي " + money(left) + "</span>");
+      return { v: pct, h:
+        "<tr><td class='wide'>" + esc(p.name) + "</td>" +
+        "<td class='num'>" + money(cap) + "</td>" +
+        "<td class='num " + (earned>=0?"v-gain":"v-due") + "'>" + money(earned) + "</td>" +
+        "<td class='num'>" + pctTxt(pct) + "</td>" +
+        "<td class='num'>" + money(cash) + "</td>" +
+        "<td class='num " + (rate>=0?"":"v-due") + "'>" + money(rate) + "</td>" +
+        "<td>" + when + "</td></tr>" };
+    }).sort(function(a,b){ return b.v - a.v; }).map(function(x){ return x.h; });
+
+    var tCap = ps.reduce(function(a,p){ return a + capitalOf(p.id); },0);
+    var tEar = ps.reduce(function(a,p){ return a + partnerEarned(p.id); },0);
+    var tCash= ps.reduce(function(a,p){ return a + partnerCashOut(p.id); },0);
+    rows.push("<tr class='sumrow'><td class='wide'>الإجمالي</td>" +
+      "<td class='num'>" + money(tCap) + "</td>" +
+      "<td class='num'>" + money(tEar) + "</td>" +
+      "<td class='num'>" + pctTxt(tCap ? tEar/tCap : 0) + "</td>" +
+      "<td class='num'>" + money(tCash) + "</td><td></td><td></td></tr>");
+    table("t-rep-payback", PB_HEAD, rows, "");
+  }
+
   function renderReports(){
+    clearMonthly();
+    renderPerf();
+    renderBreakEven();
+    renderPayback();
     var r = periodRange();
     var list = salesIn(r);
 
@@ -5641,6 +5988,9 @@
     Array.prototype.forEach.call(document.querySelectorAll(".cash-ship"), function(w){
       w.hidden = ct !== "settle";
     });
+    Array.prototype.forEach.call(document.querySelectorAll(".cash-kind"), function(w){
+      w.hidden = ct !== "expense";
+    });
     document.getElementById("c-party").disabled = (ct === "settle" || ct === "expense");
 
     opts(partners(), "cp-partner", "اختر شريك");
@@ -5833,6 +6183,7 @@
     if(list==="cash"){
       g("c-date").value=rec.date||today(); g("c-type").value=rec.type||"in"; fillSelects();
       g("c-party").value=rec.partyId||""; g("c-amount").value=rec.amount||""; g("c-note").value=rec.note||"";
+      g("c-kind").value = costKindOf(rec);
       fillSelects(); g("c-shipco").value=rec.shipCo||"";
     }
     setEditUI(list);
@@ -6888,6 +7239,11 @@
     el.hidden = !pDraftDirty();
   }
 
+  ["be-target","be-days"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.addEventListener("input", renderTarget);
+  });
+
   document.getElementById("c-type").addEventListener("change", fillSelects);
 
   bind("f-cash","b-cash", function(form){
@@ -6897,8 +7253,11 @@
       partyId: document.getElementById("c-party").value,
       amount: Number(document.getElementById("c-amount").value)||0,
       shipCo: document.getElementById("c-shipco").value,
+      // ثابت/متغيّر — من غيرها نقطة التعادل مالهاش معنى
+      costKind: document.getElementById("c-kind").value || "fixed",
       note: document.getElementById("c-note").value.trim()
     };
+    if(fields.type !== "expense") fields.costKind = "";
     if(!fields.amount){ toast("اكتب المبلغ"); return; }
     if(fields.type==="settle"){
       if(!fields.shipCo){ toast("اختر شركة الشحن"); return; }
