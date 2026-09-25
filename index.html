@@ -1576,7 +1576,7 @@
             <option value="ship">شركة الشحن</option>
             <option value="direct">مباشر ليك</option>
           </select></div>
-        <div><label for="e-paid">المحصّل من العميل</label>
+        <div><label for="e-paid" id="e-paid-lab">المحصّل من العميل</label>
           <input id="e-paid" type="number" step="any" min="0" data-f="paid"></div>
         <div class="span2"><label for="e-note">ملاحظة</label>
           <input id="e-note" data-f="note" autocomplete="off"></div>
@@ -1607,8 +1607,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "42";
+  var VERSION = "43";
   var CHANGELOG = [
+    { v:"43", d:"2026-09-25", items:[
+      "التحصيل بقى طريق واحد واضح: «حصّلته شركة الشحن» لو التحصيل عن طريقها، و«المحصّل من العميل» لو مباشر",
+      "«لسه على العملاء» اتقسم لكارتين: «تجريه من العملاء» و«مع شركات الشحن»",
+      "جدول «عليهم فلوس» في لوحة المتابعة بقى بيفصل اللي تجريه إنت عن اللي مع الشحن",
+      "سطر الأوردر بيقول «مع QB 260» بدل «باقي 260» لما الشركة هي اللي بتحصّل"
+    ]},
     { v:"42", d:"2026-09-25", items:[
       "إصلاح: دوسة تانية على سطر شركة الشحن كانت بتسيب الكشف مفتوح — بقت تقفله",
       "السطر المفتوح كشفه بقى متعلّم في الجدول",
@@ -2619,6 +2625,20 @@
     };
   }
 
+  /* الأوردر اللي تحصيله عن طريق شركة الشحن: العميل لسه عليه فلوس فعلاً
+     (البضاعة اتسلّمت والفلوس ما وصلتش)، بس إنت مش هتجري وراه — الشركة
+     هي اللي هتحصّل. فالمديونية لازم تتقسم في العرض: إيه اللي عليك تجريه
+     من العميل، وإيه اللي مستني من الشركة. الميزانية زي ما هي. */
+  function dueViaShip(id){
+    var v = 0;
+    live("sales").forEach(function(s){
+      if(s.partyId !== id || !viaShip(s) || !isDelivered(s)) return;
+      var d = saleTotal(s) + shipIn(s) - (Number(s.paid)||0);
+      if(d > 0.009) v += d;
+    });
+    return v;
+  }
+
   function partyBalance(id){
     var bal = 0;
     live("sales").forEach(function(s){
@@ -3522,12 +3542,18 @@
     var recv=[], pay=[];
     live("parties").forEach(function(p){
       var b = partyBalance(p.id);
-      if(p.type==="customer" && b > 0.009)
-        recv.push("<tr><td class='wide'>"+esc(p.name)+"</td><td class='num'>"+money(b)+"</td></tr>");
+      if(p.type==="customer" && b > 0.009){
+        var viaS = dueViaShip(p.id), mine = b - viaS;
+        recv.push("<tr><td class='wide'>"+esc(p.name)+"</td>"+
+          "<td class='num "+(mine>0.009?"v-due":"")+"'>"+money(Math.max(mine,0))+"</td>"+
+          "<td class='num'>"+(viaS>0.009?money(viaS):"—")+"</td>"+
+          "<td class='num'>"+money(b)+"</td></tr>");
+      }
       if(p.type==="supplier" && b < -0.009)
         pay.push("<tr><td class='wide'>"+esc(p.name)+"</td><td class='num v-due'>"+money(-b)+"</td></tr>");
     });
-    table("t-recv", ["العميل","المطلوب منه"], recv, "مفيش عميل عليه فلوس دلوقتي.");
+    table("t-recv", ["العميل","تجريه إنت","مع شركة الشحن","الإجمالي"], recv,
+      "مفيش عميل عليه فلوس دلوقتي.");
     table("t-pay", ["المورد","المستحق له"], pay, "مفيش مورد ليه فلوس عندك دلوقتي.");
   }
 
@@ -3847,6 +3873,12 @@
     /* الشرح الحيّ: نفس قصة الشاشة بس وإنت بتكتب. الخانتين اسمهم
        «بتحصّله» و«بتدفعه» بس الفرق بينهم هو اللي بيطلع من جيبك — ودي
        الحتة اللي كانت ضايعة في رقم «صافي الشحن» بالسالب. */
+    /* التحصيل طريق واحد: يا العميل بيدفعلك مباشرة، يا الشركة بتحصّل بدالك.
+       الاسم لازم يقول مين اللي ماسك الفلوس دلوقتي، وإلا الأرقام بتتقري غلط. */
+    var via = viaShip(draft), co = squish(draft.shipCo);
+    var lab = document.getElementById("e-paid-lab");
+    if(lab) lab.textContent = via ? "حصّلته شركة الشحن" : "المحصّل من العميل";
+
     var pb = document.getElementById("e-paybox");
     if(pb){
       if(!hasItem && !sin && !sout && !paid){ pb.hidden = true; pb.innerHTML = ""; }
@@ -3858,9 +3890,16 @@
         var pocket = sout - sin, html = L("البضاعة", goods);
         if(sin) html += L("شحن محمّل على العميل", sin);
         html += L("المطلوب من العميل", owed, "tot");
-        if(paid) html += L("محصّل منه", paid);
-        if(st === "delivered") html += L(due > 0.009 ? "باقي عليه" : "خالص", Math.max(due,0), "tot");
+        if(paid) html += L(via ? "حصّلته " + (co || "شركة الشحن") : "محصّل منه", paid);
+        if(st === "delivered")
+          html += L(due > 0.009 ? (via ? "لسه هتحصّله الشركة" : "باقي عليه") : "خالص",
+                    Math.max(due,0), "tot");
         if(sout) html += L("شحن بتدفعه للشركة", sout);
+        if(st === "delivered" && paid > 0.009)
+          html += "<p class='pn'>" + (via
+            ? "الفلوس دي عند " + esc(co || "شركة الشحن") +
+              " — بتستلمها من شاشة «شركات الشحن»، مش في خزنتك دلوقتي."
+            : "الفلوس دي دخلت الخزنة على طول.") + "</p>";
         if(Math.abs(pocket) > 0.009)
           html += "<p class='pn " + (pocket > 0 ? "v-due" : "v-gain") + "'>" +
             (pocket > 0
@@ -3933,7 +3972,9 @@
       "<span class='secondary num'>" +
         (isDelivered(s)
           ? (due > 0.009
-              ? "محصّل " + money(collected) + " <span class='pill due'>باقي " + money(due) + "</span>"
+              ? (viaShip(s)
+                  ? "<span class='pill due'>مع " + esc(squish(s.shipCo) || "الشحن") + " " + money(due) + "</span>"
+                  : "محصّل " + money(collected) + " <span class='pill due'>باقي " + money(due) + "</span>")
               : "خالص")
           : (canc ? "ملغي · شحن " + money(shipOut(s)) : "لسه ما اتحصّلش")) +
       "</span>";
@@ -3971,9 +4012,12 @@
       mRow("البضاعة", m.goods) +
       (m.shipIn ? mRow("شحن محمّل عليه", m.shipIn, "", "+ ") : "") +
       mRow("المطلوب منه", m.owed, "tot") +
-      mRow("محصّل", m.paid, "", "− ") +
-      mRow(m.due > 0.009 ? "باقي عليه" : "خالص", Math.max(m.due,0),
-           m.due > 0.009 ? "tot v-due" : "tot v-gain") +
+      mRow(viaShip(s) ? "حصّلته الشركة" : "محصّل", m.paid, "", "− ") +
+      mRow(m.due > 0.009 ? (viaShip(s) ? "لسه هتحصّله الشركة" : "باقي عليه") : "خالص",
+           Math.max(m.due,0), m.due > 0.009 ? "tot v-due" : "tot v-gain") +
+      (m.due > 0.009 && viaShip(s)
+        ? "<p class='mnote'>" + esc(squish(s.shipCo) || "شركة الشحن") +
+          " هي اللي بتحصّل — مش إنت اللي بتجري ورا العميل.</p>" : "") +
       "</div>";
 
     /* ٢) اللي طلع منك — التكلفة الحقيقية للأوردر */
@@ -4037,16 +4081,19 @@
     }).join("");
 
     /* الحركة اليومية الأكتر تكرار: العميل دفع الباقي. من غير ما تفتح الدرج. */
+    var viaS = viaShip(s), shco = squish(s.shipCo) || "شركة الشحن";
     var pay = m.due <= 0.009 ? "" :
       "<div class='quickpay'>" +
-        "<label for='qp-"+s.id+"'>تحصيل من العميل</label>" +
+        "<label for='qp-"+s.id+"'>" +
+          (viaS ? esc(shco) + " حصّلت" : "تحصيل من العميل") + "</label>" +
         "<input id='qp-"+s.id+"' inputmode='decimal' data-qp='"+s.id+"' " +
           "placeholder='"+esc(money(m.due))+"'>" +
         "<button class='tbtn primary' type='button' data-qpay='"+s.id+"'>سجّل</button>" +
-        "<button class='tbtn' type='button' data-qpayall='"+s.id+"'>خلّص الباقي</button>" +
-        "<p class='hintline'>الباقي " + esc(money(m.due)) +
-          (viaShip(s) ? " · بيروح لمحفظة " + esc(squish(s.shipCo) || "شركة الشحن")
-                      : " · بيدخل الخزنة على طول") + "</p>" +
+        "<button class='tbtn' type='button' data-qpayall='"+s.id+"'>حصّلت الكل</button>" +
+        "<p class='hintline'>" + (viaS
+          ? "لسه " + esc(money(m.due)) + " عند العميل — أول ما " + esc(shco) +
+            " تحصّلها سجّلها هنا، وتقعد في محفظتها لحد ما تستلمها من «شركات الشحن»."
+          : "الباقي " + esc(money(m.due)) + " — بيدخل الخزنة على طول") + "</p>" +
       "</div>";
 
     return "<tr class='detail' data-detail='"+s.id+"'><td colspan='"+SALE_HEAD.length+"'><div class='detail-in'>" +
@@ -4113,17 +4160,22 @@
       return a + (shipCounts(s) ? shipOut(s) - shipIn(s) : 0); },0);
     var deliv = list.filter(isDelivered).length;
     // فلوس مستنية من العملاء: أوردر مسلّم واللي اتحصّل منه أقل من قيمته
-    var owedN = 0, owed = list.reduce(function(a,s){
-      if(!isDelivered(s)) return a;
+    var owedN = 0, owed = 0, shipN = 0, shipOwed = 0;
+    list.forEach(function(s){
+      if(!isDelivered(s)) return;
       var d = saleTotal(s) + shipIn(s) - (Number(s.paid)||0);
-      if(d <= 0.009) return a;
-      owedN++; return a + d;
-    },0);
+      if(d <= 0.009) return;
+      // تحصيل عن طريق الشركة؟ مش إنت اللي هتجري وراه
+      if(viaShip(s)){ shipN++; shipOwed += d; }
+      else { owedN++; owed += d; }
+    });
     var cells = [
       ["أوردرات ظاهرة", qty(list.length), "", "من إجمالي " + qty(live("sales").length)],
       ["مبيعات مسلّمة", money(rev), "", qty(deliv) + " أوردر مسلّم"],
-      ["لسه على العملاء", money(owed), owed > 0.009 ? "v-due" : "",
-       owed > 0.009 ? qty(owedN) + " أوردر مسلّم ولسه ما اتحصّلش كامل" : "كل المسلّم اتحصّل"],
+      ["تجريه من العملاء", money(owed), owed > 0.009 ? "v-due" : "",
+       owed > 0.009 ? qty(owedN) + " أوردر تحصيله مباشر ليك" : "مفيش تحصيل مباشر معلّق"],
+      ["مع شركات الشحن", money(shipOwed), "",
+       shipOwed > 0.009 ? qty(shipN) + " أوردر الشركة هي اللي بتحصّله" : "مفيش حاجة معلّقة عندهم"],
       [pocket >= 0 ? "شحن من جيبك" : "كسبت من الشحن", money(Math.abs(pocket)),
        pocket > 0.009 ? "v-due" : "v-gain",
        pocket >= 0 ? "دفعت للشركات أكتر مما حمّلته للعملاء"
@@ -5847,7 +5899,8 @@
     rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll();
     var left = due - add;
-    toast("اتحصّل " + money(add) + (left > 0.009 ? " · باقي " + money(left) : " · الأوردر خلص"));
+    toast((viaShip(rec) ? (squish(rec.shipCo) || "الشركة") + " حصّلت " : "اتحصّل ") + money(add) +
+          (left > 0.009 ? " · باقي " + money(left) : " · الأوردر خلص"));
   }
 
   function cancelDraft(){
