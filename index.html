@@ -1483,8 +1483,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "36";
+  var VERSION = "37";
   var CHANGELOG = [
+    { v:"37", d:"2026-09-25", items:[
+      "إصلاح: فلوس محصّلة «عن طريق شركة الشحن» من غير اسم شركة كانت بتختفي من الميزانية",
+      "إصلاح: العربون على أوردر لسه ما اتسلّمش كان بيدخل الخزنة من غير التزام مقابل",
+      "إصلاح: المحصّل على أوردر جاري عن طريق شركة شحن مكانش بيبان في محفظتها",
+      "حاجز: لازم تكتب اسم شركة الشحن لو التحصيل عن طريقها",
+      "الفلوس اللي اتسجّلت غلط قبل كده بتظهر في سطر محذّر بدل ما تضيع"
+    ]},
     { v:"36", d:"2026-09-25", items:[
       "فلتر باللون وفلتر بالمقاس في المخزون",
       "جدول المخزون بقى فوق الكروت — بيبان من غير ما تنزل",
@@ -2304,26 +2311,43 @@
 
   // محفظة شركة الشحن: اللي حصّلته من العملاء ولسه عندها
   function walletOf(co){
-    var w = 0, name = (co||"").trim();
+    var w = 0, name = squish(co);
     live("sales").forEach(function(s){
-      if((s.shipCo||"").trim() !== name || !viaShip(s)) return;
-      if(isDelivered(s)) w += Number(s.paid)||0;
-      if(isCancelled(s)) w += shipIn(s);
-      if(shipCounts(s)) w -= shipOut(s);      // بتخصم عمولتها من المحفظة
+      if(squish(s.shipCo) !== name || !viaShip(s)) return;
+      // الشركة ماسكة الفلوس من ساعة ما حصّلتها، مش من ساعة التسليم.
+      // قبل كده كان المحصّل على أوردر «جاري» مش بيبان في أي محفظة.
+      if(!isCancelled(s)) w += Number(s.paid)||0;
+      if(isCancelled(s))  w += shipIn(s);
+      if(shipCounts(s))   w -= shipOut(s);    // بتخصم عمولتها من المحفظة
     });
     live("cash").forEach(function(c){
-      if(c.type === "settle" && (c.shipCo||"").trim() === name) w -= Number(c.amount)||0;
+      if(c.type === "settle" && squish(c.shipCo) === name) w -= Number(c.amount)||0;
     });
     return w;
   }
   function shipCompanies(){
     var m = {};
-    live("sales").forEach(function(s){ var c=(s.shipCo||"").trim(); if(c) m[c]=1; });
-    live("cash").forEach(function(c){ if(c.type==="settle"){ var n=(c.shipCo||"").trim(); if(n) m[n]=1; } });
+    live("sales").forEach(function(s){ var c=squish(s.shipCo); if(c) m[c]=1; });
+    live("cash").forEach(function(c){ if(c.type==="settle"){ var n=squish(c.shipCo); if(n) m[n]=1; } });
     return Object.keys(m);
   }
+  // أوردر تحصيله «عن طريق شركة الشحن» بس اسم الشركة فاضي: الفلوس دي
+  // مكانتش بتتحسب لا في الخزنة ولا في أي محفظة — يعني بتختفي من الميزانية.
+  // بنطلّعها في دلو مستقل عشان تفضل ظاهرة والمستخدم يقدر يصلّحها.
+  function hasOrphanShip(){
+    return live("sales").some(function(s){
+      return viaShip(s) && !squish(s.shipCo) && !isCancelled(s) &&
+             ((Number(s.paid)||0) || shipIn(s) || shipOut(s));
+    });
+  }
+  // كل الدلاء اللي فيها فلوس، وفيها الدلو المجهول لو موجود
+  function shipBuckets(){
+    var cos = shipCompanies();
+    if(hasOrphanShip()) cos.push("");
+    return cos;
+  }
   function walletsTotal(){
-    return shipCompanies().reduce(function(a,c){ return a + walletOf(c); },0);
+    return shipBuckets().reduce(function(a,c){ return a + walletOf(c); },0);
   }
 
   function retQty(s){
@@ -2376,9 +2400,13 @@
 
   function partyBalance(id){
     var bal = 0;
-    // الأوردر المسلّم بس هو اللي بيعمل مديونية (بضاعة + شحن محصّل − اللي اتدفع)
     live("sales").forEach(function(s){
-      if(s.partyId===id && isDelivered(s)) bal += saleTotal(s) + shipIn(s) - (Number(s.paid)||0);
+      if(s.partyId !== id) return;
+      // المسلّم بيعمل مديونية: بضاعة + شحن محصّل − اللي اتدفع
+      if(isDelivered(s)){ bal += saleTotal(s) + shipIn(s) - (Number(s.paid)||0); return; }
+      // لسه ما اتسلّمش: اللي دفعه عربون — فلوسه عندك وإنت مدين له بيها.
+      // قبل كده كان بيدخل الخزنة من غير التزام مقابل، فالميزانية تختل.
+      if(!isCancelled(s)) bal -= (Number(s.paid)||0);
     });
     live("purchases").forEach(function(p){ if(p.partyId===id) bal -= goodsTotal(p) - (Number(p.paid)||0); });
     live("cash").forEach(function(c){
@@ -4176,17 +4204,16 @@
   }
 
   function renderWallets(){
-    var cos = shipCompanies();
-    var rows = cos.map(function(co){
+    var rows = shipBuckets().map(function(co){
       var collected = 0, fees = 0, drawn = 0;
       live("sales").forEach(function(s){
-        if((s.shipCo||"").trim() !== co || !viaShip(s)) return;
-        if(isDelivered(s)) collected += Number(s.paid)||0;
-        if(isCancelled(s)) collected += shipIn(s);
-        if(shipCounts(s)) fees += shipOut(s);
+        if(squish(s.shipCo) !== co || !viaShip(s)) return;
+        if(!isCancelled(s)) collected += Number(s.paid)||0;
+        if(isCancelled(s))  collected += shipIn(s);
+        if(shipCounts(s))   fees += shipOut(s);
       });
       live("cash").forEach(function(c){
-        if(c.type==="settle" && (c.shipCo||"").trim()===co) drawn += Number(c.amount)||0;
+        if(c.type==="settle" && squish(c.shipCo)===co) drawn += Number(c.amount)||0;
       });
       var bal = collected - fees - drawn;
       return { co:co, collected:collected, fees:fees, drawn:drawn, bal:bal };
@@ -4196,7 +4223,8 @@
     if(!rows.length) return;
     table("t-wallets", ["شركة الشحن","حصّلت من العملاء","خصمت عمولتها","سحبته منها","لك في محفظتها"],
       rows.map(function(x){
-        return "<tr><td class='wide'>"+esc(x.co)+"</td>"+
+        return "<tr><td class='wide'>"+(x.co ? esc(x.co)
+            : "<span class='v-due'>⚠ من غير اسم شركة</span><span class='sub'>افتح الأوردر واكتب اسم شركة الشحن</span>")+"</td>"+
           "<td class='num v-gain'>"+money(x.collected)+"</td>"+
           "<td class='num v-due'>"+money(x.fees)+"</td>"+
           "<td class='num'>"+money(x.drawn)+"</td>"+
@@ -5190,6 +5218,15 @@
 
     if(!draft.partyId){ toast("اختر العميل"); focusFirst(); return; }
     if(!lines.length){ toast("اختر صنف واكتب الكمية"); return; }
+    // تحصيل «عن طريق شركة الشحن» من غير اسم الشركة = فلوس مالهاش مكان:
+    // مش في الخزنة (لأنها عند الشركة) ولا في محفظة (لأن مفيش شركة).
+    if(viaShip(draft) && !squish(draft.shipCo) &&
+       ((Number(draft.paid)||0) || shipIn(draft) || shipOut(draft))){
+      toast("اكتب اسم شركة الشحن — الفلوس دي عندها مش عندك");
+      var sc = document.getElementById("e-shipco");
+      if(sc){ sc.focus(); sc.scrollIntoView({block:"center"}); }
+      return;
+    }
     for(var i=0;i<lines.length;i++){
       var miss = variantMissing(lines[i].itemId, lines[i].color, lines[i].size);
       if(miss){ toast(itemName(lines[i].itemId)+": "+miss); return; }
