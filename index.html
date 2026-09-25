@@ -239,6 +239,9 @@
   .quickpay input{width:120px;padding:6px 9px;font-size:.86rem}
   .quickpay .hintline{margin:0;flex:1 1 100%}
 
+  /* «عندك دلوقتي» جوّه سطر الصنف */
+  .stockline{margin:6px 0 0;font-size:.76rem;line-height:1.55}
+
   /* الفلاتر الشغالة كـ chips */
   .chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .chips:empty{display:none}
@@ -1307,6 +1310,30 @@
     </div>
     <p class="hint" id="fs-note" style="margin:12px 0 0"></p>
   </div>
+  <div class="panel">
+    <h3>ترقيم الأوردرات</h3>
+    <p class="hint" style="margin-bottom:10px">
+      كل أوردر بياخد رقم تسلسلي، والرقم ما بيترجّعش حتى لو حذفت الأوردر — عشان
+      ما يبقاش في أوردرين بنفس الرقم على بوليصتين. لو كنت بتجرّب السيستم وحذفت
+      اللي سجّلته، الترقيم هيفضل ماشي من فوق. الزرار ده بيرجّعه من ١.
+    </p>
+    <p class="note" id="sno-state" style="margin-bottom:12px"></p>
+    <div class="row-actions">
+      <button class="act ghost" type="button" id="b-renum">أعد الترقيم من ١</button>
+    </div>
+    <div id="renum-box" hidden style="margin-top:14px;border:1px solid var(--line);border-radius:9px;padding:14px">
+      <p class="note bad" id="renum-warn" style="margin-top:0"></p>
+      <p class="hint" style="margin:8px 0 12px">
+        الأوردرات الموجودة هتتعاد ترقيمها بترتيب التاريخ. لو طبعت بوالص فيها
+        الأرقام القديمة، الأرقام اللي عليها مش هتطابق السيستم بعد كده.
+      </p>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-renum-do">تأكيد إعادة الترقيم</button>
+        <button class="act ghost" type="button" id="b-renum-cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <div class="panel" style="border-color:var(--due)">
     <h3 style="color:var(--due)">تهيئة السيستم</h3>
     <p class="hint" style="margin-bottom:12px">
@@ -1487,7 +1514,7 @@
   <div class="drawer-foot">
     <div class="sums">
       <div>إجمالي البضاعة<strong class="num" id="e-goods">—</strong></div>
-      <div id="e-profit-wrap" hidden>صافي الأوردر<strong class="num" id="e-profit">—</strong></div>
+      <div id="e-profit-wrap" hidden>صافي ربح الأوردر<strong class="num" id="e-profit">—</strong></div>
     </div>
     <button class="tbtn" type="button" id="b-canceldraft">تفريغ</button>
     <button class="tbtn primary" type="button" id="b-savedraft">حفظ الأوردر</button>
@@ -1504,8 +1531,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "38";
+  var VERSION = "39";
   var CHANGELOG = [
+    { v:"39", d:"2026-09-25", items:[
+      "«خلصان» كانت بتكدب: المقاس اللي عندك في لون تاني بقى بيقول «مش في بني · عندك في أسود»",
+      "سطر «عندك دلوقتي» تحت الصنف بيوري التركيبات اللي فيها رصيد فعلاً",
+      "زرار «أعد الترقيم من ١» في الإعدادات — الأوردر المحذوف كان بيسيب رقمه محجوز",
+      "«سعر القطعة» بقت «سعر بيع القطعة» و«صافي الأوردر» بقى «صافي ربح الأوردر»"
+    ]},
     { v:"38", d:"2026-09-25", items:[
       "شرايط حالة فوق جدول المبيعات بعدّاد: الكل · جاري · مسلّم · مقترح · ملغي",
       "كارت «لسه على العملاء» — فلوس الأوردرات المسلّمة اللي ما اتحصّلتش",
@@ -2351,7 +2384,7 @@
   }
   // الأوردرات القديمة بتاخد أرقامها مرة واحدة بترتيب التاريخ — نفس الترتيب على كل الأجهزة
   function backfillSaleNos(){
-    var miss = db.sales.filter(function(s){ return !s.no; });
+    var miss = db.sales.filter(function(s){ return !s.no && !s.deleted; });
     if(!miss.length) return;
     var m = 0;
     db.sales.forEach(function(s){ var n = Number(s.no)||0; if(n > m) m = n; });
@@ -3452,6 +3485,44 @@
   }
   function availTag(n){ return n > 0 ? " — متاح " + qty(n) : " — خلصان"; }
 
+  /* اللون والمقاس بيتفلتروا على بعض. لو إنت واقف على «بني» والمقاس ٣٩
+     عندك في «أسود» بس، كلمة «خلصان» بتبقى كذبة — عندك ٣٩ فعلاً.
+     دي بترجّع الاتجاه التاني اللي المقاس (أو اللون) ده موجود فيه. */
+  function whereElse(itemId, f, v){
+    var out = [];
+    variantsOf(itemId).forEach(function(x){
+      var mine  = f === "size" ? x.size  : x.color;
+      var other = f === "size" ? x.color : x.size;
+      if(squish(mine) !== squish(v) || !other) return;
+      if(comboAvail(itemId, x.color, x.size) <= 0) return;
+      if(out.indexOf(other) < 0) out.push(other);
+    });
+    return out;
+  }
+  // نص خيار واحد في قايمة اللون أو المقاس، وهو عارف اللي متحدد في القايمة التانية
+  function vOptLabel(itemId, f, v, other){
+    var n = f === "color" ? comboAvail(itemId, v, other) : comboAvail(itemId, other, v);
+    if(n > 0) return v + " — متاح " + qty(n);
+    if(!squish(other)) return v + " — خلصان";
+    var els = whereElse(itemId, f, v);
+    if(!els.length) return v + " — خلصان";
+    return v + " — مش في " + other + " · عندك في " +
+           els.slice(0,2).join(" و") + (els.length > 2 ? " وغيرهم" : "");
+  }
+  // «عندك دلوقتي» — التركيبات اللي فيها رصيد فعلاً، بتجاوب على السؤال قبل ما يتسأل
+  function stockLine(itemId){
+    var parts = [];
+    variantsOf(itemId).forEach(function(x){
+      var n = comboAvail(itemId, x.color, x.size);
+      if(n <= 0) return;
+      var lb = [squish(x.color), squish(x.size)].filter(Boolean).join(" ");
+      parts.push((lb || "من غير لون ولا مقاس") + " ×" + qty(n));
+    });
+    if(!parts.length) return "";
+    return "عندك: " + parts.slice(0,6).join(" · ") +
+           (parts.length > 6 ? " · و" + qty(parts.length - 6) + " غيرهم" : "");
+  }
+
   // في البيع مهم تعرف المتاح. في الشراء الرقم ده مالوش لازمة وبيلخبط.
   function itemOptionsHTML(sel, plain){
     return optsHTML(live("items").map(function(o){
@@ -3475,10 +3546,9 @@
     var pick = function(list, sel, f){
       return "<select data-li='"+i+"' data-f='"+f+"'>" +
         optsHTML(list.map(function(v){
-          var n = l.itemId
-            ? (f === "color" ? comboAvail(l.itemId, v, l.size) : comboAvail(l.itemId, l.color, v))
-            : null;
-          return { v:v, t: v + (n === null ? "" : availTag(n)) };
+          return { v:v, t: l.itemId
+            ? vOptLabel(l.itemId, f, v, f === "color" ? l.size : l.color)
+            : v };
         }), sel, "اختر") + "</select>";
     };
     var dash = "<select disabled><option>—</option></select>";
@@ -3496,13 +3566,15 @@
       "<div class='lrow-top'>" +
         "<div><label for='l-qty-"+i+"'>الكمية</label>" +
           "<input id='l-qty-"+i+"' type='number' step='any' min='0' data-li='"+i+"' data-f='qty' value='"+esc(l.qty)+"'></div>" +
-        "<div><label for='l-price-"+i+"'>سعر القطعة</label>" +
+        "<div><label for='l-price-"+i+"'>سعر بيع القطعة</label>" +
           "<input id='l-price-"+i+"' type='number' step='any' min='0' data-li='"+i+"' data-f='price' value='"+esc(l.price)+"'></div>" +
         (showRet
           ? "<div><label for='l-ret-"+i+"'>مرتجع</label>" +
             "<input id='l-ret-"+i+"' type='number' step='any' min='0' data-li='"+i+"' data-f='ret' value='"+esc(l.ret)+"'></div>"
           : "") +
       "</div>" +
+      (l.itemId && (cs.length || zs.length) && stockLine(l.itemId)
+        ? "<p class='hintline stockline'>" + esc(stockLine(l.itemId)) + "</p>" : "") +
       "<div class='lrow-foot'>" +
         "<span class='ltot num' data-li='"+i+"'>—</span>" +
         (draft.lines.length > 1 ? "<button type='button' class='rm' data-rmline='"+i+"'>شيل السطر</button>" : "") +
@@ -3520,9 +3592,8 @@
       if(!sel) return;
       Array.prototype.forEach.call(sel.options, function(o){
         if(!o.value) return;
-        o.textContent = o.value + availTag(f === "color"
-          ? comboAvail(l.itemId, o.value, l.size)
-          : comboAvail(l.itemId, l.color, o.value));
+        o.textContent = vOptLabel(l.itemId, f, o.value,
+          f === "color" ? l.size : l.color);
       });
     });
   }
@@ -4778,7 +4849,7 @@
     parties: function(){ renderParties(); renderStatement(); },
     rep:     function(){ renderReports(); },
     log:     function(){ renderLog(); },
-    backup:  function(){ renderOpening(); renderLock(); }
+    backup:  function(){ renderOpening(); renderLock(); renderSnoState(); }
   };
   var dirtyTabs = {};          // تبويبات محتاجة رسم لما تتفتح
   var activeTab = "dash";
@@ -6510,6 +6581,48 @@
     toast("السيستم اتهيّأ — نزّلنا نسخة احتياطية قبل المسح");
   }
 
+  /* ---------- إعادة ترقيم الأوردرات ---------- */
+  // الأوردر المحذوف بيسيب رقمه محجوز فالعدّاد بيفضل ماشي. ده بيرجّع
+  // الترقيم من ١ على الأوردرات الموجودة بترتيب التاريخ، وبيفكّ أرقام المحذوف.
+  function renumSales(){
+    var liveS = live("sales").slice().sort(function(a,b){
+      return (a.date||"") !== (b.date||"") ? ((a.date||"") < (b.date||"") ? -1 : 1)
+                                           : (a.at||0) - (b.at||0);
+    });
+    var now = Date.now(), n = 0;
+    liveS.forEach(function(x){
+      var next = ++n;
+      if(x.no === next) return;
+      x.no = next; x.editedBy = me || "غير محدد"; x.at = now;
+    });
+    db.sales.forEach(function(x){
+      if(x.deleted && x.no != null){ delete x.no; x.at = now; }
+    });
+    saveSoon("sales"); renderAll(); renderSnoState();
+    document.getElementById("renum-box").hidden = true;
+    toast(n ? "اتعاد ترقيم " + qty(n) + " أوردر — الجاي رقم " + qty(n+1)
+            : "مفيش أوردرات — الجاي هيبدأ من ١");
+  }
+  function renderSnoState(){
+    var el = document.getElementById("sno-state");
+    if(!el) return;
+    var n = live("sales").length;
+    el.textContent = "عندك " + qty(n) + " أوردر، والجاي هياخد رقم " + qty(nextSaleNo()) + ".";
+  }
+  document.getElementById("b-renum").addEventListener("click", function(){
+    var box = document.getElementById("renum-box");
+    var n = live("sales").length;
+    document.getElementById("renum-warn").textContent = n
+      ? "هيتعاد ترقيم " + qty(n) + " أوردر موجود، والجاي هياخد رقم " + qty(n+1) + "."
+      : "مفيش أوردرات موجودة — الترقيم هيرجع يبدأ من ١.";
+    box.hidden = false;
+    box.scrollIntoView({block:"nearest"});
+  });
+  document.getElementById("b-renum-cancel").addEventListener("click", function(){
+    document.getElementById("renum-box").hidden = true;
+  });
+  document.getElementById("b-renum-do").addEventListener("click", renumSales);
+
   document.getElementById("b-reset-open").addEventListener("click", openReset);
   document.getElementById("b-reset-cancel").addEventListener("click", closeReset);
   document.getElementById("reset-word").addEventListener("input", function(){
@@ -6527,7 +6640,7 @@
   document.getElementById("b-csv").addEventListener("click", function(){
     var head = ["رقم الأوردر","التاريخ","الحالة","العميل","التليفون","المحافظة","الصنف","اللون","المقاس",
       "المشحون","المرتجع","المباع","السعر","إجمالي السطر","إجمالي الأوردر",
-      "شركة الشحن","كود الشحن","التحصيل عن طريق","شحن محصّل","شحن مدفوع","المحصّل","صافي الأوردر","المستخدم"];
+      "شركة الشحن","كود الشحن","التحصيل عن طريق","شحن محصّل","شحن مدفوع","المحصّل","صافي ربح الأوردر","المستخدم"];
     var lines = [head.join(",")];
     filteredSales().slice().sort(byDate).forEach(function(s){
       var p = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
