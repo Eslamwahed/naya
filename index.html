@@ -214,6 +214,31 @@
   .filters label{display:block;font-size:.72rem;color:var(--ink-soft);margin-bottom:4px;font-weight:500}
   .filters select,.filters input{width:100%;padding:7px 9px;font-size:.85rem}
 
+  /* شرايط الحالة — أسرع فلتر في الشاشة، بره لوحة الفلاتر */
+  .stabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .stabs button{
+    background:var(--card);border:1px solid var(--line);border-radius:99px;
+    font:inherit;font-size:.83rem;padding:6px 14px;cursor:pointer;color:var(--ink);
+    display:inline-flex;align-items:center;gap:7px;transition:.15s;
+  }
+  .stabs button:hover{border-color:var(--teal);color:var(--teal)}
+  .stabs button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+  [data-theme="dark"] .stabs button.on{color:#1A141C}
+  .stabs b{font-weight:700;font-size:.76rem;opacity:.65}
+  .stabs button.on b{opacity:.9}
+  @media (max-width:560px){
+    .stabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+      padding-bottom:4px;margin-inline:-14px;padding-inline:14px}
+    .stabs button{flex:0 0 auto}
+  }
+
+  /* تحصيل سريع من سطر التفاصيل */
+  .quickpay{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:var(--teal-soft);border-radius:10px;padding:9px 12px;margin-top:10px}
+  .quickpay label{font-size:.8rem;color:var(--teal);font-weight:600}
+  .quickpay input{width:120px;padding:6px 9px;font-size:.86rem}
+  .quickpay .hintline{margin:0;flex:1 1 100%}
+
   /* الفلاتر الشغالة كـ chips */
   .chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
   .chips:empty{display:none}
@@ -649,15 +674,10 @@
     <button class="tbtn primary" type="button" id="b-newsale">+ أوردر جديد</button>
   </div>
 
+  <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
+  <input type="hidden" id="flt-status" value="">
+
   <div class="filters" id="filters-panel" hidden>
-    <div><label for="flt-status">الحالة</label>
-      <select id="flt-status">
-        <option value="">الكل</option>
-        <option value="proposed">مقترح</option>
-        <option value="progress">جاري</option>
-        <option value="delivered">مسلّم</option>
-        <option value="cancelled">ملغي</option>
-      </select></div>
     <div><label for="flt-party">العميل</label><select id="flt-party"></select></div>
     <div><label for="flt-item">الصنف</label><select id="flt-item"></select></div>
     <div><label for="flt-ship">شركة الشحن</label><select id="flt-ship"></select></div>
@@ -1460,6 +1480,7 @@
         <div class="span2"><label for="e-note">ملاحظة</label>
           <input id="e-note" data-f="note" autocomplete="off"></div>
       </div>
+      <p class="hintline" id="e-shipnote" hidden></p>
     </div>
   </div>
 
@@ -1483,8 +1504,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "37";
+  var VERSION = "38";
   var CHANGELOG = [
+    { v:"38", d:"2026-09-25", items:[
+      "شرايط حالة فوق جدول المبيعات بعدّاد: الكل · جاري · مسلّم · مقترح · ملغي",
+      "كارت «لسه على العملاء» — فلوس الأوردرات المسلّمة اللي ما اتحصّلتش",
+      "تحصيل سريع من سطر تفاصيل الأوردر من غير ما تفتح درج التعديل",
+      "اللون والمقاس في درج البيع بقوا بيوروا المتاح جنب كل اختيار",
+      "اقتراح شركة الشحن ومصاريفها بقى بيقول جه منين، ومش بياخد من أوردر ملغي",
+      "الأوردر الملغي بيبان بقيمته الأصلية مشطوبة بدل 0.00",
+      "اختيار صنف بيحط الكمية ١ لوحدها",
+      "سرعة: فهرس واحد للمخزون بدل ما كل سؤال عن تركيبة يقرا الداتا من الأول"
+    ]},
     { v:"37", d:"2026-09-25", items:[
       "إصلاح: فلوس محصّلة «عن طريق شركة الشحن» من غير اسم شركة كانت بتختفي من الميزانية",
       "إصلاح: العربون على أوردر لسه ما اتسلّمش كان بيدخل الخزنة من غير التزام مقابل",
@@ -1643,6 +1674,7 @@
 
   function absorb(data){
     if(!data) return false;
+    clearStockIdx();                  // داتا جاية من السحابة أو من ملف
     var src = data.db || data;
     var got = false;
     LISTS.forEach(function(n){
@@ -1691,6 +1723,7 @@
 
   // نداء واحد بيكتب في كل الأماكن المتاحة
   function saveSoon(name){
+    clearStockIdx();                  // الداتا اتغيّرت — فهرس المخزون بقى قديم
     sinks.local = writeLocal();
     writeFileSoon();
     if(CLOUD){
@@ -2193,7 +2226,8 @@
     return s;
   }
   function freeOfV(itemId, color, size){
-    return stockOfV(itemId,color,size) - reservedOfV(itemId,color,size);
+    var n = stockIdx().free[vKey(itemId,color,size)];
+    return n == null ? 0 : n;
   }
   // ---------- الألوان والمقاسات ----------
   // كل حركة ممكن يكون معاها لون ومقاس. السجلات القديمة من غيرهم = نسخة "عام"
@@ -2250,14 +2284,43 @@
     return Object.keys(out).map(function(k){ return out[k]; });
   }
 
-  function variantsOf(itemId){
-    var out = {}, add = function(c,z){ out[vKey(itemId,c,z)] = { color:c||"", size:z||"" }; };
-    live("purchases").forEach(function(r){ if(r.itemId===itemId) add(vColor(r), vSize(r)); });
-    live("sales").forEach(function(r){
-      SL(r).forEach(function(l){ if(l.itemId===itemId) add(vColor(l), vSize(l)); });
+  /* فهرس المخزون: مسحة واحدة على المشتريات والمبيعات بتطلّع
+     المتاح لكل تركيبة + قايمة تركيبات كل صنف. من غيره كل سؤال عن
+     تركيبة كان بيقرا الداتا كلها من الأول — وده بيبوّظ سرعة درج البيع
+     لما الأصناف والتركيبات تكتر. بيتصفّر مع أي تعديل في الداتا. */
+  var _sidx = null;
+  function clearStockIdx(){ _sidx = null; }
+  function stockIdx(){
+    if(_sidx) return _sidx;
+    var free = {}, vars = {};
+    var touch = function(r){
+      var id = r.itemId; if(!id) return;
+      var c = vColor(r), z = vSize(r), k = vKey(id,c,z);
+      if(!vars[id]) vars[id] = {};
+      if(!vars[id][k]) vars[id][k] = { color:c, size:z };
+      if(free[k] == null) free[k] = 0;
+      return k;
+    };
+    live("purchases").forEach(function(r){
+      var k = touch(r); if(k) free[k] += Number(r.qty)||0;
     });
-    if(!Object.keys(out).length) add("","");   // صنف لسه ماتحركش: صف واحد بصفر
-    return Object.keys(out).map(function(k){ return out[k]; });
+    live("sales").forEach(function(x){
+      var deliv = isDelivered(x), rsv = isReserved(x);
+      SL(x).forEach(function(l){
+        var k = touch(l); if(!k) return;
+        // المتاح = اللي دخل − اللي اتباع فعلاً − اللي محجوز لأوردر لسه ما اتسلّمش
+        if(deliv) free[k] -= lineSold(l, x);
+        else if(rsv) free[k] -= Number(l.qty)||0;
+      });
+    });
+    _sidx = { free:free, vars:vars };
+    return _sidx;
+  }
+
+  function variantsOf(itemId){
+    var m = stockIdx().vars[itemId];
+    if(!m) return [{ color:"", size:"" }];      // صنف لسه ماتحركش: صف واحد بصفر
+    return Object.keys(m).map(function(k){ return m[k]; });
   }
 
   // شرائح السعر: الأساس هو سعر القطعة، وكل شريحة {q: من كمية, u: سعر القطعة}
@@ -3324,9 +3387,10 @@
     filt.text   = document.getElementById("flt-text").value.trim().toLowerCase();
   }
 
-  function filteredSales(){
+  // كل الفلاتر ما عدا الحالة — عشان عدّاد كل شريط يبان على نفس النطاق
+  function filteredSales(skipStatus){
     return live("sales").filter(function(s){
-      if(filt.status && stOf(s) !== filt.status) return false;
+      if(!skipStatus && filt.status && stOf(s) !== filt.status) return false;
       if(filt.party && s.partyId !== filt.party) return false;
       if(filt.item && !SL(s).some(function(l){ return l.itemId === filt.item; })) return false;
       if(filt.ship && (s.shipCo||"").trim() !== filt.ship) return false;
@@ -3373,12 +3437,26 @@
       return '<option value="'+esc(o.v)+'"'+(String(o.v)===String(sel)?' selected':'')+'>'+esc(o.t)+'</option>';
     }).join("");
   }
+  /* المتاح لتركيبة — لو سبت اللون أو المقاس فاضي بيجمع كل اللي بيطابق.
+     بيستعمل availOfKey عشان الأوردر اللي بتعدّله ما يحسبش على نفسه. */
+  function comboAvail(itemId, color, size){
+    var c = squish(color), z = squish(size), seen = {}, out = 0;
+    variantsOf(itemId).forEach(function(v){
+      if(c && squish(v.color) !== c) return;
+      if(z && squish(v.size)  !== z) return;
+      var k = vKey(itemId, v.color, v.size);
+      if(seen[k]) return;
+      seen[k] = 1; out += availOfKey(k);
+    });
+    return out;
+  }
+  function availTag(n){ return n > 0 ? " — متاح " + qty(n) : " — خلصان"; }
+
   // في البيع مهم تعرف المتاح. في الشراء الرقم ده مالوش لازمة وبيلخبط.
   function itemOptionsHTML(sel, plain){
     return optsHTML(live("items").map(function(o){
       if(plain) return { v:o.id, t:o.name };
-      var st = stockOf(o.id);
-      return { v:o.id, t:o.name + (st > 0 ? " — متاح " + qty(st) : " — خلصان") };
+      return { v:o.id, t:o.name + availTag(comboAvail(o.id,"","")) };
     }), sel, "اختر صنف");
   }
 
@@ -3392,9 +3470,16 @@
   function lineRowHTML(l, i){
     var it = db.items.find(function(x){ return x.id===l.itemId; });
     var cs = listOf(it,"colors"), zs = listOf(it,"sizes");
+    /* اللون والمقاس بيبانوا بالمتاح جنبهم — أكتر غلطة في الإدخال إنك
+       تختار تركيبة مش موجودة عندك أصلاً وتكتشف ده عند الحفظ. */
     var pick = function(list, sel, f){
       return "<select data-li='"+i+"' data-f='"+f+"'>" +
-        optsHTML(list.map(function(v){ return {v:v,t:v}; }), sel, "اختر") + "</select>";
+        optsHTML(list.map(function(v){
+          var n = l.itemId
+            ? (f === "color" ? comboAvail(l.itemId, v, l.size) : comboAvail(l.itemId, l.color, v))
+            : null;
+          return { v:v, t: v + (n === null ? "" : availTag(n)) };
+        }), sel, "اختر") + "</select>";
     };
     var dash = "<select disabled><option>—</option></select>";
     var showRet = draft.status === "delivered";
@@ -3422,6 +3507,24 @@
         "<span class='ltot num' data-li='"+i+"'>—</span>" +
         (draft.lines.length > 1 ? "<button type='button' class='rm' data-rmline='"+i+"'>شيل السطر</button>" : "") +
       "</div></div>";
+  }
+
+  /* بعد ما تختار لون، أرقام المقاسات بتتغيّر. بنحدّث نص الخيارات في مكانه
+     بدل ما نعيد بناء السطر — إعادة البناء جوّه change بتكسر الـDOM اللي المتصفح
+     واقف عليه (نفس مشكلة درج الشراء). */
+  function refreshVariantOpts(i){
+    var l = draft.lines[i];
+    if(!l || !l.itemId) return;
+    ["color","size"].forEach(function(f){
+      var sel = document.querySelector("#e-lines select[data-li='"+i+"'][data-f='"+f+"']");
+      if(!sel) return;
+      Array.prototype.forEach.call(sel.options, function(o){
+        if(!o.value) return;
+        o.textContent = o.value + availTag(f === "color"
+          ? comboAvail(l.itemId, o.value, l.size)
+          : comboAvail(l.itemId, l.color, o.value));
+      });
+    });
   }
 
   function renderDrawerLines(){
@@ -3457,6 +3560,8 @@
     });
 
     document.getElementById("newcust-box").hidden = true;
+    var sn = document.getElementById("e-shipnote");
+    if(sn){ sn.textContent = ""; sn.hidden = true; }
     renderDrawerLines();
   }
 
@@ -3496,7 +3601,7 @@
       if(st === "delivered") cost += lineCost(l) * sold;
       var tot = document.querySelector("#e-lines .ltot[data-li='"+i+"']");
       if(tot){
-        var free = l.itemId ? freeOfV(l.itemId, vColor(l), vSize(l)) : null;
+        var free = l.itemId ? comboAvail(l.itemId, l.color, l.size) : null;
         tot.innerHTML = (l.itemId ? esc(money(sold*pr)) : "—") +
           (free === null ? "" : " <em>· متاح " + esc(qty(free)) + "</em>");
       }
@@ -3521,8 +3626,9 @@
     if(g) g.innerHTML = esc(money(goods)) +
       (st === "delivered" ? " <em style='font-style:normal;font-size:.72rem;color:var(--ink-soft)'>· باقي " + esc(money(due)) + "</em>" : "");
 
-    var net = null;
-    if(st === "delivered") net = (goods - cost) + sin - sout;
+    var net = null, hasItem = draft.lines.some(function(l){ return !!l.itemId; });
+    if(!hasItem) net = null;                       // لسه ما دخلش بضاعة — مفيش صافي يتقال
+    else if(st === "delivered") net = (goods - cost) + sin - sout;
     else if(st === "cancelled") net = sin - sout;
     var pw = document.getElementById("e-profit-wrap"), pf = document.getElementById("e-profit");
     if(pw && pf){
@@ -3586,7 +3692,13 @@
     if(lines.length > 2) goods += "<span class='more'>و" + qty(lines.length - 2) + " صنف تاني</span>";
 
     var collected = canc ? shipIn(s) : (Number(s.paid)||0);
-    var totalCell = "<span class='primary num'>" + money(saleTotal(s)) + "</span>" +
+    // الملغي إجماليه صفر فعلاً، بس عرض 0.00 لوحده بيضلّل —
+    // بنوري قيمته الأصلية مشطوبة عشان تعرف الأوردر ده كان بكام.
+    var rawGoods = lines.reduce(function(a,l){
+      return a + (Number(l.qty)||0) * (Number(l.price)||0); },0);
+    var totalCell = "<span class='primary num'>" +
+        (canc ? "<s style='opacity:.5;font-weight:500'>" + money(rawGoods) + "</s>"
+              : money(saleTotal(s))) + "</span>" +
       "<span class='secondary num'>" +
         (isDelivered(s)
           ? (due > 0.009
@@ -3646,9 +3758,24 @@
         "<td class='num' style='font-weight:600'>" + money(lineTotal(l,s)) + "</td></tr>";
     }).join("");
 
+    /* الحركة اليومية الأكتر تكرار: العميل دفع الباقي. قبل كده كانت
+       بتحتاج تفتح درج التعديل كله — بقت خانة واحدة هنا. */
+    var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
+    var pay = due <= 0.009 ? "" :
+      "<div class='quickpay'>" +
+        "<label for='qp-"+s.id+"'>تحصيل من العميل</label>" +
+        "<input id='qp-"+s.id+"' inputmode='decimal' data-qp='"+s.id+"' " +
+          "placeholder='"+esc(money(due))+"'>" +
+        "<button class='tbtn primary' type='button' data-qpay='"+s.id+"'>سجّل</button>" +
+        "<button class='tbtn' type='button' data-qpayall='"+s.id+"'>خلّص الباقي</button>" +
+        "<p class='hintline'>الباقي " + esc(money(due)) +
+          (viaShip(s) ? " · بيروح لمحفظة " + esc(squish(s.shipCo) || "شركة الشحن")
+                      : " · بيدخل الخزنة على طول") + "</p>" +
+      "</div>";
+
     return "<tr class='detail' data-detail='"+s.id+"'><td colspan='"+SALE_HEAD.length+"'><div class='detail-in'>" +
       "<div class='kv'>" + kv + "</div>" +
-      (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") +
+      (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") + pay +
       "<div class='dlines'><table><thead><tr>" +
         ["الصنف","اللون والمقاس","الكمية","السعر","مرتجع","الإجمالي"].map(function(h){
           return "<th>"+esc(h)+"</th>"; }).join("") +
@@ -3661,7 +3788,8 @@
   }
 
   /* ---------- الفلاتر: chips + عدّاد ---------- */
-  var FLT_LABEL = { status:"الحالة", party:"العميل", item:"الصنف", ship:"شركة الشحن",
+  // الحالة مش هنا — ليها شرايط فوق الجدول، فما تتعدّش في الـchips ولا في عدّاد الفلاتر
+  var FLT_LABEL = { party:"العميل", item:"الصنف", ship:"شركة الشحن",
                     owner:"المسؤول", from:"من", to:"لـ", text:"بحث" };
 
   function chipText(k){
@@ -3685,14 +3813,39 @@
       }).join("") + "<button class='clearall' type='button' id='b-clearf'>مسح الكل</button>";
   }
 
+  /* ---------- شرايط الحالة: أسرع فلتر في الشاشة ---------- */
+  // العدّاد بيتحسب على باقي الفلاتر الشغالة، فالرقم اللي قدامك هو اللي هتشوفه فعلاً
+  var STAB = [["","الكل"],["progress","جاري"],["delivered","مسلّم"],
+              ["proposed","مقترح"],["cancelled","ملغي"]];
+  function renderStatusTabs(){
+    var base = filteredSales(true);
+    var n = {};
+    base.forEach(function(s){ var k = stOf(s); n[k] = (n[k]||0) + 1; });
+    document.getElementById("s-tabs").innerHTML = STAB.map(function(t){
+      var c = t[0] ? (n[t[0]]||0) : base.length;
+      return "<button type='button' data-stab='" + t[0] + "'" +
+        (filt.status === t[0] ? " class='on' aria-pressed='true'" : " aria-pressed='false'") +
+        ">" + esc(t[1]) + " <b>" + qty(c) + "</b></button>";
+    }).join("");
+  }
+
   function renderSaleStats(list){
     var rev  = list.filter(isDelivered).reduce(function(a,s){ return a+saleTotal(s); },0);
     var net  = list.reduce(function(a,s){ return a+saleProfit(s); },0);
     var sh   = list.reduce(function(a,s){ return a + (shipCounts(s) ? shipIn(s)-shipOut(s) : 0); },0);
     var deliv = list.filter(isDelivered).length;
+    // فلوس مستنية من العملاء: أوردر مسلّم واللي اتحصّل منه أقل من قيمته
+    var owedN = 0, owed = list.reduce(function(a,s){
+      if(!isDelivered(s)) return a;
+      var d = saleTotal(s) + shipIn(s) - (Number(s.paid)||0);
+      if(d <= 0.009) return a;
+      owedN++; return a + d;
+    },0);
     var cells = [
       ["أوردرات ظاهرة", qty(list.length), "", "من إجمالي " + qty(live("sales").length)],
       ["مبيعات مسلّمة", money(rev), "", qty(deliv) + " أوردر مسلّم"],
+      ["لسه على العملاء", money(owed), owed > 0.009 ? "v-due" : "",
+       owed > 0.009 ? qty(owedN) + " أوردر مسلّم ولسه ما اتحصّلش كامل" : "كل المسلّم اتحصّل"],
       ["صافي الشحن", money(sh), sh>=0?"v-gain":"v-due", "محصّل − مدفوع"],
       ["صافي الربح", money(net), net>=0?"v-gain":"v-due", "بعد الشحن والمرتجع"]
     ];
@@ -3704,6 +3857,7 @@
 
   function renderSales(){
     var list = filteredSales().slice().sort(byDate);
+    renderStatusTabs();
     renderChips();
     renderSaleStats(list);
 
@@ -4637,6 +4791,7 @@
   }
   // بتتنادى بعد أي تغيير في البيانات
   function renderAll(){
+    clearStockIdx();                     // أضمن حتة: أي رسم كامل بيبدأ بفهرس جديد
     fillSelects();                       // القوايم بتتغذّى في كل الأدراج
     Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
     renderTab(activeTab);
@@ -5041,9 +5196,12 @@
       l[f] = v;
       if(f === "itemId" || f === "color" || f === "size") l.unitCost = null;
       if(f === "itemId"){ l.color = ""; l.size = ""; l.manual = false; }
+      // أول ما تختار صنف، الكمية الغالبة ١ — بدل ما تكتبها في كل سطر
+      if(f === "itemId" && v && !String(l.qty||"").trim()) l.qty = 1;
       if(f === "itemId" || f === "qty") applyDraftTier(l);
       // الصنف بيغيّر قوايم اللون والمقاس، فسطور الأصناف بس هي اللي بتتبني تاني
       if(f === "itemId"){ renderDrawerLines(); return; }
+      if(f === "color" || f === "size") refreshVariantOpts(Number(el.dataset.li));
     } else {
       draft[f] = v;
       if(f === "status"){ renderDrawerLines(); return; }  // المرتجع بيظهر ويختفي مع الحالة
@@ -5059,13 +5217,17 @@
     var el = document.querySelector("#e-lines [data-f='price'][data-li='"+draft.lines.indexOf(l)+"']");
     if(el) el.value = l.price;
   }
-  // آخر شركة شحن اتستخدمت للمحافظة دي
+  /* آخر شركة شحن اتستخدمت للمحافظة دي. الأرقام دي فلوس، فما ينفعش
+     تتحط في الخانات من غير ما اللي بيسجّل يعرف — بيظهر سطر بيقول جت منين.
+     والملغي مش مصدر: مصاريفه مش بتاعت توصيل ناجح. */
   function suggestShipping(){
+    var note = document.getElementById("e-shipnote");
+    if(note){ note.textContent = ""; note.hidden = true; }
     var p = db.parties.find(function(x){ return x.id === draft.partyId; });
     if(!p || !p.gov) return;
     var last = live("sales").filter(function(x){
       var q = db.parties.find(function(y){ return y.id===x.partyId; });
-      return q && q.gov === p.gov && (x.shipCo||"").trim();
+      return q && q.gov === p.gov && !isCancelled(x) && squish(x.shipCo);
     }).sort(byDate)[0];
     if(!last) return;
     draft.shipCo = last.shipCo;
@@ -5075,6 +5237,15 @@
       var el = SD.querySelector("[data-f='"+f+"']:not([data-li])");
       if(el) el.value = draft[f];
     });
+    if(note){
+      // «لـ» + «الإسكندرية» بتتكتب «للإسكندرية» مش «لـالإسكندرية»
+      var gv = p.gov.indexOf("ال") === 0 ? "ل" + p.gov.slice(1) : "لـ" + p.gov;
+      note.textContent = "اتملّت لوحدها من آخر أوردر " + gv +
+        " (#" + (last.no || "—") + "): " + squish(last.shipCo) +
+        " · على العميل " + money(shipIn(last)) + " · للشركة " + money(shipOut(last)) +
+        " — غيّرها لو مختلفة.";
+      note.hidden = false;
+    }
   }
 
   // Enter بيحفظ · Esc بيقفل الدرج
@@ -5153,6 +5324,13 @@
     }
   });
 
+  // شرايط الحالة — بتحرّك نفس الفلتر اللي في اللوحة عشان يفضلوا متزامنين
+  document.getElementById("s-tabs").addEventListener("click", function(e){
+    var b = e.target.closest("[data-stab]"); if(!b) return;
+    document.getElementById("flt-status").value = b.dataset.stab;
+    readFilters(); resetPage("sales"); renderSales();
+  });
+
   // الفلاتر المطوية + الـ chips
   document.getElementById("b-filters").addEventListener("click", function(){
     var pnl = document.getElementById("filters-panel");
@@ -5186,6 +5364,28 @@
     rec.date = el.value; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll(); toast("التاريخ بقى " + rec.date);
   });
+
+  /* تحصيل سريع: العميل دفع الباقي وإنت واقف في الجدول.
+     نفس الحواجز اللي في الدرج — الفترة المقفولة، وشحن من غير اسم شركة. */
+  function quickPay(id, all){
+    var rec = db.sales.find(function(x){ return x.id === id; });
+    if(!rec) return;
+    if(saleLocked(rec)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+    var due = saleTotal(rec) + shipIn(rec) - (Number(rec.paid)||0);
+    var box = document.querySelector("[data-qp='" + id + "']");
+    var add = all ? due : Number(toEn(box ? box.value : ""))||0;
+    if(!(add > 0)){ toast("اكتب المبلغ اللي اتحصّل"); if(box) box.focus(); return; }
+    if(add > due + 0.009){ toast("المبلغ أكبر من الباقي (" + money(due) + ")"); return; }
+    if(viaShip(rec) && !squish(rec.shipCo)){
+      toast("اكتب اسم شركة الشحن الأول — الفلوس دي عندها مش عندك");
+      startEditSale(id); return;
+    }
+    rec.paid = (Number(rec.paid)||0) + add;
+    rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+    saveSoon("sales"); renderAll();
+    var left = due - add;
+    toast("اتحصّل " + money(add) + (left > 0.009 ? " · باقي " + money(left) : " · الأوردر خلص"));
+  }
 
   function cancelDraft(){
     var wasEditing = !!editing.sales;
@@ -5816,6 +6016,20 @@
       toast("الحالة بقت مسلّم — راجع خانة المحصّل من زرار تعديل");
     else
       toast("الحالة بقت: " + ST_LABEL[next]);
+  });
+
+  TSALES.addEventListener("click", function(e){
+    var q = e.target.closest("[data-qpay]");
+    if(q){ e.stopPropagation(); quickPay(q.dataset.qpay, false); return; }
+    var a = e.target.closest("[data-qpayall]");
+    if(a){ e.stopPropagation(); quickPay(a.dataset.qpayall, true); return; }
+  }, true);
+  // Enter جوّه خانة التحصيل = دوس «سجّل»
+  TSALES.addEventListener("keydown", function(e){
+    if(e.key !== "Enter") return;
+    var box = e.target.closest("[data-qp]"); if(!box) return;
+    e.preventDefault(); e.stopPropagation();
+    quickPay(box.dataset.qp, false);
   });
 
   document.body.addEventListener("click", async function(e){
