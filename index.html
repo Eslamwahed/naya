@@ -637,11 +637,6 @@
   #t-lines tr.bad-row td{background:#FBEEF1}
   [data-theme="dark"] #t-lines tr.bad-row td{background:#3A2028}
   .lines-wrap{overflow-x:auto}
-  .find-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
-  .find-card h4{margin:0 0 8px;font-size:.95rem;font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .find-card .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 14px;font-size:.86rem}
-  .find-card .kv span{color:var(--ink-soft);font-size:.76rem;display:block}
   .ono{font-variant-numeric:tabular-nums;font-weight:700;color:var(--teal)}
   @media (max-width:760px){
     #t-lines{font-size:1rem}
@@ -678,7 +673,6 @@
   <button data-tab="items">الأصناف</button>
   <button data-tab="inv">المخزون</button>
   <button data-tab="sales">المبيعات</button>
-  <button data-tab="find">بحث</button>
   <button data-tab="ship">شركات الشحن</button>
   <button data-tab="parties">العملاء والموردين</button>
   <button data-tab="rep">تقارير</button>
@@ -761,7 +755,7 @@
 
   <div class="toolbar">
     <div class="s-search">
-      <input id="flt-text" type="search" placeholder="رقم أوردر، كود بوليصة، اسم عميل، تليفون…" autocomplete="off">
+      <input id="flt-text" type="search" placeholder="رقم أوردر · كود بوليصة · كود صنف · اسم عميل · تليفون · تاريخ" autocomplete="off">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
       </svg>
@@ -838,19 +832,6 @@
   </div>
 </section>
 
-<section id="tab-find" hidden>
-  <h2>بحث عن أوردر</h2>
-  <p class="hint">اكتب رقم الأوردر، أو كود شركة الشحن، أو اسم العميل أو تليفونه — والنتيجة بتظهر كاملة على طول.</p>
-  <div class="panel">
-    <div class="grid">
-      <div style="grid-column:span 2"><label for="find-q">ابحث</label>
-        <input id="find-q" placeholder="رقم أوردر · كود شحن · كود الصنف · اسم · تليفون" autocomplete="off"></div>
-      <div><label>&nbsp;</label><button class="act ghost" type="button" id="b-find-clear">مسح</button></div>
-    </div>
-    <p class="note ok" id="find-msg"></p>
-  </div>
-  <div id="find-res"></div>
-</section>
 
 <!-- مشتريات -->
 <section id="tab-purch" hidden>
@@ -1673,8 +1654,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "46";
+  var VERSION = "47";
   var CHANGELOG = [
+    { v:"47", d:"2026-09-25", items:[
+      "شريط «مرتجع» فوق جدول المبيعات بعدّاده",
+      "واجهة «بحث» اتشالت — بحث المبيعات بقى بيعمل نفس الشغل",
+      "بحث المبيعات بقى بيدوّر كمان بكود الصنف والتاريخ"
+    ]},
     { v:"46", d:"2026-09-25", items:[
       "جدول نصيب الشركاء بقى بيقول من إمتى فلوس كل شريك بتتحسب وكام يوم من الفترة",
       "وتوضيح ليه شريكين بنفس المبلغ ليهم نسبتين مختلفتين"
@@ -3949,7 +3935,7 @@
   // كل الفلاتر ما عدا الحالة — عشان عدّاد كل شريط يبان على نفس النطاق
   function filteredSales(skipStatus){
     return live("sales").filter(function(s){
-      if(!skipStatus && filt.status && stOf(s) !== filt.status) return false;
+      if(!skipStatus && filt.status && !stabMatch(s, filt.status)) return false;
       if(filt.party && s.partyId !== filt.party) return false;
       if(filt.item && !SL(s).some(function(l){ return l.itemId === filt.item; })) return false;
       if(filt.ship && (s.shipCo||"").trim() !== filt.ship) return false;
@@ -3958,8 +3944,11 @@
       if(filt.to && (s.date||"") > filt.to) return false;
       if(filt.text){
         var p = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
+        // أكواد التركيبات والتاريخ كانوا في واجهة البحث المنفصلة — بقوا هنا
+        var codes = SL(s).map(function(l){
+          return vCode(l.itemId, vColor(l), vSize(l)); }).join(" ");
         var hay = [partyName(s.partyId), itemsLabel(s), s.note, s.shipCo, s.shipCode,
-                   (s.no ? "#"+s.no+" "+s.no : ""), s.owner,
+                   (s.no ? "#"+s.no+" "+s.no : ""), s.owner, codes, s.date,
                    p.phone, p.gov, p.address, p.fb].join(" ").toLowerCase();
         if(hay.indexOf(filt.text) < 0) return false;
       }
@@ -4531,12 +4520,17 @@
 
   /* ---------- شرايط الحالة: أسرع فلتر في الشاشة ---------- */
   // العدّاد بيتحسب على باقي الفلاتر الشغالة، فالرقم اللي قدامك هو اللي هتشوفه فعلاً
+  // «مرتجع» مش حالة — دي صفة: أوردر فيه بضاعة رجعت. فبتتفلتر لوحدها.
   var STAB = [["","الكل"],["progress","جاري"],["delivered","مسلّم"],
-              ["proposed","مقترح"],["cancelled","ملغي"]];
+              ["proposed","مقترح"],["_ret","مرتجع"],["cancelled","ملغي"]];
+  function stabMatch(s, k){ return k === "_ret" ? retQty(s) > 0 : stOf(s) === k; }
   function renderStatusTabs(){
     var base = filteredSales(true);
     var n = {};
-    base.forEach(function(s){ var k = stOf(s); n[k] = (n[k]||0) + 1; });
+    base.forEach(function(s){
+      var k = stOf(s); n[k] = (n[k]||0) + 1;
+      if(retQty(s) > 0) n._ret = (n._ret||0) + 1;
+    });
     document.getElementById("s-tabs").innerHTML = STAB.map(function(t){
       var c = t[0] ? (n[t[0]]||0) : base.length;
       return "<button type='button' data-stab='" + t[0] + "'" +
@@ -5699,7 +5693,6 @@
     inv:     function(){ renderInventory(); },
     sales:   function(){ renderSales(); },
     ship:    function(){ renderShip(); },
-    find:    function(){ renderFind(); },
     parties: function(){ renderParties(); renderStatement(); },
     rep:     function(){ renderReports(); },
     log:     function(){ renderLog(); },
@@ -5729,77 +5722,6 @@
 
 
   /* ---------- البحث عن أوردر ---------- */
-  function findMatches(q){
-    q = (q||"").trim().toLowerCase();
-    if(!q) return [];
-    var digits = /^[0-9#]+$/.test(q);
-    var num = Number(q.replace("#",""));
-    var exact = function(s){ return digits && Number(s.no) === num; };
-    return live("sales").filter(function(s){
-      if(exact(s)) return true;
-      var p = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
-      var codes = SL(s).map(function(l){ return vCode(l.itemId, vColor(l), vSize(l)); }).join(" ");
-      var hay = [s.shipCode, s.shipCo, partyName(s.partyId), p.phone, p.fb, p.gov,
-                 itemsLabel(s), codes, s.owner, s.note, s.date].join(" ").toLowerCase();
-      return hay.indexOf(q) > -1;
-    }).sort(function(a,b){
-      // الأوردر اللي رقمه مطابق بيطلع الأول، وبعده الأحدث
-      var ea = exact(a) ? 1 : 0, eb = exact(b) ? 1 : 0;
-      return eb - ea || byDate(a,b);
-    });
-  }
-
-  function findCard(s){
-    var p = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
-    var st = stOf(s);
-    var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
-    var goods = SL(s).map(function(l){
-      return "<div>" + thumbHTML(l.itemId) + esc(itemName(l.itemId)) +
-        (vLabel(vColor(l),vSize(l)) ? " <span class='pill'>"+esc(vLabel(vColor(l),vSize(l)))+"</span>" : "") +
-        " <span class='sub' style='display:inline'>" + qty(Number(l.qty)||0) + " × " + money(l.price) +
-        (lineRet(l) ? " · مرتجع " + qty(lineRet(l)) : "") + "</span></div>";
-    }).join("");
-    var kv = [
-      ["العميل", esc(p.name || "—")],
-      ["التليفون", esc(p.phone || "—")],
-      ["المحافظة", esc(p.gov || "—")],
-      ["العنوان", esc(p.address || "—")],
-      ["شركة الشحن", esc(s.shipCo || "—")],
-      ["كود شركة الشحن", "<strong>" + esc(s.shipCode || "—") + "</strong>"],
-      ["إجمالي البضاعة", esc(money(saleTotal(s)))],
-      ["الشحن", esc("+" + qty(shipIn(s)) + " / −" + qty(shipOut(s)))],
-      ["المحصّل", esc(money(Number(s.paid)||0))],
-      ["المتبقي", due > 0.009 ? "<span class='pill due'>"+esc(money(due))+"</span>" : "—"],
-      ["المسؤول", esc(s.owner || "—")],
-      ["ملاحظة", esc(s.note || "—")]
-    ].map(function(x){ return "<div><span>"+x[0]+"</span>"+x[1]+"</div>"; }).join("");
-    return "<div class='find-card'>" +
-      "<h4><span class='ono'>" + (s.no ? "#"+esc(s.no) : "—") + "</span>" +
-        "<span class='num'>" + esc(s.date) + "</span>" +
-        "<span class='st st-"+st+"'>" + ST_LABEL[st] + "</span>" +
-        "<span style='margin-inline-start:auto;display:flex;gap:4px'>" +
-        "<button class='del' style='color:var(--teal)' data-edit='sales|"+s.id+"'>تعديل</button>" +
-        "<button class='del' style='color:var(--ink-soft)' data-label='"+s.id+"'>بوليصة</button></span></h4>" +
-      "<div style='margin-bottom:9px'>" + goods + "</div>" +
-      "<div class='kv'>" + kv + "</div></div>";
-  }
-
-  function renderFind(){
-    var box = document.getElementById("find-res");
-    if(!box) return;
-    var q = document.getElementById("find-q").value;
-    var msg = document.getElementById("find-msg");
-    if(!q.trim()){
-      box.innerHTML = "";
-      msg.textContent = "آخر أوردر اتسجّل رقمه " + qty(Math.max(nextSaleNo()-1,0)) + ".";
-      return;
-    }
-    var list = findMatches(q);
-    msg.textContent = list.length ? (qty(list.length) + " نتيجة") : "مفيش أوردر بالمواصفات دي.";
-    box.innerHTML = list.slice(0,40).map(findCard).join("") +
-      (list.length > 40 ? "<p class='hint'>عرضنا أول ٤٠ نتيجة بس — ضيّق البحث.</p>" : "");
-  }
-
   /* ---------- تنقّل ---------- */
   document.getElementById("nav").addEventListener("click", function(e){
     var b = e.target.closest("button[data-tab]");
@@ -7043,11 +6965,6 @@
   }
 
   // البحث عن أوردر
-  document.getElementById("find-q").addEventListener("input", renderFind);
-  document.getElementById("b-find-clear").addEventListener("click", function(){
-    document.getElementById("find-q").value = ""; renderFind();
-    document.getElementById("find-q").focus();
-  });
 
   // أزرار إلغاء التعديل
   Object.keys(EDIT_UI).forEach(function(list){
