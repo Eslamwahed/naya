@@ -1777,8 +1777,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "53";
+  var VERSION = "54";
   var CHANGELOG = [
+    { v:"54", d:"2026-09-25", items:[
+      "«لازم تبيع بكام» بقى بيطلّع رقم حتى قبل أول بيعة — بهامش تقديري من أسعار البيع وتكاليف الشراء المسجّلة",
+      "الرقم التقديري متعلّم إنه تقديري، وبيتظبط لوحده أول ما تسجّل مبيعات فعلية"
+    ]},
     { v:"53", d:"2026-09-25", items:[
       "كارت «لازم تبيع بكام» في لوحة المتابعة — الرقم ده مكانه قدامك مش جوّه التقارير",
       "الكارت بيتفتح ويوري المعادلة: مصاريفك الثابتة ÷ هامش المساهمة",
@@ -3369,26 +3373,31 @@
       var L = function(a, v, cls){
         return "<tr" + (cls ? " class='" + cls + "'" : "") + "><td class='wide'>" + esc(a) +
           "</td><td class='num'>" + money(v) + "</td></tr>"; };
-      if(cur.revenue <= 0.009)
-        return { note:"محتاج مبيعات في الفترة عشان نعرف كل جنيه بيفضل منه كام. غيّر «الفترة» فوق.",
-                 head:["البند","المبلغ"], rows:[L("مصاريفك الثابتة", cur.fixedExp)] };
+      var m = cmBasis(cur);
       if(b === null)
-        return { note:"بتبيع بأقل من تكلفتك — كل قطعة بتزوّد الخسارة. مفيش رقم مبيعات بيغطّي ده.",
-                 head:["البند","المبلغ"], rows:[
-                   L("مبيعات", cur.revenue), L("تكاليف متغيّرة", cur.varCost),
-                   L("هامش المساهمة", cur.cm, "sumrow")] };
+        return { note: cur.revenue > 0.009
+            ? "بتبيع بأقل من تكلفتك — كل قطعة بتزوّد الخسارة. مفيش رقم مبيعات بيغطّي ده."
+            : "محتاج أسعار بيع للأصناف وفواتير شراء عشان نعرف كل جنيه بيفضل منه كام.",
+                 head:["البند","المبلغ"], rows:[L("مصاريفك الثابتة", cur.fixedExp)] };
       var rows = [
         L("مصاريفك الثابتة", cur.fixedExp),
-        "<tr><td class='wide'>÷ هامش المساهمة</td><td class='num'>" + pctTxt(cur.cmPct) + "</td></tr>",
-        L("= لازم تبيع بـ", b, "sumrow"),
-        L("مبيعاتك في الفترة", cur.revenue),
-        L(cur.revenue >= b ? "زيادة عندك" : "ناقصك", Math.abs(b - cur.revenue), "sumrow")
+        "<tr><td class='wide'>÷ هامش المساهمة" + (m.est ? " (تقديري)" : "") +
+          "</td><td class='num'>" + pctTxt(m.pct) + "</td></tr>",
+        L("= لازم تبيع بـ", b, "sumrow")
       ];
+      if(!m.est){
+        rows.push(L("مبيعاتك في الفترة", cur.revenue));
+        rows.push(L(cur.revenue >= b ? "زيادة عندك" : "ناقصك", Math.abs(b - cur.revenue), "sumrow"));
+      }
       if(days) rows.push(L("يعني في اليوم", b / days));
       if(aov) rows.push("<tr><td class='wide'>يعني كام أوردر</td><td class='num'>" +
         qty(Math.ceil(b / aov)) + "</td></tr>");
-      return { note:"كل جنيه بتبيعه بيفضل منه " + pctTxt(cur.cmPct) +
-        " بعد تكلفة البضاعة والشحن والمصاريف المتغيّرة. الرقم ده هو اللي بيغطّي مصاريفك الثابتة.",
+      return { note: m.est
+          ? "لسه ما بعتش حاجة، فالهامش <strong>تقديري</strong> محسوب من " + esc(m.basis) +
+            ": كل جنيه هتبيعه هيفضل منه " + pctTxt(m.pct) +
+            " بعد تكلفة البضاعة. الرقم هيتظبط لوحده أول ما تسجّل مبيعات فعلية."
+          : "كل جنيه بتبيعه بيفضل منه " + pctTxt(m.pct) +
+            " بعد تكلفة البضاعة والشحن والمصاريف المتغيّرة. الرقم ده هو اللي بيغطّي مصاريفك الثابتة.",
         head:["البند","المبلغ"], rows:rows };
     },
     net: function(cur){
@@ -3817,21 +3826,69 @@
 
   /* «أبيع بكام عشان أغطّي مصاريفي» — أهم رقم في الشاشة، فمكانه
      لوحة المتابعة مش جوّه التقارير. */
-  function beOf(c){ return c.cmPct > 0 ? c.fixedExp / c.cmPct : null; }
+  // متوسط تكلفة القطعة للصنف من كل مشترياته
+  function itemAvgCost(itemId){
+    var q = 0, c = 0;
+    live("purchases").forEach(function(x){
+      if(x.itemId !== itemId) return;
+      var n = Number(x.qty)||0; q += n; c += n * (Number(x.cost)||0);
+    });
+    return q > 0 ? c / q : 0;
+  }
+
+  /* لسه ما بعتش حاجة؟ الهامش لسه ممكن يتحسب من أسعار البيع المسجّلة
+     وتكلفة الشراء الفعلية. من غير كده الشاشة بتقول «—» وإنت محتاج
+     الرقم ده بالذات في أول يوم قبل ما تبيع. */
+  function expectedMargin(){
+    var rev = 0, cost = 0, units = 0;
+    live("items").forEach(function(it){
+      var price = Number(it.price)||0; if(price <= 0) return;
+      variantsOf(it.id).forEach(function(v){
+        var q = Math.max(0, stockOfV(it.id, v.color, v.size));
+        if(q <= 0) return;
+        var c = avgCostV(it.id, v.color, v.size);
+        if(c <= 0) return;
+        rev += q * price; cost += q * c; units += q;
+      });
+    });
+    if(units > 0 && rev > 0)
+      return { pct:(rev - cost)/rev, basis:"البضاعة اللي في مخزنك بأسعار البيع المسجّلة" };
+    // مفيش مخزون: متوسط بسيط على الأصناف اللي ليها سعر وتكلفة معروفين
+    var ps = [];
+    live("items").forEach(function(it){
+      var price = Number(it.price)||0, c = itemAvgCost(it.id);
+      if(price > 0 && c > 0) ps.push((price - c)/price);
+    });
+    if(!ps.length) return null;
+    return { pct: ps.reduce(function(a,b){ return a+b; },0)/ps.length,
+             basis:"متوسط أسعارك وتكاليفك المسجّلة" };
+  }
+
+  /* الهامش اللي بنحسب بيه: الفعلي من مبيعاتك لو موجود، وإلا تقديري. */
+  function cmBasis(c){
+    if(c.revenue > 0.009 && c.cmPct > 0) return { pct:c.cmPct, est:false };
+    var e = expectedMargin();
+    return (e && e.pct > 0) ? { pct:e.pct, est:true, basis:e.basis } : null;
+  }
+  function beOf(c){
+    var m = cmBasis(c);
+    return m ? c.fixedExp / m.pct : null;
+  }
   function beTxt(c){
-    if(c.revenue <= 0.009) return "—";
     var b = beOf(c);
     return b === null ? "—" : money(b);
   }
   function beCls(c){
     var b = beOf(c);
-    if(b === null || c.revenue <= 0.009) return "";
+    if(b === null) return "";
     return c.revenue >= b ? "v-gain" : "v-due";
   }
   function beSub(c){
-    if(c.revenue <= 0.009) return "<span class='sub'>مفيش مبيعات في الفترة</span>";
-    var b = beOf(c);
-    if(b === null) return "<span class='sub v-due'>بتبيع بأقل من التكلفة</span>";
+    var m = cmBasis(c), b = beOf(c);
+    if(b === null)
+      return "<span class='sub v-due'>" +
+        (c.revenue > 0.009 ? "بتبيع بأقل من التكلفة" : "سجّل أسعار البيع والمشتريات الأول") + "</span>";
+    if(m.est) return "<span class='sub'>تقديري بهامش " + esc(pctTxt(m.pct)) + "</span>";
     var gap = b - c.revenue;
     return "<span class='sub " + (gap > 0.009 ? "v-due" : "v-gain") + "'>" +
       (gap > 0.009 ? "ناقصك " + esc(money(gap)) : "غطّيت مصاريفك ✓") + "</span>";
@@ -3909,7 +3966,8 @@
   function renderBreakEven(){
     var r = periodRange(), c = periodStats(r);
     var days = r ? daysBetween(r.from, r.to) + 1 : null;
-    var be   = c.cmPct > 0 ? c.fixedExp / c.cmPct : null;
+    var mB   = cmBasis(c);
+    var be   = beOf(c);
     var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
 
     document.getElementById("rep-be").innerHTML =
@@ -3922,20 +3980,26 @@
         mRow(c.netShip >= 0 ? "+ صافي الشحن" : "− تكلفة الشحن", Math.abs(c.netShip)),
         mRow("− مصاريف متغيّرة", c.varExp),
         mRow("هامش المساهمة", c.cm, "tot " + (c.cm>=0?"v-gain":"v-due"))
-      ], c.revenue <= 0.009
-           ? "مفيش مبيعات في الفترة دي عشان يتحسب منها هامش."
-           : "<b>" + esc(pctTxt(c.cmPct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.") +
-      (c.revenue <= 0.009
-        ? beBox("مبيعات التعادل", [], noSalesNote(), "—", "")
-        : be === null
-        ? beBox("مبيعات التعادل", [], "هامش المساهمة سالب — كل قطعة بتبيعها بتزوّد الخسارة. " +
-            "مينفعش يتحسب تعادل قبل ما السعر يغطّي التكلفة المتغيّرة.", "—", "v-due")
+      ], !mB
+           ? "محتاج أسعار بيع وفواتير شراء عشان يتحسب الهامش."
+           : (mB.est
+              ? "لسه ما بعتش حاجة — <b>" + esc(pctTxt(mB.pct)) + "</b> هامش <b>تقديري</b> من " +
+                esc(mB.basis) + "."
+              : "<b>" + esc(pctTxt(mB.pct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.")) +
+      (be === null
+        ? beBox("مبيعات التعادل", [],
+            c.revenue > 0.009
+              ? "هامش المساهمة سالب — كل قطعة بتبيعها بتزوّد الخسارة. " +
+                "مينفعش يتحسب تعادل قبل ما السعر يغطّي التكلفة المتغيّرة."
+              : "سجّل أسعار البيع للأصناف وفواتير الشراء، وساعتها هنقدر نقولك الرقم حتى قبل أول بيعة.",
+            "—", c.revenue > 0.009 ? "v-due" : "")
         : beBox("لازم تبيع بكام؟", [
             days ? mRow("في اليوم", be/days) : "",
             aov ? "<div class='mrow'><span>يعني كام أوردر</span><b class='num'>" +
                   esc(qty(Math.ceil(be/aov))) + "</b></div>" : ""
           ], "عشان صافي الربح يساوي <b>صفر</b> على " +
-             (days ? qty(days) + " يوم" : "الفترة دي") + ".", money(be),
+             (days ? qty(days) + " يوم" : "الفترة دي") + "." +
+             (mB.est ? " <b>الرقم تقديري</b> لحد ما تسجّل مبيعات." : ""), money(be),
              c.revenue >= be ? "v-gain" : "v-due"));
 
     // جدول هيكل التكلفة
@@ -3965,16 +4029,15 @@
     var t = Number(toEn((document.getElementById("be-target")||{}).value))||0;
     var d = Number(toEn((document.getElementById("be-days")||{}).value))||0;
     if(!t){ box.innerHTML = ""; return; }
-    if(c.revenue <= 0.009){
-      box.innerHTML = beBox("مينفعش يتحسب", [], noSalesNote(), "—", "");
-      return;
-    }
-    if(c.cmPct <= 0){
+    var mT = cmBasis(c);
+    if(!mT){
       box.innerHTML = beBox("مينفعش يتحسب", [],
-        "هامش المساهمة سالب — لازم السعر يغطّي التكلفة المتغيّرة الأول.", "—", "v-due");
+        c.revenue > 0.009
+          ? "هامش المساهمة سالب — لازم السعر يغطّي التكلفة المتغيّرة الأول."
+          : "سجّل أسعار البيع وفواتير الشراء الأول.", "—", "v-due");
       return;
     }
-    var need = (c.fixedExp + t) / c.cmPct;
+    var need = (c.fixedExp + t) / mT.pct;
     var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
     box.innerHTML =
       beBox("لازم تبيع بكام؟", [
@@ -3987,7 +4050,8 @@
         mRow("مصاريف ثابتة", c.fixedExp),
         mRow("+ الربح المطلوب", t),
         mRow("= لازم تغطّي", c.fixedExp + t, "tot")
-      ], "÷ هامش المساهمة <b>" + esc(pctTxt(c.cmPct)) + "</b> = <b>" + esc(money(need)) + "</b>") +
+      ], "÷ هامش المساهمة" + (mT.est ? " (تقديري)" : "") + " <b>" + esc(pctTxt(mT.pct)) +
+         "</b> = <b>" + esc(money(need)) + "</b>") +
       beBox("مقارنة بمبيعاتك الحالية", [
         mRow("مبيعات الفترة", c.revenue),
         mRow(need > c.revenue ? "ناقصك" : "زيادة عندك", Math.abs(need - c.revenue),
