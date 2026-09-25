@@ -273,6 +273,30 @@
   .paybox .pl.tot{border-top:1px solid var(--line);margin-top:5px;padding-top:5px}
   .paybox .pn{margin:7px 0 0;font-size:.76rem;line-height:1.6}
 
+  /* شريط الإجراء الجماعي */
+  .bulkbar{
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+    background:var(--teal);color:#fff;border-radius:11px;padding:10px 14px;margin-bottom:12px;
+    position:sticky;top:8px;z-index:6;box-shadow:0 6px 18px rgba(0,0,0,.14);
+  }
+  .bulkbar[hidden]{display:none}
+  .bulkbar .bcount{font-weight:700;font-size:.9rem;margin-inline-end:4px}
+  .bulkbar .bcount::after{content:" أوردر مختار";font-weight:500;font-size:.82rem;opacity:.9}
+  .bulkbar .tbtn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
+  .bulkbar .tbtn:hover{background:rgba(255,255,255,.26);border-color:#fff;color:#fff}
+  .bulkbar .tbtn.primary{background:#fff;color:var(--teal);border-color:#fff}
+  .bulkbar .tbtn.primary:hover{background:var(--paper);color:var(--teal-deep)}
+  .bulkbar .ghostx{background:none;border-color:transparent;text-decoration:underline}
+  .bulkbar select{padding:6px 9px;font-size:.84rem;border-radius:8px}
+  [data-theme="dark"] .bulkbar{color:#1A141C}
+  [data-theme="dark"] .bulkbar .tbtn{color:#1A141C;background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.2)}
+  [data-theme="dark"] .bulkbar .tbtn:hover{background:rgba(0,0,0,.2);border-color:#1A141C;color:#1A141C}
+  td.selcell,th.selcell{width:34px;text-align:center;padding-inline:6px}
+  td.selcell input,th.selcell input{width:17px;height:17px;cursor:pointer;accent-color:var(--teal)}
+  tr.order.sel > td{background:var(--teal-soft)}
+  /* خانة المرتجع جوه جدول أصناف الأوردر */
+  .dlines input.retin{width:68px;padding:4px 7px;font-size:.84rem;text-align:center}
+
   /* كروت لوحة المتابعة بقت بتتفتح */
   .band > .kpi{cursor:pointer;position:relative;transition:.15s}
   .band > .kpi:hover{background:var(--teal-soft)}
@@ -762,6 +786,22 @@
 
   <div class="chips" id="flt-chips"></div>
   <div class="stats" id="s-stats"></div>
+
+  <div class="bulkbar" id="s-bulk" hidden>
+    <span class="bcount" id="s-bcount">0</span>
+    <button class="tbtn primary" type="button" data-bulk="deliverpay">سلّم وحصّل</button>
+    <button class="tbtn" type="button" data-bulk="deliver">سلّم بس</button>
+    <button class="tbtn" type="button" data-bulk="collect">حصّل الباقي</button>
+    <select id="s-bulk-st" aria-label="غيّر الحالة">
+      <option value="">غيّر الحالة لـ…</option>
+      <option value="proposed">مقترح</option>
+      <option value="progress">جاري</option>
+      <option value="delivered">مسلّم</option>
+      <option value="cancelled">ملغي</option>
+    </select>
+    <button class="tbtn ghostx" type="button" id="b-bulk-clear">شيل الاختيار</button>
+  </div>
+  <p class="note" id="s-bulk-res" hidden></p>
 
   <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
@@ -1633,8 +1673,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "44";
+  var VERSION = "45";
   var CHANGELOG = [
+    { v:"45", d:"2026-09-25", items:[
+      "اختيار متعدد في جدول المبيعات: «سلّم وحصّل» لعشرين أوردر مرة واحدة بدل ٦٠ خطوة",
+      "الإجراء الجماعي بيعدّي على نفس الحواجز، وبيقولك أنهي أوردر اتخطّى وليه",
+      "المرتجع بقى خانة في سطر التفاصيل — مش محتاج تفتح درج التعديل",
+      "لو حصّلت من العميل أكتر من المطلوب بعد المرتجع، السيستم بيقولك «ترجّعله كذا» بدل «خالص»"
+    ]},
     { v:"44", d:"2026-09-25", items:[
       "كل كارت في لوحة المتابعة بقى بيتفتح ويوريك التفاصيل اللي الرقم اتجمع منها",
       "كارتين جداد: «الإيرادات» و«تكلفة البضاعة المباعة»",
@@ -4228,8 +4274,10 @@
 
   /* ================= جدول الأوردرات ================= */
   // ٥ أعمدة بتتقري بنظرة. الشحن والربح والتحصيل نزلوا سطر التفاصيل.
-  var SALE_HEAD = ["الأوردر","العميل","الأصناف","الإجمالي","الحالة",""];
+  var SALE_HEAD = ["","الأوردر","العميل","الأصناف","الإجمالي","الحالة",""];
   var openRows = {};        // الأوردرات المفتوح سطر تفاصيلها
+  var selSales = {};        // الأوردرات المختارة للإجراء الجماعي
+  function selIds(){ return Object.keys(selSales); }
 
   function saleRowHTML(s){
     var st = stOf(s);
@@ -4269,7 +4317,10 @@
       "</span>";
 
     var row = "<tr class='order" + (isOpen ? " open" : "") + (s.id === freshId ? " fresh" : "") +
+        (selSales[s.id] ? " sel" : "") +
         "' data-st='" + st + "' data-row='" + s.id + "' tabindex='0'>" +
+      "<td class='selcell'><input type='checkbox' data-sel='" + s.id + "'" +
+        (selSales[s.id] ? " checked" : "") + " aria-label='اختار أوردر " + esc(s.no||"") + "'></td>" +
       "<td class='lead'><span class='ono'>" + (s.no ? "#"+esc(s.no) : "—") + "</span>" +
         "<span class='secondary num'>" + esc(s.date||"—") + "</span></td>" +
       "<td class='cust'><span class='primary' style='font-size:.9rem'>" + esc(partyName(s.partyId)) + "</span>" +
@@ -4302,11 +4353,16 @@
       (m.shipIn ? mRow("شحن محمّل عليه", m.shipIn, "", "+ ") : "") +
       mRow("المطلوب منه", m.owed, "tot") +
       mRow(viaShip(s) ? "حصّلته الشركة" : "محصّل", m.paid, "", "− ") +
-      mRow(m.due > 0.009 ? (viaShip(s) ? "لسه هتحصّله الشركة" : "باقي عليه") : "خالص",
-           Math.max(m.due,0), m.due > 0.009 ? "tot v-due" : "tot v-gain") +
+      mRow(m.due > 0.009 ? (viaShip(s) ? "لسه هتحصّله الشركة" : "باقي عليه")
+             : (m.due < -0.009 ? "ترجّعله" : "خالص"),
+           Math.abs(m.due), m.due > 0.009 ? "tot v-due"
+             : (m.due < -0.009 ? "tot v-due" : "tot v-gain")) +
       (m.due > 0.009 && viaShip(s)
         ? "<p class='mnote'>" + esc(squish(s.shipCo) || "شركة الشحن") +
           " هي اللي بتحصّل — مش إنت اللي بتجري ورا العميل.</p>" : "") +
+      (m.due < -0.009
+        ? "<p class='mnote v-due'>حصّلت منه أكتر من المطلوب — ترجّعله " +
+          esc(money(-m.due)) + ".</p>" : "") +
       "</div>";
 
     /* ٢) اللي طلع منك — التكلفة الحقيقية للأوردر */
@@ -4349,17 +4405,25 @@
 
     /* الأصناف — بالتكلفة والربح لكل صنف، مش الإجمالي بس */
     var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع","إجمالي البيع","ربح البضاعة"];
-    var body = SL(s).map(function(l){
+    var body = SL(s).map(function(l, i){
       var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l,s);
       var c = m.known ? lineCost(l) : null;
       var gp = m.known ? ((Number(l.price)||0) - lineCost(l)) * sold : null;
+      /* المرتجع كان محتاج تفتح درج التعديل وتدوّر على السطر. بقى خانة هنا
+         زي التحصيل السريع — بتتحفظ أول ما تسيبها، وبترجّع البضاعة للمخزن. */
+      var canRet = isDelivered(s) && !saleLocked(s);
+      var retCell = canRet
+        ? "<input class='retin' inputmode='decimal' data-ret='" + s.id + "|" + i + "' " +
+          "value='" + (lineRet(l) ? esc(qty(lineRet(l))) : "") + "' placeholder='0' " +
+          "aria-label='مرتجع من " + esc(itemName(l.itemId)) + "'>"
+        : (lineRet(l) ? qty(lineRet(l)) : q);
       var cells = [
         thumbHTML(l.itemId) + esc(itemName(l.itemId)),
         esc(vl) || q,
         qty(Number(l.qty)||0),
         c === null ? q : money(c),
         money(l.price),
-        lineRet(l) ? qty(lineRet(l)) : q,
+        retCell,
         money(lineTotal(l,s)),
         gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>"
       ];
@@ -4487,10 +4551,18 @@
     Object.keys(openRows).forEach(function(id){
       if(!list.some(function(s){ return s.id === id; })) delete openRows[id];
     });
+    selIds().forEach(function(id){
+      if(!list.some(function(s){ return s.id === id; })) delete selSales[id];
+    });
 
     var page = pageRows("sales", list);   // الإحصائيات فوق على الكل، والجدول على الدفعة
     var t = document.getElementById("t-sales");
-    t.innerHTML = "<thead><tr>" + SALE_HEAD.map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("") +
+    var allOn = page.length && page.every(function(x){ return selSales[x.id]; });
+    t.innerHTML = "<thead><tr>" + SALE_HEAD.map(function(h, i){
+        return i === 0
+          ? "<th class='selcell'><input type='checkbox' id='s-selall'" + (allOn ? " checked" : "") +
+            " aria-label='اختار كل الظاهر'></th>"
+          : "<th>"+esc(h)+"</th>"; }).join("") +
       "</tr></thead><tbody>" + page.map(saleRowHTML).join("") +
       (list.length ? "" : "<tr><td class='empty' colspan='"+SALE_HEAD.length+"'>" +
         esc(live("sales").length ? "مفيش أوردرات بالمواصفات دي." : "مفيش أوردرات لسه — ابدأ بزرار «أوردر جديد» فوق.") +
@@ -4503,8 +4575,17 @@
       });
     });
 
+    renderBulkBar();
     setTimeout(function(){ freshId = null; }, 1600);
     if(SD_OPEN) updateEntryCalc();
+  }
+
+  function renderBulkBar(){
+    var n = selIds().length, bar = document.getElementById("s-bulk");
+    if(!bar) return;
+    bar.hidden = !n;
+    document.getElementById("s-bcount").textContent = qty(n);
+    if(!n){ var r = document.getElementById("s-bulk-res"); if(r) r.hidden = true; }
   }
 
 
@@ -6084,6 +6165,72 @@
     }
   });
 
+  /* تسجيل المرتجع من سطر التفاصيل. البضاعة بترجع المخزن لوحدها لأن
+     lineSold بتطرح المرتجع، وكل حسابات المخزون بتقرا منها. */
+  function saveRet(box){
+    var parts = String(box.dataset.ret).split("|");
+    var rec = db.sales.find(function(x){ return x.id === parts[0]; });
+    if(!rec) return;
+    var l = SL(rec)[Number(parts[1])];
+    if(!l) return;
+    var was = lineRet(l);
+    if(saleLocked(rec)){ box.value = was ? qty(was) : ""; toast("الأوردر ده في فترة مقفولة"); return; }
+    var v = Number(toEn(box.value))||0, max = Number(l.qty)||0;
+    if(v < 0) v = 0;
+    if(v > max){
+      box.value = was ? qty(was) : "";
+      toast("المرتجع أكبر من المشحون (" + qty(max) + ")"); box.focus(); return;
+    }
+    if(v === was){ box.value = v ? qty(v) : ""; return; }
+    l.ret = v;
+    rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+    saveSoon("sales"); renderAll();
+    var due = saleTotal(rec) + shipIn(rec) - (Number(rec.paid)||0);
+    toast(v > was
+      ? "اترجّع " + qty(v - was) + " " + itemName(l.itemId) + " للمخزن" +
+        (due < -0.009 ? " · ترجّعله " + money(-due) : "")
+      : "اتعدّل المرتجع لـ " + qty(v));
+  }
+  TSALES.addEventListener("change", function(e){
+    var r = e.target.closest("[data-ret]");
+    if(r){ saveRet(r); return; }
+  });
+  TSALES.addEventListener("keydown", function(e){
+    if(e.key !== "Enter") return;
+    var r = e.target.closest("[data-ret]"); if(!r) return;
+    e.preventDefault(); e.stopPropagation(); r.blur();
+  });
+
+  // مربعات الاختيار + شريط الإجراء
+  TSALES.addEventListener("change", function(e){
+    var cb = e.target.closest("[data-sel]");
+    if(cb){
+      if(cb.checked) selSales[cb.dataset.sel] = 1; else delete selSales[cb.dataset.sel];
+      var tr = cb.closest("tr"); if(tr) tr.classList.toggle("sel", cb.checked);
+      renderBulkBar();
+      return;
+    }
+    if(e.target.id === "s-selall"){
+      var on = e.target.checked;
+      Array.prototype.forEach.call(TSALES.querySelectorAll("[data-sel]"), function(x){
+        x.checked = on;
+        if(on) selSales[x.dataset.sel] = 1; else delete selSales[x.dataset.sel];
+        var r = x.closest("tr"); if(r) r.classList.toggle("sel", on);
+      });
+      renderBulkBar();
+    }
+  });
+  document.getElementById("s-bulk").addEventListener("click", function(e){
+    var b = e.target.closest("[data-bulk]");
+    if(b){ bulkRun(b.dataset.bulk, null); return; }
+    if(e.target.id === "b-bulk-clear"){ selSales = {}; renderSales(); }
+  });
+  document.getElementById("s-bulk-st").addEventListener("change", function(){
+    if(!this.value) return;
+    var v = this.value; this.value = "";
+    bulkRun("status", v);
+  });
+
   // فتح وقفل سطر التفاصيل
   function toggleDetail(id){
     if(openRows[id]) delete openRows[id]; else openRows[id] = 1;
@@ -6190,6 +6337,88 @@
     var left = due - add;
     toast((viaShip(rec) ? (squish(rec.shipCo) || "الشركة") + " حصّلت " : "اتحصّل ") + money(add) +
           (left > 0.009 ? " · باقي " + money(left) : " · الأوردر خلص"));
+  }
+
+  /* ================= الإجراء الجماعي ================= */
+  /* المندوب بيرجع بعشرين أوردر مرة واحدة. من غير ده كل أوردر ٣ خطوات.
+     كل حاجة هنا بتعدّي على نفس حواجز الإجراء الفردي، واللي بيتخطّى
+     بيتقال ليه — مفيش حاجة بتتعمل في الضلمة. */
+  function canDeliver(rec){
+    var short = null, needs = {};
+    SL(rec).forEach(function(l){
+      var k = keyOf(l);
+      needs[k] = (needs[k]||0) + ((Number(l.qty)||0) - lineRet(l));
+    });
+    Object.keys(needs).forEach(function(k){
+      if(short || needs[k] <= 0) return;
+      var parts = k.split("|"), av = freeOfV(parts[0], parts[1], parts[2]);
+      // اللي محجوز للأوردر ده نفسه مش نقص
+      if(isReserved(rec)) SL(rec).forEach(function(l){ if(keyOf(l) === k) av += Number(l.qty)||0; });
+      if(needs[k] > av) short = itemName(parts[0]) + ": المتاح " + qty(av) + " بس";
+    });
+    return short;
+  }
+
+  function bulkRun(kind, newStatus){
+    var ids = selIds();
+    if(!ids.length) return;
+    /* الأوردر ممكن جزء منه ينفع وجزء لأ: يتسلّم بس تحصيله يتوقف لأن
+       مفيش اسم شركة شحن. فالعدّ لازم يفصل بين الحركتين، والرسالة تقول
+       بالظبط أنهي حركة اتخطّت على أنهي أوردر — مش رقم مبهم. */
+    var nDeliv = 0, nPay = 0, money_ = 0, skip = {};
+    var no = function(rec, why){
+      skip[why] = (skip[why] || []); skip[why].push("#" + (rec.no || "?"));
+    };
+    ids.forEach(function(id){
+      var rec = db.sales.find(function(x){ return x.id === id; });
+      if(!rec || rec.deleted) return;
+      if(saleLocked(rec)){ no(rec, "في فترة مقفولة"); return; }
+      var touched = false;
+
+      // ١) الحالة
+      var want = newStatus || ((kind === "deliver" || kind === "deliverpay") ? "delivered" : null);
+      if(want && stOf(rec) !== want){
+        if(want === "delivered" || want === "progress"){
+          var short = canDeliver(rec);
+          if(short){ no(rec, short); return; }      // ما ينفعش يتسلّم = مش هيتحصّل كمان
+        }
+        rec.status = want; stampDelivery(rec); touched = true; nDeliv++;
+      }
+
+      // ٢) التحصيل
+      if(kind === "deliverpay" || kind === "collect"){
+        if(!isDelivered(rec)){
+          if(kind === "collect") no(rec, "تحصيل: لسه ما اتسلّمش");
+        } else {
+          var due = saleTotal(rec) + shipIn(rec) - (Number(rec.paid)||0);
+          if(due > 0.009){
+            if(viaShip(rec) && !squish(rec.shipCo)) no(rec, "تحصيل: من غير اسم شركة شحن");
+            else { rec.paid = (Number(rec.paid)||0) + due; money_ += due; nPay++; touched = true; }
+          }
+        }
+      }
+      if(touched){ rec.editedBy = me || "غير محدد"; rec.at = Date.now(); }
+    });
+
+    var any = nDeliv || nPay;
+    if(any) saveSoon("sales");
+    selSales = {};
+    renderAll();
+
+    var parts = [];
+    if(nDeliv) parts.push((newStatus ? "اتغيّرت حالة " : "اتسلّم ") + qty(nDeliv) + " أوردر");
+    if(nPay)   parts.push("اتحصّل " + qty(nPay) + " أوردر بـ" + money(money_));
+    var skips = Object.keys(skip);
+    skips.forEach(function(w){ parts.push(skip[w].join(" و") + " اتخطّى — " + w); });
+
+    var res = document.getElementById("s-bulk-res");
+    if(res){
+      res.innerHTML = esc(parts.join(" · ")) || "مفيش حاجة محتاجة تتغيّر.";
+      res.className = "note " + (skips.length ? "bad" : "ok");
+      res.hidden = false;
+    }
+    toast(any ? parts[0] + (skips.length ? " · في أوردرات اتخطّت، شوف فوق" : "")
+              : (skips.length ? "مفيش حاجة اتعملت — شوف السبب فوق" : "مفيش حاجة محتاجة تتغيّر"));
   }
 
   function cancelDraft(){
