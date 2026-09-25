@@ -273,6 +273,21 @@
   .paybox .pl.tot{border-top:1px solid var(--line);margin-top:5px;padding-top:5px}
   .paybox .pn{margin:7px 0 0;font-size:.76rem;line-height:1.6}
 
+  /* كروت لوحة المتابعة بقت بتتفتح */
+  .band > .kpi{cursor:pointer;position:relative;transition:.15s}
+  .band > .kpi:hover{background:var(--teal-soft)}
+  .band > .kpi:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  .band > .kpi.on{background:var(--teal-soft);box-shadow:inset 0 -3px 0 var(--teal)}
+  .kpi-go{display:block;font-size:.7rem;color:var(--teal);margin-top:5px;opacity:0;transition:.15s}
+  .band > .kpi:hover .kpi-go,.band > .kpi.on .kpi-go,
+  .band > .kpi:focus-visible .kpi-go{opacity:1}
+  @media (hover:none){ .kpi-go{opacity:.75} }
+  #kpi-panel > .dhead{display:flex;align-items:center;gap:12px}
+  #kpi-panel .dclose{display:block}
+  #t-kpi a{color:var(--teal);font-weight:600;text-decoration:none}
+  #t-kpi a:hover{text-decoration:underline}
+  tr.sumrow > td{border-top:2px solid var(--line);font-weight:600;background:var(--paper)}
+
   /* سطر جدول بيتفتح بالدوس */
   tr.pick{cursor:pointer}
   tr.pick:hover > td{background:var(--teal-soft)}
@@ -669,6 +684,17 @@
     </div>
   </div>
   <div class="band" id="kpis"></div>
+
+  <div class="panel" id="kpi-panel" hidden>
+    <div class="dhead">
+      <h3 id="kpi-title">التفاصيل</h3>
+      <button class="dclose" type="button" id="b-kpi-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hint" id="kpi-note" style="margin-top:0"></p>
+      <div class="tbl-wrap"><table id="t-kpi"></table></div>
+    </div>
+  </div>
 
   <div class="panel" id="dash-partners" hidden>
     <h3>نصيب الشركاء من ربح الفترة</h3>
@@ -1607,8 +1633,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "43";
+  var VERSION = "44";
   var CHANGELOG = [
+    { v:"44", d:"2026-09-25", items:[
+      "كل كارت في لوحة المتابعة بقى بيتفتح ويوريك التفاصيل اللي الرقم اتجمع منها",
+      "كارتين جداد: «الإيرادات» و«تكلفة البضاعة المباعة»",
+      "تفاصيل صافي الربح بتوريك المعادلة كاملة: إيراد − تكلفة + شحن − مصاريف",
+      "دوسة على رقم الأوردر في أي جدول تفاصيل بتفتحه على طول"
+    ]},
     { v:"43", d:"2026-09-25", items:[
       "التحصيل بقى طريق واحد واضح: «حصّلته شركة الشحن» لو التحصيل عن طريقها، و«المحصّل من العميل» لو مباشر",
       "«لسه على العملاء» اتقسم لكارتين: «تجريه من العملاء» و«مع شركات الشحن»",
@@ -2899,9 +2931,12 @@
     var deliv = list.filter(isDelivered);
     var revenue = deliv.reduce(function(a,s){ return a+saleTotal(s); },0);
     var profit  = list.reduce(function(a,s){ return a+goodsProfit(s); },0);
+    // تكلفة البضاعة المباعة: الإيراد ناقص مجمل الربح — بنطلّعها رقم لوحدها
+    var cogs    = deliv.reduce(function(a,s){
+      return a + SL(s).reduce(function(b,l){ return b + lineCost(l) * lineSold(l,s); },0); },0);
     var netShip = list.reduce(function(a,s){ return a + (shipCounts(s) ? shipIn(s)-shipOut(s) : 0); },0);
     var exp     = expensesIn(r);
-    return { list:list, deliv:deliv, revenue:revenue, profit:profit,
+    return { list:list, deliv:deliv, revenue:revenue, profit:profit, cogs:cogs,
              netShip:netShip, expenses:exp, net: profit + netShip - exp };
   }
 
@@ -2952,24 +2987,278 @@
     var canc    = cur.list.filter(isCancelled);
     var cancCost= canc.reduce(function(a,s){ return a + (shipOut(s) - shipIn(s)); },0);
 
+    // كل كارت ليه مفتاح، والمفتاح بيفتح جدول تفاصيله من KPI_DETAIL
     var cells = [
-      ["مبيعات مسلّمة", money(cur.revenue), "", prev?deltaHTML(cur.revenue, prev.revenue):""],
-      ["مجمل ربح البضاعة", money(cur.profit), cur.profit>=0?"v-gain":"v-due", prev?deltaHTML(cur.profit, prev.profit):""],
-      ["صافي الشحن", money(cur.netShip), cur.netShip>=0?"v-gain":"v-due", prev?deltaHTML(cur.netShip, prev.netShip):""],
-      ["المصاريف", money(cur.expenses), cur.expenses>0?"v-due":"", prev?deltaHTML(cur.expenses, prev.expenses):""],
-      ["صافي الربح", money(cur.net), cur.net>=0?"v-gain":"v-due", prev?deltaHTML(cur.net, prev.net):""],
-      ["قيمة المخزون", money(stockValue), "", "<span class='sub'>تراكمي</span>"],
-      ["رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due", "<span class='sub'>تراكمي</span>"],
-      ["لك عند شركات الشحن", money(walletsTotal()), walletsTotal()>0?"v-gain":"", "<span class='sub'>لسه ما اتسحبتش</span>"],
-      ["لك عند العملاء", money(recv), recv>0?"v-gain":"", "<span class='sub'>تراكمي</span>"],
-      ["عليك للموردين", money(pay), pay>0?"v-due":"", "<span class='sub'>تراكمي</span>"],
-      ["أوردرات مسلّمة", qty(cur.deliv.length), "", ""],
-      ["أوردرات جارية", qty(open.length) + (openVal ? " · " + money(openVal) : ""), "", ""],
-      ["ملغية (صافي خسارتها)", qty(canc.length) + (cancCost ? " · " + money(cancCost) : ""), cancCost>0?"v-due":"", ""]
+      ["rev",   "الإيرادات (مبيعات مسلّمة)", money(cur.revenue), "", prev?deltaHTML(cur.revenue, prev.revenue):""],
+      ["cogs",  "تكلفة البضاعة المباعة", money(cur.cogs), cur.cogs>0?"v-due":"", "<span class='sub'>بمتوسط سعر الشراء</span>"],
+      ["gross", "مجمل ربح البضاعة", money(cur.profit), cur.profit>=0?"v-gain":"v-due", prev?deltaHTML(cur.profit, prev.profit):""],
+      ["ship",  "صافي الشحن", money(cur.netShip), cur.netShip>=0?"v-gain":"v-due", prev?deltaHTML(cur.netShip, prev.netShip):""],
+      ["exp",   "المصاريف", money(cur.expenses), cur.expenses>0?"v-due":"", prev?deltaHTML(cur.expenses, prev.expenses):""],
+      ["net",   "صافي الربح", money(cur.net), cur.net>=0?"v-gain":"v-due", prev?deltaHTML(cur.net, prev.net):""],
+      ["stock", "قيمة المخزون", money(stockValue), "", "<span class='sub'>تراكمي</span>"],
+      ["cash",  "رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due", "<span class='sub'>تراكمي</span>"],
+      ["wallet","لك عند شركات الشحن", money(walletsTotal()), walletsTotal()>0?"v-gain":"", "<span class='sub'>لسه ما اتسحبتش</span>"],
+      ["recv",  "لك عند العملاء", money(recv), recv>0?"v-gain":"", "<span class='sub'>تراكمي</span>"],
+      ["pay",   "عليك للموردين", money(pay), pay>0?"v-due":"", "<span class='sub'>تراكمي</span>"],
+      ["deliv", "أوردرات مسلّمة", qty(cur.deliv.length), "", ""],
+      ["open",  "أوردرات جارية", qty(open.length) + (openVal ? " · " + money(openVal) : ""), "", ""],
+      ["canc",  "ملغية (صافي خسارتها)", qty(canc.length) + (cancCost ? " · " + money(cancCost) : ""), cancCost>0?"v-due":"", ""]
     ];
     document.getElementById("kpis").innerHTML = cells.map(function(c){
-      return '<div><span>'+c[0]+'</span><strong class="num '+c[2]+'">'+esc(c[1])+'</strong>'+(c[3]||'')+'</div>';
+      return '<div class="kpi' + (kpiOpen === c[0] ? ' on' : '') + '" data-kpi="' + c[0] +
+        '" tabindex="0" role="button"><span>'+c[0+1]+'</span>' +
+        '<strong class="num '+c[3]+'">'+esc(c[2])+'</strong>'+(c[4]||'') +
+        '<span class="kpi-go" aria-hidden="true">التفاصيل ›</span></div>';
     }).join("");
+    renderKpiDetail();
+  }
+
+  /* ================= تفاصيل كروت لوحة المتابعة ================= */
+  /* كل رقم في اللوحة لازم يكون ليه «من فين جه». كل مفتاح بيرجّع
+     {note, head, rows, foot} والجدول بيتبني منهم. الأرقام بتتحسب بنفس
+     الدوال اللي الكارت نفسه بيستعملها عشان الإجمالي يطابق التفاصيل. */
+  var kpiOpen = null;
+
+  function oLink(s){
+    return "<a href='#' data-goorder='" + esc(s.id) + "'>#" + esc(s.no || "—") + "</a>";
+  }
+  function sumRow(cells){
+    return "<tr class='sumrow'>" + cells.map(function(c, i){
+      return "<td" + (i ? " class='num'" : " class='wide'") + ">" + c + "</td>"; }).join("") + "</tr>";
+  }
+
+  var KPI_DETAIL = {
+    rev: function(cur){
+      var rows = cur.deliv.slice().sort(byDate).map(function(s){
+        return "<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+          "<td class='num'>" + esc(revDate(s)) + "</td>" +
+          "<td class='wide'>" + esc(itemsLabel(s)) + "</td>" +
+          "<td class='num'>" + qty(soldQty(s)) + "</td>" +
+          "<td class='num' style='font-weight:600'>" + money(saleTotal(s)) + "</td></tr>";
+      });
+      rows.push(sumRow(["الإجمالي","","", qty(cur.deliv.reduce(function(a,s){ return a+soldQty(s); },0)),
+                        "<b>"+money(cur.revenue)+"</b>"]));
+      return { note:"الإيراد بيتسجّل بتاريخ التسليم مش تاريخ الأوردر (IFRS 15). المرتجع مخصوم.",
+               head:["الأوردر","تاريخ التسليم","الأصناف","القطع","الإيراد"], rows:rows };
+    },
+    cogs: function(cur){
+      var per = {};
+      cur.deliv.forEach(function(s){
+        SL(s).forEach(function(l){
+          var k = vKey(l.itemId, vColor(l), vSize(l)), n = lineSold(l,s);
+          if(!n) return;
+          if(!per[k]) per[k] = { itemId:l.itemId, color:vColor(l), size:vSize(l), q:0, c:0, r:0 };
+          per[k].q += n; per[k].c += lineCost(l) * n; per[k].r += n * (Number(l.price)||0);
+        });
+      });
+      var rows = Object.keys(per).map(function(k){ return per[k]; })
+        .sort(function(a,b){ return b.c - a.c; }).map(function(x){
+        return "<tr><td class='wide'>" + thumbHTML(x.itemId) + esc(itemName(x.itemId)) +
+            (vLabel(x.color,x.size) ? " <span class='pill'>"+esc(vLabel(x.color,x.size))+"</span>" : "") + "</td>" +
+          "<td class='num'>" + qty(x.q) + "</td>" +
+          "<td class='num'>" + money(x.q ? x.c/x.q : 0) + "</td>" +
+          "<td class='num'>" + money(x.c) + "</td>" +
+          "<td class='num'>" + money(x.r) + "</td>" +
+          "<td class='num " + ((x.r-x.c)>=0?"v-gain":"v-due") + "'>" + money(x.r - x.c) + "</td></tr>";
+      });
+      rows.push(sumRow(["الإجمالي","","","<b>"+money(cur.cogs)+"</b>",
+                        "<b>"+money(cur.revenue)+"</b>","<b>"+money(cur.revenue-cur.cogs)+"</b>"]));
+      return { note:"التكلفة بتتثبّت وقت التسليم بمتوسط سعر الشراء وقتها (IAS 2.27)، فمش بتتغيّر لو اشتريت بعدها بسعر تاني.",
+               head:["الصنف","اتباع","متوسط تكلفة القطعة","إجمالي التكلفة","الإيراد","مجمل الربح"], rows:rows };
+    },
+    gross: function(cur){
+      var rows = cur.deliv.slice().sort(byDate).map(function(s){
+        var c = SL(s).reduce(function(a,l){ return a + lineCost(l)*lineSold(l,s); },0);
+        var g = saleTotal(s) - c;
+        return "<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+          "<td class='num'>" + esc(revDate(s)) + "</td>" +
+          "<td class='num'>" + money(saleTotal(s)) + "</td>" +
+          "<td class='num'>" + money(c) + "</td>" +
+          "<td class='num " + (g>=0?"v-gain":"v-due") + "' style='font-weight:600'>" + money(g) + "</td></tr>";
+      });
+      rows.push(sumRow(["الإجمالي","","<b>"+money(cur.revenue)+"</b>",
+                        "<b>"+money(cur.cogs)+"</b>","<b>"+money(cur.profit)+"</b>"]));
+      return { note:"مجمل ربح البضاعة = الإيراد − تكلفة البضاعة المباعة. الشحن والمصاريف مش داخلين هنا.",
+               head:["الأوردر","التاريخ","الإيراد","التكلفة","مجمل الربح"], rows:rows };
+    },
+    ship: function(cur){
+      var rows = cur.list.filter(function(s){ return shipCounts(s) && (shipIn(s) || shipOut(s)); })
+        .sort(byDate).map(function(s){
+        var n = shipIn(s) - shipOut(s);
+        return "<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+          "<td>" + (esc(squish(s.shipCo)) || "—") + "</td>" +
+          "<td class='num'>" + money(shipIn(s)) + "</td>" +
+          "<td class='num'>" + money(shipOut(s)) + "</td>" +
+          "<td class='num " + (n>=0?"v-gain":"v-due") + "'>" + money(n) + "</td></tr>";
+      });
+      var ti = cur.list.reduce(function(a,s){ return a + (shipCounts(s)?shipIn(s):0); },0);
+      var to = cur.list.reduce(function(a,s){ return a + (shipCounts(s)?shipOut(s):0); },0);
+      rows.push(sumRow(["الإجمالي","","<b>"+money(ti)+"</b>","<b>"+money(to)+"</b>",
+                        "<b>"+money(ti-to)+"</b>"]));
+      return { note:"بالسالب يعني دفعت لشركات الشحن أكتر مما حمّلته للعملاء — الفرق ده طلع من جيبك.",
+               head:["الأوردر","شركة الشحن","حمّلته للعميل","دفعته للشركة","الصافي"], rows:rows };
+    },
+    exp: function(cur, r){
+      var rows = live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r); })
+        .sort(byDate).map(function(c){
+        return "<tr><td class='num'>" + esc(c.date||"—") + "</td>" +
+          "<td class='wide'>" + (esc(squish(c.note)) || "بدون بيان") + "</td>" +
+          "<td>" + (c.partyId ? esc(partyName(c.partyId)) : "—") + "</td>" +
+          "<td class='num v-due'>" + money(c.amount) + "</td></tr>";
+      });
+      rows.push(sumRow(["الإجمالي","","","<b>"+money(cur.expenses)+"</b>"]));
+      return { note:"مصاريف التشغيل المسجّلة في الخزنة. مصاريف نقل المشتريات مش هنا — دي بتتحط على تكلفة البضاعة.",
+               head:["التاريخ","البيان","الجهة","المبلغ"], rows:rows };
+    },
+    net: function(cur){
+      var L = function(a,b,cls){
+        return "<tr><td class='wide'>"+esc(a)+"</td><td class='num "+(cls||"")+"'>"+money(b)+"</td></tr>"; };
+      var rows = [
+        L("الإيرادات (مبيعات مسلّمة)", cur.revenue, "v-gain"),
+        L("− تكلفة البضاعة المباعة", -cur.cogs, "v-due"),
+        sumRow(["مجمل ربح البضاعة","<b>"+money(cur.profit)+"</b>"]),
+        L((cur.netShip>=0?"+ ":"") + "صافي الشحن", cur.netShip, cur.netShip>=0?"v-gain":"v-due"),
+        L("− المصاريف", -cur.expenses, "v-due"),
+        sumRow(["صافي الربح","<b>"+money(cur.net)+"</b>"])
+      ];
+      return { note:"ده ربح الفترة المختارة. رصيد الخزنة رقم تاني خالص — فيه رأس المال والمشتريات والتحصيل.",
+               head:["البند","المبلغ"], rows:rows };
+    },
+    stock: function(){
+      var rows = [], tot = 0;
+      live("items").forEach(function(i){
+        variantsOf(i.id).forEach(function(v){
+          var q = stockOfV(i.id,v.color,v.size); if(Math.abs(q) < 0.0001) return;
+          var c = avgCostV(i.id,v.color,v.size), val = q*c; tot += val;
+          rows.push({ v:val, h:"<tr><td class='wide'>" + thumbHTML(i.id) + esc(i.name) +
+            (vLabel(v.color,v.size) ? " <span class='pill'>"+esc(vLabel(v.color,v.size))+"</span>" : "") + "</td>" +
+            "<td class='num'>" + qty(q) + "</td><td class='num'>" + money(c) + "</td>" +
+            "<td class='num' style='font-weight:600'>" + money(val) + "</td></tr>" });
+        });
+      });
+      rows.sort(function(a,b){ return b.v - a.v; });
+      var out = rows.map(function(x){ return x.h; });
+      out.push(sumRow(["الإجمالي","","","<b>"+money(tot)+"</b>"]));
+      return { note:"القيمة بمتوسط سعر الشراء واصل المخزن (شامل النقل). مش بسعر البيع.",
+               head:["الصنف","الرصيد","متوسط التكلفة","القيمة"], rows:out };
+    },
+    cash: function(){
+      var m = {};
+      live("cash").forEach(function(c){
+        var k = cashLabel(c.type) || c.type;
+        if(!m[k]) m[k] = 0;
+        var a = Number(c.amount)||0;
+        if(isCapType(c.type)) m[k] += CAP[c.type].cash * a;
+        else if(c.type==="opening_party") m[k] += 0;
+        else if(c.type==="in" || c.type==="settle" || c.type==="opening") m[k] += a;
+        else m[k] -= a;
+      });
+      var rows = [];
+      // المبيعات والمشتريات مش حركات خزنة، فبنحسبهم من مصدرهم
+      rows.push("<tr><td class='wide'>تحصيل مباشر من العملاء</td><td class='num v-gain'>" +
+        money(live("sales").reduce(function(a,s){
+          if(viaShip(s)) return a;
+          return a + (isCancelled(s) ? shipIn(s) : (Number(s.paid)||0)); },0)) + "</td></tr>");
+      rows.push("<tr><td class='wide'>مدفوع للموردين ومصاريف النقل</td><td class='num v-due'>" +
+        money(-live("purchases").reduce(function(a,x){
+          return a + (Number(x.paid)||0) + pFreight(x); },0)) + "</td></tr>");
+      Object.keys(m).forEach(function(k){
+        if(Math.abs(m[k]) < 0.009) return;
+        rows.push("<tr><td class='wide'>" + esc(k) + "</td><td class='num " +
+          (m[k]>=0?"v-gain":"v-due") + "'>" + money(m[k]) + "</td></tr>");
+      });
+      rows.push(sumRow(["رصيد الخزنة","<b>"+money(cashBox())+"</b>"]));
+      return { note:"الخزنة بتتأثر بكل حاجة: رأس المال، المشتريات، التحصيل المباشر، والاستلام من شركات الشحن.",
+               head:["المصدر","المبلغ"], rows:rows };
+    },
+    wallet: function(){
+      var rows = shipBuckets().map(function(co){
+        var o = shipCoStats(co);
+        return { v:o.bal, h:"<tr><td class='wide'>" + (squish(co) ? esc(co) :
+            "<span class='v-due'>⚠ من غير اسم شركة</span>") + "</td>" +
+          "<td class='num v-gain'>" + money(o.collected) + "</td>" +
+          "<td class='num v-due'>" + money(o.fees) + "</td>" +
+          "<td class='num'>" + money(o.drawn) + "</td>" +
+          "<td class='num' style='font-weight:600'>" + money(o.bal) + "</td></tr>" };
+      }).filter(function(x){ return Math.abs(x.v) > 0.009 || true; });
+      var out = rows.map(function(x){ return x.h; });
+      out.push(sumRow(["الإجمالي","","","<b>"+money(walletsTotal())+"</b>"]));
+      return { note:"فلوس حصّلتها شركات الشحن من عملائك ولسه ما وصلتكش. تستلمها من شاشة «شركات الشحن».",
+               head:["الشركة","حصّلت","عمولتها","استلمته","لك عندها"], rows:out };
+    },
+    recv: function(){
+      var rows = [], t1=0, t2=0;
+      live("parties").forEach(function(p){
+        if(p.type !== "customer") return;
+        var b = partyBalance(p.id); if(b <= 0.009) return;
+        var vs = dueViaShip(p.id), mine = b - vs; t1 += Math.max(mine,0); t2 += vs;
+        rows.push({ v:b, h:"<tr><td class='wide'>" + esc(p.name) +
+          (p.phone ? " <span class='sub'>"+esc(p.phone)+"</span>" : "") + "</td>" +
+          "<td class='num " + (mine>0.009?"v-due":"") + "'>" + money(Math.max(mine,0)) + "</td>" +
+          "<td class='num'>" + (vs>0.009 ? money(vs) : "—") + "</td>" +
+          "<td class='num' style='font-weight:600'>" + money(b) + "</td></tr>" });
+      });
+      rows.sort(function(a,b){ return b.v - a.v; });
+      var out = rows.map(function(x){ return x.h; });
+      out.push(sumRow(["الإجمالي","<b>"+money(t1)+"</b>","<b>"+money(t2)+"</b>",
+                       "<b>"+money(t1+t2)+"</b>"]));
+      return { note:"«تجريه إنت» هو اللي لازم تكلّم العميل عشانه. «مع شركة الشحن» الشركة هي اللي بتحصّله.",
+               head:["العميل","تجريه إنت","مع شركة الشحن","الإجمالي"], rows:out };
+    },
+    pay: function(){
+      var rows = [], tot = 0;
+      live("parties").forEach(function(p){
+        if(p.type !== "supplier") return;
+        var b = partyBalance(p.id); if(b >= -0.009) return;
+        tot += -b;
+        rows.push({ v:-b, h:"<tr><td class='wide'>" + esc(p.name) + "</td>" +
+          "<td class='num v-due' style='font-weight:600'>" + money(-b) + "</td></tr>" });
+      });
+      rows.sort(function(a,b){ return b.v - a.v; });
+      var out = rows.map(function(x){ return x.h; });
+      out.push(sumRow(["الإجمالي","<b>"+money(tot)+"</b>"]));
+      return { note:"قيمة البضاعة اللي استلمتها وما دفعتهاش. مصاريف النقل مش عليهم — بتتدفع للناقل.",
+               head:["المورد","المستحق له"], rows:out };
+    },
+    deliv: function(cur){ return ordersDetail(cur.deliv, "أوردرات اتسلّمت في الفترة دي."); },
+    open:  function(cur){ return ordersDetail(cur.list.filter(isReserved),
+      "أوردرات مشحونة أو محجوزة ولسه ما اتسلّمتش — بضاعتها محجوزة من المخزون."); },
+    canc:  function(cur){ return ordersDetail(cur.list.filter(isCancelled),
+      "أوردرات اتلغت. خسارتها هي مصاريف الشحن اللي دفعتها ومارجعتش."); }
+  };
+
+  function ordersDetail(list, note){
+    var rows = list.slice().sort(byDate).map(function(s){
+      var m = saleMoney(s);
+      return "<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+        "<td class='num'>" + esc(s.date||"—") + "</td>" +
+        "<td class='wide'>" + esc(itemsLabel(s)) + "</td>" +
+        "<td class='num'>" + money(m.goods) + "</td>" +
+        "<td>" + (esc(squish(s.shipCo)) || "—") + "</td>" +
+        "<td class='num " + (m.known ? (m.profit>=0?"v-gain":"v-due") : "") + "'>" +
+          (m.known ? money(m.profit) : "—") + "</td></tr>";
+    });
+    return { note:note, head:["الأوردر","التاريخ","الأصناف","البضاعة","شركة الشحن","صافي الربح"],
+             rows:rows };
+  }
+
+  var KPI_TITLE = { rev:"الإيرادات", cogs:"تكلفة البضاعة المباعة", gross:"مجمل ربح البضاعة",
+    ship:"صافي الشحن", exp:"المصاريف", net:"صافي الربح", stock:"قيمة المخزون",
+    cash:"رصيد الخزنة", wallet:"لك عند شركات الشحن", recv:"لك عند العملاء",
+    pay:"عليك للموردين", deliv:"أوردرات مسلّمة", open:"أوردرات جارية", canc:"أوردرات ملغية" };
+
+  function renderKpiDetail(){
+    var pnl = document.getElementById("kpi-panel");
+    if(!pnl) return;
+    if(!kpiOpen || !KPI_DETAIL[kpiOpen]){ pnl.hidden = true; return; }
+    var r = periodRange(), cur = periodStats(r);
+    var d = KPI_DETAIL[kpiOpen](cur, r);
+    pnl.hidden = false;
+    var rr = periodRange();
+    document.getElementById("kpi-title").textContent = KPI_TITLE[kpiOpen] +
+      (rr ? " · من " + rr.from + " لـ " + rr.to : " · كل الفترات");
+    document.getElementById("kpi-note").textContent = d.note || "";
+    table("t-kpi", d.head, d.rows, "مفيش حركات في الفترة دي.");
   }
 
   function table(el, head, rows, emptyMsg){
@@ -7908,6 +8197,27 @@
 
   document.getElementById("ob-item").addEventListener("change", function(){
     fillVariantSelects("ob", this.value);
+  });
+
+  /* ---------- كروت لوحة المتابعة: كل رقم بيتفتح ---------- */
+  document.getElementById("kpis").addEventListener("click", function(e){
+    var c = e.target.closest("[data-kpi]"); if(!c) return;
+    kpiOpen = (kpiOpen === c.dataset.kpi) ? null : c.dataset.kpi;
+    renderKPIs();
+    if(kpiOpen) document.getElementById("kpi-panel").scrollIntoView({ block:"nearest" });
+  });
+  document.getElementById("kpis").addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var c = e.target.closest("[data-kpi]"); if(!c) return;
+    e.preventDefault(); c.click();
+  });
+  document.getElementById("b-kpi-close").addEventListener("click", function(){
+    kpiOpen = null; renderKPIs();
+  });
+  // من أي سطر في التفاصيل للأوردر نفسه
+  document.getElementById("t-kpi").addEventListener("click", function(e){
+    var a = e.target.closest("[data-goorder]"); if(!a) return;
+    e.preventDefault(); startEditSale(a.dataset.goorder);
   });
 
   /* ---------- شركات الشحن: الأحداث ---------- */
