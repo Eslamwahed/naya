@@ -239,6 +239,39 @@
   .quickpay input{width:120px;padding:6px 9px;font-size:.86rem}
   .quickpay .hintline{margin:0;flex:1 1 100%}
 
+  /* قصة فلوس الأوردر: ٣ بلوكات جنب بعض */
+  .money3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:12px}
+  .mbox{background:var(--card);padding:12px 14px}
+  .mbox h4{margin:0 0 9px;font-size:.76rem;font-weight:600;color:var(--ink-soft)}
+  .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    font-size:.85rem;padding:3px 0}
+  .mrow span{color:var(--ink-soft)}
+  .mrow b{font-weight:600}
+  .mrow.tot{border-top:1px solid var(--line);margin-top:5px;padding-top:6px;font-weight:600}
+  .mrow.tot span{color:var(--ink)}
+  .mnote{margin:8px 0 0;font-size:.75rem;color:var(--ink-soft);line-height:1.6}
+  .mbig{font-size:1.6rem;font-weight:600;letter-spacing:-.3px;margin-top:2px}
+  .mbox.big{display:flex;flex-direction:column;justify-content:center}
+  @media (max-width:820px){ .money3{grid-template-columns:1fr} }
+
+  /* بيانات الأوردر — سطر واحد بدل شبكة عشر خانات */
+  .dmeta{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;
+    font-size:.8rem;color:var(--ink-soft);margin:12px 0}
+  .dmeta b{color:var(--ink);font-weight:600;margin-inline-start:4px}
+  .dmeta label{display:inline-flex;align-items:center;gap:6px}
+  .dmeta input,.dmeta select{padding:4px 8px;font-size:.82rem}
+
+  /* شرح الفلوس وهي بتتكتب في الدرج */
+  .paybox{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    font-size:.82rem;line-height:1.75}
+  .paybox[hidden]{display:none}
+  .paybox .pl{display:flex;justify-content:space-between;gap:12px}
+  .paybox .pl span{color:var(--ink-soft)}
+  .paybox .pl b{font-weight:600}
+  .paybox .pl.tot{border-top:1px solid var(--line);margin-top:5px;padding-top:5px}
+  .paybox .pn{margin:7px 0 0;font-size:.76rem;line-height:1.6}
+
   /* «عندك دلوقتي» جوّه سطر الصنف */
   .stockline{margin:6px 0 0;font-size:.76rem;line-height:1.55}
 
@@ -1493,9 +1526,9 @@
           <input id="e-shipco" list="ship-list" data-f="shipCo" autocomplete="off"></div>
         <div><label for="e-shipcode">كود البوليصة</label>
           <input id="e-shipcode" data-f="shipCode" autocomplete="off"></div>
-        <div><label for="e-shipin">شحن على العميل</label>
+        <div><label for="e-shipin">شحن بتحصّله من العميل</label>
           <input id="e-shipin" type="number" step="any" min="0" data-f="shipIn"></div>
-        <div><label for="e-shipout">مدفوع لشركة الشحن</label>
+        <div><label for="e-shipout">شحن بتدفعه لشركة الشحن</label>
           <input id="e-shipout" type="number" step="any" min="0" data-f="shipOut"></div>
         <div class="span2"><label for="e-payvia">التحصيل بيتم عن طريق</label>
           <select id="e-payvia" data-f="payVia">
@@ -1508,13 +1541,15 @@
           <input id="e-note" data-f="note" autocomplete="off"></div>
       </div>
       <p class="hintline" id="e-shipnote" hidden></p>
+      <div class="paybox" id="e-paybox" hidden></div>
     </div>
   </div>
 
   <div class="drawer-foot">
     <div class="sums">
-      <div>إجمالي البضاعة<strong class="num" id="e-goods">—</strong></div>
-      <div id="e-profit-wrap" hidden>صافي ربح الأوردر<strong class="num" id="e-profit">—</strong></div>
+      <div>العميل عليه<strong class="num" id="e-goods">—</strong></div>
+      <div id="e-due-wrap" hidden>باقي عليه<strong class="num" id="e-due">—</strong></div>
+      <div id="e-profit-wrap" hidden>ربح الأوردر<strong class="num" id="e-profit">—</strong></div>
     </div>
     <button class="tbtn" type="button" id="b-canceldraft">تفريغ</button>
     <button class="tbtn primary" type="button" id="b-savedraft">حفظ الأوردر</button>
@@ -1531,8 +1566,16 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "39";
+  var VERSION = "40";
   var CHANGELOG = [
+    { v:"40", d:"2026-09-25", items:[
+      "سطر تفاصيل الأوردر اتعاد ترتيبه على ٣ أسئلة: العميل عليه كام؟ · التكلفة عليك كام؟ · ربحت كام؟",
+      "«شحن من جيبك» بقى رقم صريح — الفرق بين اللي حمّلته للعميل واللي دفعته للشركة",
+      "جدول أصناف الأوردر بقى فيه تكلفة القطعة وربح البضاعة لكل صنف",
+      "شرح حيّ في درج الأوردر بيوضّح الفلوس وإنت بتكتبها",
+      "«شحن على العميل» ← «شحن بتحصّله من العميل» و«مدفوع لشركة الشحن» ← «شحن بتدفعه لشركة الشحن»",
+      "فوتر الدرج بقى: العميل عليه · باقي عليه · ربح الأوردر"
+    ]},
     { v:"39", d:"2026-09-25", items:[
       "«خلصان» كانت بتكدب: المقاس اللي عندك في لون تاني بقى بيقول «مش في بني · عندك في أسود»",
       "سطر «عندك دلوقتي» تحت الصنف بيوري التركيبات اللي فيها رصيد فعلاً",
@@ -2492,6 +2535,35 @@
     var net = goodsProfit(s);
     if(shipCounts(s)) net += shipIn(s) - shipOut(s);
     return net;
+  }
+
+  /* قصة فلوس الأوردر في مكان واحد — كل الشاشات بتقراها من هنا عشان
+     الأرقام ما تختلفش من شاشة لشاشة. ثلاث حتت:
+       داخل  = بضاعة + شحن على العميل  (ده اللي العميل عليه)
+       خارج  = تكلفة البضاعة + مدفوع لشركة الشحن
+       الربح = داخل − خارج
+     مصاريف الشحن اللي مش محمّلة على العميل بتطلع من جيبك — والرقم ده
+     كان مخفي في «صافي الشحن» بالسالب، ومحدش بيفهمه. */
+  function saleMoney(s){
+    var goods = saleTotal(s), canc = isCancelled(s), deliv = isDelivered(s);
+    var sIn = shipCounts(s) ? shipIn(s) : 0;
+    var sOut = shipCounts(s) ? shipOut(s) : 0;
+    var cost = deliv ? SL(s).reduce(function(a,l){
+      return a + lineCost(l) * lineSold(l,s); },0) : 0;
+    var paid = canc ? shipIn(s) : (Number(s.paid)||0);
+    return {
+      goods: goods,                  // البضاعة بسعر البيع
+      shipIn: sIn,                   // شحن محمّل على العميل
+      owed: goods + sIn,             // المطلوب من العميل
+      paid: paid,                    // المحصّل منه
+      due: deliv ? (goods + sIn - paid) : 0,
+      cost: cost,                    // تكلفة البضاعة اللي خرجت
+      shipOut: sOut,                 // مدفوع لشركة الشحن
+      outlay: cost + sOut,           // إجمالي اللي طلع منك
+      pocket: sOut - sIn,            // شحن من جيبك (بالسالب يبقى كسبت من الشحن)
+      profit: saleProfit(s),
+      known: deliv || canc           // لسه ما اتسلّمش؟ التكلفة والربح مش متحددين
+    };
   }
 
   function partyBalance(id){
@@ -3506,8 +3578,8 @@
     if(!squish(other)) return v + " — خلصان";
     var els = whereElse(itemId, f, v);
     if(!els.length) return v + " — خلصان";
-    return v + " — مش في " + other + " · عندك في " +
-           els.slice(0,2).join(" و") + (els.length > 2 ? " وغيرهم" : "");
+    // الخانة ضيقة والنص بيتقص، فالمختصر أوضح: «٤٠ — في أسود»
+    return v + " — في " + els.slice(0,2).join(" و") + (els.length > 2 ? " وغيرهم" : "");
   }
   // «عندك دلوقتي» — التركيبات اللي فيها رصيد فعلاً، بتجاوب على السؤال قبل ما يتسأل
   function stockLine(itemId){
@@ -3692,13 +3764,22 @@
     });
 
     var sin = Number(draft.shipIn)||0, sout = Number(draft.shipOut)||0, paid = Number(draft.paid)||0;
-    var due = goods + sin - paid;
-    var g = document.getElementById("e-goods");
-    if(g) g.innerHTML = esc(money(goods)) +
-      (st === "delivered" ? " <em style='font-style:normal;font-size:.72rem;color:var(--ink-soft)'>· باقي " + esc(money(due)) + "</em>" : "");
+    var hasItem = draft.lines.some(function(l){ return !!l.itemId; });
+    if(st === "cancelled"){ sin = 0; }             // الملغي: مفيش بضاعة ولا شحن على العميل
+    var owed = goods + sin;                        // المطلوب من العميل
+    var due  = owed - paid;
 
-    var net = null, hasItem = draft.lines.some(function(l){ return !!l.itemId; });
-    if(!hasItem) net = null;                       // لسه ما دخلش بضاعة — مفيش صافي يتقال
+    var g = document.getElementById("e-goods");
+    if(g) g.textContent = money(owed);
+    var dw = document.getElementById("e-due-wrap"), dv = document.getElementById("e-due");
+    if(dw && dv){
+      dw.hidden = !(st === "delivered" && hasItem);
+      dv.textContent = money(due);
+      dv.className = "num " + (due > 0.009 ? "v-due" : "v-gain");
+    }
+
+    var net = null;
+    if(!hasItem) net = null;                       // لسه ما دخلش بضاعة — مفيش ربح يتقال
     else if(st === "delivered") net = (goods - cost) + sin - sout;
     else if(st === "cancelled") net = sin - sout;
     var pw = document.getElementById("e-profit-wrap"), pf = document.getElementById("e-profit");
@@ -3707,6 +3788,33 @@
       if(net !== null){
         pf.textContent = money(net);
         pf.className = "num " + (net >= 0 ? "v-gain" : "v-due");
+      }
+    }
+
+    /* الشرح الحيّ: نفس قصة الشاشة بس وإنت بتكتب. الخانتين اسمهم
+       «بتحصّله» و«بتدفعه» بس الفرق بينهم هو اللي بيطلع من جيبك — ودي
+       الحتة اللي كانت ضايعة في رقم «صافي الشحن» بالسالب. */
+    var pb = document.getElementById("e-paybox");
+    if(pb){
+      if(!hasItem && !sin && !sout && !paid){ pb.hidden = true; pb.innerHTML = ""; }
+      else {
+        var L = function(a, b, cls){
+          return "<div class='pl" + (cls ? " " + cls : "") + "'><span>" + esc(a) +
+                 "</span><b class='num'>" + esc(money(b)) + "</b></div>";
+        };
+        var pocket = sout - sin, html = L("البضاعة", goods);
+        if(sin) html += L("شحن محمّل على العميل", sin);
+        html += L("المطلوب من العميل", owed, "tot");
+        if(paid) html += L("محصّل منه", paid);
+        if(st === "delivered") html += L(due > 0.009 ? "باقي عليه" : "خالص", Math.max(due,0), "tot");
+        if(sout) html += L("شحن بتدفعه للشركة", sout);
+        if(Math.abs(pocket) > 0.009)
+          html += "<p class='pn " + (pocket > 0 ? "v-due" : "v-gain") + "'>" +
+            (pocket > 0
+              ? "شحن من جيبك " + esc(money(pocket)) + " — حمّلت العميل " + esc(money(sin)) +
+                " وهتدفع للشركة " + esc(money(sout))
+              : "كسبت من الشحن " + esc(money(-pocket))) + "</p>";
+        pb.innerHTML = html; pb.hidden = false;
       }
     }
 
@@ -3747,7 +3855,6 @@
     var p  = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
     var lines = SL(s), canc = isCancelled(s);
     var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
-    var sNet = shipCounts(s) ? (shipIn(s) - shipOut(s)) : 0;
     var isOpen = !!openRows[s.id];
 
     // أول صنفين بس — عشان ارتفاع السطر ما يرقصش مع عدد الأصناف
@@ -3792,64 +3899,109 @@
         "<span class='chev' aria-hidden='true'>▾</span></td></tr>";
 
     if(!isOpen) return row;
-    return row + detailRowHTML(s, sNet, collected);
+    return row + detailRowHTML(s);
   }
 
-  function detailRowHTML(s, sNet, collected){
-    var st = stOf(s), pending = (st === "proposed" || st === "progress");
-    var pr = saleProfit(s), rq = retQty(s);
+  // بلوك واحد في جدول الفلوس: اسم · رقم · (علامة)
+  function mRow(label, val, cls, sign){
+    return "<div class='mrow" + (cls ? " " + cls : "") + "'>" +
+      "<span>" + esc(label) + "</span>" +
+      "<b class='num'>" + (sign || "") + esc(money(val)) + "</b></div>";
+  }
 
-    var kv = [
-      ["التاريخ", "<input type='date' data-date='"+s.id+"' value='"+esc(s.date||"")+"'>"],
-      ["الحالة", "<select class='stsel' data-status='"+s.id+"'>" +
+  function detailRowHTML(s){
+    var st = stOf(s), m = saleMoney(s), canc = isCancelled(s);
+    var q = "—";
+
+    /* ١) فلوس العميل — من البضاعة لحد الباقي عليه، خطوة بخطوة */
+    var inBox = "<div class='mbox'><h4>العميل عليه كام؟</h4>" +
+      mRow("البضاعة", m.goods) +
+      (m.shipIn ? mRow("شحن محمّل عليه", m.shipIn, "", "+ ") : "") +
+      mRow("المطلوب منه", m.owed, "tot") +
+      mRow("محصّل", m.paid, "", "− ") +
+      mRow(m.due > 0.009 ? "باقي عليه" : "خالص", Math.max(m.due,0),
+           m.due > 0.009 ? "tot v-due" : "tot v-gain") +
+      "</div>";
+
+    /* ٢) اللي طلع منك — التكلفة الحقيقية للأوردر */
+    var outBox = "<div class='mbox'><h4>التكلفة عليك كام؟</h4>" +
+      (m.known
+        ? mRow("تكلفة البضاعة", m.cost) +
+          (m.shipOut ? mRow("مدفوع لشركة الشحن", m.shipOut) : "") +
+          mRow("إجمالي التكلفة", m.outlay, "tot") +
+          (m.pocket > 0.009
+            ? "<p class='mnote v-due'>شحن من جيبك " + esc(money(m.pocket)) +
+              " — حمّلت العميل " + esc(money(m.shipIn)) + " ودفعت " + esc(money(m.shipOut)) + "</p>"
+            : (m.pocket < -0.009
+               ? "<p class='mnote v-gain'>كسبت من الشحن " + esc(money(-m.pocket)) + "</p>"
+               : ""))
+        : "<p class='mnote'>التكلفة بتتثبّت لما الأوردر يتسلّم.</p>")
+      + "</div>";
+
+    /* ٣) النتيجة */
+    var profBox = "<div class='mbox big'><h4>ربحت كام؟</h4>" +
+      (m.known
+        ? "<div class='mbig num " + (m.profit >= 0 ? "v-gain" : "v-due") + "'>" +
+            esc(money(m.profit)) + "</div>" +
+          "<p class='mnote'>" + esc(money(m.owed)) + " − " + esc(money(m.outlay)) + "</p>"
+        : "<div class='mbig'>—</div><p class='mnote'>لسه ما اتسلّمش</p>")
+      + "</div>";
+
+    /* بيانات الأوردر — سطر واحد مضغوط بدل شبكة عشر خانات */
+    var meta = "<div class='dmeta'>" +
+      "<label>التاريخ <input type='date' data-date='"+s.id+"' value='"+esc(s.date||"")+"'></label>" +
+      "<label>الحالة <select class='stsel' data-status='"+s.id+"'>" +
         ["proposed","progress","delivered","cancelled"].map(function(k){
           return "<option value='"+k+"'"+(k===st?" selected":"")+">"+ST_LABEL[k]+"</option>";
-        }).join("") + "</select>"],
-      ["شركة الشحن", esc(s.shipCo||"") || "—"],
-      ["كود البوليصة", "<span class='num'>"+(esc(s.shipCode||"") || "—")+"</span>"],
-      ["صافي الشحن", pending ? "—" :
-        "<span class='num "+(sNet<0?"v-due":(sNet>0?"v-gain":""))+"'>"+money(sNet)+"</span>"],
-      ["التحصيل عن طريق", viaShip(s) ? "شركة الشحن" : "مباشر ليك"],
-      ["المحصّل", "<span class='num'>"+money(collected)+"</span>"],
-      ["صافي الربح", pending ? "—" :
-        "<span class='num "+(pr>=0?"v-gain":"v-due")+"'>"+money(pr)+"</span>"],
-      ["المسؤول", esc(s.owner||"") || "—"],
-      ["المرتجع", rq ? "<span class='num'>"+qty(rq)+"</span>" : "—"]
-    ].map(function(x){
-      return "<div><span>"+esc(x[0])+"</span><strong>"+x[1]+"</strong></div>";
-    }).join("");
+        }).join("") + "</select></label>" +
+      "<span>شركة الشحن <b>" + (esc(squish(s.shipCo)) || q) + "</b></span>" +
+      "<span>كود البوليصة <b class='num'>" + (esc(squish(s.shipCode)) || q) + "</b></span>" +
+      "<span>التحصيل <b>" + (viaShip(s) ? "عن طريق الشركة" : "مباشر ليك") + "</b></span>" +
+      "<span>المسؤول <b>" + (esc(squish(s.owner)) || q) + "</b></span>" +
+      (retQty(s) ? "<span>مرتجع <b class='num'>" + qty(retQty(s)) + "</b></span>" : "") +
+      "</div>";
 
+    /* الأصناف — بالتكلفة والربح لكل صنف، مش الإجمالي بس */
+    var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع","إجمالي البيع","ربح البضاعة"];
     var body = SL(s).map(function(l){
-      var vl = vLabel(vColor(l), vSize(l));
-      return "<tr><td class='wide'>" + thumbHTML(l.itemId) + esc(itemName(l.itemId)) + "</td>" +
-        "<td>" + (esc(vl) || "—") + "</td>" +
-        "<td class='num'>" + qty(Number(l.qty)||0) + "</td>" +
-        "<td class='num'>" + money(l.price) + "</td>" +
-        "<td class='num'>" + (lineRet(l) ? qty(lineRet(l)) : "—") + "</td>" +
-        "<td class='num' style='font-weight:600'>" + money(lineTotal(l,s)) + "</td></tr>";
+      var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l,s);
+      var c = m.known ? lineCost(l) : null;
+      var gp = m.known ? ((Number(l.price)||0) - lineCost(l)) * sold : null;
+      var cells = [
+        thumbHTML(l.itemId) + esc(itemName(l.itemId)),
+        esc(vl) || q,
+        qty(Number(l.qty)||0),
+        c === null ? q : money(c),
+        money(l.price),
+        lineRet(l) ? qty(lineRet(l)) : q,
+        money(lineTotal(l,s)),
+        gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>"
+      ];
+      return "<tr>" + cells.map(function(c2, k){
+        return "<td data-l='" + esc(LH[k]) + "'" +
+          (k === 0 ? " class='wide'" : (k >= 2 ? " class='num'" : "")) + ">" + c2 + "</td>";
+      }).join("") + "</tr>";
     }).join("");
 
-    /* الحركة اليومية الأكتر تكرار: العميل دفع الباقي. قبل كده كانت
-       بتحتاج تفتح درج التعديل كله — بقت خانة واحدة هنا. */
-    var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
-    var pay = due <= 0.009 ? "" :
+    /* الحركة اليومية الأكتر تكرار: العميل دفع الباقي. من غير ما تفتح الدرج. */
+    var pay = m.due <= 0.009 ? "" :
       "<div class='quickpay'>" +
         "<label for='qp-"+s.id+"'>تحصيل من العميل</label>" +
         "<input id='qp-"+s.id+"' inputmode='decimal' data-qp='"+s.id+"' " +
-          "placeholder='"+esc(money(due))+"'>" +
+          "placeholder='"+esc(money(m.due))+"'>" +
         "<button class='tbtn primary' type='button' data-qpay='"+s.id+"'>سجّل</button>" +
         "<button class='tbtn' type='button' data-qpayall='"+s.id+"'>خلّص الباقي</button>" +
-        "<p class='hintline'>الباقي " + esc(money(due)) +
+        "<p class='hintline'>الباقي " + esc(money(m.due)) +
           (viaShip(s) ? " · بيروح لمحفظة " + esc(squish(s.shipCo) || "شركة الشحن")
                       : " · بيدخل الخزنة على طول") + "</p>" +
       "</div>";
 
     return "<tr class='detail' data-detail='"+s.id+"'><td colspan='"+SALE_HEAD.length+"'><div class='detail-in'>" +
-      "<div class='kv'>" + kv + "</div>" +
-      (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") + pay +
+      "<div class='money3'>" + inBox + outBox + profBox + "</div>" +
+      pay + meta +
+      (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") +
       "<div class='dlines'><table><thead><tr>" +
-        ["الصنف","اللون والمقاس","الكمية","السعر","مرتجع","الإجمالي"].map(function(h){
-          return "<th>"+esc(h)+"</th>"; }).join("") +
+        LH.map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("") +
       "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       "<div class='detail-actions'>" +
         "<button class='tbtn' type='button' data-edit='sales|"+s.id+"'>تعديل الأوردر</button>" +
@@ -3903,7 +4055,9 @@
   function renderSaleStats(list){
     var rev  = list.filter(isDelivered).reduce(function(a,s){ return a+saleTotal(s); },0);
     var net  = list.reduce(function(a,s){ return a+saleProfit(s); },0);
-    var sh   = list.reduce(function(a,s){ return a + (shipCounts(s) ? shipIn(s)-shipOut(s) : 0); },0);
+    // موجب = دفعت للشركات أكتر مما حمّلته للعملاء، يعني طلع من جيبك
+    var pocket = list.reduce(function(a,s){
+      return a + (shipCounts(s) ? shipOut(s) - shipIn(s) : 0); },0);
     var deliv = list.filter(isDelivered).length;
     // فلوس مستنية من العملاء: أوردر مسلّم واللي اتحصّل منه أقل من قيمته
     var owedN = 0, owed = list.reduce(function(a,s){
@@ -3917,7 +4071,10 @@
       ["مبيعات مسلّمة", money(rev), "", qty(deliv) + " أوردر مسلّم"],
       ["لسه على العملاء", money(owed), owed > 0.009 ? "v-due" : "",
        owed > 0.009 ? qty(owedN) + " أوردر مسلّم ولسه ما اتحصّلش كامل" : "كل المسلّم اتحصّل"],
-      ["صافي الشحن", money(sh), sh>=0?"v-gain":"v-due", "محصّل − مدفوع"],
+      [pocket >= 0 ? "شحن من جيبك" : "كسبت من الشحن", money(Math.abs(pocket)),
+       pocket > 0.009 ? "v-due" : "v-gain",
+       pocket >= 0 ? "دفعت للشركات أكتر مما حمّلته للعملاء"
+                   : "حمّلت العملاء أكتر مما دفعته للشركات"],
       ["صافي الربح", money(net), net>=0?"v-gain":"v-due", "بعد الشحن والمرتجع"]
     ];
     document.getElementById("s-stats").innerHTML = cells.map(function(c){
