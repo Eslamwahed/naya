@@ -277,6 +277,7 @@
   tr.pick{cursor:pointer}
   tr.pick:hover > td{background:var(--teal-soft)}
   tr.pick:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  tr.pick.on > td{background:var(--teal-soft);font-weight:600}
   #shstmt-draw input[type="date"]{width:auto}
 
   /* «عندك دلوقتي» جوّه سطر الصنف */
@@ -489,6 +490,9 @@
   }
   .dclose:hover{background:var(--paper);color:var(--ink)}
   .panel:not(.as-drawer) .dclose{display:none}
+  /* كشف الشركة لوحة بتتفتح وبتتقفل، فالـ× لازم يبان */
+  #shstmt-panel > .dhead{display:flex;align-items:center;gap:12px}
+  #shstmt-panel .dclose{display:block}
 
   /* شريط الإجراء فوق كل جدول */
   .tbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
@@ -1603,8 +1607,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "41";
+  var VERSION = "42";
   var CHANGELOG = [
+    { v:"42", d:"2026-09-25", items:[
+      "إصلاح: دوسة تانية على سطر شركة الشحن كانت بتسيب الكشف مفتوح — بقت تقفله",
+      "السطر المفتوح كشفه بقى متعلّم في الجدول",
+      "إصلاح: زرار × في كشف الشركة كان مخفي بالـCSS فمكانش بيتدوس"
+    ]},
     { v:"41", d:"2026-09-25", items:[
       "شاشة جديدة «شركات الشحن»: حساب كل شركة بالتفصيل في مكان واحد",
       "كشف حساب لكل شركة بكل حركة — تحصيل وعمولة واستلام — برصيد جاري",
@@ -4740,6 +4749,7 @@
           if(SHIP_HEAD[i]) td.setAttribute("data-l", SHIP_HEAD[i]);
         });
       });
+    markShipRow();
     renderShipStmt();
   }
 
@@ -4825,6 +4835,14 @@
         Array.prototype.forEach.call(tr.children, function(td, i){
           if(SHSTMT_HEAD[i]) td.setAttribute("data-l", SHSTMT_HEAD[i]);
         });
+      });
+  }
+
+  // السطر المفتوح كشفه بيتعلّم عشان تعرف إنت واقف فين
+  function markShipRow(){
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#t-shipco tbody tr[data-shco]"), function(tr){
+        tr.classList.toggle("on", shipFor !== null && tr.dataset.shco === shipFor);
       });
   }
 
@@ -7842,9 +7860,12 @@
   /* ---------- شركات الشحن: الأحداث ---------- */
   document.getElementById("t-shipco").addEventListener("click", function(e){
     var tr = e.target.closest("[data-shco]"); if(!tr) return;
-    shipFor = tr.dataset.shco;
+    // نفس السطر تاني = قفل، زي سطر تفاصيل الأوردر في المبيعات
+    var same = (shipFor !== null && shipFor === tr.dataset.shco);
+    shipFor = same ? null : tr.dataset.shco;
+    markShipRow();
     renderShipStmt();
-    document.getElementById("shstmt-panel").scrollIntoView({ block:"nearest" });
+    if(!same) document.getElementById("shstmt-panel").scrollIntoView({ block:"nearest" });
   });
   document.getElementById("t-shipco").addEventListener("keydown", function(e){
     if(e.key !== "Enter" && e.key !== " ") return;
@@ -7852,7 +7873,7 @@
     e.preventDefault(); tr.click();
   });
   document.getElementById("b-shstmt-close").addEventListener("click", function(){
-    shipFor = null; renderShipStmt();
+    shipFor = null; markShipRow(); renderShipStmt();
   });
   // من الكشف للأوردر نفسه
   document.getElementById("t-shstmt").addEventListener("click", function(e){
