@@ -646,7 +646,9 @@
     .detail-in{background:var(--card);border:1px solid var(--line);border-radius:11px;
       margin:-4px 0 10px;padding:14px}
     .drawer{width:100%}
-    .fgrid .span2{grid-column:span 1}
+    /* v58 — الشبكة هنا بتفضل عمودين على 390px، فـ«span 1» كانت بتحشر
+       العميل وطريقة التحصيل والملاحظة في نص سطر وتقطّع نصّهم */
+    .fgrid .span2{grid-column:1 / -1}
     .drawer-foot{padding-block-end:calc(13px + env(safe-area-inset-bottom, 0px))}
   }
   /* الجداول بتتحول لكروت على الموبايل */
@@ -703,6 +705,53 @@
     #t-lines tbody tr{display:block;background:var(--paper);border:1px solid var(--line);
       border-radius:10px;margin-bottom:10px;padding:4px 2px}
   }
+  /* ═══ v58 — الإدخال على الموبايل ═══
+     القياس على شاشة 390×844: ١١ خانة خطها 14px و١٣ خانة ارتفاعها أقل من 44px.
+     السبب: `input,select{font-size:1rem}` اللي فوق كان بيتغلب بالتحديد (specificity)
+     من `.fgrid input` و`.dmeta input` وغيرهم. فالقاعدة دي بتسمّي كل واحدة بالاسم.
+     أقل من 16px = iOS بيزوّم لوحده على كل لمسة، وده بيخرّب الإدخال كل مرة. */
+  @media (max-width:760px){
+    input,select,textarea,
+    .filters input,.filters select,
+    .fgrid input,.fgrid select,
+    .dmeta input,.dmeta select,
+    .quickpay input,
+    .lmix-row input,.lmix-row select,
+    #t-lines input,#t-lines select,
+    .s-search input{ font-size:16px;min-height:44px }
+    /* مربّعات الاختيار مش خانات كتابة — الارتفاع بيوسّعها بدون داعي */
+    input[type="checkbox"]{ min-height:0;width:auto }
+    td.selcell input,th.selcell input,.allow input{ width:22px;height:22px }
+
+    /* أهداف اللمس: ٧ أزرار من ٩ كانت أصغر من 40×40 */
+    .stabs button,.seg button,.tbtn,.withbtn .tbtn,.addline,
+    .lmix-head button,.sd-close{ min-height:42px }
+    .stabs button,.seg button,.tbtn,.addline{ font-size:14px }
+    .del,.rowact,.lrow .rm,.lmix-row .rm{
+      min-height:40px;min-width:40px;
+      display:inline-flex;align-items:center;justify-content:center }
+
+    /* خلّاط المقاسات: 5 أعمدة في 312px بيخنق الخانات لما الخط يبقى 16px،
+       فبقى سطرين — والعناوين مش ناقصة لأن كل خانة فيها placeholder */
+    .lmix-cols{ display:none }
+    .lmix-row{
+      grid-template-columns:1fr 1fr 40px;
+      grid-template-areas:"c z x" "q k x";
+      row-gap:7px;border:1px dashed var(--line);border-radius:9px;padding:8px }
+    .lmix-row > :nth-child(1){ grid-area:c }
+    .lmix-row > :nth-child(2){ grid-area:z }
+    .lmix-row > :nth-child(3){ grid-area:q }
+    .lmix-row > .mcode{ grid-area:k;text-align:start;align-self:center }
+    .lmix-row > .rm{ grid-area:x;align-self:center }
+
+    /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 13px */
+    .hintline,.mnote,.lmix-empty,.lmix-head,.lmix-sum,.fset > h3,
+    .fgrid label,.filters label,.stabs b,.lrow .lcost,.lrow-foot .ltot em,
+    tbody td::before,.fgroup .glabel,.band span,.mbox h4,.lmix-row .mcode,.rowact,
+    .stats span,.stats small,.kpi-go,header.top .who,
+    .dmeta,.hint,label{ font-size:13px }
+  }
+
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -1596,6 +1645,11 @@
 
     <div id="user-box" hidden style="margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:14px">
       <h4 id="user-title" style="margin:0 0 10px;font-size:.95rem">مستخدم جديد</h4>
+      <p class="note" id="us-first" hidden style="margin-top:0">
+        <strong>ده أول حساب — اعمله باسمك إنت.</strong>
+        سيب كل الشاشات متعلّمة، لأن «الإعدادات» هي اللي بتضيف منها باقي الفريق.
+        بعد ما تدخل، ضيفهم واحد واحد بالصلاحيات اللي تحبها.
+      </p>
       <div class="fgrid">
         <div><label for="us-name">الاسم</label><input id="us-name" autocomplete="off"></div>
         <div><label for="us-pin">الرقم السري</label>
@@ -1876,8 +1930,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "56";
+  var VERSION = "58";
   var CHANGELOG = [
+    { v:"58", d:"2026-09-26", items:[
+      "الإدخال على الموبايل: كل خانة بقت 16px على الأقل — قبل كده ١١ خانة كانت 14px فالموبايل كان بيزوّم لوحده على كل لمسة",
+      "كل خانة ارتفاعها 44px وكل زرار صغير 40px على الأقل — قبل كده ١٣ خانة و٧ أزرار من ٩ كانوا أصغر من كده",
+      "خلّاط الألوان والمقاسات بقى سطرين على الموبايل بدل خمس أعمدة مخنوقة",
+      "مفيش نص أقل من 13px على الموبايل — العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح",
+      "إصلاح: خانات العميل وطريقة التحصيل والملاحظة كانت بتتحشر في نص سطر على الموبايل ونصّها يتقطّع — بقت سطر كامل"
+    ]},
+    { v:"57", d:"2026-09-26", items:[
+      "أول حساب: تنبيه واضح إنه لازم يكون بتاع صاحب السيستم وبكل الصلاحيات، ورسالة الرفض بقت تشرح السبب بدل جملة عامة"
+    ]},
     { v:"56", d:"2026-09-26", items:[
       "مستخدمين وصلاحيات: كل واحد بحساب ورقم سري، وإنت اللي بتحدّد الشاشات اللي يشوفها",
       "مفتاح «يشوف الأرباح والتكاليف» بيخفي أرقام الربح وتكلفة الشراء من الشاشات المسموحة",
@@ -9542,6 +9606,8 @@
     editUser = id || null;
     var u = id ? users().find(function(x){ return x.id === id; }) : null;
     document.getElementById("user-title").textContent = u ? ("تعديل: " + u.name) : "مستخدم جديد";
+    var fst = document.getElementById("us-first");
+    if(fst) fst.hidden = !(!u && !users().length);
     document.getElementById("us-name").value = u ? u.name : "";
     document.getElementById("us-pin").value = "";
     document.getElementById("us-pinnote").hidden = !u;
@@ -9609,7 +9675,14 @@
     var stillAdmin = others.some(function(x){ return (x.tabs||[]).indexOf("backup") > -1; }) ||
                      tabs.indexOf("backup") > -1;
     if(!stillAdmin){
-      err.textContent = "لازم يفضل حد واحد على الأقل يشوف «الإعدادات» — وإلا مش هتقدر ترجّع الصلاحيات تاني.";
+      /* الحالة الأولى مختلفة تمامًا: لسه مفيش ولا حساب، فاللي بيتعمل
+         دلوقتي هو صاحب السيستم. الرسالة العامة مكانتش بتقول ده. */
+      err.innerHTML = others.length === 0
+        ? "<strong>ده أول حساب في السيستم — لازم يكون بتاعك إنت.</strong><br>" +
+          "شاشة «الإعدادات» هي المكان الوحيد اللي بتتحكّم منه في المستخدمين والصلاحيات. " +
+          "اعمل حسابك إنت الأول وسيب كل الشاشات متعلّمة، وبعد ما تدخل ضيف " +
+          esc(name || "الموظف") + " بالصلاحيات اللي إنت عايزها."
+        : "لازم يفضل حد واحد على الأقل يشوف «الإعدادات» — وإلا مش هتقدر ترجّع الصلاحيات تاني.";
       err.hidden = false; return;
     }
 
