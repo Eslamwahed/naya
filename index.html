@@ -1930,8 +1930,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "58";
+  var VERSION = "59";
   var CHANGELOG = [
+    { v:"59", d:"2026-09-26", items:[
+      "إصلاح مهم: لما تشتري نفس الصنف تاني بسعر مختلف بعد ما بعت منه، قيمة المخزون كانت بتتحسب بالمتوسط الجديد والتكلفة المثبّتة بالقديم — فالميزانية تختل بالفرق. دلوقتي قيمة المخزون = اللي اشتريته − اللي خرج تكلفة",
+      "إصلاح: البيع من غير فاتورة شراء («البضاعة عندي بس ما سجّلتهاش») كان بيكسر الميزانية بقيمة البضاعة دي",
+      "إصلاح: صنف أو عميل اتحذف وعليه حركات كان بيضيّع قيمته من الميزانية",
+      "إصلاح: المخزون الافتتاحي كان ممكن يتحسب مديونية مورد فوق كونه حقوق ملكية",
+      "«لازم تبيع بكام» ما بقاش يطلّع رقم تقديري متفائل وإنت بتبيع بأقل من التكلفة — بيقول كده صريح",
+      "الأوردر الملغي اللي العميل كان دافع فيه: تنبيه إن السيستم بيعتبرها رجعتله",
+      "جدول توفيق الميزانية بيوضّح فرق «المتوسط الحالي» عن «تكلفة مثبّتة وقت البيع» بند صريح",
+      "قيمة المخزون بقت رقم واحد في كل الشاشات (لوحة المتابعة · الأداء · الميزانية)"
+    ]},
     { v:"58", d:"2026-09-26", items:[
       "الإدخال على الموبايل: كل خانة بقت 16px على الأقل — قبل كده ١١ خانة كانت 14px فالموبايل كان بيزوّم لوحده على كل لمسة",
       "كل خانة ارتفاعها 44px وكل زرار صغير 40px على الأقل — قبل كده ١٣ خانة و٧ أزرار من ٩ كانوا أصغر من كده",
@@ -3101,7 +3111,12 @@
       // قبل كده كان بيدخل الخزنة من غير التزام مقابل، فالميزانية تختل.
       if(!isCancelled(s)) bal -= (Number(s.paid)||0);
     });
-    live("purchases").forEach(function(p){ if(p.partyId===id) bal -= goodsTotal(p) - (Number(p.paid)||0); });
+    live("purchases").forEach(function(p){
+      // المخزون الافتتاحي مالوش مورد — قيمته اتسجّلت في حقوق الملكية
+      // (openingStock)، فلو اتحسبت كمان مديونية تبقى اتعدّت مرتين
+      if(p.opening) return;
+      if(p.partyId===id) bal -= goodsTotal(p) - (Number(p.paid)||0);
+    });
     live("cash").forEach(function(c){
       if(c.partyId!==id) return;
       if(isCapType(c.type)) return;                              // رأس مال — مش مديونية
@@ -3233,20 +3248,46 @@
   function retainedEarnings(){ return netProfitAll() - distributedTotal(); }
 
   /* ---------- توفيق الميزانية ---------- */
-  // صافي الأصول لازم يساوي حقوق الملكية. الفرق معناه حاجة مش مسجّلة.
-  function netAssets(){
-    var stock = live("items").reduce(function(a,i){
+  /* قيمة المخزون في الدفاتر = كل اللي اشتريته − كل اللي خرج تكلفة مع البيع.
+     مش «الكمية × المتوسط الحالي»: التكلفة بتتثبّت على السطر وقت التسليم
+     (عشان أرباح الشهور اللي فاتت ما تتغيّرش)، فلو اشتريت تاني بسعر مختلف
+     المتوسط بيتحرّك والرقمين ما يبقوش متساويين — والميزانية تختل بالفرق.
+     الطرح ده كمان بيمسك حالتين تانيين لوحده:
+       · البيع من غير فاتورة شراء: القيمة بتطلع بالسالب بدل ما تتقصّ لصفر
+       · صنف اتشال: مشترياته لسه محسوبة لأننا مش بنلف على live("items")
+     (IAS 2.27 — المتوسط المتحرّك) */
+  function stockBookValue(){
+    var v = live("purchases").reduce(function(a,p){ return a + purchTotal(p); }, 0);
+    live("sales").forEach(function(s){
+      if(!isDelivered(s)) return;
+      SL(s).forEach(function(l){ v -= lineCost(l) * lineSold(l, s); });
+    });
+    return v;
+  }
+  // قيمة المخزون زي ما شاشة المخزون بتعرضها: الكمية × المتوسط الحالي
+  function stockAtAvg(){
+    return live("items").reduce(function(a,i){
       return a + variantsOf(i.id).reduce(function(b,v){
-        return b + Math.max(0, stockOfV(i.id,v.color,v.size)) * avgCostV(i.id,v.color,v.size);
+        return b + stockOfV(i.id,v.color,v.size) * avgCostV(i.id,v.color,v.size);
       }, 0);
     }, 0);
-    var recv = 0, pay = 0;
-    live("parties").forEach(function(p){
-      if(isPartner(p)) return;
+  }
+  /* الجهة المحذوفة اللي لسه عليها أو ليها فلوس بتفضل في الميزانية.
+     الحذف بيخفيها من الكشوف، بس المديونية بتاعتها فلوس حقيقية. */
+  function duesNet(){
+    var seen = {}, net = 0;
+    db.parties.forEach(function(p){
+      if(!p || seen[p.id] || isPartner(p)) return;
+      seen[p.id] = 1;
       var b = partyBalance(p.id);
-      if(b > 0) recv += b; else pay += -b;
+      if(p.deleted && Math.abs(b) < 0.009) return;
+      net += b;
     });
-    return cashBox() + walletsTotal() + stock + recv - pay;
+    return net;
+  }
+  // صافي الأصول لازم يساوي حقوق الملكية. الفرق معناه حاجة مش مسجّلة.
+  function netAssets(){
+    return cashBox() + walletsTotal() + stockBookValue() + duesNet();
   }
   function totalEquity(){
     return partners().reduce(function(a,p){
@@ -3449,11 +3490,7 @@
     var cur = periodStats(r);
     var prev = prevRange() ? periodStats(prevRange()) : null;
 
-    var stockValue = live("items").reduce(function(a,i){
-      return a + variantsOf(i.id).reduce(function(b,v){
-        return b + stockOfV(i.id,v.color,v.size) * avgCostV(i.id,v.color,v.size);
-      },0);
-    },0);
+    var stockValue = stockBookValue();
     var recv=0, pay=0;
     live("parties").forEach(function(p){
       var b = partyBalance(p.id);
@@ -4091,7 +4128,10 @@
 
   /* الهامش اللي بنحسب بيه: الفعلي من مبيعاتك لو موجود، وإلا تقديري. */
   function cmBasis(c){
-    if(c.revenue > 0.009 && c.cmPct > 0) return { pct:c.cmPct, est:false };
+    /* عندك مبيعات فعلية؟ هي وحدها الأساس. لو هامشها سالب (بتبيع بأقل من
+       التكلفة) بنرجّع null عشان الكارت يقول كده صريح — ممنوع نحطّ مكانه
+       رقم تقديري من أسعار القايمة، ده بيخبّي الخسارة ويطلّع رقم متفائل. */
+    if(c.revenue > 0.009) return c.cmPct > 0 ? { pct:c.cmPct, est:false } : null;
     var e = expectedMargin();
     return (e && e.pct > 0) ? { pct:e.pct, est:true, basis:e.basis } : null;
   }
@@ -4123,10 +4163,7 @@
   function renderPerf(){
     var r = periodRange(), c = periodStats(r);
     var gross = c.revenue - c.cogs;
-    var stockVal = live("items").reduce(function(a,i){
-      return a + variantsOf(i.id).reduce(function(b,v){
-        return b + Math.max(0, stockOfV(i.id,v.color,v.size)) * avgCostV(i.id,v.color,v.size);
-      },0); },0);
+    var stockVal = Math.max(0, stockBookValue());
     var turns   = stockVal > 0 ? c.cogs / stockVal : 0;     // مرات الدوران في الفترة
     var days    = r ? daysBetween(r.from, r.to) + 1 : null;
     var shelf   = turns > 0 && days ? days / turns : null;  // أيام لحد ما البضاعة تتباع
@@ -5430,6 +5467,12 @@
       (m.due < -0.009
         ? "<p class='mnote v-due'>حصّلت منه أكتر من المطلوب — ترجّعله " +
           esc(money(-m.due)) + ".</p>" : "") +
+      /* الأوردر الملغي بيتفك بالكامل: السيستم بيفترض إن العربون رجع للعميل.
+         لو إنت ماسكه (مصاريف إلغاء مثلًا) لازم تسجّله دخل في الخزنة،
+         وإلا الرقم اللي في إيدك أكتر من اللي في السيستم. */
+      (canc && (Number(s.paid)||0) > 0.009
+        ? "<p class='mnote v-due'>العميل كان دافع " + esc(money(Number(s.paid)||0)) +
+          " — السيستم بيعتبرها رجعتله مع الإلغاء. لو ماسكها، سجّلها «دخل» في الخزنة.</p>" : "") +
       "</div>";
 
     /* ٢) اللي طلع منك — التكلفة الحقيقية للأوردر */
@@ -6754,6 +6797,7 @@
   // بتتنادى بعد أي تغيير في البيانات
   function renderAll(){
     clearStockIdx();                     // أضمن حتة: أي رسم كامل بيبدأ بفهرس جديد
+    clearMonthly();                      // نفس السبب: أرباح الشهور مش تفضل قديمة
     fillSelects();                       // القوايم بتتغذّى في كل الأدراج
     Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
     renderTab(activeTab);
@@ -8821,10 +8865,19 @@
 
   function renderRecon(){
     var a = netAssets(), e = totalEquity(), d = a - e;
+    /* شاشة المخزون بتعرض «الكمية × المتوسط الحالي»، والدفاتر بتعرض
+       «اللي اشتريته − اللي خرج تكلفة». الاتنين بيختلفوا لما تشتري نفس
+       الصنف تاني بسعر مختلف بعد ما بعت منه — فبنكتب الفرق بند صريح
+       بدل ما الرقمين يتعارضوا من غير تفسير. */
+    var gap = stockBookValue() - stockAtAvg();
     var rows = [
       ["الخزنة", cashBox(), ""],
       ["محافظ شركات الشحن", walletsTotal(), ""],
-      ["المخزون", netAssets() - cashBox() - walletsTotal() - reconDues(), ""],
+      ["المخزون (بالمتوسط الحالي)", stockAtAvg(), ""]
+    ];
+    if(Math.abs(gap) >= 0.01)
+      rows.push(["فرق تكلفة مثبّتة وقت البيع", gap, ""]);
+    rows = rows.concat([
       ["صافي أرصدة العملاء والموردين", reconDues(), ""],
       ["صافي الأصول", a, "tot"],
       ["رأس المال", totalCapital(), ""],
@@ -8833,7 +8886,7 @@
       ["صافي الأصول الافتتاحية", openingEquity(), ""],
       ["حقوق الملكية", e, "tot"],
       ["الفرق", d, "diff"]
-    ].map(function(x){
+    ]).map(function(x){
       var cls = x[2]==="diff" ? (Math.abs(x[1])<0.01 ? "v-gain" : "v-due") : "";
       var w = x[2]==="tot" || x[2]==="diff" ? "font-weight:600" : "";
       return "<tr"+(x[2]==="tot"?" style='background:var(--teal-soft)'":"")+
@@ -8843,15 +8896,7 @@
     });
     table("t-recon", ["البند","القيمة"], rows, "");
   }
-  function reconDues(){
-    var recv=0, pay=0;
-    live("parties").forEach(function(p){
-      if(isPartner(p)) return;
-      var b = partyBalance(p.id);
-      if(b > 0) recv += b; else pay += -b;
-    });
-    return recv - pay;
-  }
+  function reconDues(){ return duesNet(); }
 
   var capLogFor = null;      // فلتر السجل على شريك واحد
 
