@@ -312,6 +312,32 @@
   #t-kpi a:hover{text-decoration:underline}
   tr.sumrow > td{border-top:2px solid var(--line);font-weight:600;background:var(--paper)}
 
+  /* شاشة القفل */
+  #lock{position:fixed;inset:0;z-index:200;background:var(--paper);
+    display:flex;align-items:center;justify-content:center;padding:20px}
+  #lock[hidden]{display:none}
+  .lockbox{background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:26px 24px;width:min(420px,100%);box-shadow:var(--shadow)}
+  .lockbox h2{margin:0 0 4px;font-size:1.2rem}
+  .lockbox .hint{margin:0 0 16px}
+  .lockwho{font-weight:600;margin:0 0 10px;font-size:1rem}
+  #lock-code,#lf-pin{letter-spacing:.3em;text-align:center;font-size:1.1rem}
+  .pickbtn{display:block;width:100%;text-align:start;background:var(--paper);
+    border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+    font:inherit;font-size:.95rem;font-weight:600;cursor:pointer;color:var(--ink)}
+  .pickbtn:hover{border-color:var(--teal);color:var(--teal)}
+  .pickbtn small{display:block;font-weight:400;font-size:.76rem;color:var(--ink-soft);margin-top:2px}
+
+  /* الأرقام اللي بتتخفي حسب الصلاحية */
+  body.no-money .money-only{display:none !important}
+
+  /* جدول الصلاحيات */
+  .permgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 12px;margin:8px 0 4px}
+  .permgrid label{display:flex;align-items:center;gap:7px;font-size:.87rem;cursor:pointer;
+    padding:5px 7px;border-radius:7px}
+  .permgrid label:hover{background:var(--teal-soft)}
+  .permgrid input{width:16px;height:16px;accent-color:var(--teal)}
+
   /* أقسام التقارير المطوية */
   .rsecs{padding:0}
   .rsec{border-top:1px solid var(--line)}
@@ -1554,6 +1580,52 @@
     </div>
     <p class="hint" id="fs-note" style="margin:12px 0 0"></p>
   </div>
+  <div class="panel" id="users-panel">
+    <h3>مين بيشوف إيه</h3>
+    <p class="hint" style="margin-bottom:10px">
+      كل واحد في الفريق بحساب ورقم سري، وإنت اللي بتحدّد الشاشات اللي يشوفها.
+      <strong>مهم تعرف:</strong> ده قفل على الشاشة — بيمنع الفضول والغلط، بس حد بيفهم في
+      التقنية يقدر يتخطّاه. للأمان الحقيقي محتاجين سيرفر.
+    </p>
+    <p class="note" id="users-state" style="margin-bottom:12px"></p>
+    <div class="tbl-wrap"><table id="t-users"></table></div>
+    <div class="row-actions">
+      <button class="act ghost" type="button" id="b-user-new">+ مستخدم جديد</button>
+      <button class="act ghost" type="button" id="b-logout" hidden>تسجيل خروج</button>
+    </div>
+
+    <div id="user-box" hidden style="margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:14px">
+      <h4 id="user-title" style="margin:0 0 10px;font-size:.95rem">مستخدم جديد</h4>
+      <div class="fgrid">
+        <div><label for="us-name">الاسم</label><input id="us-name" autocomplete="off"></div>
+        <div><label for="us-pin">الرقم السري</label>
+          <input id="us-pin" inputmode="numeric" autocomplete="off" placeholder="٤ أرقام على الأقل"></div>
+      </div>
+      <p class="hintline" id="us-pinnote" hidden>سيبها فاضية لو مش عايز تغيّر الرقم السري.</p>
+
+      <p class="hintline" style="margin:12px 0 2px"><strong>الشاشات اللي يشوفها</strong></p>
+      <div class="permgrid" id="us-tabs"></div>
+      <div class="row-actions" style="margin:4px 0 10px">
+        <button class="rowact" type="button" data-permset="all">اختار الكل</button>
+        <button class="rowact" type="button" data-permset="none">شيل الكل</button>
+        <button class="rowact" type="button" data-permset="sales">المبيعات بس</button>
+      </div>
+
+      <p class="hintline" style="margin:10px 0 2px"><strong>صلاحيات إضافية</strong></p>
+      <div class="permgrid">
+        <label><input type="checkbox" id="us-money"> يشوف الأرباح والتكاليف</label>
+        <label><input type="checkbox" id="us-edit"> يقدر يعدّل ويحذف</label>
+      </div>
+      <p class="hintline">لو شيلت «يشوف الأرباح والتكاليف»، أرقام الربح وتكلفة الشراء هتختفي من الشاشات اللي بيشوفها.</p>
+
+      <p class="note bad" id="us-err" hidden></p>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-user-save">حفظ</button>
+        <button class="act ghost" type="button" id="b-user-cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <div class="panel">
     <h3>ترقيم الأوردرات</h3>
     <p class="hint" style="margin-bottom:10px">
@@ -1760,12 +1832,39 @@
     <div class="sums">
       <div>العميل عليه<strong class="num" id="e-goods">—</strong></div>
       <div id="e-due-wrap" hidden>باقي عليه<strong class="num" id="e-due">—</strong></div>
-      <div id="e-profit-wrap" hidden>صافي ربح الأوردر<strong class="num" id="e-profit">—</strong></div>
+      <div id="e-profit-wrap" class="money-only" hidden>صافي ربح الأوردر<strong class="num" id="e-profit">—</strong></div>
     </div>
     <button class="tbtn" type="button" id="b-canceldraft">تفريغ</button>
     <button class="tbtn primary" type="button" id="b-savedraft">حفظ الأوردر</button>
   </div>
 </aside>
+
+<div id="lock" hidden>
+  <div class="lockbox">
+    <h2>Lora Collection</h2>
+    <p class="hint" id="lock-hint">اختار اسمك واكتب رقمك السري.</p>
+    <div id="lock-pick"></div>
+    <div id="lock-pin" hidden>
+      <p class="lockwho" id="lock-who"></p>
+      <input id="lock-code" inputmode="numeric" autocomplete="off" placeholder="الرقم السري">
+      <p class="note bad" id="lock-err" hidden></p>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-lock-in">دخول</button>
+        <button class="act ghost" type="button" id="b-lock-back">رجوع</button>
+      </div>
+    </div>
+    <div id="lock-first" hidden>
+      <p class="hint">مفيش مستخدمين لسه. اعمل حسابك إنت الأول — هيبقى ليه كل الصلاحيات.</p>
+      <div class="fgrid">
+        <div><label for="lf-name">اسمك</label><input id="lf-name" autocomplete="off"></div>
+        <div><label for="lf-pin">رقم سري (٤ أرقام على الأقل)</label>
+          <input id="lf-pin" inputmode="numeric" autocomplete="off"></div>
+      </div>
+      <p class="note bad" id="lf-err" hidden></p>
+      <div class="row-actions"><button class="act" type="button" id="b-lock-create">ابدأ</button></div>
+    </div>
+  </div>
+</div>
 
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="img-zoom" hidden><img id="img-zoom-src" alt=""></div>
@@ -1777,8 +1876,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "54";
+  var VERSION = "56";
   var CHANGELOG = [
+    { v:"56", d:"2026-09-26", items:[
+      "مستخدمين وصلاحيات: كل واحد بحساب ورقم سري، وإنت اللي بتحدّد الشاشات اللي يشوفها",
+      "مفتاح «يشوف الأرباح والتكاليف» بيخفي أرقام الربح وتكلفة الشراء من الشاشات المسموحة",
+      "مفتاح «يقدر يعدّل ويحذف»",
+      "حاجز: لازم يفضل حد واحد على الأقل يشوف «الإعدادات» عشان ما تقفلش على نفسك بره",
+      "تنبيه صريح: ده قفل على الشاشة مش أمان حقيقي — الأمان الحقيقي محتاج سيرفر"
+    ]},
+    { v:"55", d:"2026-09-26", items:[
+      "لما الفترة مفيهاش مبيعات: الرقم التقديري بيبان ومعاه تنبيه إن عندك مبيعات بره الفترة — مش واحد بدل التاني"
+    ]},
     { v:"54", d:"2026-09-25", items:[
       "«لازم تبيع بكام» بقى بيطلّع رقم حتى قبل أول بيعة — بهامش تقديري من أسعار البيع وتكاليف الشراء المسجّلة",
       "الرقم التقديري متعلّم إنه تقديري، وبيتظبط لوحده أول ما تسجّل مبيعات فعلية"
@@ -1998,6 +2107,55 @@
   var db = { items:[], parties:[], purchases:[], sales:[], cash:[] };
   var settings = { currency:"ج.م" };
   var me = "";
+  /* ---------- المستخدمين والصلاحيات ----------
+     قفل على مستوى الواجهة: بيمنع الفضول والغلط، مش بيمنع حد بيفهم
+     في التقنية من إنه يفتح أدوات المتصفح ويشوف الداتا. الأمان الحقيقي
+     محتاج سيرفر بيتحقق قبل ما يبعت. مكتوب ده للمستخدم في الإعدادات.
+     لو مفيش مستخدمين مسجّلين، البرنامج بيشتغل من غير قفل زي الأول. */
+  var TABS = [
+    ["dash","لوحة المتابعة"],["capital","رأس المال"],["cash","الخزنة"],
+    ["purch","المشتريات"],["items","الأصناف"],["inv","المخزون"],
+    ["sales","المبيعات"],["ship","شركات الشحن"],["parties","العملاء والموردين"],
+    ["rep","تقارير"],["log","سجل الحركات"],["backup","الإعدادات"]
+  ];
+  var TAB_NAME = {}; TABS.forEach(function(t){ TAB_NAME[t[0]] = t[1]; });
+  var authUser = null;                  // المستخدم الداخل دلوقتي
+
+  function users(){ return (settings.users || []).filter(function(u){ return !u.deleted; }); }
+  function lockOn(){ return users().length > 0; }
+  function curUser(){
+    if(!lockOn()) return null;
+    if(!authUser) return null;
+    return users().find(function(u){ return u.id === authUser; }) || null;
+  }
+  function canTab(t){
+    if(!lockOn()) return true;
+    var u = curUser();
+    return !!u && (u.tabs || []).indexOf(t) > -1;
+  }
+  // الأرباح والتكاليف — بتتخفي من جوّه الشاشات المسموحة كمان
+  function canMoney(){
+    if(!lockOn()) return true;
+    var u = curUser(); return !!u && u.money !== false;
+  }
+  function canEdit(){
+    if(!lockOn()) return true;
+    var u = curUser(); return !!u && u.edit !== false;
+  }
+
+  // تشفير الرقم السري — عشان ما يتخزّنش مكشوف
+  async function sha(txt){
+    try{
+      var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("naya:" + txt));
+      return Array.prototype.map.call(new Uint8Array(buf), function(b){
+        return b.toString(16).padStart(2,"0"); }).join("");
+    }catch(e){
+      // متصفح قديم أو صفحة مش آمنة: تجزئة بسيطة — أضعف بس أحسن من نص مكشوف
+      var h = 5381; txt = "naya:" + txt;
+      for(var i=0;i<txt.length;i++) h = ((h<<5) + h + txt.charCodeAt(i)) >>> 0;
+      return "x" + h.toString(16);
+    }
+  }
   var statementFor = null;
 
   /* ---------- تخزين: ذاكرة الجهاز + المحادثة + ملف على الجهاز ---------- */
@@ -3261,9 +3419,12 @@
       ["open",  "أوردرات جارية", qty(open.length) + (openVal ? " · " + money(openVal) : ""), "", ""],
       ["canc",  "ملغية (صافي خسارتها)", qty(canc.length) + (cancCost ? " · " + money(cancCost) : ""), cancCost>0?"v-due":"", ""]
     ];
+    // الكروت دي بتكشف الربح أو التكلفة — بتختفي عن اللي مالوش صلاحية
+    var MONEY_KPI = { cogs:1, gross:1, net:1, be:1, stock:1 };
     document.getElementById("kpis").innerHTML = cells.map(function(c){
-      return '<div class="kpi' + (kpiOpen === c[0] ? ' on' : '') + '" data-kpi="' + c[0] +
-        '" tabindex="0" role="button"><span>'+c[0+1]+'</span>' +
+      return '<div class="kpi' + (kpiOpen === c[0] ? ' on' : '') +
+        (MONEY_KPI[c[0]] ? ' money-only' : '') + '" data-kpi="' + c[0] +
+        '" tabindex="0" role="button"><span>'+c[1]+'</span>' +
         '<strong class="num '+c[3]+'">'+esc(c[2])+'</strong>'+(c[4]||'') +
         '<span class="kpi-go" aria-hidden="true">التفاصيل ›</span></div>';
     }).join("");
@@ -3956,11 +4117,11 @@
      الاتنين كانوا بيدّوا نفس الرسالة — وهي رسالة مرعبة وغلط. */
   function noSalesNote(){
     var out = live("sales").filter(isDelivered);
-    if(!out.length) return "لسه مفيش أوردرات مسلّمة أصلاً — التعادل بيتحسب على مبيعات فعلية.";
+    if(!out.length) return "لسه ما بعتش حاجة، فالرقم محسوب من أسعارك مش من مبيعات فعلية.";
     var last = out.slice().sort(byDate)[0];
-    return "مفيش مبيعات مسلّمة في <strong>الفترة المختارة</strong>. عندك " + qty(out.length) +
+    return "<strong>مفيش مبيعات مسلّمة في الفترة المختارة</strong> — بس عندك " + qty(out.length) +
       " أوردر مسلّم بره الفترة دي (آخر واحد " + esc(revDate(last)) +
-      ") — غيّر «الفترة» فوق لـ<strong>كل الفترات</strong> أو وسّع التاريخ.";
+      "). غيّر «الفترة» فوق لـ<strong>كل الفترات</strong> وهتشوف الرقم الفعلي.";
   }
 
   function renderBreakEven(){
@@ -3983,8 +4144,8 @@
       ], !mB
            ? "محتاج أسعار بيع وفواتير شراء عشان يتحسب الهامش."
            : (mB.est
-              ? "لسه ما بعتش حاجة — <b>" + esc(pctTxt(mB.pct)) + "</b> هامش <b>تقديري</b> من " +
-                esc(mB.basis) + "."
+              ? "<b>" + esc(pctTxt(mB.pct)) + "</b> هامش <b>تقديري</b> من " + esc(mB.basis) +
+                ". " + noSalesNote()
               : "<b>" + esc(pctTxt(mB.pct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.")) +
       (be === null
         ? beBox("مبيعات التعادل", [],
@@ -3999,7 +4160,8 @@
                   esc(qty(Math.ceil(be/aov))) + "</b></div>" : ""
           ], "عشان صافي الربح يساوي <b>صفر</b> على " +
              (days ? qty(days) + " يوم" : "الفترة دي") + "." +
-             (mB.est ? " <b>الرقم تقديري</b> لحد ما تسجّل مبيعات." : ""), money(be),
+             (mB.est ? " <b>الرقم تقديري</b> — من أسعارك وتكاليفك مش من مبيعات فعلية." : ""),
+             money(be),
              c.revenue >= be ? "v-gain" : "v-due"));
 
     // جدول هيكل التكلفة
@@ -4045,7 +4207,8 @@
         aov ? "<div class='mrow'><span>يعني كام أوردر</span><b class='num'>" +
               esc(qty(Math.ceil(need/aov))) + "</b></div>" : ""
       ], "عشان صافي الربح يبقى <b>" + esc(money(t)) + "</b>" +
-         (d ? " في " + qty(d) + " يوم" : "") + ".", money(need), "v-gain") +
+         (d ? " في " + qty(d) + " يوم" : "") + "." +
+         (mT.est ? " " + noSalesNote() : ""), money(need), "v-gain") +
       beBox("المعادلة", [
         mRow("مصاريف ثابتة", c.fixedExp),
         mRow("+ الربح المطلوب", t),
@@ -4609,8 +4772,8 @@
           "<td class='num "+(x.stock<=0?"v-due":"")+"'>"+qty(x.stock)+"</td>"+
           "<td class='num'>"+(x.rsv?"<span class='pill due'>"+qty(x.rsv)+"</span>":"—")+"</td>"+
           "<td class='num'>"+qty(free)+"</td>"+
-          "<td class='num'>"+money(x.cost)+"</td>"+
-          "<td class='num'>"+money(x.stock*x.cost)+"</td></tr>";
+          "<td class='num money-only'>"+money(x.cost)+"</td>"+
+          "<td class='num money-only'>"+money(x.stock*x.cost)+"</td></tr>";
       });
     var emptyMsg = "مفيش أصناف لسه.";
     if(all.length){
@@ -4622,6 +4785,10 @@
     }
     table("t-inv", ["الصنف · اللون · المقاس","اتشترى","رجع للمورد","اتباع","رجع من عميل","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
       rows, emptyMsg);
+    // آخر عمودين بيكشفوا التكلفة
+    Array.prototype.forEach.call(
+      document.querySelectorAll("#t-inv thead th:nth-last-child(-n+2)"), function(th){
+        th.classList.add("money-only"); });
 
     renderMovement();
   }
@@ -5202,7 +5369,7 @@
       "</div>";
 
     /* ٢) اللي طلع منك — التكلفة الحقيقية للأوردر */
-    var outBox = "<div class='mbox'><h4>التكلفة عليك كام؟</h4>" +
+    var outBox = "<div class='mbox money-only'><h4>التكلفة عليك كام؟</h4>" +
       (m.known
         ? mRow("تكلفة البضاعة", m.cost) +
           (m.shipOut ? mRow("مدفوع لشركة الشحن", m.shipOut) : "") +
@@ -5217,7 +5384,7 @@
       + "</div>";
 
     /* ٣) النتيجة */
-    var profBox = "<div class='mbox big'><h4>ربحت كام؟</h4>" +
+    var profBox = "<div class='mbox big money-only'><h4>ربحت كام؟</h4>" +
       (m.known
         ? "<div class='mbig num " + (m.profit >= 0 ? "v-gain" : "v-due") + "'>" +
             esc(money(m.profit)) + "</div>" +
@@ -5263,9 +5430,10 @@
         money(lineTotal(l,s)),
         gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>"
       ];
+      // عمود تكلفة القطعة (٣) وربح البضاعة (٧) بيكشفوا الهامش
       return "<tr>" + cells.map(function(c2, k){
-        return "<td data-l='" + esc(LH[k]) + "'" +
-          (k === 0 ? " class='wide'" : (k >= 2 ? " class='num'" : "")) + ">" + c2 + "</td>";
+        var cl = (k === 0 ? "wide" : (k >= 2 ? "num" : "")) + ((k===3||k===7) ? " money-only" : "");
+        return "<td data-l='" + esc(LH[k]) + "'" + (cl ? " class='"+cl+"'" : "") + ">" + c2 + "</td>";
       }).join("") + "</tr>";
     }).join("");
 
@@ -5290,7 +5458,8 @@
       pay + meta +
       (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") +
       "<div class='dlines'><table><thead><tr>" +
-        LH.map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("") +
+        LH.map(function(h, k){
+          return "<th" + ((k===3||k===7) ? " class='money-only'" : "") + ">"+esc(h)+"</th>"; }).join("") +
       "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       "<div class='detail-actions'>" +
         "<button class='tbtn' type='button' data-edit='sales|"+s.id+"'>تعديل الأوردر</button>" +
@@ -5374,10 +5543,11 @@
        pocket > 0.009 ? "v-due" : "v-gain",
        pocket >= 0 ? "دفعت للشركات أكتر مما حمّلته للعملاء"
                    : "حمّلت العملاء أكتر مما دفعته للشركات"],
-      ["صافي الربح", money(net), net>=0?"v-gain":"v-due", "بعد الشحن والمرتجع"]
+      ["صافي الربح", money(net), net>=0?"v-gain":"v-due", "بعد الشحن والمرتجع", 1]
     ];
     document.getElementById("s-stats").innerHTML = cells.map(function(c){
-      return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
+      return "<div" + (c[4] ? " class='money-only'" : "") + "><span>"+esc(c[0])+"</span>" +
+        "<strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
         "<small>"+esc(c[3])+"</small></div>";
     }).join("");
   }
@@ -6506,7 +6676,7 @@
     parties: function(){ renderParties(); renderStatement(); },
     rep:     function(){ renderReports(); },
     log:     function(){ renderLog(); },
-    backup:  function(){ renderOpening(); renderLock(); renderSnoState(); }
+    backup:  function(){ renderOpening(); renderLock(); renderSnoState(); renderUsers(); }
   };
   var dirtyTabs = {};          // تبويبات محتاجة رسم لما تتفتح
   var activeTab = "dash";
@@ -6528,6 +6698,116 @@
   function showTab(tab){
     activeTab = tab;
     if(dirtyTabs[tab]) renderTab(tab);
+  }
+
+  /* ---------- تطبيق الصلاحيات على الواجهة ---------- */
+  function firstAllowedTab(){
+    var t = TABS.find(function(x){ return canTab(x[0]); });
+    return t ? t[0] : "sales";
+  }
+  function applyPerms(){
+    // القفل اتفعّل ومحدش داخل: شاشة الدخول هي اللي تظهر، مش شاشة فاضية
+    if(lockOn() && !curUser()){ lockShow(); return; }
+    document.body.classList.toggle("no-money", !canMoney());
+    Array.prototype.forEach.call(document.querySelectorAll("#nav button[data-tab]"), function(b){
+      b.hidden = !canTab(b.dataset.tab);
+    });
+    // لو إنت واقف على شاشة مش من حقك، ارجع لأول شاشة مسموحة
+    if(!canTab(activeTab)){
+      var t = firstAllowedTab();
+      var btn = document.querySelector('#nav button[data-tab="'+t+'"]');
+      if(btn) btn.click();
+    }
+    var w = document.getElementById("me");
+    if(w){ w.readOnly = lockOn(); w.title = lockOn() ? "الاسم بيتحدد من حسابك" : ""; }
+  }
+
+  /* ---------- شاشة القفل ---------- */
+  function lockShow(){
+    var box = document.getElementById("lock");
+    if(!box) return;
+    if(!lockOn()){ box.hidden = true; document.body.classList.remove("no-money"); return; }
+    if(curUser()){ box.hidden = true; return; }
+    box.hidden = false;
+    document.getElementById("lock-first").hidden = true;
+    document.getElementById("lock-pin").hidden = true;
+    var pick = document.getElementById("lock-pick");
+    pick.hidden = false;
+    pick.innerHTML = users().map(function(u){
+      var n = (u.tabs||[]).length;
+      return "<button class='pickbtn' type='button' data-lu='" + esc(u.id) + "'>" + esc(u.name) +
+        "<small>" + (n >= TABS.length ? "كل الشاشات" : qty(n) + " شاشة") +
+        (u.money === false ? " · من غير أرباح" : "") + "</small></button>";
+    }).join("");
+  }
+  function lockFirstRun(){
+    var box = document.getElementById("lock");
+    if(!box) return;
+    box.hidden = false;
+    document.getElementById("lock-pick").hidden = true;
+    document.getElementById("lock-pin").hidden = true;
+    document.getElementById("lock-first").hidden = false;
+    document.getElementById("lock-hint").textContent = "أول مرة — اعمل حسابك.";
+    var f = document.getElementById("lf-name"); if(f) f.focus();
+  }
+  var lockPicked = null;
+  document.getElementById("lock-pick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-lu]"); if(!b) return;
+    lockPicked = b.dataset.lu;
+    var u = users().find(function(x){ return x.id === lockPicked; });
+    document.getElementById("lock-pick").hidden = true;
+    document.getElementById("lock-pin").hidden = false;
+    document.getElementById("lock-who").textContent = u ? u.name : "";
+    document.getElementById("lock-err").hidden = true;
+    var c = document.getElementById("lock-code"); c.value = ""; c.focus();
+  });
+  document.getElementById("b-lock-back").addEventListener("click", lockShow);
+  async function lockTry(){
+    var u = users().find(function(x){ return x.id === lockPicked; });
+    var err = document.getElementById("lock-err");
+    if(!u){ lockShow(); return; }
+    var code = toEn(document.getElementById("lock-code").value).trim();
+    var h = await sha(code);
+    if(h !== u.pin){
+      err.textContent = "الرقم السري غلط."; err.hidden = false;
+      var c = document.getElementById("lock-code"); c.value = ""; c.focus();
+      return;
+    }
+    authUser = u.id;
+    try{ if(LS) LS.setItem("naya:auth", u.id); }catch(e){}
+    me = u.name;
+    var mi = document.getElementById("me"); if(mi) mi.value = me;
+    saveMe();
+    document.getElementById("lock").hidden = true;
+    applyPerms(); renderAll(); renderUsers();
+    toast("أهلاً " + u.name);
+  }
+  document.getElementById("b-lock-in").addEventListener("click", lockTry);
+  document.getElementById("lock-code").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); lockTry(); }
+  });
+  document.getElementById("b-lock-create").addEventListener("click", async function(){
+    var n = squish(document.getElementById("lf-name").value);
+    var pin = toEn(document.getElementById("lf-pin").value).trim();
+    var err = document.getElementById("lf-err");
+    if(!n){ err.textContent = "اكتب اسمك."; err.hidden = false; return; }
+    if(pin.length < 4){ err.textContent = "الرقم السري لازم ٤ أرقام على الأقل."; err.hidden = false; return; }
+    if(!settings.users) settings.users = [];
+    settings.users.push({ id: uid(), name: n, pin: await sha(pin),
+      tabs: TABS.map(function(t){ return t[0]; }), money:true, edit:true, at: Date.now() });
+    authUser = settings.users[settings.users.length-1].id;
+    try{ if(LS) LS.setItem("naya:auth", authUser); }catch(e){}
+    me = n;
+    var mi = document.getElementById("me"); if(mi) mi.value = me;
+    saveMe(); saveSoon("cash");
+    document.getElementById("lock").hidden = true;
+    applyPerms(); renderAll(); renderUsers();
+    toast("اتعمل حسابك — دلوقتي تقدر تضيف باقي الفريق من الإعدادات");
+  });
+  function lockOut(){
+    authUser = null;
+    try{ if(LS) LS.removeItem("naya:auth"); }catch(e){}
+    lockShow();
   }
 
 
@@ -9229,6 +9509,135 @@
     e.preventDefault(); startEditSale(a.dataset.goorder);
   });
 
+  /* ---------- إدارة المستخدمين والصلاحيات ---------- */
+  var editUser = null;
+
+  function renderUsers(){
+    var st = document.getElementById("users-state");
+    var lo = document.getElementById("b-logout");
+    if(lo) lo.hidden = !lockOn();
+    if(st) st.innerHTML = !lockOn()
+      ? "مفيش قفل دلوقتي — أي حد يفتح اللينك يشوف كل حاجة. اعمل حسابك عشان تبدأ."
+      : "داخل باسم <strong>" + esc((curUser()||{}).name || "—") + "</strong>.";
+
+    var rows = users().map(function(u){
+      var n = (u.tabs||[]).length, meNow = curUser() && curUser().id === u.id;
+      var tags = [];
+      if(u.money === false) tags.push("من غير أرباح");
+      if(u.edit === false) tags.push("قراءة بس");
+      return "<tr><td class='wide'>" + esc(u.name) +
+          (meNow ? " <span class='pill'>إنت</span>" : "") +
+          (tags.length ? "<span class='sub'>" + esc(tags.join(" · ")) + "</span>" : "") + "</td>" +
+        "<td>" + (n >= TABS.length ? "كل الشاشات"
+          : (n ? esc((u.tabs||[]).map(function(t){ return TAB_NAME[t]||t; }).join(" · ")) : "مفيش")) + "</td>" +
+        "<td class='rowacts'>" +
+          "<button class='rowact' type='button' data-uedit='" + esc(u.id) + "'>تعديل</button>" +
+          (meNow ? "" : "<button class='del' type='button' data-udel='" + esc(u.id) + "'>حذف</button>") +
+        "</td></tr>";
+    });
+    table("t-users", ["الاسم","الشاشات",""], rows, "مفيش مستخدمين لسه.");
+  }
+
+  function openUser(id){
+    editUser = id || null;
+    var u = id ? users().find(function(x){ return x.id === id; }) : null;
+    document.getElementById("user-title").textContent = u ? ("تعديل: " + u.name) : "مستخدم جديد";
+    document.getElementById("us-name").value = u ? u.name : "";
+    document.getElementById("us-pin").value = "";
+    document.getElementById("us-pinnote").hidden = !u;
+    document.getElementById("us-money").checked = u ? (u.money !== false) : true;
+    document.getElementById("us-edit").checked  = u ? (u.edit !== false)  : true;
+    document.getElementById("us-tabs").innerHTML = TABS.map(function(t){
+      var on = u ? (u.tabs||[]).indexOf(t[0]) > -1 : true;
+      return "<label><input type='checkbox' data-ut='" + t[0] + "'" + (on ? " checked" : "") + "> " +
+        esc(t[1]) + "</label>";
+    }).join("");
+    document.getElementById("us-err").hidden = true;
+    var box = document.getElementById("user-box");
+    box.hidden = false; box.scrollIntoView({ block:"nearest" });
+    document.getElementById("us-name").focus();
+  }
+
+  document.getElementById("b-user-new").addEventListener("click", function(){ openUser(null); });
+  document.getElementById("b-user-cancel").addEventListener("click", function(){
+    document.getElementById("user-box").hidden = true; editUser = null;
+  });
+  document.getElementById("t-users").addEventListener("click", function(e){
+    var ed = e.target.closest("[data-uedit]");
+    if(ed){ openUser(ed.dataset.uedit); return; }
+    var dl = e.target.closest("[data-udel]");
+    if(dl){
+      var u = users().find(function(x){ return x.id === dl.dataset.udel; });
+      if(!u) return;
+      if(dl.dataset.armed !== "1"){
+        dl.dataset.armed = "1"; dl.textContent = "متأكد؟";
+        setTimeout(function(){ if(dl.dataset.armed === "1"){ dl.dataset.armed = ""; dl.textContent = "حذف"; } }, 4000);
+        return;
+      }
+      u.deleted = true; u.at = Date.now();
+      saveSoon("cash"); renderUsers(); applyPerms();
+      toast("اتشال " + u.name);
+    }
+  });
+  document.getElementById("user-box").addEventListener("click", function(e){
+    var b = e.target.closest("[data-permset]"); if(!b) return;
+    var mode = b.dataset.permset;
+    var keep = { sales:["sales","items","inv","parties","ship"] }[mode];
+    Array.prototype.forEach.call(document.querySelectorAll("#us-tabs [data-ut]"), function(c){
+      c.checked = mode === "all" ? true : (mode === "none" ? false : keep.indexOf(c.dataset.ut) > -1);
+    });
+  });
+
+  document.getElementById("b-user-save").addEventListener("click", async function(){
+    var err = document.getElementById("us-err");
+    var name = squish(document.getElementById("us-name").value);
+    var pin  = toEn(document.getElementById("us-pin").value).trim();
+    var tabs = Array.prototype.filter.call(
+      document.querySelectorAll("#us-tabs [data-ut]"), function(c){ return c.checked; })
+      .map(function(c){ return c.dataset.ut; });
+    var money = document.getElementById("us-money").checked;
+    var edit  = document.getElementById("us-edit").checked;
+    var u = editUser ? users().find(function(x){ return x.id === editUser; }) : null;
+
+    if(!name){ err.textContent = "اكتب الاسم."; err.hidden = false; return; }
+    if(!u && pin.length < 4){ err.textContent = "الرقم السري لازم ٤ أرقام على الأقل."; err.hidden = false; return; }
+    if(pin && pin.length < 4){ err.textContent = "الرقم السري لازم ٤ أرقام على الأقل."; err.hidden = false; return; }
+    if(!tabs.length){ err.textContent = "اختار شاشة واحدة على الأقل."; err.hidden = false; return; }
+    /* ما ينفعش تقفل على نفسك بره: لازم يفضل حد واحد على الأقل يقدر
+       يفتح الإعدادات، وإلا مفيش طريقة ترجّع الصلاحيات تاني. */
+    var others = users().filter(function(x){ return !u || x.id !== u.id; });
+    var stillAdmin = others.some(function(x){ return (x.tabs||[]).indexOf("backup") > -1; }) ||
+                     tabs.indexOf("backup") > -1;
+    if(!stillAdmin){
+      err.textContent = "لازم يفضل حد واحد على الأقل يشوف «الإعدادات» — وإلا مش هتقدر ترجّع الصلاحيات تاني.";
+      err.hidden = false; return;
+    }
+
+    if(!settings.users) settings.users = [];
+    if(u){
+      u.name = name; u.tabs = tabs; u.money = money; u.edit = edit; u.at = Date.now();
+      if(pin) u.pin = await sha(pin);
+    } else {
+      var nu = { id: uid(), name: name, pin: await sha(pin),
+                 tabs: tabs, money: money, edit: edit, at: Date.now() };
+      settings.users.push(nu);
+      // أول حساب يتعمل = اللي قاعد على الجهاز دلوقتي، يدخل على طول
+      // وإلا القفل بيشتغل وهو بره وميقدرش يرجع
+      if(!curUser()){
+        authUser = nu.id;
+        try{ if(LS) LS.setItem("naya:auth", nu.id); }catch(e){}
+        me = nu.name;
+        var mi2 = document.getElementById("me"); if(mi2) mi2.value = me;
+        saveMe();
+      }
+    }
+    saveSoon("cash");
+    document.getElementById("user-box").hidden = true; editUser = null;
+    renderUsers(); applyPerms(); renderAll();
+    toast(u ? "اتعدّلت صلاحيات " + name : "اتضاف " + name);
+  });
+  document.getElementById("b-logout").addEventListener("click", lockOut);
+
   /* ---------- شركات الشحن: الأحداث ---------- */
   document.getElementById("t-shipco").addEventListener("click", function(e){
     var tr = e.target.closest("[data-shco]"); if(!tr) return;
@@ -9328,6 +9737,15 @@
     numify();
     var cur = document.querySelector('#nav button[aria-current="true"]');
     activeTab = cur ? cur.dataset.tab : "dash";
+
+    // الجلسة محفوظة على الجهاز ده بس — مش بتتزامن مع باقي الأجهزة
+    try{ if(LS) authUser = LS.getItem("naya:auth") || null; }catch(e){}
+    if(lockOn()){
+      if(curUser()){ me = curUser().name; var mi = document.getElementById("me"); if(mi) mi.value = me; }
+      else authUser = null;
+    }
+    applyPerms();
+    if(lockOn() && !curUser()) lockShow();
     renderAll();
     renderStorageState();
 
