@@ -1596,6 +1596,11 @@
 
     <div id="user-box" hidden style="margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:14px">
       <h4 id="user-title" style="margin:0 0 10px;font-size:.95rem">مستخدم جديد</h4>
+      <p class="note" id="us-first" hidden style="margin-top:0">
+        <strong>ده أول حساب — اعمله باسمك إنت.</strong>
+        سيب كل الشاشات متعلّمة، لأن «الإعدادات» هي اللي بتضيف منها باقي الفريق.
+        بعد ما تدخل، ضيفهم واحد واحد بالصلاحيات اللي تحبها.
+      </p>
       <div class="fgrid">
         <div><label for="us-name">الاسم</label><input id="us-name" autocomplete="off"></div>
         <div><label for="us-pin">الرقم السري</label>
@@ -1876,8 +1881,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "56";
+  var VERSION = "57";
   var CHANGELOG = [
+    { v:"57", d:"2026-09-26", items:[
+      "أول حساب: تنبيه واضح إنه لازم يكون بتاع صاحب السيستم وبكل الصلاحيات، ورسالة الرفض بقت تشرح السبب بدل جملة عامة"
+    ]},
     { v:"56", d:"2026-09-26", items:[
       "مستخدمين وصلاحيات: كل واحد بحساب ورقم سري، وإنت اللي بتحدّد الشاشات اللي يشوفها",
       "مفتاح «يشوف الأرباح والتكاليف» بيخفي أرقام الربح وتكلفة الشراء من الشاشات المسموحة",
@@ -9542,6 +9550,8 @@
     editUser = id || null;
     var u = id ? users().find(function(x){ return x.id === id; }) : null;
     document.getElementById("user-title").textContent = u ? ("تعديل: " + u.name) : "مستخدم جديد";
+    var fst = document.getElementById("us-first");
+    if(fst) fst.hidden = !(!u && !users().length);
     document.getElementById("us-name").value = u ? u.name : "";
     document.getElementById("us-pin").value = "";
     document.getElementById("us-pinnote").hidden = !u;
@@ -9609,7 +9619,14 @@
     var stillAdmin = others.some(function(x){ return (x.tabs||[]).indexOf("backup") > -1; }) ||
                      tabs.indexOf("backup") > -1;
     if(!stillAdmin){
-      err.textContent = "لازم يفضل حد واحد على الأقل يشوف «الإعدادات» — وإلا مش هتقدر ترجّع الصلاحيات تاني.";
+      /* الحالة الأولى مختلفة تمامًا: لسه مفيش ولا حساب، فاللي بيتعمل
+         دلوقتي هو صاحب السيستم. الرسالة العامة مكانتش بتقول ده. */
+      err.innerHTML = others.length === 0
+        ? "<strong>ده أول حساب في السيستم — لازم يكون بتاعك إنت.</strong><br>" +
+          "شاشة «الإعدادات» هي المكان الوحيد اللي بتتحكّم منه في المستخدمين والصلاحيات. " +
+          "اعمل حسابك إنت الأول وسيب كل الشاشات متعلّمة، وبعد ما تدخل ضيف " +
+          esc(name || "الموظف") + " بالصلاحيات اللي إنت عايزها."
+        : "لازم يفضل حد واحد على الأقل يشوف «الإعدادات» — وإلا مش هتقدر ترجّع الصلاحيات تاني.";
       err.hidden = false; return;
     }
 
