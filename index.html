@@ -306,10 +306,10 @@
   .band > .kpi:hover .kpi-go,.band > .kpi.on .kpi-go,
   .band > .kpi:focus-visible .kpi-go{opacity:1}
   @media (hover:none){ .kpi-go{opacity:.75} }
-  #kpi-panel > .dhead{display:flex;align-items:center;gap:12px}
-  #kpi-panel .dclose{display:block}
-  #t-kpi a{color:var(--teal);font-weight:600;text-decoration:none}
-  #t-kpi a:hover{text-decoration:underline}
+  #kpi-panel > .dhead,#inv-kpi-panel > .dhead{display:flex;align-items:center;gap:12px}
+  #kpi-panel .dclose,#inv-kpi-panel .dclose{display:block}
+  #t-kpi a,#t-invkpi a{color:var(--teal);font-weight:600;text-decoration:none}
+  #t-kpi a:hover,#t-invkpi a:hover{text-decoration:underline}
   tr.sumrow > td{border-top:2px solid var(--line);font-weight:600;background:var(--paper)}
 
   /* شاشة القفل */
@@ -1453,6 +1453,17 @@
 
   <div class="band" id="inv-kpis"></div>
 
+  <div class="panel" id="inv-kpi-panel" hidden>
+    <div class="dhead">
+      <h3 id="inv-kpi-title">التفاصيل</h3>
+      <button class="dclose" type="button" id="b-invkpi-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hint" id="inv-kpi-note" style="margin-top:0"></p>
+      <div class="tbl-wrap"><table id="t-invkpi"></table></div>
+    </div>
+  </div>
+
   <div class="panel" id="move-panel" hidden>
     <h3 id="move-title"></h3>
     <div class="tbl-wrap"><table id="t-move"></table></div>
@@ -1930,8 +1941,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "59";
+  var VERSION = "60";
   var CHANGELOG = [
+    { v:"60", d:"2026-09-26", items:[
+      "كل كارت في شاشة المخزون بقى بيتفتح على تفاصيله — زي كروت لوحة المتابعة",
+      "«محجوز لأوردرات جارية» بيقولك أي أوردر ماسك بضاعتك بالاسم، واضغط على رقمه يفتحه",
+      "«قرب يخلص» و«خلص من المخزن» مرتّبين بالأكتر مبيعًا: دول اللي تطلبهم الأول",
+      "«قيمتها لو اتباعت كلها» بقى معاه الربح لو اتباعت",
+      "إصلاح صلاحيات: كارت «قيمة المخزون بالتكلفة» كان بيبان لمستخدم مالوش صلاحية يشوف التكاليف"
+    ]},
     { v:"59", d:"2026-09-26", items:[
       "إصلاح مهم: لما تشتري نفس الصنف تاني بسعر مختلف بعد ما بعت منه، قيمة المخزون كانت بتتحسب بالمتوسط الجديد والتكلفة المثبّتة بالقديم — فالميزانية تختل بالفرق. دلوقتي قيمة المخزون = اللي اشتريته − اللي خرج تكلفة",
       "إصلاح: البيع من غير فاتورة شراء («البضاعة عندي بس ما سجّلتهاش») كان بيكسر الميزانية بقيمة البضاعة دي",
@@ -4735,6 +4753,228 @@
     return out;
   }
 
+  /* ---------- كروت المخزون: كل رقم بيتفتح ---------- */
+  var invKpiOpen = null;
+
+  // اسم التركيبة زي ما بيتكتب في الجداول: «شبشب · بني · 38» ومعاه الكود
+  function vRowName(x){
+    var lbl = vLabel(x.color, x.size), code = vCode(x.item.id, x.color, x.size);
+    return esc(x.item.name) + (lbl ? " · " + esc(lbl) : "") +
+      (code ? " <span class='pill'>" + esc(code) + "</span>" : "");
+  }
+  // العمود اللي بيكشف تكلفة الشراء بيختفي عن اللي مالوش صلاحية
+  function mCell(v){ return "<td class='num money-only'>" + money(v) + "</td>"; }
+
+  var INV_TITLE = {
+    units:"قطع في المخزن", value:"قيمة المخزون بالتكلفة", retail:"قيمتها لو اتباعت كلها",
+    rsv:"محجوز لأوردرات جارية", bought:"قطع اتشترت", sold:"قطع اتباعت",
+    pret:"قطع رجعت للمورد", ret:"قطع رجعت من العملاء",
+    out:"خلص من المخزن", low:"قرب يخلص" };
+
+  /* كل دالة بتاخد الأسطر اللي ظاهرة قدامك (بعد الفلتر) وبترجّع جدول.
+     الفترة بتتقرا من periodRange زي باقي الشاشة. */
+  var INV_DETAIL = {
+    units: function(src){
+      var rows = src.filter(function(x){ return Math.abs(x.stock) > 0.0001; })
+        .sort(function(a,b){ return b.stock - a.stock; })
+        .map(function(x){
+          return "<tr><td class='wide'>" + vRowName(x) + "</td>" +
+            "<td class='num" + (x.stock < 0 ? " v-due" : "") + "'>" + qty(x.stock) + "</td>" +
+            "<td class='num'>" + (x.rsv ? qty(x.rsv) : "—") + "</td>" +
+            "<td class='num'>" + qty(x.stock - x.rsv) + "</td>" + mCell(x.stock * x.cost) + "</tr>";
+        });
+      var t = src.reduce(function(a,x){ return a + x.stock; },0);
+      var tr = src.reduce(function(a,x){ return a + x.rsv; },0);
+      rows.push(sumRow(["الإجمالي", "<b>"+qty(t)+"</b>", qty(tr), qty(t-tr),
+        "<b class='money-only'>"+money(src.reduce(function(a,x){ return a+x.stock*x.cost; },0))+"</b>"]));
+      return { note:"كل لون ومقاس على حدة. «المتاح» = الرصيد ناقص المحجوز لأوردرات جارية. الرقم بالسالب معناه إنك بعت أكتر من اللي مسجّل شراؤه.",
+        head:["الصنف · اللون · المقاس","الرصيد","محجوز","المتاح","قيمته"], rows:rows };
+    },
+
+    value: function(src){
+      var rows = src.filter(function(x){ return Math.abs(x.stock * x.cost) > 0.009; })
+        .sort(function(a,b){ return (b.stock*b.cost) - (a.stock*a.cost); })
+        .map(function(x){
+          return "<tr><td class='wide'>" + vRowName(x) + "</td>" +
+            "<td class='num'>" + qty(x.stock) + "</td>" + mCell(x.cost) + mCell(x.stock * x.cost) + "</tr>";
+        });
+      rows.push(sumRow(["الإجمالي","",
+        "<b class='money-only'>"+money(src.reduce(function(a,x){ return a+x.stock*x.cost; },0))+"</b>", ""]));
+      return { note:"التكلفة هنا متوسط اللي اشتريت بيه اللون والمقاس ده. الرقم ده هو اللي بيدخل الميزانية.",
+        head:["الصنف · اللون · المقاس","الرصيد","متوسط التكلفة","قيمته"], rows:rows };
+    },
+
+    retail: function(src){
+      var rows = src.filter(function(x){ return x.stock > 0.0001; })
+        .map(function(x){
+          var pr = Number(x.item.price)||0, rv = x.stock*pr, cv = x.stock*x.cost;
+          return { v:rv, h:"<tr><td class='wide'>" + vRowName(x) + "</td>" +
+            "<td class='num'>" + qty(x.stock) + "</td>" +
+            "<td class='num'>" + money(pr) + "</td>" +
+            "<td class='num' style='font-weight:600'>" + money(rv) + "</td>" +
+            "<td class='num money-only " + (rv-cv >= 0 ? "v-gain" : "v-due") + "'>" + money(rv-cv) + "</td></tr>" };
+        });
+      rows.sort(function(a,b){ return b.v - a.v; });
+      var out = rows.map(function(x){ return x.h; });
+      var rv = src.reduce(function(a,x){ return a + Math.max(0,x.stock)*(Number(x.item.price)||0); },0);
+      var cv = src.reduce(function(a,x){ return a + Math.max(0,x.stock)*x.cost; },0);
+      out.push(sumRow(["الإجمالي","","","<b>"+money(rv)+"</b>",
+        "<b class='money-only'>"+money(rv-cv)+"</b>"]));
+      return { note:"لو بعت كل اللي في المخزن بسعر البيع المسجّل للصنف. ده مش إيراد متحقّق — ده سقف اللي في إيدك.",
+        head:["الصنف · اللون · المقاس","الرصيد","سعر البيع","قيمته بالبيع","الربح لو اتباع"], rows:out };
+    },
+
+    /* المحجوز مش رقم مجرّد — الأهم تعرف أي أوردر ماسك بضاعتك */
+    rsv: function(src){
+      var keys = {}; src.forEach(function(x){ keys[x.key] = 1; });
+      var rows = [], tot = 0;
+      live("sales").filter(isReserved).sort(byDate).forEach(function(s){
+        SL(s).forEach(function(l){
+          var k = keyOf(l); if(!keys[k]) return;
+          var n = Number(l.qty)||0; if(!n) return;
+          tot += n;
+          rows.push("<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+            "<td class='num'>" + esc(s.date||"—") + "</td>" +
+            "<td class='wide'>" + esc(itemName(l.itemId)) +
+              (vLabel(vColor(l), vSize(l)) ? " · " + esc(vLabel(vColor(l), vSize(l))) : "") + "</td>" +
+            "<td class='num'>" + qty(n) + "</td></tr>");
+        });
+      });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","", "<b>"+qty(tot)+"</b>"]));
+      return { note:"البضاعة دي لسه في مخزنك بس محجوزة لأوردرات حالتها «جاري». اضغط على رقم الأوردر تفتحه.",
+        head:["الأوردر","تاريخه","الصنف","محجوز"], rows:rows };
+    },
+
+    bought: function(src, r){
+      var keys = {}; src.forEach(function(x){ keys[x.key] = 1; });
+      var rows = [], tq = 0, tv = 0;
+      live("purchases").filter(function(p){
+        return keys[keyOf(p)] && inRange(p.date, r) && (Number(p.qty)||0) > 0;
+      }).sort(byDate).forEach(function(p){
+        var n = Number(p.qty)||0; tq += n; tv += purchTotal(p);
+        rows.push("<tr><td class='num'>" + esc(p.date||"—") + "</td>" +
+          "<td class='wide'>" + esc(p.partyId ? partyName(p.partyId) : (p.opening ? "رصيد افتتاحي" : "—")) + "</td>" +
+          "<td class='wide'>" + esc(itemName(p.itemId)) +
+            (vLabel(p.color, p.size) ? " · " + esc(vLabel(p.color, p.size)) : "") + "</td>" +
+          "<td class='num'>" + qty(n) + "</td>" + mCell(Number(p.cost)||0) + mCell(purchTotal(p)) + "</tr>");
+      });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","", "<b>"+qty(tq)+"</b>", "",
+        "<b class='money-only'>"+money(tv)+"</b>"]));
+      return { note:"فواتير الشراء اللي في الفترة المختارة. التكلفة واصلة المخزن — يعني مصاريف النقل داخلة فيها.",
+        head:["التاريخ","المورد","الصنف","الكمية","تكلفة القطعة","الإجمالي"], rows:rows };
+    },
+
+    sold: function(src, r){
+      var keys = {}; src.forEach(function(x){ keys[x.key] = 1; });
+      var rows = [], tq = 0, tv = 0;
+      live("sales").filter(function(x){ return isDelivered(x) && inRange(revDate(x), r); })
+        .sort(byDate).forEach(function(s){
+          SL(s).forEach(function(l){
+            if(!keys[keyOf(l)]) return;
+            var n = lineSold(l, s); if(!n) return;
+            var pr = Number(l.price)||0; tq += n; tv += n*pr;
+            rows.push("<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+              "<td class='num'>" + esc(revDate(s)) + "</td>" +
+              "<td class='wide'>" + esc(itemName(l.itemId)) +
+                (vLabel(vColor(l), vSize(l)) ? " · " + esc(vLabel(vColor(l), vSize(l))) : "") + "</td>" +
+              "<td class='num'>" + qty(n) + "</td>" +
+              "<td class='num'>" + money(pr) + "</td>" +
+              "<td class='num' style='font-weight:600'>" + money(n*pr) + "</td>" +
+              "<td class='num money-only " + (pr - lineCost(l) >= 0 ? "v-gain" : "v-due") + "'>" +
+                money((pr - lineCost(l)) * n) + "</td></tr>");
+          });
+        });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","", "<b>"+qty(tq)+"</b>", "",
+        "<b>"+money(tv)+"</b>", ""]));
+      return { note:"بتاريخ التسليم مش تاريخ الأوردر، والمرتجع مخصوم من الكمية.",
+        head:["الأوردر","تاريخ التسليم","الصنف","الكمية","سعر البيع","الإجمالي","ربحه"], rows:rows };
+    },
+
+    pret: function(src, r){
+      var keys = {}; src.forEach(function(x){ keys[x.key] = 1; });
+      var rows = [], tq = 0;
+      live("purchases").filter(function(p){
+        return keys[keyOf(p)] && inRange(p.date, r) && (Number(p.qty)||0) < 0;
+      }).sort(byDate).forEach(function(p){
+        var n = -(Number(p.qty)||0); tq += n;
+        rows.push("<tr><td class='num'>" + esc(p.date||"—") + "</td>" +
+          "<td class='wide'>" + esc(p.partyId ? partyName(p.partyId) : "—") + "</td>" +
+          "<td class='wide'>" + esc(itemName(p.itemId)) +
+            (vLabel(p.color, p.size) ? " · " + esc(vLabel(p.color, p.size)) : "") + "</td>" +
+          "<td class='num'>" + qty(n) + "</td>" + mCell(Math.abs(purchTotal(p))) + "</tr>");
+      });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","", "<b>"+qty(tq)+"</b>", ""]));
+      return { note:"البضاعة اللي رجّعتها لموردك. بتتسجّل كفاتورة شراء بكمية بالسالب، فبتقلّل الرصيد والدَّين مع بعض.",
+        head:["التاريخ","المورد","الصنف","رجع","قيمته"], rows:rows };
+    },
+
+    ret: function(src, r){
+      var keys = {}; src.forEach(function(x){ keys[x.key] = 1; });
+      var rows = [], tq = 0, tv = 0;
+      live("sales").filter(function(x){ return isDelivered(x) && inRange(revDate(x), r); })
+        .sort(byDate).forEach(function(s){
+          SL(s).forEach(function(l){
+            if(!keys[keyOf(l)]) return;
+            var n = lineRet(l); if(!n) return;
+            var pr = Number(l.price)||0; tq += n; tv += n*pr;
+            rows.push("<tr><td class='wide'>" + oLink(s) + " · " + esc(partyName(s.partyId)) + "</td>" +
+              "<td class='num'>" + esc(revDate(s)) + "</td>" +
+              "<td class='wide'>" + esc(itemName(l.itemId)) +
+                (vLabel(vColor(l), vSize(l)) ? " · " + esc(vLabel(vColor(l), vSize(l))) : "") + "</td>" +
+              "<td class='num'>" + qty(Number(l.qty)||0) + "</td>" +
+              "<td class='num v-due'>" + qty(n) + "</td>" +
+              "<td class='num'>" + money(n*pr) + "</td></tr>");
+          });
+        });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","","", "<b>"+qty(tq)+"</b>", "<b>"+money(tv)+"</b>"]));
+      return { note:"القطع اللي العميل رجّعها بعد التسليم. رجعت المخزن تاني، وإيرادها وتكلفتها اتشالوا من الأوردر.",
+        head:["الأوردر","التاريخ","الصنف","اتشحن","رجع","قيمة المرتجع"], rows:rows };
+    },
+
+    out: function(src){
+      var rows = src.filter(function(x){ return x.stock <= 0; })
+        .sort(function(a,b){ return b.sold - a.sold; })
+        .map(function(x){
+          return "<tr><td class='wide'>" + vRowName(x) + "</td>" +
+            "<td class='num" + (x.stock < 0 ? " v-due" : "") + "'>" + qty(x.stock) + "</td>" +
+            "<td class='num'>" + qty(x.sold) + "</td>" +
+            "<td class='num'>" + qty(x.bought) + "</td>" + mCell(x.cost) + "</tr>";
+        });
+      return { note:"اللون والمقاس اللي رصيده صفر أو أقل. «اتباع» و«اتشترى» في الفترة المختارة — رتّبناهم بالأكتر مبيعًا عشان دول اللي تطلبهم الأول.",
+        head:["الصنف · اللون · المقاس","الرصيد","اتباع","اتشترى","آخر متوسط تكلفة"], rows:rows };
+    },
+
+    low: function(src){
+      var rows = src.filter(isLow)
+        .sort(function(a,b){ return (a.stock - a.rsv) - (b.stock - b.rsv); })
+        .map(function(x){
+          var min = Number(x.item.min)||0;
+          return "<tr><td class='wide'>" + vRowName(x) + "</td>" +
+            "<td class='num v-due'>" + qty(x.stock - x.rsv) + "</td>" +
+            "<td class='num'>" + (x.rsv ? qty(x.rsv) : "—") + "</td>" +
+            "<td class='num'>" + (min > 0 ? qty(min) : "<span class='sub'>" + qty(LOW_DEFAULT) + " (افتراضي)</span>") + "</td>" +
+            "<td class='num'>" + qty(x.sold) + "</td>" + mCell(x.cost) + "</tr>";
+        });
+      return { note:"المتاح وصل حد التنبيه أو أقل. تقدر تحدّد حد لكل صنف من شاشة الأصناف — من غيره بننبّهك عند " +
+          qty(LOW_DEFAULT) + " قطعة أو أقل، وبس لو اتباع منه قبل كده.",
+        head:["الصنف · اللون · المقاس","المتاح","محجوز","حد التنبيه","اتباع في الفترة","متوسط التكلفة"], rows:rows };
+    }
+  };
+
+  function renderInvKpiDetail(src, filtered){
+    var pnl = document.getElementById("inv-kpi-panel");
+    if(!pnl) return;
+    if(!invKpiOpen || !INV_DETAIL[invKpiOpen]){ pnl.hidden = true; return; }
+    var r = periodRange();
+    var d = INV_DETAIL[invKpiOpen](src, r);
+    pnl.hidden = false;
+    document.getElementById("inv-kpi-title").textContent = INV_TITLE[invKpiOpen] +
+      (r ? " · من " + r.from + " لـ " + r.to : " · كل الفترات") +
+      (filtered ? " · حسب الفلتر" : "");
+    document.getElementById("inv-kpi-note").textContent = d.note || "";
+    table("t-invkpi", d.head, d.rows, "مفيش حاجة هنا في الفترة دي.");
+  }
+
   // "قرب يخلص": بحد التنبيه لو متحدد، وإلا بتنبيه افتراضي عند قطعتين أو أقل
   var LOW_DEFAULT = 2;
   function isLow(x){
@@ -4840,21 +5080,29 @@
     var outCount = src.filter(function(x){ return x.stock <= 0; }).length;
     var lowCount = src.filter(isLow).length;
 
+    /* كل كارت ليه مفتاح بيفتح جدول تفاصيله من INV_DETAIL — نفس فكرة
+       كروت لوحة المتابعة. والكروت اللي بتكشف التكلفة بتختفي عن اللي
+       مالوش صلاحية «يشوف الأرباح والتكاليف». */
     var cells = [
-      ["قطع في المخزن", qty(units), "", scope || "<span class='sub'>تراكمي</span>"],
-      ["قيمة المخزون بالتكلفة", money(value), "", scope || "<span class='sub'>تراكمي</span>"],
-      ["قيمتها لو اتباعت كلها", money(retail), "v-gain", "<span class='sub'>بسعر البيع</span>"],
-      ["محجوز لأوردرات جارية", qty(reserved), reserved?"v-due":"", scope],
-      ["قطع اتشترت", qty(bought), "", "<span class='sub'>في الفترة</span>"],
-      ["قطع اتباعت", qty(sold), "v-gain", "<span class='sub'>في الفترة</span>"],
-      ["قطع رجعت للمورد", qty(prets), prets?"v-due":"", "<span class='sub'>في الفترة</span>"],
-      ["قطع رجعت من العملاء", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
-      ["خلص من المخزن", qty(outCount), outCount?"v-due":"", scope || "<span class='sub'>لون/مقاس رصيده صفر</span>"],
-      ["قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"]
+      ["units",  "قطع في المخزن", qty(units), "", scope || "<span class='sub'>تراكمي</span>"],
+      ["value",  "قيمة المخزون بالتكلفة", money(value), "", scope || "<span class='sub'>تراكمي</span>", 1],
+      ["retail", "قيمتها لو اتباعت كلها", money(retail), "v-gain", "<span class='sub'>بسعر البيع</span>"],
+      ["rsv",    "محجوز لأوردرات جارية", qty(reserved), reserved?"v-due":"", scope],
+      ["bought", "قطع اتشترت", qty(bought), "", "<span class='sub'>في الفترة</span>"],
+      ["sold",   "قطع اتباعت", qty(sold), "v-gain", "<span class='sub'>في الفترة</span>"],
+      ["pret",   "قطع رجعت للمورد", qty(prets), prets?"v-due":"", "<span class='sub'>في الفترة</span>"],
+      ["ret",    "قطع رجعت من العملاء", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
+      ["out",    "خلص من المخزن", qty(outCount), outCount?"v-due":"", scope || "<span class='sub'>لون/مقاس رصيده صفر</span>"],
+      ["low",    "قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"]
     ];
     document.getElementById("inv-kpis").innerHTML = cells.map(function(c){
-      return '<div><span>'+c[0]+'</span><strong class="num '+c[2]+'">'+esc(c[1])+'</strong>'+(c[3]||'')+'</div>';
+      return '<div class="kpi' + (invKpiOpen === c[0] ? ' on' : '') +
+        (c[5] ? ' money-only' : '') + '" data-invkpi="' + c[0] + '"' +
+        ' tabindex="0" role="button"><span>'+c[1]+'</span>' +
+        '<strong class="num '+c[3]+'">'+esc(c[2])+'</strong>'+(c[4]||'') +
+        '<span class="kpi-go" aria-hidden="true">التفاصيل ›</span></div>';
     }).join("");
+    renderInvKpiDetail(src, filtered);
 
     // الجدول
     var rows = list.sort(function(a,b){ return (b.sold - a.sold) || (b.stock - a.stock); })
@@ -9614,6 +9862,26 @@
   });
   // من أي سطر في التفاصيل للأوردر نفسه
   document.getElementById("t-kpi").addEventListener("click", function(e){
+    var a = e.target.closest("[data-goorder]"); if(!a) return;
+    e.preventDefault(); startEditSale(a.dataset.goorder);
+  });
+
+  /* ---------- كروت المخزون: نفس السلوك ---------- */
+  document.getElementById("inv-kpis").addEventListener("click", function(e){
+    var c = e.target.closest("[data-invkpi]"); if(!c) return;
+    invKpiOpen = (invKpiOpen === c.dataset.invkpi) ? null : c.dataset.invkpi;
+    renderInventory();
+    if(invKpiOpen) document.getElementById("inv-kpi-panel").scrollIntoView({ block:"nearest" });
+  });
+  document.getElementById("inv-kpis").addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var c = e.target.closest("[data-invkpi]"); if(!c) return;
+    e.preventDefault(); c.click();
+  });
+  document.getElementById("b-invkpi-close").addEventListener("click", function(){
+    invKpiOpen = null; renderInventory();
+  });
+  document.getElementById("t-invkpi").addEventListener("click", function(e){
     var a = e.target.closest("[data-goorder]"); if(!a) return;
     e.preventDefault(); startEditSale(a.dataset.goorder);
   });
