@@ -18,8 +18,12 @@
     --teal:#4A2545;         /* البرقوقي العميق: الهوية */
     --teal-deep:#361A33;
     --teal-soft:#F0E8F0;
-    --gain:#2F6D53;         /* أخضر مطفي متناغم مع البرقوقي */
-    --due:#9E2B3F;          /* نبيذي بدل الأحمر الصارخ */
+    /* الاتنين دول بيفرّقوا بين «ليك» و«عليك». واحد من كل ١٢ راجل عنده
+       عمى ألوان، فمش كفاية إنهم مختلفين بالنسبالنا — لازم يفضلوا مختلفين
+       بعد محاكاة deutan/protan/tritan. القياس: أسوأ ΔE بقى 16.1 بعد ما
+       كان 8.2، والتباين مع الخلفية 5.06 و8.35 (المطلوب ≥4.5). */
+    --gain:#327B63;         /* أخضر مطفي متناغم مع البرقوقي */
+    --due:#9A1333;          /* نبيذي بدل الأحمر الصارخ */
     --warn:#8A6212;
     --shadow:0 1px 2px rgba(36,30,38,.05);
     --radius:12px;
@@ -35,8 +39,10 @@
     --teal:#C9A7C4;
     --teal-deep:#E0C6DC;
     --teal-soft:#2E2431;
-    --gain:#6FBF95;
-    --due:#E58095;
+    /* الوضع الليلي كان أسوأ بكتير: أسوأ ΔE كان 2.2 — يعني عند عمى
+       الألوان الأخضر والوردي كانوا شبه نفس اللون. بقى 16.4. */
+    --gain:#78BF92;
+    --due:#DC89B5;
     --warn:#D4A93F;
     --shadow:none;
   }
@@ -1839,6 +1845,8 @@
           <input id="e-owner" list="owner-list" data-f="owner" autocomplete="off"></div>
       </div>
       <p class="hintline" id="e-cust"></p>
+      <p class="hintline bad" id="e-repeat" hidden></p>
+      <p class="hintline bad" id="e-conflict" hidden></p>
 
       <div class="newcust" id="newcust-box" hidden>
         <h4>عميل جديد</h4>
@@ -1941,8 +1949,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "60";
+  var VERSION = "61";
   var CHANGELOG = [
+    { v:"61", d:"2026-09-26", items:[
+      "«كرّر الأوردر»: زرار في تفاصيل أي أوردر بيعمل أوردر جديد بنفس العميل والأصناف والأسعار — ضغطتين بدل ٦ خطوات",
+      "التكرار بيشيل اللي يخص المرة اللي فاتت (التاريخ · الحالة · كود البوليصة · المحصّل · المرتجع) وبينبّهك لو السعر اتغيّر في قايمة الأصناف",
+      "ألوان «ليك» و«عليك» اتظبطت لعمى الألوان — في الوضع الليلي كانوا شبه نفس اللون تمامًا (ΔE 2.2)، بقى 16.4",
+      "حاجز التعديل المتزامن: لو حد عدّل نفس السجل من جهاز تاني وإنت فاتحه، السيستم بيقولك مين وامتى وبيوقف الحفظ لحد ما تأكّد"
+    ]},
     { v:"60", d:"2026-09-26", items:[
       "كل كارت في شاشة المخزون بقى بيتفتح على تفاصيله — زي كروت لوحة المتابعة",
       "«محجوز لأوردرات جارية» بيقولك أي أوردر ماسك بضاعتك بالاسم، واضغط على رقمه يفتحه",
@@ -2296,6 +2310,8 @@
       if(Array.isArray(src[n])){ db[n] = mergeById(db[n], src[n]); got = true; }
     });
     if(data.settings && data.settings.currency) settings = data.settings;
+    // داتا جديدة وصلت — لو فيها السجل اللي إنت فاتحه، قوله دلوقتي
+    if(got && typeof warnIfOpenChanged === "function") warnIfOpenChanged();
     return got;
   }
 
@@ -2515,7 +2531,9 @@
         }
       });
       saveSyncCfg(); savePushed();
-      if(changed){ writeLocal(); writeFileSoon(); renderAll(); }
+      /* المزامنة بتدمج هنا مباشرة مش عن طريق absorb — فلازم التحذير
+         يتنادى من هنا كمان، وإلا مش هيشتغل في أهم حالة أصلاً */
+      if(changed){ writeLocal(); writeFileSoon(); warnIfOpenChanged(); renderAll(); }
       renderStorageState();
       return changed;
     }catch(e){
@@ -2708,11 +2726,11 @@
     });
   }
   var toastTimer;
-  function toast(msg){
+  function toast(msg, ms){
     var t = document.getElementById("toast");
     t.textContent = msg; t.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2200);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, ms || 2200);
   }
   function itemName(id){
     var it = db.items.find(function(x){ return x.id===id; });
@@ -5289,6 +5307,36 @@
              shipIn:"", shipOut:"", payVia: keep ? keep.payVia : "ship",
              paid:"", note:"", lines:[ blankLine() ] };
   }
+  /* «كرّر الأوردر»: نفس العميل ونفس الأصناف، بس الحاجات اللي بتخص
+     المرة اللي فاتت بتتشال — التاريخ والحالة وكود البوليصة والمحصّل
+     والمرتجع والتكلفة المثبّتة. السعر بيتنقل زي ما هو عشان العميل
+     مستنّي نفس السعر، ولو اتغيّر في قايمة الأصناف بيظهر سطر بيقول كده. */
+  function draftRepeat(rec){
+    var d = draftFrom(rec);
+    d.date     = firstOpenDate();
+    d.status   = "progress";
+    d.shipCode = "";
+    d.paid     = "";
+    d.note     = "";
+    d.lines = d.lines.map(function(l){
+      return { itemId:l.itemId, color:l.color, size:l.size,
+               qty:l.qty, price:l.price, ret:"", manual:true };
+    });
+    d.fromNo = rec.no || "";
+    return d;
+  }
+  // الأسعار اللي اتغيّرت في قايمة الأصناف من ساعة الأوردر ده
+  function repeatPriceDiffs(d){
+    var out = [];
+    (d.lines||[]).forEach(function(l){
+      var it = db.items.find(function(x){ return x.id === l.itemId; });
+      if(!it) return;
+      var now = Number(tierFor(it, Number(l.qty)||1).u)||0, was = Number(l.price)||0;
+      if(now > 0 && was > 0 && Math.abs(now - was) > 0.009)
+        out.push(itemName(l.itemId) + " " + money(was) + " ← " + money(now));
+    });
+    return out;
+  }
   function draftFrom(rec){
     return { date: rec.date || today(), status: stOf(rec), partyId: rec.partyId || "",
              owner: rec.owner || "", shipCo: rec.shipCo || "", shipCode: rec.shipCode || "",
@@ -5471,6 +5519,22 @@
     document.getElementById("newcust-box").hidden = true;
     var sn = document.getElementById("e-shipnote");
     if(sn){ sn.textContent = ""; sn.hidden = true; }
+    var cf = document.getElementById("e-conflict");
+    if(cf){ cf.textContent = ""; cf.hidden = true; }
+    var rp = document.getElementById("e-repeat");
+    if(rp){
+      var diffs = draft.fromNo ? repeatPriceDiffs(draft) : [];
+      if(draft.fromNo && diffs.length){
+        rp.textContent = "متكرّر من أوردر #" + draft.fromNo +
+          " — الأسعار دي اتغيّرت في قايمة الأصناف: " + diffs.join(" · ") +
+          ". سايبينها زي الأوردر القديم، غيّرها لو عايز.";
+        rp.hidden = false;
+      } else if(draft.fromNo){
+        rp.textContent = "متكرّر من أوردر #" + draft.fromNo +
+          " — راجع الكميات والمتاح قبل ما تحفظ.";
+        rp.hidden = false;
+      } else { rp.textContent = ""; rp.hidden = true; }
+    }
     renderDrawerLines();
   }
 
@@ -5818,6 +5882,7 @@
       "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       "<div class='detail-actions'>" +
         "<button class='tbtn' type='button' data-edit='sales|"+s.id+"'>تعديل الأوردر</button>" +
+        "<button class='tbtn primary' type='button' data-repeat='"+s.id+"'>كرّر الأوردر</button>" +
         "<button class='tbtn' type='button' data-label='"+s.id+"'>طباعة بوليصة</button>" +
         "<button class='tbtn' type='button' data-del='sales' data-id='"+s.id+"'>حذف</button>" +
       "</div></div></td></tr>";
@@ -7198,6 +7263,60 @@
 
   // ---------- التعديل على الحركات ----------
   var editing = { items:null, parties:null, sales:null, purchases:null, cash:null };
+
+  /* ---------- حاجز التعديل المتزامن ----------
+     المزامنة بتفضّل الأحدث بالوقت. لو إنت فاتح أوردر وموظف عدّله من
+     جهازه في نفس الوقت، تعديله بيوصلك في الخلفية — وأول ما تحفظ إنت،
+     نسختك بتدهس نسخته من غير ما حد ياخد باله.
+     الحل: بنفتكر الـat اللي فتحت عليه السجل، ولو اتغيّر وقت الحفظ
+     بنوقف ونقول اتغيّر من مين. تاني ضغطة على حفظ = «أنا متأكد». */
+  var editBase = {};        // list → الـat وقت الفتح
+  var overwriteArm = {};    // list → وقت آخر تحذير
+
+  function markEditBase(list, rec){ editBase[list] = rec ? (Number(rec.at)||0) : 0; }
+  function clearEditBase(list){ delete editBase[list]; delete overwriteArm[list]; }
+
+  function whoTxt(rec){ return squish(rec && rec.editedBy) || "جهاز تاني"; }
+  function agoTxt(ts){
+    var m = Math.round((Date.now() - (Number(ts)||0)) / 60000);
+    if(m < 1) return "دلوقتي";
+    if(m < 60) return "من " + plural(m, "دقيقة", "دقيقتين", "دقايق");
+    var h = Math.round(m/60);
+    if(h < 24) return "من " + plural(h, "ساعة", "ساعتين", "ساعات");
+    return "من " + plural(Math.round(h/24), "يوم", "يومين", "أيام");
+  }
+
+  // بترجّع true يعني كمّل الحفظ
+  function staleCheck(list, rec){
+    if(!rec) return true;
+    var base = editBase[list];
+    if(base == null) return true;                 // مش في وضع تعديل متتبّع
+    if((Number(rec.at)||0) <= base) return true;  // ما اتغيّرش من ساعة ما فتحته
+    if(overwriteArm[list] && Date.now() - overwriteArm[list] < 12000){
+      overwriteArm[list] = 0;                     // أكّد إنه عايز نسخته
+      return true;
+    }
+    overwriteArm[list] = Date.now();
+    var msg = "«" + whoTxt(rec) + "» عدّل ده " + agoTxt(rec.at) +
+      " وإنت فاتحه. اضغط حفظ تاني لو نسختك هي الصح، أو اقفل وافتحه من جديد.";
+    toast(msg, 9000);
+    var line = (list === "sales") ? document.getElementById("e-conflict") : null;
+    if(line){ line.textContent = msg; line.hidden = false; }
+    return false;
+  }
+
+  /* الأفضل إنك تعرف وإنت لسه بتكتب مش وقت الحفظ: لو المزامنة جابت
+     نسخة أحدث للسجل اللي إنت فاتحه، بنقول على طول. */
+  function warnIfOpenChanged(){
+    if(!editing.sales || editBase.sales == null) return;
+    var rec = db.sales.find(function(x){ return x.id === editing.sales; });
+    if(!rec || (Number(rec.at)||0) <= editBase.sales) return;
+    var line = document.getElementById("e-conflict");
+    var msg = "«" + whoTxt(rec) + "» عدّل الأوردر ده " + agoTxt(rec.at) +
+      " من جهاز تاني وإنت فاتحه. لو حفظت هتدهس تعديله.";
+    if(line && line.hidden){ line.textContent = msg; line.hidden = false; toast(msg, 9000); }
+  }
+
   var EDIT_UI = {
     items:   { btn:"b-item",  cancel:"x-item",  add:"إضافة صنف",  save:"حفظ التعديل", tab:"items",   form:"f-item"  },
     parties: { btn:"b-party", cancel:"x-party", add:"إضافة",      save:"حفظ التعديل", tab:"parties", form:"f-party" },
@@ -7216,7 +7335,7 @@
   }
 
   function cancelEdit(list){
-    editing[list] = null;
+    editing[list] = null; clearEditBase(list);
     if(list === "items") showImgPreview("");
     document.getElementById(EDIT_UI[list].form).reset();
     if(list==="purchases"){ pdraft = newPDraft(); clearPOver(); syncPHead(); renderPLines(); }
@@ -7234,6 +7353,7 @@
     var rec = db[list].find(function(x){ return x.id===id; });
     if(!rec) return;
     editing[list] = id;
+    markEditBase(list, rec);
     var g = function(i){ return document.getElementById(i); };
     if(list==="items"){ g("i-name").value=rec.name||""; g("i-unit").value=rec.unit||"";
       g("i-price").value=rec.price||0; g("i-min").value=rec.min||0;
@@ -7306,13 +7426,14 @@
     }
     if(id){
       var rec = db[list].find(function(x){ return x.id===id; });
+      if(!staleCheck(list, rec)) return;
       if(rec){
         Object.keys(fields).forEach(function(k){ rec[k] = fields[k]; });
         rec.editedBy = me || "غير محدد";
         rec.at = Date.now();
       }
       savedId = id;
-      editing[list] = null;
+      editing[list] = null; clearEditBase(list);
       setEditUI(list);
       toast("اتعدّلت الحركة");
     } else {
@@ -7550,7 +7671,7 @@
   document.getElementById("sale-scrim").addEventListener("click", cancelDraft);
   document.getElementById("b-closedraft").addEventListener("click", cancelDraft);
   document.getElementById("b-newsale").addEventListener("click", function(){
-    editing.sales = null;
+    editing.sales = null; clearEditBase("sales");
     draft = newDraft(draft);
     openDrawer();
   });
@@ -7832,7 +7953,7 @@
 
   function cancelDraft(){
     var wasEditing = !!editing.sales;
-    editing.sales = null;
+    editing.sales = null; clearEditBase("sales");
     draft = newDraft(draft);
     closeDrawer();
     renderSales();
@@ -7856,6 +7977,7 @@
     if(editing.sales){
       var oldRec = db.sales.find(function(x){ return x.id === editing.sales; });
       if(oldRec && saleLocked(oldRec)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+      if(!staleCheck("sales", oldRec)) return;
     }
     if(!guardLock(draft.date, "الأوردر")) return;
 
@@ -7911,7 +8033,7 @@
         rec.editedBy = me || "غير محدد"; rec.at = Date.now();
         stampDelivery(rec);
       }
-      freshId = editing.sales; editing.sales = null;
+      freshId = editing.sales; editing.sales = null; clearEditBase("sales");
       toast("اتعدّل الأوردر");
     } else {
       fields.no = nextSaleNo();
@@ -7928,10 +8050,22 @@
     renderAll();
   }
 
+  function startRepeatSale(id){
+    var rec = db.sales.find(function(x){ return x.id===id; });
+    if(!rec) return;
+    editing.sales = null;                 // ده أوردر جديد مش تعديل
+    clearEditBase("sales");
+    draft = draftRepeat(rec);
+    goTab("sales");
+    openDrawer();
+    toast("أوردر جديد بنفس أصناف #" + (rec.no || "") + " — راجعه واحفظه");
+  }
+
   function startEditSale(id){
     var rec = db.sales.find(function(x){ return x.id===id; });
     if(!rec) return;
     editing.sales = id;
+    markEditBase("sales", rec);
     draft = draftFrom(rec);
     goTab("sales");
     openDrawer();
@@ -8487,6 +8621,11 @@
       document.getElementById("statement-panel").scrollIntoView({block:"nearest"}); return; }
     var lb = e.target.closest("[data-label]");
     if(lb){ printLabel(lb.dataset.label); return; }
+    var rp = e.target.closest("[data-repeat]");
+    if(rp){
+      if(!canEdit()){ toast("مالكش صلاحية تضيف أوردرات"); return; }
+      e.stopPropagation(); startRepeatSale(rp.dataset.repeat); return;
+    }
     var ed = e.target.closest("[data-edit]");
     if(ed){
       var q = ed.dataset.edit.split("|");
