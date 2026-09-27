@@ -501,6 +501,23 @@
 
   /* سطر التفاصيل: كل اللي اتشال من الأعمدة بيعيش هنا */
   #t-sales tr.detail td{padding:0;background:var(--paper);border-bottom:1px solid var(--line)}
+  /* سطر الفاتورة في المشتريات — نفس سلوك سطر الأوردر */
+  #t-purch tr.pinv{cursor:pointer}
+  #t-purch tr.pinv:hover td{background:var(--teal-soft)}
+  #t-purch tr.pinv.open td{background:var(--teal-soft)}
+  #t-purch tr.pinv.open .chev{transform:rotate(180deg)}
+  #t-purch tr.pinv:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  #t-purch tr.detail td{padding:0;background:var(--paper)}
+  /* المخزون: صنف في سطر بيتفتح على ألوانه ومقاساته */
+  #t-inv tr.itemrow{cursor:pointer}
+  #t-inv tr.itemrow > td{font-weight:600}
+  #t-inv tr.itemrow:hover > td{background:var(--teal-soft)}
+  #t-inv tr.itemrow.open > td{background:var(--teal-soft)}
+  #t-inv tr.itemrow.open .chev{transform:rotate(180deg)}
+  #t-inv tr.itemrow:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  #t-inv tr.itemrow .chev{margin-inline-start:var(--sp-2)}
+  #t-inv tr.varrow > td{background:var(--paper)}
+  #t-inv tr.varrow > td:first-child{padding-inline-start:var(--sp-6)}
   .detail-in{padding:var(--sp-4) var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-4)}
   .kv{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-3)}
   .kv > div > span{display:block;font-size:var(--fs-1);color:var(--ink-soft);margin-bottom:var(--sp-1)}
@@ -567,9 +584,10 @@
   .lmix{background:var(--card);border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-2);display:grid;gap:var(--sp-2)}
   .lmix-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);
     font-size:var(--fs-1);color:var(--ink-soft);font-weight:500}
-  .lmix-head button{background:none;border:1px dashed var(--line);border-radius:var(--r-sm);
-    color:var(--teal);font:inherit;font-size:var(--fs-2);padding:var(--sp-1) var(--sp-2);cursor:pointer}
-  .lmix-head button:hover{border-color:var(--teal);border-style:solid}
+  .addmix{background:none;border:1px dashed var(--line);border-radius:var(--r-sm);
+    color:var(--teal);font:inherit;font-size:var(--fs-2);font-weight:500;
+    padding:var(--sp-2);cursor:pointer;width:100%;margin-top:var(--sp-1)}
+  .addmix:hover{border-color:var(--teal);border-style:solid;background:var(--teal-soft)}
   .seg{display:flex;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--card)}
   .seg button{flex:1;background:none;border:none;font:inherit;font-size:var(--fs-3);
     padding:var(--sp-2) var(--sp-1);color:var(--ink-soft);cursor:pointer;transition:background .12s,color .12s}
@@ -784,7 +802,7 @@
 
     /* أهداف اللمس: ٧ أزرار من ٩ كانت أصغر من 40×40 */
     .stabs button,.seg button,.tbtn,.withbtn .tbtn,.addline,
-    .lmix-head button,.sd-close{ min-height:42px }
+    .addmix,.sd-close{ min-height:42px }
     .stabs button,.seg button,.tbtn,.addline{ font-size:var(--fs-3) }
     .del,.rowact,.lrow .rm,.lmix-row .rm{
       min-height:40px;min-width:40px;
@@ -1115,6 +1133,28 @@
       </form>
     </div>
   </div>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="pu-text" placeholder="دوّر بالمورد أو الصنف أو اللون أو المقاس أو الكود أو رقم الفاتورة…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+    <button class="tbtn" type="button" id="b-pufilters" aria-expanded="false" aria-controls="pu-filters">
+      فلاتر <span class="fcount" id="pu-count" hidden>0</span>
+    </button>
+  </div>
+
+  <div class="filters" id="pu-filters" hidden>
+    <div><label for="pu-party">المورد</label><select id="pu-party"></select></div>
+    <div><label for="pu-item">الصنف</label><select id="pu-item"></select></div>
+    <div><label for="pu-color">اللون</label><select id="pu-color"></select></div>
+    <div><label for="pu-size">المقاس</label><select id="pu-size"></select></div>
+    <div><label for="pu-from">من تاريخ</label><input type="date" id="pu-from"></div>
+    <div><label for="pu-to">لـ تاريخ</label><input type="date" id="pu-to"></div>
+  </div>
+  <div class="chips" id="pu-chips"></div>
 
   <div class="tbl-wrap"><table id="t-purch"></table></div>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="purch" hidden></button></p>
@@ -2002,8 +2042,16 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "62";
+  var VERSION = "63";
   var CHANGELOG = [
+    { v:"63", d:"2026-09-27", items:[
+      "زرار «+ سطر» في خلّاط الألوان والمقاسات نزل تحت آخر سطر — مع ١٥ لون ومقاس كنت بترجع لفوق كل مرة",
+      "شاشة المشتريات: الفاتورة بقت سطر واحد بيتفتح بالدوس عليه بدل سطر لكل لون ومقاس — فاتورة بـ١٥ تركيبة كانت بتاخد الشاشة كلها",
+      "شاشة المخزون: الصنف بقى سطر واحد فيه رصيده كله، وألوانه ومقاساته بتتفتح بضغطة — ٣ أصناف كانوا ٣٠ سطر",
+      "الفلتر على لون أو مقاس أو بحث بيفتح الأصناف المطابقة لوحده",
+      "ترقيم للفواتير (#1، #2…) بيبان في الجدول وفي درج الإدخال، والقديم بياخد أرقامه بالتاريخ تلقائي",
+      "فلاتر في المشتريات: المورد · الصنف · اللون · المقاس · من وحتى تاريخ، وبحث بالنص فوقهم"
+    ]},
     { v:"62", d:"2026-09-27", items:[
       "نظام خطوط ومسافات موحّد: ٣١ قيمة خط في الكود و١٣ مقاس على الشاشة بقوا ٦ درجات · ١٩ قيمة حشو بقت شبكة من ٦",
       "لوحة المتابعة بقت ٤ مجموعات بعناوين بدل ١٥ كارت بنفس الحجم — «صافي الربح» و«لازم تبيع بكام» فوق وأكبر",
@@ -4850,6 +4898,7 @@
 
   /* ---------- كروت المخزون: كل رقم بيتفتح ---------- */
   var invKpiOpen = null;
+  var openInv = {};         // الأصناف المفتوح ألوانها ومقاساتها
 
   // اسم التركيبة زي ما بيتكتب في الجداول: «شبشب · بني · 38» ومعاه الكود
   function vRowName(x){
@@ -5199,14 +5248,55 @@
     }).join("");
     renderInvKpiDetail(src, filtered);
 
-    // الجدول
-    var rows = list.sort(function(a,b){ return (b.sold - a.sold) || (b.stock - a.stock); })
-      .map(function(x){
-        var free = x.stock - x.rsv, lbl = vLabel(x.color, x.size);
+    /* الجدول: صنف في سطر واحد بيتفتح على ألوانه ومقاساته.
+       صنف بـ١٠ ألوان ومقاسات كان ١٠ أسطر، وتلات أصناف = ٣٠ سطر
+       وشاشة مالهاش آخر. الرصيد اللي بتدوّر عليه بيبقى في السطر،
+       والتفصيل بضغطة. */
+    var byItem = [], seenIt = {};
+    list.forEach(function(x){
+      var id = x.item.id;
+      if(!seenIt[id]){ seenIt[id] = { item:x.item, vars:[] }; byItem.push(seenIt[id]); }
+      seenIt[id].vars.push(x);
+    });
+    var sum = function(g, f){ return g.vars.reduce(function(a,x){ return a + (x[f]||0); }, 0); };
+    var val = function(g){ return g.vars.reduce(function(a,x){ return a + x.stock * x.cost; }, 0); };
+    byItem.sort(function(a,b){ return (sum(b,"sold") - sum(a,"sold")) || (sum(b,"stock") - sum(a,"stock")); });
+
+    /* فلتر على لون أو مقاس أو بحث معناه إنك بتدوّر على تركيبة —
+       فبنفتح الأصناف المطابقة لوحدها بدل ما تدوس عليهم واحد واحد */
+    var autoOpen = !!(ifilt.color || ifilt.size || ifilt.text || ifilt.only !== "all");
+
+    var rows = [];
+    byItem.forEach(function(g){
+      var stock = sum(g,"stock"), rsv = sum(g,"rsv"), free = stock - rsv;
+      var isOpen = autoOpen || !!openInv[g.item.id];
+      var nv = g.vars.length;
+      var lowN = g.vars.filter(isLow).length;
+      var outN = g.vars.filter(function(x){ return x.stock <= 0; }).length;
+      var tags = (lowN ? " <span class='pill due'>" + qty(lowN) + " قرب يخلص</span>" : "") +
+                 (outN ? " <span class='pill due'>" + qty(outN) + " خلصان</span>" : "");
+      rows.push("<tr class='itemrow" + (isOpen ? " open" : "") +
+        "' data-invrow='" + esc(g.item.id) + "' tabindex='0'>" +
+        "<td class='wide'>" + thumbHTML(g.item.id) + esc(g.item.name) +
+          "<span class='sub'>" + qty(nv) + " لون ومقاس" + tags + "</span></td>" +
+        "<td class='num'>" + qty(sum(g,"bought")) + "</td>" +
+        "<td class='num " + (sum(g,"pret")?"v-due":"") + "'>" + (sum(g,"pret")?qty(sum(g,"pret")):"—") + "</td>" +
+        "<td class='num'>" + qty(sum(g,"sold")) + "</td>" +
+        "<td class='num " + (sum(g,"ret")?"v-due":"") + "'>" + (sum(g,"ret")?qty(sum(g,"ret")):"—") + "</td>" +
+        "<td class='num " + (sum(g,"canc")?"v-due":"") + "'>" + (sum(g,"canc")?qty(sum(g,"canc")):"—") + "</td>" +
+        "<td class='num " + (stock<=0?"v-due":"") + "'>" + qty(stock) + "</td>" +
+        "<td class='num'>" + (rsv ? "<span class='pill due'>"+qty(rsv)+"</span>" : "—") + "</td>" +
+        "<td class='num'>" + qty(free) + "</td>" +
+        "<td class='num money-only'>—</td>" +
+        "<td class='num money-only'>" + money(val(g)) + "<span class='chev' aria-hidden='true'>▾</span></td></tr>");
+
+      if(!isOpen) return;
+      g.vars.sort(function(a,b){ return (b.sold - a.sold) || (b.stock - a.stock); }).forEach(function(x){
+        var f = x.stock - x.rsv, lbl = vLabel(x.color, x.size);
         var code = vCode(x.item.id, x.color, x.size);
-        return "<tr><td class='wide'>"+thumbHTML(x.item.id)+
+        rows.push("<tr class='varrow'><td class='wide'>" +
             "<button class='del' style='color:var(--teal)' data-move='"+esc(x.key)+"'>"+
-            esc(x.item.name)+(lbl?" · "+esc(lbl):"")+"</button>"+
+            (lbl ? esc(lbl) : "من غير لون ولا مقاس")+"</button>"+
             (code ? " <span class='pill'>"+esc(code)+"</span>" : "")+"</td>"+
           "<td class='num'>"+qty(x.bought)+"</td>"+
           "<td class='num "+(x.pret?"v-due":"")+"'>"+(x.pret?qty(x.pret):"—")+"</td>"+
@@ -5215,10 +5305,14 @@
           "<td class='num "+(x.canc?"v-due":"")+"'>"+(x.canc?qty(x.canc):"—")+"</td>"+
           "<td class='num "+(x.stock<=0?"v-due":"")+"'>"+qty(x.stock)+"</td>"+
           "<td class='num'>"+(x.rsv?"<span class='pill due'>"+qty(x.rsv)+"</span>":"—")+"</td>"+
-          "<td class='num'>"+qty(free)+"</td>"+
+          "<td class='num'>"+qty(f)+"</td>"+
           "<td class='num money-only'>"+money(x.cost)+"</td>"+
-          "<td class='num money-only'>"+money(x.stock*x.cost)+"</td></tr>";
+          "<td class='num money-only'>"+money(x.stock*x.cost)+"</td></tr>");
       });
+    });
+    Object.keys(openInv).forEach(function(id){
+      if(!seenIt[id]) delete openInv[id];
+    });
     var emptyMsg = "مفيش أصناف لسه.";
     if(all.length){
       emptyMsg = only === "low"
@@ -5227,7 +5321,7 @@
         : only === "instock" ? "مفيش لون أو مقاس فيه رصيد بالمواصفات دي."
         : "مفيش حاجة بالمواصفات دي — جرّب تمسح الفلاتر.";
     }
-    table("t-inv", ["الصنف · اللون · المقاس","اتشترى","رجع للمورد","اتباع","رجع من عميل","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
+    table("t-inv", ["الصنف / اللون · المقاس","اتشترى","رجع للمورد","اتباع","رجع من عميل","ملغي","الرصيد","محجوز","متاح","متوسط التكلفة","قيمته"],
       rows, emptyMsg);
     // آخر عمودين بيكشفوا التكلفة
     Array.prototype.forEach.call(
@@ -6188,11 +6282,13 @@
     var mixHTML = l.itemId
       ? "<div class='lmix'>" +
           dl("dl-c-"+i, cs) + dl("dl-z-"+i, zs) +
-          "<div class='lmix-head'><span class='lmix-title'>"+esc(mixTitle(l))+"</span>" +
-            "<button type='button' data-addmix='"+i+"'>+ سطر</button></div>" +
+          "<div class='lmix-head'><span class='lmix-title'>"+esc(mixTitle(l))+"</span></div>" +
           "<div class='lmix-cols'><span>اللون</span><span>المقاس</span>" +
             "<span>عدد القطع</span><span>الكود</span><span></span></div>" +
           mixRows +
+          /* الزرار تحت آخر سطر مش فوق: مع ١٥ لون ومقاس كنت بترجع
+             لفوق كل مرة عشان تضيف سطر جديد */
+          "<button type='button' class='addmix' data-addmix='"+i+"'>+ سطر</button>" +
           "<div class='lmix-sum'>إجمالي القطع <b>"+qty(pieces)+"</b></div>" +
           "<p class='lmix-empty'>سيب اللون أو المقاس فاضي لو الصنف مالوش. أي لون أو مقاس جديد بتكتبه بيتضاف للصنف تلقائي.</p>" +
         "</div>"
@@ -6432,7 +6528,97 @@
       (mode === "cash" ? " دخلت الخزنة" : " اتخصمت من حساب المورد"));
   });
 
+  /* ---------- المشتريات: فاتورة في سطر واحد بيتفتح ----------
+     كانت كل تركيبة لون/مقاس سطر كامل في الجدول. فاتورة فيها ١٥ لون
+     ومقاس = ١٥ سطر، وشاشة كاملة لفاتورة واحدة. بقت سطر واحد بالرقم
+     والمورد والإجمالي، والتفاصيل بتتفتح بالدوس عليه. */
+  var openPurch = {};       // الفواتير المفتوح تفاصيلها
+  var pufilt = { party:"", item:"", color:"", size:"", from:"", to:"", text:"" };
+
+  function readPuFilters(){
+    var g = function(id){ var e = document.getElementById(id); return e ? e.value : ""; };
+    pufilt.party = g("pu-party"); pufilt.item = g("pu-item");
+    pufilt.color = g("pu-color"); pufilt.size = g("pu-size");
+    pufilt.from  = g("pu-from");  pufilt.to   = g("pu-to");
+    pufilt.text  = squish(g("pu-text"));
+  }
+  var PU_LABEL = { party:"المورد", item:"الصنف", color:"اللون", size:"المقاس",
+                   from:"من", to:"لـ", text:"بحث" };
+  function puChipText(k){
+    if(k === "party") return partyName(pufilt.party);
+    if(k === "item")  return itemName(pufilt.item);
+    return pufilt[k];
+  }
+  function fillPuSelects(){
+    var sup = live("parties").filter(function(x){ return x.type === "supplier"; })
+      .map(function(x){ return { v:x.id, t:x.name }; });
+    var used = {}, cols = {}, sizes = {};
+    live("purchases").forEach(function(x){
+      if(x.itemId) used[x.itemId] = 1;
+      if(squish(x.color)) cols[squish(x.color)] = 1;
+      if(squish(x.size))  sizes[squish(x.size)] = 1;
+    });
+    var items = live("items").filter(function(i){ return used[i.id]; })
+      .map(function(i){ return { v:i.id, t:i.name }; });
+    var set = function(id, list, ph, cur){
+      var el = document.getElementById(id); if(!el) return;
+      el.innerHTML = optsHTML(list, cur, ph);
+    };
+    set("pu-party", sup, "كل الموردين", pufilt.party);
+    set("pu-item",  items, "كل الأصناف", pufilt.item);
+    set("pu-color", Object.keys(cols).sort().map(function(c){ return {v:c,t:c}; }), "كل الألوان", pufilt.color);
+    set("pu-size",  Object.keys(sizes).sort().map(function(z){ return {v:z,t:z}; }), "كل المقاسات", pufilt.size);
+  }
+  function renderPuChips(){
+    var keys = Object.keys(pufilt).filter(function(k){ return !!pufilt[k]; });
+    var c = document.getElementById("pu-count");
+    if(c){ c.textContent = keys.length; c.hidden = !keys.length; }
+    var box = document.getElementById("pu-chips");
+    if(!box) return;
+    box.innerHTML = !keys.length ? "" :
+      keys.map(function(k){
+        return "<span class='chip'>" + esc(PU_LABEL[k]) + ": <b>" + esc(puChipText(k)) + "</b>" +
+          "<button type='button' data-rmpu='" + k + "' aria-label='شيل فلتر " + esc(PU_LABEL[k]) + "'>&times;</button></span>";
+      }).join("") + "<button class='clearall' type='button' id='b-clear-pu'>مسح الكل</button>";
+  }
+
+  // رقم تسلسلي للفاتورة — نفس فكرة ترقيم الأوردرات
+  function backfillPurchNos(){
+    var byBatch = {}, order = [];
+    db.purchases.forEach(function(p){
+      if(p.deleted) return;
+      var k = p.batchId || ("solo:" + p.id);
+      if(!byBatch[k]){ byBatch[k] = []; order.push(k); }
+      byBatch[k].push(p);
+    });
+    var m = 0, miss = [];
+    order.forEach(function(k){
+      var g = byBatch[k];
+      var has = g.find(function(x){ return Number(x.pno) > 0; });
+      if(has){ if(Number(has.pno) > m) m = Number(has.pno);
+               g.forEach(function(x){ x.pno = Number(has.pno); }); }
+      else miss.push(g);
+    });
+    if(!miss.length) return;
+    miss.sort(function(a, b){
+      var A = a[0], B = b[0];
+      return (A.date||"") !== (B.date||"") ? ((A.date||"") < (B.date||"") ? -1 : 1)
+                                           : (A.at||0) - (B.at||0);
+    }).forEach(function(g){ m++; g.forEach(function(x){ x.pno = m; }); });
+    saveSoon("purchases");
+  }
+  function nextPurchNo(){
+    var m = 0;
+    db.purchases.forEach(function(p){ var n = Number(p.pno)||0; if(n > m) m = n; });
+    return m + 1;
+  }
+
   function renderPurch(){
+    backfillPurchNos();
+    readPuFilters();
+    fillPuSelects();
+    renderPuChips();
+
     // الفاتورة الواحدة كذا سجل بنفس batchId — بنعرضها مجمّعة
     var groups = [], byBatch = {};
     live("purchases").slice().sort(byDate).forEach(function(p){
@@ -6441,64 +6627,105 @@
       byBatch[k].rows.push(p);
     });
 
+    // الفلتر بيمشي على الفاتورة: تكفي تركيبة واحدة جواها تطابق
+    var q = pufilt.text.toLowerCase();
+    groups = groups.filter(function(g){
+      var h = g.head;
+      if(pufilt.party && h.partyId !== pufilt.party) return false;
+      if(pufilt.from && (h.date||"") < pufilt.from) return false;
+      if(pufilt.to   && (h.date||"") > pufilt.to)   return false;
+      if(pufilt.item  && !g.rows.some(function(x){ return x.itemId === pufilt.item; })) return false;
+      if(pufilt.color && !g.rows.some(function(x){ return squish(x.color) === pufilt.color; })) return false;
+      if(pufilt.size  && !g.rows.some(function(x){ return squish(x.size)  === pufilt.size;  })) return false;
+      if(q){
+        var hay = [partyName(h.partyId), h.inv || "", "#" + (h.pno || ""), h.note || "", h.date || ""]
+          .concat(g.rows.map(function(x){
+            return [itemName(x.itemId), x.color || "", x.size || "",
+                    vCode(x.itemId, vColor(x), vSize(x))].join(" ");
+          })).join(" ").toLowerCase();
+        if(hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+
+    var shown = groups.length, all = live("purchases").length;
     var rows = [];
-    groups = pageRows("purch", groups);   // دفعة فواتير كاملة مش أسطر مقطوعة
+    groups = pageRows("purch", groups);
     groups.forEach(function(g){
       var n = g.rows.length, h = g.head;
       var isRet = isPRet(h);
+      var isOpen = !!openPurch[g.key];
       var nItems = Object.keys(g.rows.reduce(function(a,x){ a[x.itemId]=1; return a; }, {})).length;
-      var gLabel = nItems > 1 ? qty(nItems) + " أصناف · " + qty(n) + " سطر"
-                              : qty(n) + " ألوان ومقاسات";
+      var pieces = g.rows.reduce(function(a,x){ return a + (Number(x.qty)||0); }, 0);
+      var names  = Object.keys(g.rows.reduce(function(a,x){ a[itemName(x.itemId)]=1; return a; }, {}));
+      var gLabel = names.slice(0,2).join(" · ") + (names.length > 2 ? " وغيرهم" : "") +
+                   (n > 1 ? " — " + qty(n) + " لون ومقاس" : "");
       var goods = g.rows.reduce(function(a,x){ return a + goodsTotal(x); }, 0);
       var fr    = g.rows.reduce(function(a,x){ return a + pFreight(x); }, 0);
       var paid  = g.rows.reduce(function(a,x){ return a + (Number(x.paid)||0); }, 0);
       var rest  = goods - paid;
       var isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
-      g.rows.forEach(function(p, i){
-        var vl = vLabel(vColor(p), vSize(p));
-        var code = vCode(p.itemId, vColor(p), vSize(p));
-        var pq = pPackQty(p);
-        var packs = pPacks(p), pn = pPackName(p) || "قطعة";
-        var sub = pq > 1
-          ? qty(packs) + " " + esc(pn) + " × " + qty(pq) + " قطعة"
-          : (packs !== (Number(p.qty)||0) ? "" : "");
-        return rows.push(
-          "<tr" + (isFresh ? " class='fresh'" : "") + ">" +
-          (i === 0
-            ? "<td class='num' rowspan='"+n+"'>"+esc(h.date)+
-                (isRet ? "<span class='sub'><span class='pill due'>مرتجع</span></span>"
-                       : (h.inv ? "<span class='sub'>فاتورة "+esc(h.inv)+"</span>" : ""))+"</td>" +
-              "<td class='wide' rowspan='"+n+"'>"+esc(partyName(h.partyId))+
-                (isRet && h.note ? "<span class='sub'>"+esc(h.note)+"</span>"
-                                 : (n > 1 ? "<span class='sub'>"+esc(gLabel)+"</span>" : ""))+"</td>"
-            : "") +
-          "<td class='wide'>"+esc(itemName(p.itemId))+
-            (vl ? " <span class='pill'>"+esc(vl)+"</span>" : "")+
-            (code ? " <span class='pill'>"+esc(code)+"</span>" : "")+
-            (sub ? "<span class='sub'>"+sub+"</span>" : "")+
-            (isRet ? "" : "<span class='sub'><button class='del' style='color:var(--due)' data-pret='"+p.id+"'>رجّعه للمورد</button></span>")+"</td>" +
-          "<td class='num "+(isRet?"v-due":"")+"'>"+qty(p.qty)+"</td>" +
-          "<td class='num'>"+money(p.cost)+
-            (pFreight(p) ? "<span class='sub'>شامل نقل "+money(pFreight(p)/(Number(p.qty)||1))+"</span>" : "")+"</td>" +
-          "<td class='num'>"+money(goodsTotal(p))+"</td>" +
-          (i === 0
-            ? "<td class='num' rowspan='"+n+"'>"+(fr ? money(fr) : "—")+"</td>" +
-              "<td class='num' rowspan='"+n+"'>"+money(paid)+"</td>" +
-              "<td class='num' rowspan='"+n+"'>"+
-                (rest>0.009 ? "<span class='pill due'>"+money(rest)+"</span>"
-                            : "<span class='pill'>خالص</span>")+"</td>" +
-              "<td rowspan='"+n+"'>"+(isRet
-                ? "<span style='font-size:var(--fs-1);color:var(--ink-soft)'>مرتجع</span>"
-                : "<button class='del' style='color:var(--teal)' data-edit='purchases|"+h.id+"'>تعديل</button>")+"</td>" +
-              "<td rowspan='"+n+"'><button class='del' data-del='purchases' data-id='"+h.id+"'>حذف</button></td>"
-            : "") +
-          "</tr>");
-      });
+
+      rows.push("<tr class='pinv" + (isFresh ? " fresh" : "") + (isOpen ? " open" : "") +
+        "' data-prow='" + esc(g.key) + "' tabindex='0'>" +
+        "<td class='num'><span class='ono'>#" + esc(h.pno || "—") + "</span></td>" +
+        "<td class='num'>" + esc(h.date) +
+          (isRet ? " <span class='pill due'>مرتجع</span>" : "") +
+          (h.inv ? "<span class='sub'>فاتورة " + esc(h.inv) + "</span>" : "") + "</td>" +
+        "<td class='wide'>" + esc(partyName(h.partyId)) +
+          (isRet && h.note ? "<span class='sub'>" + esc(h.note) + "</span>" : "") + "</td>" +
+        "<td class='wide'>" + esc(gLabel) + "</td>" +
+        "<td class='num" + (isRet ? " v-due" : "") + "'>" + qty(pieces) + "</td>" +
+        "<td class='num money-only'>" + money(goods) + "</td>" +
+        "<td class='num money-only'>" + (fr ? money(fr) : "—") + "</td>" +
+        "<td class='num money-only'>" + money(paid) + "</td>" +
+        "<td class='num'>" + (rest > 0.009 ? "<span class='pill due'>" + money(rest) + "</span>"
+                                           : "<span class='pill'>خالص</span>") + "</td>" +
+        "<td class='rowacts'>" + (isRet
+          ? "<span style='font-size:var(--fs-1);color:var(--ink-soft)'>مرتجع</span>"
+          : "<button class='rowact' type='button' data-edit='purchases|" + h.id + "'>تعديل</button>") +
+          "<span class='chev' aria-hidden='true'>▾</span></td></tr>");
+
+      if(!isOpen) return;
+      var lines = g.rows.map(function(x){
+        var vl = vLabel(vColor(x), vSize(x));
+        var code = vCode(x.itemId, vColor(x), vSize(x));
+        var pq = pPackQty(x), packs = pPacks(x), pn = pPackName(x) || "قطعة";
+        var sub = pq > 1 ? qty(packs) + " " + esc(pn) + " × " + qty(pq) + " قطعة" : "";
+        return "<tr><td class='wide'>" + esc(itemName(x.itemId)) +
+            (vl ? " <span class='pill'>" + esc(vl) + "</span>" : "") +
+            (code ? " <span class='pill'>" + esc(code) + "</span>" : "") +
+            (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
+          "<td class='num" + (isRet ? " v-due" : "") + "'>" + qty(x.qty) + "</td>" +
+          "<td class='num money-only'>" + money(x.cost) +
+            (pFreight(x) ? "<span class='sub'>شامل نقل " + money(pFreight(x)/(Number(x.qty)||1)) + "</span>" : "") + "</td>" +
+          "<td class='num money-only'>" + money(goodsTotal(x)) + "</td>" +
+          "<td>" + (isRet ? "" :
+            "<button class='del' style='color:var(--due)' data-pret='" + x.id + "'>رجّعه للمورد</button>") + "</td></tr>";
+      }).join("");
+
+      rows.push("<tr class='detail'><td colspan='10'><div class='detail-in'>" +
+        "<div class='dlines'><table><thead><tr>" +
+          "<th>الصنف · اللون · المقاس</th><th>القطع</th>" +
+          "<th class='money-only'>تكلفة القطعة</th><th class='money-only'>قيمة البضاعة</th><th></th>" +
+        "</tr></thead><tbody>" + lines + "</tbody></table></div>" +
+        "<div class='detail-actions'>" +
+          (isRet ? "" : "<button class='tbtn' type='button' data-edit='purchases|" + h.id + "'>تعديل الفاتورة</button>") +
+          "<button class='tbtn' type='button' data-del='purchases' data-id='" + h.id + "'>حذف الفاتورة</button>" +
+        "</div></div></td></tr>");
     });
 
+    // الفواتير اللي اختفت بالفلتر ما تفضلش مفتوحة في الذاكرة
+    Object.keys(openPurch).forEach(function(k){
+      if(!groups.some(function(g){ return g.key === k; })) delete openPurch[k];
+    });
+
+    var empty = all
+      ? "مفيش فاتورة مطابقة للفلتر — امسح الفلاتر وشوف تاني."
+      : "مفيش مشتريات لسه. سجّل أول فاتورة عشان يبقى عندك مخزون تبيع منه.";
     table("t-purch",
-      ["التاريخ","المورد","الصنف","القطع","تكلفة القطعة","قيمة البضاعة","النقل","المدفوع","المتبقي","",""],
-      rows, "مفيش مشتريات لسه. سجّل أول فاتورة عشان يبقى عندك مخزون تبيع منه.");
+      ["#","التاريخ","المورد","المحتوى","القطع","قيمة البضاعة","النقل","المدفوع","المتبقي",""],
+      rows, empty);
     if(freshBatch) setTimeout(function(){ freshBatch = null; }, 1600);
   }
 
@@ -8369,7 +8596,61 @@
   /* ---------- أحداث أسطر الفاتورة ---------- */
   document.getElementById("t-purch").addEventListener("click", function(e){
     var b = e.target.closest("[data-pret]");
-    if(b) openPRet(b.dataset.pret);
+    if(b){ e.stopPropagation(); openPRet(b.dataset.pret); return; }
+    // الأزرار جوّه السطر ليها معالجها في مكان تاني
+    if(e.target.closest("button,a,select,input")) return;
+    var tr = e.target.closest("tr.pinv");
+    if(!tr) return;
+    var k = tr.dataset.prow;
+    if(openPurch[k]) delete openPurch[k]; else openPurch[k] = 1;
+    renderPurch();
+  });
+  document.getElementById("t-purch").addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var tr = e.target.closest("tr.pinv"); if(!tr) return;
+    e.preventDefault(); tr.click();
+  });
+
+  /* ---------- المخزون: سطر الصنف بيتفتح ---------- */
+  document.getElementById("t-inv").addEventListener("click", function(e){
+    if(e.target.closest("button,a,select,input")) return;
+    var tr = e.target.closest("tr.itemrow"); if(!tr) return;
+    var id = tr.dataset.invrow;
+    if(openInv[id]) delete openInv[id]; else openInv[id] = 1;
+    renderInventory();
+  });
+  document.getElementById("t-inv").addEventListener("keydown", function(e){
+    if(e.key !== "Enter" && e.key !== " ") return;
+    var tr = e.target.closest("tr.itemrow"); if(!tr) return;
+    e.preventDefault(); tr.click();
+  });
+
+  /* ---------- فلاتر المشتريات ---------- */
+  document.getElementById("b-pufilters").addEventListener("click", function(){
+    var pnl = document.getElementById("pu-filters");
+    pnl.hidden = !pnl.hidden;
+    this.setAttribute("aria-expanded", String(!pnl.hidden));
+  });
+  ["pu-party","pu-item","pu-color","pu-size","pu-from","pu-to"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){
+      resetPage("purch"); renderPurch();
+    });
+  });
+  document.getElementById("pu-text").addEventListener("input", function(){
+    resetPage("purch"); renderPurch();
+  });
+  var PU_ID = { party:"pu-party", item:"pu-item", color:"pu-color",
+                size:"pu-size", from:"pu-from", to:"pu-to", text:"pu-text" };
+  document.getElementById("pu-chips").addEventListener("click", function(e){
+    var rm = e.target.closest("[data-rmpu]");
+    var clearOne = function(k){
+      var el = document.getElementById(PU_ID[k]); if(el) el.value = ""; pufilt[k] = "";
+    };
+    if(rm){ clearOne(rm.dataset.rmpu); resetPage("purch"); renderPurch(); return; }
+    if(e.target.id === "b-clear-pu"){
+      Object.keys(PU_ID).forEach(clearOne);
+      resetPage("purch"); renderPurch();
+    }
   });
 
   /* ---------- صنف جديد من جوّه درج الشراء ---------- */
@@ -9826,6 +10107,12 @@
     if(t) t.textContent = (key === "capital")
       ? (editingCap ? "تعديل حركة رأس مال" : cfg.title)
       : (editing[key] ? cfg.edit : cfg.title);
+    // رقم الفاتورة يبان وإنت بتكتبها، زي رقم الأوردر في درج المبيعات
+    if(key === "purchases" && t){
+      var rec = editing.purchases
+        ? db.purchases.find(function(x){ return x.id === editing.purchases; }) : null;
+      t.textContent += "  #" + (rec && rec.pno ? rec.pno : nextPurchNo());
+    }
 
     if(key === "cash") clearOver();
     if(key === "pret"){ renderPRetSrc(); renderPRetCalc(); }
