@@ -2039,8 +2039,16 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "65";
+  var VERSION = "66";
   var CHANGELOG = [
+    { v:"66", d:"2026-09-27", items:[
+      "«لازم تبيع بكام» في لوحة المتابعة بقى رقم كاش: كل اللي خرج من جيبك ناقص كل اللي رجع من البيع — تراكمي من البداية وبيقل مع كل تحصيل",
+      "ما بقاش بيقول «—» أبدًا: مش محتاج هامش ولا أسعار بيع عشان يشتغل",
+      "اضغط على الكارت تشوف الرقم جه منين بندًا بند: مدفوع للموردين · نقل · شحن · مصاريف ← مقابل المحصّل",
+      "المحصّل عن طريق شركة الشحن محسوب حتى لو لسه ما سحبتوش، و«سحب من شركة شحن» مش بيتعدّ مرتين",
+      "نقطة التعادل المحاسبية (المصاريف ÷ الهامش) فضلت زي ما هي في تقارير ← «أبيع بكام؟»",
+      "لما الهامش مش معروف، الرسالة بقت تقول الناقص بالظبط بدل «سجّل أسعار البيع والمشتريات» وإنت مشترياتك متسجّلة"
+    ]},
     { v:"65", d:"2026-09-27", items:[
       "عمود «الكود» اتشال من خلّاط الألوان والمقاسات في درج الشراء — كان عمود كامل بـ«—» في كل سطر، والمساحة راحت للون والمقاس",
       "شارة الكود اتشالت من المخزون ومن تفاصيل فاتورة الشراء ومن درج المرتجع",
@@ -3662,7 +3670,7 @@
       ["ship",  "صافي الشحن", money(cur.netShip), cur.netShip>=0?"v-gain":"v-due", prev?deltaHTML(cur.netShip, prev.netShip):""],
       ["exp",   "المصاريف", money(cur.expenses), cur.expenses>0?"v-due":"", prev?deltaHTML(cur.expenses, prev.expenses):""],
       ["net",   "صافي الربح", money(cur.net), cur.net>=0?"v-gain":"v-due", prev?deltaHTML(cur.net, prev.net):""],
-      ["be",    "لازم تبيع بكام", beTxt(cur), beCls(cur), beSub(cur)],
+      ["be",    "لازم تبيع بكام", cashBeTxt(), cashBeCls(), cashBeSub()],
       ["stock", "قيمة المخزون", money(stockValue), "", "<span class='sub'>تراكمي</span>"],
       ["cash",  "رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due", "<span class='sub'>تراكمي</span>"],
       ["wallet","لك عند شركات الشحن", money(walletsTotal()), walletsTotal()>0?"v-gain":"", "<span class='sub'>لسه ما اتسحبتش</span>"],
@@ -3799,38 +3807,44 @@
                head:["التاريخ","البيان","الجهة","المبلغ"], rows:rows };
     },
     be: function(cur, r){
-      var b = beOf(cur), days = r ? daysBetween(r.from, r.to) + 1 : null;
-      var nD = cur.deliv.length, aov = nD ? cur.revenue / nD : 0;
       var L = function(a, v, cls){
         return "<tr" + (cls ? " class='" + cls + "'" : "") + "><td class='wide'>" + esc(a) +
           "</td><td class='num'>" + money(v) + "</td></tr>"; };
-      var m = cmBasis(cur);
-      if(b === null)
-        return { note: cur.revenue > 0.009
-            ? "بتبيع بأقل من تكلفتك — كل قطعة بتزوّد الخسارة. مفيش رقم مبيعات بيغطّي ده."
-            : "محتاج أسعار بيع للأصناف وفواتير شراء عشان نعرف كل جنيه بيفضل منه كام.",
-                 head:["البند","المبلغ"], rows:[L("مصاريفك الثابتة", cur.fixedExp)] };
-      var rows = [
-        L("مصاريفك الثابتة", cur.fixedExp),
-        "<tr><td class='wide'>÷ هامش المساهمة" + (m.est ? " (تقديري)" : "") +
-          "</td><td class='num'>" + pctTxt(m.pct) + "</td></tr>",
-        L("= لازم تبيع بـ", b, "sumrow")
-      ];
-      if(!m.est){
-        rows.push(L("مبيعاتك في الفترة", cur.revenue));
-        rows.push(L(cur.revenue >= b ? "زيادة عندك" : "ناقصك", Math.abs(b - cur.revenue), "sumrow"));
-      }
-      if(days) rows.push(L("يعني في اليوم", b / days));
-      if(aov) rows.push("<tr><td class='wide'>يعني كام أوردر</td><td class='num'>" +
-        qty(Math.ceil(b / aov)) + "</td></tr>");
-      return { note: m.est
-          ? "لسه ما بعتش حاجة، فالهامش <strong>تقديري</strong> محسوب من " + esc(m.basis) +
-            ": كل جنيه هتبيعه هيفضل منه " + pctTxt(m.pct) +
-            " بعد تكلفة البضاعة. الرقم هيتظبط لوحده أول ما تسجّل مبيعات فعلية."
-          : "كل جنيه بتبيعه بيفضل منه " + pctTxt(m.pct) +
-            " بعد تكلفة البضاعة والشحن والمصاريف المتغيّرة. الرقم ده هو اللي بيغطّي مصاريفك الثابتة.",
+      // كل بند لوحده عشان تعرف الرقم جه منين
+      var sup = 0, fr = 0, shp = 0, exp = 0, out = 0;
+      live("purchases").forEach(function(p){
+        var pd = Number(p.paid)||0; if(pd > 0) sup += pd; fr += pFreight(p); });
+      live("sales").forEach(function(s){ if(shipCounts(s)) shp += shipOut(s); });
+      live("cash").forEach(function(c){
+        if(c.type === "expense") exp += Number(c.amount)||0;
+        if(c.type === "out")     out += Number(c.amount)||0; });
+      var fromCust = 0, fromSup = 0, manIn = 0;
+      live("sales").forEach(function(s){
+        if(isCancelled(s)) fromCust += shipIn(s); else fromCust += Number(s.paid)||0; });
+      live("purchases").forEach(function(p){
+        var pd = Number(p.paid)||0; if(pd < 0) fromSup += -pd; });
+      live("cash").forEach(function(c){ if(c.type === "in") manIn += Number(c.amount)||0; });
+
+      var spent = cashOutlay(), back = cashBack(), left = spent - back;
+      var rows = [];
+      if(sup) rows.push(L("مدفوع للموردين", sup));
+      if(fr)  rows.push(L("نقل البضاعة", fr));
+      if(shp) rows.push(L("مدفوع لشركات الشحن", shp));
+      if(exp) rows.push(L("مصاريف", exp));
+      if(out) rows.push(L("مدفوع لجهات", out));
+      rows.push(L("إجمالي اللي خرج من جيبك", spent, "sumrow"));
+      if(fromCust) rows.push(L("محصّل من العملاء", fromCust));
+      if(fromSup)  rows.push(L("استرداد من موردين", fromSup));
+      if(manIn)    rows.push(L("تحصيل يدوي", manIn));
+      rows.push(L("إجمالي اللي رجع", back, "sumrow"));
+      rows.push(L(left > 0.009 ? "لازم تبيع بـ" : "رجّعت فلوسك وزيادة",
+                  Math.abs(left), "sumrow"));
+      return { note: left > 0.009
+          ? "كل اللي خرج من جيبك على الشغل ناقص كل اللي رجع من البيع. رقم كاش تراكمي من البداية — بيقل مع كل تحصيل. المحصّل عن طريق شركة الشحن محسوب هنا حتى لو لسه ما سحبتوش."
+          : "رجّعت كل اللي دفعته، واللي بعد كده مكسب. الرقم تراكمي من البداية.",
         head:["البند","المبلغ"], rows:rows };
     },
+
     net: function(cur){
       var L = function(a,b,cls){
         return "<tr><td class='wide'>"+esc(a)+"</td><td class='num "+(cls||"")+"'>"+money(b)+"</td></tr>"; };
@@ -3976,8 +3990,12 @@
     var d = KPI_DETAIL[kpiOpen](cur, r);
     pnl.hidden = false;
     var rr = periodRange();
+    /* «لازم تبيع بكام» رقم تراكمي من البداية — مش تابع للفترة المختارة،
+       فما ينفعش نكتب تحته تواريخ الفترة. */
+    var CUMULATIVE = { be:1, stock:1, cash:1, wallet:1, recv:1, pay:1 };
     document.getElementById("kpi-title").textContent = KPI_TITLE[kpiOpen] +
-      (rr ? " · من " + rr.from + " لـ " + rr.to : " · كل الفترات");
+      (CUMULATIVE[kpiOpen] ? " · تراكمي من البداية"
+        : (rr ? " · من " + rr.from + " لـ " + rr.to : " · كل الفترات"));
     document.getElementById("kpi-note").textContent = d.note || "";
     table("t-kpi", d.head, d.rows, "مفيش حركات في الفترة دي.");
   }
@@ -4295,6 +4313,62 @@
              basis:"متوسط أسعارك وتكاليفك المسجّلة" };
   }
 
+  /* ---------- «لازم تبيع بكام» عشان ترجّع فلوسك ----------
+     ده رقم كاش مش رقم محاسبي: كل اللي خرج من جيبك على الشغل ناقص كل
+     اللي رجع من البيع. تراكمي من البداية، وبيتحدّث مع كل حركة.
+
+     ليه ده غير نقطة التعادل المحاسبية؟ التعادل = المصاريف الثابتة ÷
+     نسبة الهامش، والبضاعة مش داخلة فيه لأن تكلفتها جوّه الهامش أصلاً —
+     فبيطلع صفر لو مفيش مصاريف ثابتة، وده مالوش معنى لواحد لسه دافع
+     فلوسه في بضاعة. التعادل المحاسبي مكانه التقارير.
+
+     رأس المال والأرصدة الافتتاحية مش داخلة: دي فلوس دخلت مش تكلفة.
+     و«سحب من شركة شحن» (settle) مش داخل كدخل، لأن الفلوس دي اتعدّت
+     خلاص وقت ما الشركة حصّلتها — وإلا كانت هتتعدّ مرتين. */
+  function cashOutlay(){
+    var v = 0;
+    live("purchases").forEach(function(p){
+      var pd = Number(p.paid)||0;
+      if(pd > 0) v += pd;                 // مدفوع للمورد
+      v += pFreight(p);                   // نقل البضاعة
+    });
+    live("sales").forEach(function(s){
+      if(shipCounts(s)) v += shipOut(s);  // مدفوع لشركة الشحن
+    });
+    live("cash").forEach(function(c){
+      if(c.type === "expense" || c.type === "out") v += Number(c.amount)||0;
+    });
+    return v;
+  }
+  function cashBack(){
+    var v = 0;
+    live("sales").forEach(function(s){
+      // المحصّل من العميل — سواء في إيدك أو لسه عند شركة الشحن
+      if(isCancelled(s)) v += shipIn(s);
+      else v += Number(s.paid)||0;
+    });
+    live("purchases").forEach(function(p){
+      var pd = Number(p.paid)||0;
+      if(pd < 0) v += -pd;                // استرداد من مورد
+    });
+    live("cash").forEach(function(c){
+      if(c.type === "in") v += Number(c.amount)||0;
+    });
+    return v;
+  }
+  function toBreakCash(){ return cashOutlay() - cashBack(); }
+
+  function cashBeTxt(){
+    var n = toBreakCash();
+    return money(n > 0.009 ? n : 0);
+  }
+  function cashBeCls(){ return toBreakCash() > 0.009 ? "v-due" : "v-gain"; }
+  function cashBeSub(){
+    var n = toBreakCash();
+    if(n > 0.009) return "<span class='sub'>عشان ترجّع فلوسك</span>";
+    return "<span class='sub v-gain'>رجّعت فلوسك ✓ واللي بعده مكسب</span>";
+  }
+
   /* الهامش اللي بنحسب بيه: الفعلي من مبيعاتك لو موجود، وإلا تقديري. */
   function cmBasis(c){
     /* عندك مبيعات فعلية؟ هي وحدها الأساس. لو هامشها سالب (بتبيع بأقل من
@@ -4308,24 +4382,15 @@
     var m = cmBasis(c);
     return m ? c.fixedExp / m.pct : null;
   }
-  function beTxt(c){
-    var b = beOf(c);
-    return b === null ? "—" : money(b);
-  }
-  function beCls(c){
-    var b = beOf(c);
-    if(b === null) return "";
-    return c.revenue >= b ? "v-gain" : "v-due";
-  }
-  function beSub(c){
-    var m = cmBasis(c), b = beOf(c);
-    if(b === null)
-      return "<span class='sub v-due'>" +
-        (c.revenue > 0.009 ? "بتبيع بأقل من التكلفة" : "سجّل أسعار البيع والمشتريات الأول") + "</span>";
-    if(m.est) return "<span class='sub'>تقديري بهامش " + esc(pctTxt(m.pct)) + "</span>";
-    var gap = b - c.revenue;
-    return "<span class='sub " + (gap > 0.009 ? "v-due" : "v-gain") + "'>" +
-      (gap > 0.009 ? "ناقصك " + esc(money(gap)) : "غطّيت مصاريفك ✓") + "</span>";
+  // إيه الناقص بالظبط عشان نقدر نحسب الهامش؟ «سجّل الاتنين» كانت
+  // بتوديك في السكة الغلط وإنت مشترياتك متسجّلة فعلاً
+  function marginMissing(){
+    var anyPrice = live("items").some(function(it){ return (Number(it.price)||0) > 0; });
+    var anyCost  = live("purchases").some(function(p){ return (Number(p.cost)||0) > 0; });
+    if(!anyPrice && !anyCost) return "سجّل أصنافك بأسعار بيعها، وفواتير الشراء";
+    if(!anyPrice) return "أصنافك مالهاش سعر بيع — حطّه من تبويب «الأصناف»";
+    if(!anyCost)  return "سجّل فاتورة شراء عشان نعرف تكلفة القطعة";
+    return "محتاج صنف عنده سعر بيع وتكلفة شراء مع بعض";
   }
 
   /* ---------- تقييم الأداء ---------- */
@@ -4412,7 +4477,7 @@
         mRow("− مصاريف متغيّرة", c.varExp),
         mRow("هامش المساهمة", c.cm, "tot " + (c.cm>=0?"v-gain":"v-due"))
       ], !mB
-           ? "محتاج أسعار بيع وفواتير شراء عشان يتحسب الهامش."
+           ? marginMissing() + " — من غير كده الهامش مش هيتحسب."
            : (mB.est
               ? "<b>" + esc(pctTxt(mB.pct)) + "</b> هامش <b>تقديري</b> من " + esc(mB.basis) +
                 ". " + noSalesNote()
@@ -4422,7 +4487,7 @@
             c.revenue > 0.009
               ? "هامش المساهمة سالب — كل قطعة بتبيعها بتزوّد الخسارة. " +
                 "مينفعش يتحسب تعادل قبل ما السعر يغطّي التكلفة المتغيّرة."
-              : "سجّل أسعار البيع للأصناف وفواتير الشراء، وساعتها هنقدر نقولك الرقم حتى قبل أول بيعة.",
+              : marginMissing() + "، وساعتها هنقدر نقولك الرقم حتى قبل أول بيعة.",
             "—", c.revenue > 0.009 ? "v-due" : "")
         : beBox("لازم تبيع بكام؟", [
             days ? mRow("في اليوم", be/days) : "",
