@@ -595,12 +595,10 @@
   .seg button.on{background:var(--teal);color:#fff;font-weight:600}
   [data-theme="dark"] .seg button.on{color:#1A141C}
   .lmix-cols,.lmix-row{display:grid;gap:var(--sp-1);
-    grid-template-columns:1.1fr 1fr 92px 58px 26px}
+    grid-template-columns:1.1fr 1fr 92px 26px}
   .lmix-cols{align-items:end;font-size:var(--fs-1);color:var(--ink-soft);font-weight:500;padding-bottom:1px}
   .lmix-row{align-items:center}
   .lmix-row select,.lmix-row input{min-width:0;width:100%;padding:var(--sp-1) var(--sp-2);font-size:var(--fs-2)}
-  .lmix-row .mcode{font-size:var(--fs-1);color:var(--ink-soft);font-family:ui-monospace,monospace;
-    text-align:center;overflow:hidden;text-overflow:ellipsis}
   .lmix-row .rm{font-size:var(--fs-4);line-height:1;padding:var(--sp-1) var(--sp-1);justify-self:center}
   .lmix-empty{margin:0;font-size:var(--fs-2);color:var(--ink-soft);line-height:1.6}
   .lmix-sum{font-size:var(--fs-2);color:var(--ink-soft);text-align:end}
@@ -813,18 +811,17 @@
     .lmix-cols{ display:none }
     .lmix-row{
       grid-template-columns:1fr 1fr 40px;
-      grid-template-areas:"c z x" "q k x";
+      grid-template-areas:"c z x" "q q x";
       row-gap:var(--sp-2);border:1px dashed var(--line);border-radius:var(--r-sm);padding:var(--sp-2)}
     .lmix-row > :nth-child(1){ grid-area:c }
     .lmix-row > :nth-child(2){ grid-area:z }
     .lmix-row > :nth-child(3){ grid-area:q }
-    .lmix-row > .mcode{ grid-area:k;text-align:start;align-self:center }
     .lmix-row > .rm{ grid-area:x;align-self:center }
 
     /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 13px */
     .hintline,.mnote,.lmix-empty,.lmix-head,.lmix-sum,.fset > h3,
     .fgrid label,.filters label,.stabs b,.lrow .lcost,.lrow-foot .ltot em,
-    tbody td::before,.fgroup .glabel,.band span,.mbox h4,.lmix-row .mcode,.rowact,
+    tbody td::before,.fgroup .glabel,.band span,.mbox h4,.rowact,
     .stats span,.stats small,.kpi-go,header.top .who,
     .dmeta,.hint,label{ font-size:var(--fs-2) }
   }
@@ -2042,8 +2039,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "64";
+  var VERSION = "65";
   var CHANGELOG = [
+    { v:"65", d:"2026-09-27", items:[
+      "عمود «الكود» اتشال من خلّاط الألوان والمقاسات في درج الشراء — كان عمود كامل بـ«—» في كل سطر، والمساحة راحت للون والمقاس",
+      "شارة الكود اتشالت من المخزون ومن تفاصيل فاتورة الشراء ومن درج المرتجع",
+      "الكود لسه بيتكتب من «الأصناف ← ألوان ومقاسات»، والبحث لسه بيلاقي بيه — اللي محتاجه مش هيخسره"
+    ]},
     { v:"64", d:"2026-09-27", items:[
       "دفتر الخزنة: الدفع للمورد ومصاريف النقل بقوا سطر واحد للفاتورة بدل سطر لكل لون ومقاس — ٤٧ تركيبة كانت بتطلّع ٩٤ سطر",
       "سطر الخزنة بيقول رقم الفاتورة (#1 · شراء جزمه موكا وغيرهم)",
@@ -2999,6 +3001,9 @@
 
   // كود لكل تركيبة لون/مقاس — بيتخزّن في الصنف نفسه {"أحمر|M":"LR-102"}
   function codeKey(color, size){ return squish(color) + "|" + squish(size); }
+  /* الأكواد ما بقتش بتتعرض في الجداول — كانت عمود كامل بـ«—» في كل
+     سطر. لسه بتتكتب من «الأصناف ← ألوان ومقاسات»، والبحث بيلاقي بيها
+     في المبيعات والمشتريات والمخزون، فاللي محتاجها مش هيخسرها. */
   function vCode(itemId, color, size){
     var it = db.items.find(function(x){ return x.id===itemId; });
     if(!it || !it.codes) return "";
@@ -3010,10 +3015,6 @@
     if(!it.codes) it.codes = {};
     var k = codeKey(color,size), v = String(code||"").trim();
     if(v) it.codes[k] = v; else delete it.codes[k];
-  }
-  function vCodeLabel(itemId, color, size){
-    var c = vCode(itemId, color, size);
-    return c ? " · " + c : "";
   }
 
   // الألوان والمقاسات اللي ليها حركة فعلية — مش كل الاحتمالات.
@@ -4907,11 +4908,10 @@
   var invKpiOpen = null;
   var openInv = {};         // الأصناف المفتوح ألوانها ومقاساتها
 
-  // اسم التركيبة زي ما بيتكتب في الجداول: «شبشب · بني · 38» ومعاه الكود
+  // اسم التركيبة زي ما بيتكتب في الجداول: «شبشب · بني · 38»
   function vRowName(x){
-    var lbl = vLabel(x.color, x.size), code = vCode(x.item.id, x.color, x.size);
-    return esc(x.item.name) + (lbl ? " · " + esc(lbl) : "") +
-      (code ? " <span class='pill'>" + esc(code) + "</span>" : "");
+    var lbl = vLabel(x.color, x.size);
+    return esc(x.item.name) + (lbl ? " · " + esc(lbl) : "");
   }
   // العمود اللي بيكشف تكلفة الشراء بيختفي عن اللي مالوش صلاحية
   function mCell(v){ return "<td class='num money-only'>" + money(v) + "</td>"; }
@@ -5300,11 +5300,9 @@
       if(!isOpen) return;
       g.vars.sort(function(a,b){ return (b.sold - a.sold) || (b.stock - a.stock); }).forEach(function(x){
         var f = x.stock - x.rsv, lbl = vLabel(x.color, x.size);
-        var code = vCode(x.item.id, x.color, x.size);
         rows.push("<tr class='varrow'><td class='wide'>" +
             "<button class='del' style='color:var(--teal)' data-move='"+esc(x.key)+"'>"+
-            (lbl ? esc(lbl) : "من غير لون ولا مقاس")+"</button>"+
-            (code ? " <span class='pill'>"+esc(code)+"</span>" : "")+"</td>"+
+            (lbl ? esc(lbl) : "من غير لون ولا مقاس")+"</button></td>"+
           "<td class='num'>"+qty(x.bought)+"</td>"+
           "<td class='num "+(x.pret?"v-due":"")+"'>"+(x.pret?qty(x.pret):"—")+"</td>"+
           "<td class='num'>"+qty(x.sold)+"</td>"+
@@ -6273,7 +6271,6 @@
     };
 
     var mixRows = (l.mix||[]).map(function(m, j){
-      var code = vCode(l.itemId, m.color, m.size);
       return "<div class='lmix-row'>" +
         "<input list='dl-c-"+i+"' placeholder='مثلاً بني' autocomplete='off' " +
           "data-pli='"+i+"' data-mi='"+j+"' data-mf='color' value='"+esc(m.color)+"'>" +
@@ -6281,7 +6278,6 @@
           "data-pli='"+i+"' data-mi='"+j+"' data-mf='size' value='"+esc(m.size)+"'>" +
         "<input type='number' step='any' min='0' placeholder='كام قطعة؟' " +
           "data-pli='"+i+"' data-mi='"+j+"' data-mf='qty' value='"+esc(m.qty)+"'>" +
-        "<span class='mcode'>"+(code ? esc(code) : "—")+"</span>" +
         "<button type='button' class='rm' data-rmmix='"+i+"|"+j+"' aria-label='شيل السطر ده'>&times;</button>" +
         "</div>";
     }).join("");
@@ -6291,7 +6287,7 @@
           dl("dl-c-"+i, cs) + dl("dl-z-"+i, zs) +
           "<div class='lmix-head'><span class='lmix-title'>"+esc(mixTitle(l))+"</span></div>" +
           "<div class='lmix-cols'><span>اللون</span><span>المقاس</span>" +
-            "<span>عدد القطع</span><span>الكود</span><span></span></div>" +
+            "<span>عدد القطع</span><span></span></div>" +
           mixRows +
           /* الزرار تحت آخر سطر مش فوق: مع ١٥ لون ومقاس كنت بترجع
              لفوق كل مرة عشان تضيف سطر جديد */
@@ -6448,11 +6444,11 @@
     var rec = pretRec(), box = document.getElementById("pr-src");
     if(!rec || !box) return;
     var c = vColor(rec), z = vSize(rec);
-    var lbl = vLabel(c,z), code = vCode(rec.itemId, c, z);
+    var lbl = vLabel(c,z);
     var free = freeOfV(rec.itemId, c, z), st = stockOfV(rec.itemId, c, z);
     box.innerHTML =
       "<div><span>الصنف</span><b>" + esc(itemName(rec.itemId)) +
-        (lbl ? " · " + esc(lbl) : "") + (code ? " · " + esc(code) : "") + "</b></div>" +
+        (lbl ? " · " + esc(lbl) : "") + "</b></div>" +
       "<div><span>المورد</span><b>" + esc(partyName(rec.partyId)) + "</b></div>" +
       "<div><span>الفاتورة</span><b>" + esc(rec.date) +
         (rec.inv ? " · " + esc(rec.inv) : "") + " · " + esc(qty(Number(rec.qty)||0)) + " قطعة</b></div>" +
@@ -6696,12 +6692,10 @@
       if(!isOpen) return;
       var lines = g.rows.map(function(x){
         var vl = vLabel(vColor(x), vSize(x));
-        var code = vCode(x.itemId, vColor(x), vSize(x));
         var pq = pPackQty(x), packs = pPacks(x), pn = pPackName(x) || "قطعة";
         var sub = pq > 1 ? qty(packs) + " " + esc(pn) + " × " + qty(pq) + " قطعة" : "";
         return "<tr><td class='wide'>" + esc(itemName(x.itemId)) +
             (vl ? " <span class='pill'>" + esc(vl) + "</span>" : "") +
-            (code ? " <span class='pill'>" + esc(code) + "</span>" : "") +
             (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
           "<td class='num" + (isRet ? " v-due" : "") + "'>" + qty(x.qty) + "</td>" +
           "<td class='num money-only'>" + money(x.cost) +
@@ -8809,12 +8803,6 @@
       var m = lx && lx.mix && lx.mix[Number(mx.dataset.mi)];
       if(!m) return;
       m[mx.dataset.mf] = mx.value;
-      if(mx.dataset.mf !== "qty"){
-        // اللون والمقاس خانات نص حرّة — نحدّث الكود في مكانه بدل إعادة رسم
-        var cell = mx.closest(".lmix-row");
-        cell = cell && cell.querySelector(".mcode");
-        if(cell) cell.textContent = vCode(lx.itemId, m.color, m.size) || "—";
-      }
       renderPCalc();
       return;
     }
