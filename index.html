@@ -2042,8 +2042,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "63";
+  var VERSION = "64";
   var CHANGELOG = [
+    { v:"64", d:"2026-09-27", items:[
+      "دفتر الخزنة: الدفع للمورد ومصاريف النقل بقوا سطر واحد للفاتورة بدل سطر لكل لون ومقاس — ٤٧ تركيبة كانت بتطلّع ٩٤ سطر",
+      "سطر الخزنة بيقول رقم الفاتورة (#1 · شراء جزمه موكا وغيرهم)",
+      "الأرقام ما اتغيّرتش: الموجب والسالب بيتجمّعوا كل واحد لوحده مش صافي",
+      "سجل الحركات: الفاتورة بقت حركة واحدة برقمها بدل ٤٧ حركة — السجل بيقول مين عمل إيه، وإنت سجّلت فاتورة مش ٤٧ حاجة",
+      "رقم الفاتورة بقى بيتحسب مع فتح السيستم، فبيبان في الخزنة والسجل مش في شاشة المشتريات بس"
+    ]},
     { v:"63", d:"2026-09-27", items:[
       "زرار «+ سطر» في خلّاط الألوان والمقاسات نزل تحت آخر سطر — مع ١٥ لون ومقاس كنت بترجع لفوق كل مرة",
       "شاشة المشتريات: الفاتورة بقت سطر واحد بيتفتح بالدوس عليه بدل سطر لكل لون ومقاس — فاتورة بـ١٥ تركيبة كانت بتاخد الشاشة كلها",
@@ -6763,19 +6770,43 @@
         L.push({d:s.date, at:s.at, t:"شحن مدفوع", who:(s.shipCo||"شركة شحن"), kind:"شحن",
           note:"أوردر "+who+" · "+what, inn:0, out:shipOut(s), src:"أوردر"});
     });
+    /* الفاتورة الواحدة كذا سجل — سجل لكل لون ومقاس. لو عملنا سطر خزنة
+       لكل سجل، فاتورة بـ٤٧ تركيبة بتطلّع ٩٤ سطر في دفتر الخزنة (دفع +
+       نقل لكل تركيبة) — وده مش اللي حصل فعلاً: إنت دفعت للمورد مرة
+       واحدة على الفاتورة كلها. فبنجمّع بالـbatchId.
+       الموجب والسالب بيتجمّعوا كل واحد لوحده مش صافي، عشان الأرقام
+       تفضل مطابقة للقديم بالظبط لو الفاتورة فيها الاتنين. */
+    var pBatch = [], pSeen = {};
     live("purchases").forEach(function(p){
-      var pd = Number(p.paid)||0;
-      if(pd > 0)
-        L.push({d:p.date, at:p.at, t:"دفع لمورد", who:partyName(p.partyId), kind:"دفع",
-          note:"شراء "+itemName(p.itemId), inn:0, out:pd, src:"شراء"});
-      else if(pd < 0)
-        L.push({d:p.date, at:p.at, t:"استرداد من مورد", who:partyName(p.partyId), kind:"تحصيل",
-          note:"مرتجع "+itemName(p.itemId)+(p.note?" · "+p.note:""),
-          inn:-pd, out:0, src:"مرتجع"});
-      if(pFreight(p))
-        L.push({d:p.date, at:p.at, t:"نقل بضاعة", who:"نقل وتوصيل", kind:"مصروف",
-          note:"شحنة "+partyName(p.partyId)+" · "+itemName(p.itemId),
-          inn:0, out:pFreight(p), src:"شراء"});
+      var k = p.batchId || ("solo:" + p.id);
+      if(!pSeen[k]){
+        pSeen[k] = { head:p, out:0, back:0, fr:0, items:{}, note:"" };
+        pBatch.push(pSeen[k]);
+      }
+      var g = pSeen[k], pd = Number(p.paid)||0;
+      if(pd > 0) g.out += pd; else if(pd < 0) g.back += -pd;
+      g.fr += pFreight(p);
+      g.items[itemName(p.itemId)] = 1;
+      if(!g.note && p.note) g.note = p.note;
+      // أقدم تاريخ ووقت في الفاتورة هو اللي بيحدّد ترتيبها في الدفتر
+      if((p.date||"") < (g.head.date||"")) g.head = p;
+    });
+    pBatch.forEach(function(g){
+      var h = g.head;
+      var what = Object.keys(g.items).slice(0,2).join(" · ") +
+                 (Object.keys(g.items).length > 2 ? " وغيرهم" : "");
+      var inv = h.pno ? "فاتورة #" + h.pno + " · " : "";
+      if(g.out > 0.009)
+        L.push({d:h.date, at:h.at, t:"دفع لمورد", who:partyName(h.partyId), kind:"دفع",
+          note:inv + "شراء " + what, inn:0, out:g.out, src:"شراء"});
+      if(g.back > 0.009)
+        L.push({d:h.date, at:h.at, t:"استرداد من مورد", who:partyName(h.partyId), kind:"تحصيل",
+          note:inv + "مرتجع " + what + (g.note ? " · " + g.note : ""),
+          inn:g.back, out:0, src:"مرتجع"});
+      if(g.fr > 0.009)
+        L.push({d:h.date, at:h.at, t:"نقل بضاعة", who:"نقل وتوصيل", kind:"مصروف",
+          note:inv + "شحنة " + partyName(h.partyId) + " · " + what,
+          inn:0, out:g.fr, src:"شراء"});
     });
     live("cash").forEach(function(c){
       var a = Number(c.amount)||0;
@@ -7236,7 +7267,26 @@
     live("sales").forEach(function(s){ all.push({at:s.at,by:s.by,edited:s.editedBy,
       t:"أوردر "+ST_LABEL[stOf(s)]+(s.no?" #"+s.no:""),
       d:partyName(s.partyId)+" · "+itemsLabel(s),v:saleTotal(s)}); });
-    live("purchases").forEach(function(p){ all.push({at:p.at,by:p.by,edited:p.editedBy,t:"شراء",d:partyName(p.partyId)+" · "+itemName(p.itemId),v:purchTotal(p)}); });
+    /* الفاتورة الواحدة كذا سجل — واحد لكل لون ومقاس. السجل بيتكلم عن
+       «مين عمل إيه وإمتى»، وإنت سجّلت فاتورة واحدة مش ٤٧ حركة. */
+    var pg = [], pSeen = {};
+    live("purchases").forEach(function(p){
+      var k = p.batchId || ("solo:" + p.id);
+      if(!pSeen[k]){ pSeen[k] = { head:p, v:0, items:{} }; pg.push(pSeen[k]); }
+      var g = pSeen[k];
+      g.v += purchTotal(p);
+      g.items[itemName(p.itemId)] = 1;
+      if((p.at||0) > (g.head.at||0)) g.head = p;   // آخر تعديل هو اللي يبان
+    });
+    pg.forEach(function(g){
+      var h = g.head, names = Object.keys(g.items);
+      var isRet = isPRet(h);
+      all.push({ at:h.at, by:h.by, edited:h.editedBy,
+        t:(isRet ? "مرتجع للمورد" : "شراء") + (h.pno ? " #" + h.pno : ""),
+        d: partyName(h.partyId) + " · " + names.slice(0,2).join(" · ") +
+           (names.length > 2 ? " وغيرهم" : ""),
+        v: Math.abs(g.v) });
+    });
     live("cash").forEach(function(c){ all.push({at:c.at,by:c.by,edited:c.editedBy,t:cashLabel(c.type),d:(c.partyId?partyName(c.partyId):(c.note||"—")),v:Number(c.amount)||0}); });
     all.sort(function(a,b){ return (b.at||0) - (a.at||0); });
     var rows = all.slice(0,100).map(function(r){
@@ -10667,6 +10717,7 @@
 
     try{ if(LS) applyTheme(LS.getItem("naya:theme") || "light"); }catch(e){}
     backfillSaleNos();
+    backfillPurchNos();   // عشان رقم الفاتورة يبان في الخزنة والسجل مش في شاشة المشتريات بس
     readFilters();
     readCashFilters();
     numify();
