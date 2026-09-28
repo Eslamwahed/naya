@@ -1041,7 +1041,12 @@
   <p class="hint">الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
   <div class="tbar">
     <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
+    <button class="tbtn" type="button" id="b-pu-tpl">نزّل شيت الفاتورة</button>
+    <button class="tbtn" type="button" id="b-pu-up">ارفع الشيت بعد ما تملاه</button>
+    <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
   </div>
+  <p class="hint">الشيت بيفتح في إكسل عادي. املا رأس الفاتورة فوق وسطر لكل لون ومقاس تحت، واحفظه <strong>CSV</strong> زي ما هو، وبعدين ارفعه — هيتفتح قدامك في فورم الشراء تراجعه وتحفظه.</p>
+  <p class="note" id="pu-msg" hidden></p>
 
   <div class="panel" id="entry-purchases" hidden>
     <div class="dhead">
@@ -2064,8 +2069,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "67";
+  var VERSION = "68";
   var CHANGELOG = [
+    { v:"68", d:"2026-09-28", items:[
+      "زرار «نزّل شيت الفاتورة» في تبويب المشتريات: شيت بيتفتح بإكسل فيه رأس الفاتورة وسطر لكل لون ومقاس",
+      "الشيت جاي معاه أسماء موردينك وأصنافك بألوانها ومقاساتها عشان تنسخ الاسم بالظبط",
+      "زرار «ارفع الشيت»: بيتقرا ويتفتح قدامك في فورم الشراء تراجعه وتحفظه — مش بيتكتب في الدفاتر من ورا ظهرك",
+      "بيقرا الفاصلة والفاصلة المنقوطة والأرقام العربية، وبيجمّع أسطر نفس الصنف بنفس التكلفة في سطر واحد",
+      "لو في صنف أو مورد بالاسم ده مش موجود بيقولك في أنهي سطر وما بيرفعش حاجة — عشان ما تتخلقش أصناف من غير سعر بيع"
+    ]},
     { v:"67", d:"2026-09-28", items:[
       "حالة الأوردر بتتغيّر من سطر الجدول على طول — من غير ما تفتح التفاصيل ولا درج التعديل",
       "جدول أسعار الشحن بالمنطقة في شاشة «شركات الشحن»: المنطقة وسعرها والمحافظات اللي جواها",
@@ -8918,6 +8930,209 @@
     document.getElementById("p-paid").value    = pdraft.paid || 0;
     document.getElementById("p-note").value    = pdraft.note || "";
   }
+
+  /* ---------- شيت الفاتورة: تنزيل واستيراد ----------
+     CSV مش xlsx: السيستم ملف واحد من غير مكتبات، وقارئ xlsx حقيقي
+     معناه ٨٠٠ كيلو من الإنترنت. إكسل بيفتح ويحفظ CSV على طول،
+     فالشيت ده بيتفتح ويتملى ويترفع عادي. */
+  var PU_STOP = "### تحت ده للمراجعة بس — ماتكتبش فيه ###";
+  var PU_COLS = ["الصنف", "اللون", "المقاس", "عدد القطع", "تكلفة القطعة"];
+  var PU_HEADKEY = {
+    "التاريخ":"date", "المورد":"party",
+    "رقم فاتورة المورد":"inv", "رقم الفاتورة":"inv",
+    "مصاريف النقل":"freight", "النقل":"freight",
+    "المدفوع":"paid", "المدفوع للمورد":"paid", "ملاحظة":"note"
+  };
+  function csvCell(v){ return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
+  function csvLine(a){ return a.map(csvCell).join(","); }
+
+  // بيقرا CSV بالفاصلة أو الفاصلة المنقوطة (إكسل العربي بيحفظ بالمنقوطة)
+  // ومعاه علامات التنصيص اللي إكسل بيحطها لوحده حوالين النص اللي فيه فاصلة
+  function csvSplit(text){
+    text = String(text == null ? "" : text).replace(/^﻿/, "").replace(/\r\n?/g, "\n");
+    var sep = (text.split(";").length > text.split(",").length) ? ";" : ",";
+    var rows = [], row = [], cur = "", q = false;
+    for(var i = 0; i < text.length; i++){
+      var c = text.charAt(i);
+      if(q){
+        if(c !== '"'){ cur += c; }
+        else if(text.charAt(i+1) === '"'){ cur += '"'; i++; }
+        else q = false;
+      }
+      else if(c === '"') q = true;
+      else if(c === sep){ row.push(cur); cur = ""; }
+      else if(c === "\n"){ row.push(cur); rows.push(row); row = []; cur = ""; }
+      else cur += c;
+    }
+    row.push(cur); rows.push(row);
+    return rows.map(function(r){ return r.map(squish); });
+  }
+  function rowEmpty(r){ return !r.join("").length; }
+
+  function suppliersLive(){
+    return live("parties").filter(function(p){ return p.type === "supplier"; });
+  }
+  function byName(list, nm){
+    var k = squish(nm).toLowerCase();
+    if(!k) return null;
+    for(var i = 0; i < list.length; i++){
+      if(squish(list[i].name).toLowerCase() === k) return list[i];
+    }
+    return null;
+  }
+  // إكسل ساعات بيعيد تنسيق التاريخ — بنقبل سنة-شهر-يوم ويوم/شهر/سنة
+  function puDate(s){
+    s = toEn(squish(s));
+    var p2 = function(n){ return ("0" + n).slice(-2); };
+    var m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/);
+    if(m) return m[1] + "-" + p2(m[2]) + "-" + p2(m[3]);
+    m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/);
+    if(m) return m[3] + "-" + p2(m[2]) + "-" + p2(m[1]);
+    return "";
+  }
+
+  function puTplCSV(){
+    var sup = suppliersLive(), L = [];
+    L.push(csvLine(["التاريخ", firstOpenDate()]));
+    L.push(csvLine(["المورد", sup.length === 1 ? sup[0].name : ""]));
+    L.push(csvLine(["رقم فاتورة المورد", ""]));
+    L.push(csvLine(["مصاريف النقل", 0]));
+    L.push(csvLine(["المدفوع", 0]));
+    L.push(csvLine(["ملاحظة", ""]));
+    L.push("");
+    L.push(csvLine(PU_COLS));
+    L.push("");
+    L.push(csvLine([PU_STOP]));
+    L.push("");
+    L.push(csvLine(["مثال على شكل السطر:"]));
+    L.push(csvLine(["اسم الصنف زي ما هو تحت", "أحمر", "M", 12, 145]));
+    L.push(csvLine(["سطر لكل لون ومقاس. اللون والمقاس بيتسجّلوا على الصنف لو جداد."]));
+    L.push("");
+    L.push(csvLine(["الموردين عندك:"]));
+    sup.forEach(function(p){ L.push(csvLine([p.name])); });
+    if(!sup.length) L.push(csvLine(["(لسه مافيش موردين — ضيف المورد من تبويب الجهات الأول)"]));
+    L.push("");
+    L.push(csvLine(["أصنافك — انسخ الاسم بالظبط:"]));
+    L.push(csvLine(["اسم الصنف", "الألوان المسجّلة", "المقاسات المسجّلة"]));
+    live("items").forEach(function(it){
+      L.push(csvLine([it.name, listOf(it, "colors").join(" / "), listOf(it, "sizes").join(" / ")]));
+    });
+    return L.join("\n");
+  }
+
+  // بيحوّل الشيت لمسوّدة فاتورة. مابيكتبش في الدفاتر —
+  // بيسيب فورم الشراء هو اللي يتحقق ويحفظ، فمفيش منطق متكرر يفرق عن ده.
+  function puParse(text){
+    var rows = csvSplit(text), head = {}, li = -1;
+    for(var i = 0; i < rows.length; i++){
+      var c0 = rows[i][0] || "";
+      if(c0 === PU_COLS[0]){ li = i; break; }
+      if(c0 === PU_STOP) break;
+      if(PU_HEADKEY[c0]) head[PU_HEADKEY[c0]] = rows[i][1] || "";
+    }
+    if(li < 0) return { errs:["الملف ده مش شيت الفاتورة — نزّل الشيت من زرار «نزّل شيت الفاتورة» واملاه."] };
+
+    var errs = [], groups = [], gmap = {}, seen = {};
+    for(i = li + 1; i < rows.length; i++){
+      var r = rows[i];
+      if((r[0] || "") === PU_STOP) break;
+      if(rowEmpty(r)) continue;
+      var ln = i + 1;                                   // رقم السطر زي ما إكسل بيوريه
+      var nm = r[0] || "", color = r[1] || "", size = r[2] || "";
+      var q = Number(toEn(r[3])) || 0, cost = Number(toEn(r[4]));
+      if(!nm){ errs.push("سطر " + ln + ": خانة الصنف فاضية"); continue; }
+      var it = byName(live("items"), nm);
+      if(!it){ errs.push("سطر " + ln + ": مافيش صنف اسمه «" + nm + "»"); continue; }
+      if(q <= 0){ errs.push("سطر " + ln + " (" + nm + "): عدد القطع لازم يكون أكبر من صفر"); continue; }
+      if(!(cost > 0)){ errs.push("سطر " + ln + " (" + nm + "): اكتب تكلفة القطعة"); continue; }
+      var vk = it.id + "|" + color + "|" + size + "|" + cost;
+      if(seen[vk]){
+        errs.push("سطر " + ln + ": «" + nm + (vLabel(color, size) ? " " + vLabel(color, size) : "") +
+                  "» مكرّر بنفس التكلفة — اجمعه في سطر واحد");
+        continue;
+      }
+      seen[vk] = 1;
+      var gk = it.id + "|" + cost;
+      if(!gmap[gk]){
+        gmap[gk] = { itemId:it.id, byPack:false, packs:"", packQty:1, packCost:cost, mix:[] };
+        groups.push(gmap[gk]);
+      }
+      gmap[gk].mix.push({ color:color, size:size, qty:q });
+    }
+    if(errs.length) return { errs:errs };
+    if(!groups.length) return { errs:["الشيت مافيهوش أسطر — اكتب الأصناف تحت صف العناوين"] };
+
+    var out = { date:"", partyId:"", inv:squish(head.inv || ""), freight:0, paid:0,
+                note:squish(head.note || ""), lines:groups, batchId:"", warn:[] };
+    var d = puDate(head.date);
+    if(!d){ out.date = firstOpenDate(); if(squish(head.date || "")) out.warn.push("التاريخ اللي في الشيت مش مفهوم — حطّينا " + out.date); }
+    else out.date = d;
+    if(squish(head.party || "")){
+      var sp = byName(suppliersLive(), head.party);
+      if(sp) out.partyId = sp.id;
+      else return { errs:["مافيش مورد اسمه «" + squish(head.party) + "» — ضيفه من تبويب الجهات الأول، أو صلّح الاسم في الشيت"] };
+    } else out.warn.push("خانة المورد فاضية — اختاره من الفورم");
+    out.freight = Number(toEn(head.freight)) || 0;
+    out.paid    = Number(toEn(head.paid))    || 0;
+    return out;
+  }
+
+  function puMsg(html, bad){
+    var el = document.getElementById("pu-msg");
+    if(!el) return;
+    if(!html){ el.hidden = true; el.innerHTML = ""; return; }
+    el.hidden = false;
+    el.innerHTML = bad ? "<span class='v-due'>" + html + "</span>" : html;
+  }
+
+  function puImport(text){
+    var res = puParse(text);
+    if(res.errs){
+      puMsg("<strong>الشيت ما اترفعش:</strong><br>" +
+        res.errs.slice(0, 12).map(esc).join("<br>") +
+        (res.errs.length > 12 ? "<br>… و" + (res.errs.length - 12) + " مشكلة تانية" : ""), true);
+      toast("في مشاكل في الشيت — اقرا التفاصيل فوق", 3200);
+      return false;
+    }
+    editing.purchases = null; clearEditBase("purchases"); setEditUI("purchases");
+    pdraft = { date:res.date, partyId:res.partyId, inv:res.inv, freight:res.freight,
+               paid:res.paid, note:res.note, lines:res.lines, batchId:"" };
+    var pcs = res.lines.reduce(function(a, l){ return a + mixPieces(l); }, 0);
+    clearPOver(); goTab("purch"); openEntry("purchases");
+    syncPHead(); renderPLines(); renderPDraftNote();
+    puMsg("اترفع الشيت: " + res.lines.length + " سطر · " + qty(pcs) + " قطعة" +
+      (res.warn.length ? "<br>" + res.warn.map(esc).join("<br>") : "") +
+      "<br>راجع الأرقام واضغط «احفظ» عشان تتسجّل.");
+    toast("راجع الفاتورة واحفظها");
+    return true;
+  }
+
+  document.getElementById("b-pu-tpl").addEventListener("click", function(){
+    download("lora-purchase-sheet-" + today() + ".csv", puTplCSV(), "text/csv");
+    puMsg("نزّل الشيت. افتحه بإكسل، املاه، واحفظه <strong>CSV</strong> (مش xlsx) عشان يترفع.");
+  });
+  // تأكيد من خطوتين بدل نافذة المتصفح — زي باقي السيستم
+  var puArm = 0;
+  document.getElementById("b-pu-up").addEventListener("click", function(){
+    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
+    if(pDraftDirty() && Date.now() - puArm > 12000){
+      puArm = Date.now();
+      puMsg("عندك فاتورة لسه ما اتحفظتش — الشيت هيمسحها. اضغط الزرار تاني لو ماشي.", true);
+      return;
+    }
+    puArm = 0; puMsg("");
+    document.getElementById("pu-file").click();
+  });
+  document.getElementById("pu-file").addEventListener("change", function(){
+    var f = this.files && this.files[0];
+    this.value = "";                                  // نفس الملف يترفع تاني لو اتعدّل
+    if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(){ try{ puImport(String(reader.result)); }
+                                catch(e){ puMsg("الملف مش مقروء: " + esc(String(e && e.message || e)), true); } };
+    reader.onerror = function(){ puMsg("الملف مش مقروء", true); };
+    reader.readAsText(f, "utf-8");
+  });
 
   /* ---------- أحداث أسطر الفاتورة ---------- */
   document.getElementById("t-purch").addEventListener("click", function(e){
