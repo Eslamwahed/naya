@@ -341,6 +341,7 @@
   tr.order.sel > td{background:var(--teal-soft)}
   /* خانة المرتجع جوه جدول أصناف الأوردر */
   .dlines input.retin{width:68px;padding:var(--sp-1) var(--sp-2);font-size:var(--fs-2);text-align:center}
+  #t-price input.prin{width:92px;padding:var(--sp-1) var(--sp-2);font-size:var(--fs-3);text-align:center;font-variant-numeric:tabular-nums}
 
   /* كروت لوحة المتابعة بقت بتتفتح */
   .band > .kpi{cursor:pointer;position:relative;transition:.15s}
@@ -862,6 +863,7 @@
   <button data-tab="cash">الخزنة</button>
   <button data-tab="purch">المشتريات</button>
   <button data-tab="items">الأصناف</button>
+  <button data-tab="price">التسعير</button>
   <button data-tab="inv">المخزون</button>
   <button data-tab="sales">المبيعات</button>
   <button data-tab="ship">شركات الشحن</button>
@@ -1528,6 +1530,47 @@
 
 </section>
 
+<!-- التسعير -->
+<section id="tab-price" hidden>
+  <h2>التسعير</h2>
+  <p class="hint">الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
+
+  <div class="band" id="prc-kpis"></div>
+  <p class="note" id="prc-note"></p>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="prc-q" type="search" placeholder="دوّر باسم الصنف…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+  </div>
+
+  <div class="quick" id="prc-quick">
+    <button type="button" data-prconly="all" class="on">كل الأصناف</button>
+    <button type="button" data-prconly="noprice">لسه من غير سعر</button>
+    <button type="button" data-prconly="loss">السعر أقل من التكلفة</button>
+    <button type="button" data-prconly="instock">اللي في المخزن</button>
+  </div>
+
+  <div class="filters" id="prc-bulk">
+    <div><label for="prc-bulk-pct">سعّر اللي ظاهر: زيادة على التكلفة %</label>
+      <input id="prc-bulk-pct" inputmode="decimal" placeholder="50"></div>
+    <div><label for="prc-bulk-round">قرّب السعر لأقرب</label>
+      <select id="prc-bulk-round">
+        <option value="0">من غير تقريب</option>
+        <option value="1">جنيه</option>
+        <option value="5" selected>٥ جنيه</option>
+        <option value="10">١٠ جنيه</option>
+      </select></div>
+    <div><label for="b-prc-apply">طبّق على كل اللي ظاهر</label>
+      <button class="tbtn" type="button" id="b-prc-apply">طبّق</button></div>
+  </div>
+
+  <div class="tbl-wrap"><table id="t-price"></table></div>
+</section>
+
 <section id="tab-inv" hidden>
   <h2>المخزون</h2>
   <p class="hint">كل سطر هنا = <strong>لون ومقاس معيّن</strong> من صنف (زي «شبشب · بني · 38»)، لأن ده اللي بتبيعه وبتجرده فعلاً. بتظهر بس الألوان والمقاسات اللي اشتريتها. الأرصدة تراكمية، والمشترى والمباع والمرتجع بيتبعوا الفترة المختارة. اضغط على أي سطر تشوف حركته بالتفصيل.</p>
@@ -2069,8 +2112,16 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "68";
+  var VERSION = "69";
   var CHANGELOG = [
+    { v:"69", d:"2026-09-28", items:[
+      "شاشة جديدة «التسعير»: بتحدد فيها تبيع كل صنف بكام وإنت شايف تكلفة القطعة واصلة مخزنك",
+      "اكتب السعر فتطلعلك نسبة الربح، أو اكتب النسبة فيتحسب السعر — الاتنين بيتحدّثوا مع بعض وإنت بتكتب",
+      "النسبة بشكلين عشان ما يحصلش لبس: «زيادة على التكلفة» و«الهامش» (اشتريت بـ100 وبعت بـ150 = زيادة 50% وهامش 33%)",
+      "كروت فوق: تكلفة مخزنك · هتبيعها بكام · ربحك لو بعتها كلها · أصناف لسه من غير سعر · أصناف سعرها أقل من تكلفتها",
+      "تسعير بالجملة: نسبة واحدة على اللي ظاهر قدامك بتقريب لأقرب ٥ أو ١٠ جنيه",
+      "الشاشة ما بتكتبش أي حركة في الدفاتر — بتغيّر سعر البيع المسجّل على الصنف بس"
+    ]},
     { v:"68", d:"2026-09-28", items:[
       "زرار «نزّل شيت الفاتورة» في تبويب المشتريات: شيت بيتفتح بإكسل فيه رأس الفاتورة وسطر لكل لون ومقاس",
       "الشيت جاي معاه أسماء موردينك وأصنافك بألوانها ومقاساتها عشان تنسخ الاسم بالظبط",
@@ -2389,7 +2440,7 @@
      لو مفيش مستخدمين مسجّلين، البرنامج بيشتغل من غير قفل زي الأول. */
   var TABS = [
     ["dash","لوحة المتابعة"],["capital","رأس المال"],["cash","الخزنة"],
-    ["purch","المشتريات"],["items","الأصناف"],["inv","المخزون"],
+    ["purch","المشتريات"],["items","الأصناف"],["price","التسعير"],["inv","المخزون"],
     ["sales","المبيعات"],["ship","شركات الشحن"],["parties","العملاء والموردين"],
     ["rep","تقارير"],["log","سجل الحركات"],["backup","الإعدادات"]
   ];
@@ -2403,10 +2454,16 @@
     if(!authUser) return null;
     return users().find(function(u){ return u.id === authUser; }) || null;
   }
+  /* شاشة جديدة اتضافت بعد ما المستخدمين اتعملوا: صلاحياتهم المتخزّنة
+     مافيهاش اسمها، فكانوا هيلاقوها مختفية من غير سبب. بنورّثها من
+     الشاشة اللي هي جزء منها. */
+  var TAB_FROM = { price:"items" };
   function canTab(t){
     if(!lockOn()) return true;
     var u = curUser();
-    return !!u && (u.tabs || []).indexOf(t) > -1;
+    if(!u) return false;
+    var list = u.tabs || [];
+    return list.indexOf(t) > -1 || (!!TAB_FROM[t] && list.indexOf(TAB_FROM[t]) > -1);
   }
   // الأرباح والتكاليف — بتتخفي من جوّه الشاشات المسموحة كمان
   function canMoney(){
@@ -4436,6 +4493,236 @@
     if(!anyCost)  return "سجّل فاتورة شراء عشان نعرف تكلفة القطعة";
     return "محتاج صنف عنده سعر بيع وتكلفة شراء مع بعض";
   }
+
+
+  /* ================= التسعير =================
+     شاشة قرار مش شاشة تسجيل: بتقارن تكلفة القطعة الواصلة بسعر البيع
+     وتوريك الربح قبل ما تبيع. الحاجة الوحيدة اللي بتتغيّر منها هي
+     it.price — مفيش حركة بتتكتب في الدفاتر.
+
+     بنعرض النسبة بشكلين عشان ما يحصلش لبس:
+       زيادة على التكلفة (markup) = (السعر − التكلفة) ÷ التكلفة
+       الهامش (margin)            = (السعر − التكلفة) ÷ السعر
+     التاني هو اللي التقارير بتحسب بيه التعادل. اشتريت بـ100 وبعت بـ150:
+     زيادة 50% وهامش 33% — نفس الجنيه برقمين.
+
+     ملحوظة على الأسماء: «pr-» محجوزة لدرج مرتجع المشتريات،
+     فالشاشة دي كلها «prc-». */
+  var prcFilt = { q:"", only:"all" };
+
+  function prcMarkup(price, cost){ return cost > 0 ? (price - cost) / cost : null; }
+  function prcMargin(price, cost){ return price > 0 ? (price - cost) / price : null; }
+  function prcRound(v, step){
+    var st = Number(step)||0;
+    if(st <= 0) return Math.round(v * 100) / 100;
+    return Math.round(v / st) * st;
+  }
+  function prcPct(v){ return (v === null || !isFinite(v)) ? "—" : (v*100).toFixed(1) + "%"; }
+
+  // كل الأصناف بتكلفتها وسعرها ورصيدها — مصدر الجدول والكروت مع بعض
+  function prcAll(){
+    return live("items").map(function(it){
+      var cost  = avgCost(it.id);
+      var price = Number(it.price)||0;
+      var stock = Math.max(0, stockOf(it.id));
+      return { it:it, cost:cost, price:price, stock:stock,
+               unit: (price > 0 && cost > 0) ? price - cost : null };
+    });
+  }
+  function prcList(){
+    var q = squish(prcFilt.q).toLowerCase();
+    return prcAll().filter(function(r){
+      if(q && squish(r.it.name).toLowerCase().indexOf(q) < 0) return false;
+      if(prcFilt.only === "noprice") return r.price <= 0;
+      if(prcFilt.only === "loss")    return r.price > 0 && r.cost > 0 && r.price <= r.cost;
+      if(prcFilt.only === "instock") return r.stock > 0;
+      return true;
+    });
+  }
+  // ربح كل المخزون بالأسعار الحالية
+  function prcStockProfit(all){
+    return all.reduce(function(a, r){
+      return a + (r.stock && r.unit !== null ? r.stock * r.unit : 0);
+    }, 0);
+  }
+
+  function renderPrcKpis(){
+    var all = prcAll();
+    var cost = 0, val = 0, noPrice = 0, loss = 0, noCost = 0;
+    all.forEach(function(r){
+      if(r.price <= 0) noPrice++;
+      if(r.cost  <= 0) noCost++;
+      if(r.price > 0 && r.cost > 0 && r.price <= r.cost) loss++;
+      if(!r.stock) return;
+      cost += r.stock * r.cost;
+      val  += r.stock * (r.price > 0 ? r.price : r.cost);   // من غير سعر = من غير ربح
+    });
+    var prof = val - cost;
+    var cells = [
+      ["تكلفة اللي في مخزنك", money(cost), "", "بسعر الشراء الواصل"],
+      ["هتبيعها بكام", money(val), "", "بأسعارك المسجّلة"],
+      ["ربحك لو بعتها كلها", money(prof), prof > 0 ? "v-gain" : (prof < 0 ? "v-due" : ""),
+        "هامش " + prcPct(val > 0 ? prof/val : null)],
+      ["أصناف لسه من غير سعر", qty(noPrice), noPrice ? "v-due" : "v-gain",
+        noPrice ? "دي بتتباع من غير ربح محسوب" : "كلها متسعّرة"],
+      ["سعرها أقل من تكلفتها", qty(loss), loss ? "v-due" : "v-gain",
+        loss ? "كل قطعة منها خسارة" : "مفيش صنف بيتباع بخسارة"]
+    ];
+    document.getElementById("prc-kpis").innerHTML = cells.map(function(c){
+      return "<div class='money-only'><span>" + esc(c[0]) + "</span>" +
+        "<strong class='num " + c[2] + "'>" + esc(c[1]) + "</strong>" +
+        "<span class='sub'>" + esc(c[3]) + "</span></div>";
+    }).join("");
+
+    /* الربح ده بضاعة بس. الثابت (إيجار، نت، مرتبات) بيتاكل منه —
+       وده اللي بيخلّي «أبيع بكام» في التقارير مفهوم. */
+    var el = document.getElementById("prc-note");
+    if(!el) return;
+    if(all.length && noCost === all.length){
+      el.innerHTML = "<span class='v-due'>مفيش تكلفة شراء مسجّلة لأي صنف — سجّل فاتورة شراء الأول عشان نعرف بتشتري بكام.</span>";
+      return;
+    }
+    var fx = live("cash").reduce(function(a, c){
+      return a + (c.type === "expense" && costKindOf(c) === "fixed" ? (Number(c.amount)||0) : 0);
+    }, 0);
+    var sp = prcStockProfit(all);
+    el.innerHTML = "الربح اللي فوق ربح <strong>بضاعة</strong> بس — لسه هيتاكل منه الشحن اللي بتدفعه من جيبك ومصاريفك الثابتة" +
+      (fx > 0
+        ? " (<strong>" + esc(money(fx)) + "</strong> مسجّلة من البداية لحد دلوقتي). " +
+          (sp >= fx ? "بضاعة مخزنك بتغطّيها وفاضل <strong>" + esc(money(sp - fx)) + "</strong>."
+                    : "<span class='v-due'>بضاعة مخزنك مش بتغطّيها — ناقص <strong>" + esc(money(fx - sp)) + "</strong>.</span>")
+        : ".");
+  }
+
+  var PRC_HEAD = ["الصنف","في المخزن","تكلفة القطعة","سعر البيع",
+                  "زيادة على التكلفة %","ربح القطعة","الهامش %","ربح كل المخزون"];
+
+  function renderPricing(){
+    renderPrcKpis();
+    var ed = canEdit();
+    var rows = prcList().map(function(r){
+      // صنف من غير سعر: الخانة تفضل فاضية — «−100%» رقم صح ومالوش أي معنى هنا
+      var mk = r.price > 0 ? prcMarkup(r.price, r.cost) : null;
+      var bad = r.price > 0 && r.cost > 0 && r.price <= r.cost;
+      var dis = ed ? "" : " disabled";
+      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "' data-stock='" + r.stock + "'>" +
+        "<td class='wide'>" + esc(r.it.name) + "</td>" +
+        "<td class='num'>" + esc(qty(r.stock)) + "</td>" +
+        "<td class='num'>" + (r.cost > 0 ? money(r.cost)
+           : "<span class='v-due'>لسه ما اشتريتش</span>") + "</td>" +
+        "<td><input class='prin' inputmode='decimal' data-prcprice='" + esc(r.it.id) + "'" +
+           " value='" + (r.price > 0 ? r.price : "") + "' placeholder='0' aria-label='سعر البيع'" + dis + "></td>" +
+        "<td>" + (r.cost > 0
+           ? "<input class='prin' inputmode='decimal' data-prcmk='" + esc(r.it.id) + "'" +
+             " value='" + (mk === null ? "" : (mk*100).toFixed(1)) + "' placeholder='0'" +
+             " aria-label='زيادة على التكلفة بالمية'" + dis + ">"
+           : "<span class='num'>—</span>") + "</td>" +
+        "<td class='num prc-unit " + (bad ? "v-due" : (r.unit ? "v-gain" : "")) + "'>" +
+           (r.unit === null ? "—" : money(r.unit)) + "</td>" +
+        "<td class='num prc-mg'>" + esc(prcPct(r.price > 0 ? prcMargin(r.price, r.cost) : null)) + "</td>" +
+        "<td class='num prc-tot'>" + ((r.unit === null || !r.stock) ? "—" : money(r.unit * r.stock)) + "</td>" +
+      "</tr>";
+    });
+    table("t-price", PRC_HEAD, rows,
+      (prcFilt.q || prcFilt.only !== "all") ? "مفيش صنف بالمواصفات دي."
+                                            : "سجّل أصنافك الأول من تبويب «الأصناف».");
+  }
+
+  // بيحدّث خانات السطر من غير ما يعيد رسم الجدول — عشان المؤشر ما يقفزش
+  function prcPaint(tr, price){
+    var cost = Number(tr.dataset.cost)||0, st = Number(tr.dataset.stock)||0;
+    var unit = (price > 0 && cost > 0) ? price - cost : null;
+    var u = tr.querySelector(".prc-unit"), g = tr.querySelector(".prc-mg"), t = tr.querySelector(".prc-tot");
+    if(u){
+      u.textContent = unit === null ? "—" : money(unit);
+      u.className = "num prc-unit " + (unit === null ? "" : (unit <= 0 ? "v-due" : "v-gain"));
+    }
+    if(g) g.textContent = prcPct(price > 0 ? prcMargin(price, cost) : null);
+    if(t) t.textContent = (unit === null || !st) ? "—" : money(unit * st);
+  }
+  function prcCommit(id, price){
+    var it = db.items.find(function(x){ return x.id === id; });
+    if(!it) return;
+    var v = Math.round((Number(price)||0) * 100) / 100;
+    if((Number(it.price)||0) === v) return;             // ما اتغيّرش = ما نلخبطش وقت السجل
+    it.price = v; it.at = Date.now(); it.editedBy = me || "غير محدد";
+    saveSoon("items");
+  }
+
+  /* الحفظ بيتعمل وإنت بتكتب (بتأخير بسيط) مش على blur بس. السبب:
+     لما تكتب في خانة النسبة، خانة السعر بتتملى بالكود — والمتصفح
+     مابيبعتش change لخانة اتغيّرت بالكود، فالسعر كان هيضيع لو سبت
+     الشاشة من غير ما تلمس خانة السعر نفسها. */
+  var prcTimer = null, prcPend = null;
+  function prcQueue(id, price){
+    prcPend = { id:id, price:price };
+    clearTimeout(prcTimer); prcTimer = setTimeout(prcFlush, 600);
+  }
+  function prcFlush(){
+    clearTimeout(prcTimer); prcTimer = null;
+    if(!prcPend) return;
+    var q = prcPend; prcPend = null;
+    prcCommit(q.id, q.price);
+    renderPrcKpis();
+    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
+  }
+
+  document.getElementById("t-price").addEventListener("input", function(e){
+    var tr = e.target.closest("tr[data-prcrow]"); if(!tr) return;
+    var cost = Number(tr.dataset.cost)||0;
+    var pIn  = tr.querySelector("[data-prcprice]"), mIn = tr.querySelector("[data-prcmk]");
+    if(e.target === mIn && cost > 0){
+      var mk = Number(toEn(mIn.value));
+      // خانة فاضية = مش بتصفّر السعر، بتستنى لحد ما يكتب
+      if(mIn.value.trim() === "" || !isFinite(mk)) return;
+      pIn.value = (cost * (1 + mk/100)).toFixed(2);
+    } else if(e.target === pIn && mIn){
+      var pr = Number(toEn(pIn.value));
+      mIn.value = (pIn.value.trim() === "" || !isFinite(pr)) ? "" : (prcMarkup(pr, cost)*100).toFixed(1);
+    } else if(e.target !== pIn) return;
+    var val = Number(toEn(pIn.value))||0;
+    prcPaint(tr, val);
+    if(canEdit()) prcQueue(tr.dataset.prcrow, val);
+  });
+  document.getElementById("t-price").addEventListener("change", function(e){
+    var tr = e.target.closest("tr[data-prcrow]"); if(!tr) return;
+    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
+    prcQueue(tr.dataset.prcrow, Number(toEn(tr.querySelector("[data-prcprice]").value))||0);
+    prcFlush();
+  });
+  // سبت الشاشة والتأخير لسه شغال؟ يتكتب قبل ما تمشي
+  window.addEventListener("beforeunload", function(){ prcFlush(); });
+  document.getElementById("nav").addEventListener("click", function(){ prcFlush(); }, true);
+
+  document.getElementById("prc-q").addEventListener("input", function(){
+    prcFilt.q = this.value; renderPricing();
+  });
+  document.getElementById("prc-quick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-prconly]"); if(!b) return;
+    prcFilt.only = b.dataset.prconly;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+      x.classList.toggle("on", x === b); });
+    renderPricing();
+  });
+  // التسعير بالجملة: بيمشي على اللي ظاهر قدامك بس — مش على كل الداتا
+  document.getElementById("b-prc-apply").addEventListener("click", function(){
+    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
+    var box = document.getElementById("prc-bulk-pct");
+    var pct = Number(toEn(box.value));
+    if(box.value.trim() === "" || !isFinite(pct)){ toast("اكتب نسبة الزيادة الأول"); return; }
+    var step = Number(document.getElementById("prc-bulk-round").value)||0;
+    var hit = 0, skip = 0;
+    prcList().forEach(function(r){
+      if(r.cost <= 0){ skip++; return; }
+      prcCommit(r.it.id, prcRound(r.cost * (1 + pct/100), step));
+      hit++;
+    });
+    renderPricing();
+    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
+    toast(hit ? ("اتسعّر " + qty(hit) + " صنف" +
+                 (skip ? " · " + qty(skip) + " من غير تكلفة اتساب زي ما هو" : ""))
+              : "مفيش صنف له تكلفة شراء في اللي ظاهر");
+  });
 
   /* ---------- تقييم الأداء ---------- */
   function renderPerf(){
@@ -7671,6 +7958,7 @@
     cash:    function(){ renderWallets(); renderCash(); },
     purch:   function(){ renderPurch(); },
     items:   function(){ renderItems(); renderVars(); renderOffers(); },
+    price:   function(){ renderPricing(); },
     inv:     function(){ renderInventory(); },
     sales:   function(){ renderSales(); },
     ship:    function(){ renderShip(); },
