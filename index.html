@@ -500,6 +500,17 @@
   #t-sales tr.order.open .chev{transform:rotate(180deg)}
 
   /* سطر التفاصيل: كل اللي اتشال من الأعمدة بيعيش هنا */
+  /* شارة الحالة في السطر بقت select — بتفضل شكلها شارة */
+  select.rowst{
+    -webkit-appearance:none;appearance:none;border:1px solid transparent;
+    width:auto;min-width:0;padding:2px var(--sp-2);cursor:pointer;
+    font:inherit;font-size:var(--fs-1);font-weight:600;line-height:1.7;
+    background-image:none;text-align:center;text-align-last:center;
+  }
+  select.rowst:hover{border-color:currentColor}
+  select.rowst:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  select.rowst:disabled{cursor:default;opacity:1}
+  select.rowst option{background:var(--card);color:var(--ink);font-weight:400}
   #t-sales tr.detail td{padding:0;background:var(--paper);border-bottom:1px solid var(--line)}
   /* سطر الفاتورة في المشتريات — نفس سلوك سطر الأوردر */
   #t-purch tr.pinv{cursor:pointer}
@@ -989,6 +1000,17 @@
   <p class="hint">شركة الشحن بتحصّل من العميل بدالك، وبتخصم عمولتها من الفلوس اللي عندها، والباقي بتوصّلهولك. الشاشة دي بتوريك لكل شركة: حصّلت كام، وليها كام عندك، وباقي لك كام في محفظتها — وكشف بكل حركة.</p>
 
   <div class="stats" id="sh-stats"></div>
+
+  <div class="panel">
+    <h3>أسعار الشحن بالمنطقة</h3>
+    <p class="hint">حدّد سعر الشحن لكل منطقة والمحافظات اللي جواها مرة واحدة. بعد كده أول ما تختار العميل في الأوردر، «شحن بتدفعه لشركة الشحن» بيتملّى لوحده من محافظته.</p>
+    <div class="tbl-wrap"><table id="t-zones"></table></div>
+    <div class="row-actions">
+      <button class="tbtn primary" type="button" id="b-zone-add">+ منطقة</button>
+      <button class="tbtn" type="button" id="b-zone-reset">رجّع الأسعار المبدئية</button>
+    </div>
+    <datalist id="gov-list"></datalist>
+  </div>
 
   <div class="tbl-wrap"><table id="t-shipco"></table></div>
 
@@ -1974,6 +1996,8 @@
           <input id="e-shipcode" data-f="shipCode" autocomplete="off"></div>
         <div><label for="e-shipin">شحن بتحصّله من العميل</label>
           <input id="e-shipin" type="number" step="any" min="0" data-f="shipIn"></div>
+        <div><label for="e-zone">منطقة الشحن</label>
+          <select id="e-zone"></select></div>
         <div><label for="e-shipout">شحن بتدفعه لشركة الشحن</label>
           <input id="e-shipout" type="number" step="any" min="0" data-f="shipOut"></div>
         <div class="span2"><label for="e-payvia">التحصيل بيتم عن طريق</label>
@@ -1986,6 +2010,7 @@
         <div class="span2"><label for="e-note">ملاحظة</label>
           <input id="e-note" data-f="note" autocomplete="off"></div>
       </div>
+      <p class="hintline" id="e-zonenote" hidden></p>
       <p class="hintline" id="e-shipnote" hidden></p>
       <div class="paybox" id="e-paybox" hidden></div>
     </div>
@@ -2039,8 +2064,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "66";
+  var VERSION = "67";
   var CHANGELOG = [
+    { v:"67", d:"2026-09-28", items:[
+      "حالة الأوردر بتتغيّر من سطر الجدول على طول — من غير ما تفتح التفاصيل ولا درج التعديل",
+      "جدول أسعار الشحن بالمنطقة في شاشة «شركات الشحن»: المنطقة وسعرها والمحافظات اللي جواها",
+      "في درج الأوردر: أول ما تختار العميل، «شحن بتدفعه لشركة الشحن» بيتملّى لوحده من محافظته",
+      "قايمة «منطقة الشحن» في الدرج لو عايز تختارها بإيدك، ولو كتبت رقم بنفسك بيفضل زي ما هو",
+      "تنبيه بالمحافظات اللي لسه من غير منطقة عشان تعرف قبل ما تسجّل أوردر"
+    ]},
     { v:"66", d:"2026-09-27", items:[
       "«لازم تبيع بكام» في لوحة المتابعة بقى رقم كاش: كل اللي خرج من جيبك ناقص كل اللي رجع من البيع — تراكمي من البداية وبيقل مع كل تحصيل",
       "ما بقاش بيقول «—» أبدًا: مش محتاج هامش ولا أسعار بيع عشان يشتغل",
@@ -5544,7 +5576,7 @@
   function blankLine(){ return { itemId:"", color:"", size:"", qty:"", price:"", ret:"", manual:false }; }
   function newDraft(keep){
     return { date: firstOpenDate(), status:"progress", partyId:"", owner: me || "",
-             shipCo: keep ? keep.shipCo : "", shipCode:"",
+             shipCo: keep ? keep.shipCo : "", shipCode:"", zoneId:"",
              shipIn:"", shipOut:"", payVia: keep ? keep.payVia : "ship",
              paid:"", note:"", lines:[ blankLine() ] };
   }
@@ -5563,6 +5595,7 @@
       return { itemId:l.itemId, color:l.color, size:l.size,
                qty:l.qty, price:l.price, ret:"", manual:true };
     });
+    d.zoneId = rec.zoneId || "";          // نفس العميل = نفس المنطقة
     d.fromNo = rec.no || "";
     return d;
   }
@@ -5581,6 +5614,7 @@
   function draftFrom(rec){
     return { date: rec.date || today(), status: stOf(rec), partyId: rec.partyId || "",
              owner: rec.owner || "", shipCo: rec.shipCo || "", shipCode: rec.shipCode || "",
+             zoneId: rec.zoneId || "",
              shipIn: rec.shipIn || "", shipOut: rec.shipOut || "", payVia: payVia(rec),
              paid: rec.paid || "", note: rec.note || "",
              lines: SL(rec).map(function(l){
@@ -5760,6 +5794,7 @@
     document.getElementById("newcust-box").hidden = true;
     var sn = document.getElementById("e-shipnote");
     if(sn){ sn.textContent = ""; sn.hidden = true; }
+    seedZones(); syncZoneUI();
     var cf = document.getElementById("e-conflict");
     if(cf){ cf.textContent = ""; cf.hidden = true; }
     var rp = document.getElementById("e-repeat");
@@ -5984,7 +6019,15 @@
         (p.gov||p.phone ? "<span class='secondary'>" + esc([p.gov,p.phone].filter(Boolean).join(" · ")) + "</span>" : "") + "</td>" +
       "<td class='items'>" + (goods || "—") + "</td>" +
       "<td class='total'>" + totalCell + "</td>" +
-      "<td class='stat'><span class='st st-" + st + "'>" + ST_LABEL[st] + "</span></td>" +
+      /* الحالة بتتغيّر من السطر على طول — كانت محتاجة تفتح التفاصيل
+         أو درج التعديل. المعالج والحواجز (المخزون والفترة المقفولة)
+         هم هم اللي شغّالين من التفاصيل. */
+      "<td class='stat'><select class='rowst st st-" + st + "' data-status='" + s.id + "'" +
+        (canEdit() ? "" : " disabled") + " aria-label='حالة الأوردر'>" +
+        ["proposed","progress","delivered","cancelled"].map(function(k){
+          return "<option value='" + k + "'" + (k === st ? " selected" : "") + ">" +
+                 ST_LABEL[k] + "</option>"; }).join("") +
+      "</select></td>" +
       "<td class='rowacts'>" +
         "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل'>تعديل</button>" +
         "<span class='chev' aria-hidden='true'>▾</span></td></tr>";
@@ -7093,7 +7136,120 @@
       });
   }
 
-  function renderShip(){ renderShipCos(); }
+  /* ---------- تعديل مناطق الشحن ---------- */
+  function renderZones(){
+    var box = document.getElementById("t-zones");
+    if(!box) return;
+    var dl = document.getElementById("gov-list");
+    if(dl && !dl.children.length)
+      dl.innerHTML = GOVS.map(function(g){ return "<option value='"+esc(g)+"'></option>"; }).join("");
+
+    var rows = shipZones().map(function(z){
+      var used = live("parties").filter(function(p){
+        return p.type === "customer" && zoneForGov(p.gov) && zoneForGov(p.gov).id === z.id; }).length;
+      return "<tr><td class='wide'><input data-zf='name' data-zid='"+esc(z.id)+"' value='"+esc(z.name)+"' autocomplete='off'></td>" +
+        "<td class='num'><input type='number' step='any' min='0' style='max-width:110px' " +
+          "data-zf='price' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.price)||0)+"'></td>" +
+        "<td class='wide'><input list='gov-list' data-zf='govs' data-zid='"+esc(z.id)+"' " +
+          "placeholder='القاهرة، الجيزة' autocomplete='off' value='"+esc((z.govs||[]).join("، "))+"'>" +
+          "<span class='sub'>" + (used ? qty(used) + " عميل في المنطقة دي" : "مفيش عملاء فيها لسه") + "</span></td>" +
+        "<td><button class='del' type='button' data-zdel='"+esc(z.id)+"'>حذف</button></td></tr>";
+    });
+    table("t-zones", ["المنطقة","سعر الشحن","المحافظات اللي جواها",""], rows,
+      "مفيش مناطق — دوس «+ منطقة» أو «رجّع الأسعار المبدئية».");
+    // محافظات مش متحطوطة في أي منطقة — عشان ما تكتشفش ده وإنت بتسجّل أوردر
+    var miss = GOVS.filter(function(g){ return !zoneForGov(g); });
+    var n = document.getElementById("zone-miss");
+    if(!n){
+      n = document.createElement("p");
+      n.id = "zone-miss"; n.className = "note";
+      box.parentNode.parentNode.insertBefore(n, box.parentNode.nextSibling);
+    }
+    n.textContent = miss.length
+      ? "محافظات لسه من غير منطقة: " + miss.slice(0,6).join("، ") +
+        (miss.length > 6 ? " وغيرهم (" + qty(miss.length) + ")" : "") +
+        " — العميل اللي منها مش هيتملّى سعر شحن لوحده."
+      : "";
+  }
+
+  document.getElementById("b-zone-add").addEventListener("click", function(){
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    seedZones();
+    if(!Array.isArray(settings.shipZones)) settings.shipZones = [];
+    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", price:0, govs:[] });
+    saveSoon("settings"); renderZones(); fillZoneSelect();
+  });
+  document.getElementById("b-zone-reset").addEventListener("click", function(){
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(this.dataset.armed !== "1"){
+      this.dataset.armed = "1"; this.textContent = "تأكيد؟";
+      var btn = this;
+      setTimeout(function(){
+        if(btn.dataset.armed === "1"){ btn.dataset.armed = ""; btn.textContent = "رجّع الأسعار المبدئية"; }
+      }, 4000);
+      return;
+    }
+    this.dataset.armed = ""; this.textContent = "رجّع الأسعار المبدئية";
+    settings.shipZones = undefined; seedZones();
+    saveSoon("settings"); renderZones(); fillZoneSelect();
+    toast("رجعنا الأسعار المبدئية");
+  });
+  document.getElementById("t-zones").addEventListener("input", function(e){
+    var el = e.target.closest("[data-zf]"); if(!el) return;
+    var z = zoneById(el.dataset.zid); if(!z) return;
+    var f = el.dataset.zf;
+    if(f === "name")  z.name = el.value;
+    if(f === "price") z.price = Number(el.value)||0;
+    if(f === "govs")  z.govs = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
+    saveSoon("settings"); fillZoneSelect();
+  });
+  document.getElementById("t-zones").addEventListener("click", function(e){
+    var d = e.target.closest("[data-zdel]"); if(!d) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    settings.shipZones = shipZones().filter(function(z){ return z.id !== d.dataset.zdel; });
+    saveSoon("settings"); renderZones(); fillZoneSelect();
+  });
+
+  /* ---------- المنطقة في درج الأوردر ---------- */
+  function fillZoneSelect(){
+    var el = document.getElementById("e-zone"); if(!el) return;
+    var zs = shipZones().map(function(z){
+      return { v:z.id, t:z.name + " — " + money(Number(z.price)||0) }; });
+    el.innerHTML = optsHTML(zs, draft && draft.zoneId ? draft.zoneId : "", "من غير منطقة");
+  }
+  // المحافظة بتحدّد المنطقة، والمنطقة بتحدّد السعر
+  function applyZoneFromParty(){
+    var pt = db.parties.find(function(x){ return x.id === draft.partyId; });
+    var z = pt ? zoneForGov(pt.gov) : null;
+    if(!z) return false;
+    draft.zoneId = z.id;
+    // ما نلمسش رقم كتبته بإيدك
+    var cur = Number(draft.shipOut)||0;
+    if(!cur) draft.shipOut = Number(z.price)||0;
+    return true;
+  }
+  function syncZoneUI(){
+    fillZoneSelect();
+    var out = document.getElementById("e-shipout");
+    if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
+    var note = document.getElementById("e-zonenote");
+    if(!note) return;
+    var z = draft.zoneId ? zoneById(draft.zoneId) : null;
+    var pt = db.parties.find(function(x){ return x.id === draft.partyId; });
+    if(z && pt && squish(pt.gov)){
+      note.textContent = "«" + squish(pt.gov) + "» في منطقة «" + z.name + "» — الشحن " +
+        money(Number(z.price)||0) + ". غيّره لو مختلف.";
+      note.hidden = false;
+    } else { note.textContent = ""; note.hidden = true; }
+  }
+  document.getElementById("e-zone").addEventListener("change", function(){
+    draft.zoneId = this.value;
+    var z = zoneById(this.value);
+    if(z) draft.shipOut = Number(z.price)||0;
+    syncZoneUI(); updateEntryCalc();
+  });
+
+  function renderShip(){ seedZones(); renderZones(); renderShipCos(); }
 
   /* ---------- فلاتر الخزنة ---------- */
   var cfilt = { dir:"", kind:"", src:"", from:"", to:"", text:"" };
@@ -8033,7 +8189,18 @@
     } else {
       draft[f] = v;
       if(f === "status"){ renderDrawerLines(); return; }  // المرتجع بيظهر ويختفي مع الحالة
-      if(f === "partyId" && !draft.shipCo) suggestShipping();
+      if(f === "partyId"){
+        // جدول الأسعار أولى من «آخر أوردر لنفس المحافظة» — ده رقم متفق عليه
+        applyZoneFromParty();
+        if(!draft.shipCo) suggestShipping();
+        syncZoneUI();
+      }
+      // كتبت رقم بإيدك؟ المنطقة ما بقتش هي المصدر
+      if(f === "shipOut"){
+        draft.zoneId = "";
+        var zs = document.getElementById("e-zone"); if(zs) zs.value = "";
+        var zn = document.getElementById("e-zonenote"); if(zn){ zn.textContent = ""; zn.hidden = true; }
+      }
     }
     updateEntryCalc();
   }
@@ -8045,6 +8212,47 @@
     var el = document.querySelector("#e-lines [data-f='price'][data-li='"+draft.lines.indexOf(l)+"']");
     if(el) el.value = l.price;
   }
+  /* ---------- جدول أسعار الشحن بالمنطقة ----------
+     بدل ما تكتب رقم الشحن في كل أوردر: بتحدّد المنطقة مرة واحدة
+     بسعرها والمحافظات اللي جواها، وبعدها أول ما تختار العميل بيتملّى
+     لوحده من محافظته. كله قابل للتعديل من شاشة «شركات الشحن». */
+  var ZONES_SEED = [
+    { name:"القاهرة والجيزة", price:75,
+      govs:["القاهرة","الجيزة"] },
+    { name:"مناطق جديدة وأطراف", price:80, govs:[] },
+    { name:"الوجه بحري", price:95,
+      govs:["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية",
+            "الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"] },
+    { name:"الوجه قبلي", price:105,
+      govs:["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"] },
+    { name:"المحافظات الحدودية", price:150,
+      govs:["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"] }
+  ];
+  function shipZones(){
+    if(!Array.isArray(settings.shipZones)) return [];
+    return settings.shipZones.filter(function(z){ return z && squish(z.name); });
+  }
+  function seedZones(){
+    if(Array.isArray(settings.shipZones)) return false;
+    settings.shipZones = ZONES_SEED.map(function(z, i){
+      return { id:"z"+(i+1), name:z.name, price:z.price, govs:z.govs.slice() };
+    });
+    return true;
+  }
+  function zoneById(id){
+    return shipZones().find(function(z){ return z.id === id; }) || null;
+  }
+  // المنطقة اللي المحافظة دي جواها
+  function zoneForGov(gov){
+    var g = squish(gov); if(!g) return null;
+    return shipZones().find(function(z){
+      return (z.govs||[]).some(function(x){ return squish(x) === g; });
+    }) || null;
+  }
+  function zonePrice(id){
+    var z = zoneById(id); return z ? (Number(z.price)||0) : 0;
+  }
+
   /* آخر شركة شحن اتستخدمت للمحافظة دي. الأرقام دي فلوس، فما ينفعش
      تتحط في الخانات من غير ما اللي بيسجّل يعرف — بيظهر سطر بيقول جت منين.
      والملغي مش مصدر: مصاريفه مش بتاعت توصيل ناجح. */
@@ -8058,9 +8266,19 @@
       return q && q.gov === p.gov && !isCancelled(x) && squish(x.shipCo);
     }).sort(byDate)[0];
     if(!last) return;
-    draft.shipCo = last.shipCo;
-    if(!draft.shipIn) draft.shipIn = last.shipIn || "";
-    if(!draft.shipOut) draft.shipOut = last.shipOut || "";
+    /* السطر ده لازم يقول اللي اتملّى فعلاً بس. جدول المناطق بيملا
+       «للشركة» قبل ما نوصل هنا، فلو قلنا إنها جت من آخر أوردر يبقى
+       السطر بيكدب على الخانة اللي قدامك. */
+    var filled = [];
+    draft.shipCo = last.shipCo; filled.push(squish(last.shipCo));
+    if(!draft.shipIn && (Number(last.shipIn)||0)){
+      draft.shipIn = last.shipIn;
+      filled.push("على العميل " + money(shipIn(last)));
+    }
+    if(!draft.shipOut && (Number(last.shipOut)||0)){
+      draft.shipOut = last.shipOut;
+      filled.push("للشركة " + money(shipOut(last)));
+    }
     ["shipCo","shipIn","shipOut"].forEach(function(f){
       var el = SD.querySelector("[data-f='"+f+"']:not([data-li])");
       if(el) el.value = draft[f];
@@ -8068,10 +8286,8 @@
     if(note){
       // «لـ» + «الإسكندرية» بتتكتب «للإسكندرية» مش «لـالإسكندرية»
       var gv = p.gov.indexOf("ال") === 0 ? "ل" + p.gov.slice(1) : "لـ" + p.gov;
-      note.textContent = "اتملّت لوحدها من آخر أوردر " + gv +
-        " (#" + (last.no || "—") + "): " + squish(last.shipCo) +
-        " · على العميل " + money(shipIn(last)) + " · للشركة " + money(shipOut(last)) +
-        " — غيّرها لو مختلفة.";
+      note.textContent = "من آخر أوردر " + gv + " (#" + (last.no || "—") + "): " +
+        filled.join(" · ") + " — غيّرها لو مختلفة.";
       note.hidden = false;
     }
   }
@@ -8434,6 +8650,7 @@
       paid: status === "cancelled" ? 0 : (Number(draft.paid)||0),
       owner: (draft.owner||"").trim(), shipCo: (draft.shipCo||"").trim(),
       shipCode: (draft.shipCode||"").trim(), payVia: draft.payVia,
+      zoneId: draft.zoneId || "",
       shipIn: Number(draft.shipIn)||0, shipOut: Number(draft.shipOut)||0,
       note: (draft.note||"").trim(),
       itemId:"", color:"", size:"", qty:0, price:0, ret:0
