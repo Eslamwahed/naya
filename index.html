@@ -2170,8 +2170,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "81";
+  var VERSION = "82";
   var CHANGELOG = [
+    { v:"82", d:"2026-09-29", items:[
+      "إصلاح: لما العميل يرجّع صنف في أوردر تحصيله عن طريق شركة الشحن، المحصّل بينزل لوحده — الشركة بتحصّل تمن اللي العميل خده بس",
+      "قبل كده لو «حصّلت الكل» اتدست قبل المرتجع، محفظة الشركة كانت بتفضل على الرقم القديم، والسيستم كان بيقول «ترجّعيله» فلوس العميل ما دفعهاش أصلًا",
+      "الأوردرات القديمة اللي فيها المشكلة دي: الخطوة الجاية بتقول «المسجّل إن الشركة حصّلت أكتر من الحقيقي» وجنبها زرار «صحّحي» — دوسة واحدة",
+      "التحصيل المباشر ما اتغيّرش: لو العميل فعلًا دفع قبل ما يرجّع، السيستم لسه بيقول «ترجّعيله» والرقم ما بيتلمسش"
+    ]},
     { v:"81", d:"2026-09-29", items:[
       "كروت شاشة المبيعات بقت بتتفتح على تفاصيلها زي باقي الشاشات",
       "«مبيعات مسلّمة» · «تجريه من العملاء» (بالتليفون عشان تكلّميه) · «مع شركات الشحن» (بكود البوليصة) · «شحن من جيبك» · «صافي الربح» أوردر أوردر",
@@ -3396,6 +3402,24 @@
       return "شركة الشحن بتحصّل وقت التسليم — حدّدي نتيجة المعاينة الأول (خطوة ٣) وبعدين سجّلي التحصيل";
     return null;
   }
+  /* في المعاينة شركة الشحن بتحصّل تمن اللي العميل خده بس — العميل
+     بيرجّع الصنف قبل ما يدفع، والمندوب عمره ما بيدفع فلوس للعميل على
+     الباب. فأوردر تحصيله عن طريق الشركة، لو المسجّل إنها حصّلت أكتر من
+     المطلوب، يبقى الرقم ده مش حقيقي (غالبًا اتسجّل التحصيل قبل المرتجع)
+     — مش «فلوس ليه ترجّعيهاله». والمحفظة لازم تتبع الحقيقة.
+     التحصيل المباشر مختلف: العميل ممكن فعلًا يكون دفع قبل ما يرجّع،
+     فهناك «ترجّعيله» صح ومابنلمسش الرقم. */
+  function shipOverPaid(s){
+    if(!viaShip(s) || !isDelivered(s)) return 0;
+    var over = (Number(s.paid)||0) - (saleTotal(s) + shipIn(s));
+    return over > 0.009 ? over : 0;
+  }
+  function capShipPaid(rec){
+    var over = shipOverPaid(rec);
+    if(!over) return 0;
+    rec.paid = Math.round((saleTotal(rec) + shipIn(rec)) * 100) / 100;
+    return over;
+  }
   // القطع الراجعة اللي لسه ما رجعتش المخزن
   function heldLeft(s){
     return SL(s).reduce(function(a, l){
@@ -3416,6 +3440,11 @@
     if(isDelivered(s) && m.due > 0.009)
       return { n:4, k:"collect", t: viaShip(s) ? "سجّلي تحصيل " + co : "حصّلي من العميل",
         hint:"لسه " + money(m.due) + (viaShip(s) ? " — أول ما " + co + " تحصّلها سجّليها." : " على العميل."),
+        also: left ? "وفيه " + qty(left) + " قطعة راجعة لسه عند " + co + "." : "" };
+    if(shipOverPaid(s))
+      return { n:4, k:"fixpaid", t:"المسجّل إن " + co + " حصّلت أكتر من الحقيقي",
+        hint:co + " بتحصّل تمن اللي العميل خده بس + الشحن = " + money(m.owed) +
+             "، والمسجّل " + money(Number(s.paid)||0) + ". صحّحيه عشان محفظتها تبقى مظبوطة.",
         also: left ? "وفيه " + qty(left) + " قطعة راجعة لسه عند " + co + "." : "" };
     if(isDelivered(s) && m.due < -0.009)
       return { n:4, k:"refund", t:"المحصّل أكتر من المطلوب بـ" + money(-m.due),
@@ -6553,7 +6582,9 @@
                   ? "<span class='pill due'>مع " + esc(squish(s.shipCo) || "الشحن") + " " + money(due) + "</span>"
                   : "محصّل " + money(collected) + " <span class='pill due'>باقي " + money(due) + "</span>")
               // حصّل أكتر من المطلوب (العميل رجّع بعد ما دفع) — دي مش «خالص»
-              : (due < -0.009 ? "<span class='pill due'>ترجّعله " + money(-due) + "</span>" : "خالص"))
+              : (due < -0.009
+                  ? "<span class='pill due'>" + (viaShip(s) ? "صحّحي المحصّل" : "ترجّعله " + money(-due)) + "</span>"
+                  : "خالص"))
           : (canc ? "ملغي · شحن " + money(shipOut(s)) : "لسه ما اتحصّلش")) +
       "</span>";
 
@@ -6612,6 +6643,9 @@
              esc(squish(s.shipCo) || "الشركة") + " حصّلت الكل</button>";
     if(ed && sp.k === "collect" && !viaShip(s))
       btns = "<button class='tbtn primary' type='button' data-qpayall='" + s.id + "'>العميل دفع الكل</button>";
+    if(ed && sp.k === "fixpaid")
+      btns = "<button class='tbtn primary' type='button' data-fixpaid='" + s.id + "'>صحّحي لـ " +
+             esc(money(m.owed)) + "</button>";
     if(ed && sp.k === "refund")
       btns = "<button class='tbtn' type='button' data-edit='sales|" + s.id + "'>تعديل الأوردر</button>";
     if(ed && sp.k === "back")
@@ -6638,7 +6672,7 @@
          التسليم بس، فكان بيطلع صفر ويتقري «خالص» والعميل ما دفعش حاجة. */
       (isDelivered(s)
         ? "<div><span>" + (m.due > 0.009 ? (viaShip(s) ? "لسه هتحصّله الشركة" : "باقي عليه")
-                          : (m.due < -0.009 ? "ترجّعله" : "الحساب")) + "</span>" +
+                          : (m.due < -0.009 ? (viaShip(s) ? "مسجّل زيادة" : "ترجّعله") : "الحساب")) + "</span>" +
           "<b class='num " + (Math.abs(m.due) < 0.009 ? "v-gain" : "v-due") + "'>" +
           (Math.abs(m.due) < 0.009 ? "خالص" : money(Math.abs(m.due))) + "</b></div>"
         : "<div><span>الحساب</span><b>" + (canc ? "ملغي" : "بعد التسليم") + "</b>" +
@@ -6655,7 +6689,10 @@
     if(m.due > 0.009 && viaShip(s))
       warns.push([(squish(s.shipCo) || "شركة الشحن") + " هي اللي بتحصّل — مش إنت اللي بتجري ورا العميل.", ""]);
     if(m.due < -0.009)
-      warns.push(["حصّلت منه أكتر من المطلوب — ترجّعله " + money(-m.due) + ".", "v-due"]);
+      warns.push([viaShip(s)
+        ? "المسجّل إن " + (squish(s.shipCo) || "الشركة") + " حصّلت " + money(m.paid) + " بس المطلوب " +
+          money(m.owed) + " — الشركة ما بتحصّلش تمن اللي رجع. صحّحيه من الخطوة فوق."
+        : "حصّلت منه أكتر من المطلوب — ترجّعله " + money(-m.due) + ".", "v-due"]);
     /* الأوردر الملغي بيتفك بالكامل: السيستم بيفترض إن العربون رجع للعميل.
        لو إنت ماسكه (مصاريف إلغاء مثلًا) لازم تسجّله دخل في الخزنة. */
     if(canc && (Number(s.paid)||0) > 0.009)
@@ -9450,13 +9487,17 @@
     }
     if(v === was){ box.value = v ? qty(v) : ""; return; }
     l.ret = v;
+    // الشركة ما بتحصّلش تمن اللي رجع — المحصّل ينزل معاه
+    var cut = capShipPaid(rec);
     rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll();
     var due = saleTotal(rec) + shipIn(rec) - (Number(rec.paid)||0);
     toast(v > was
       ? "اترجّع " + qty(v - was) + " " + itemName(l.itemId) + " للمخزن" +
-        (due < -0.009 ? " · ترجّعله " + money(-due) : "")
-      : "اتعدّل المرتجع لـ " + qty(v));
+        (cut ? " · " + (squish(rec.shipCo) || "الشركة") + " حصّلت " + money(Number(rec.paid)||0) +
+               " بس مش " + money((Number(rec.paid)||0) + cut) + " — محفظتها اتعدّلت"
+             : (due < -0.009 ? " · ترجّعله " + money(-due) : ""))
+      : "اتعدّل المرتجع لـ " + qty(v), 4200);
   }
   TSALES.addEventListener("change", function(e){
     var r = e.target.closest("[data-ret]");
@@ -9639,6 +9680,21 @@
       }
       return;
     }
+    // خطوة ٤ (تحصيل الشركة مسجّل زيادة): المحصّل = المطلوب
+    var fx = e.target.closest("[data-fixpaid]");
+    if(fx){
+      e.stopPropagation();
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      var r3 = db.sales.find(function(x){ return x.id === fx.dataset.fixpaid; });
+      if(!r3 || saleLocked(r3)) return;
+      var cut = capShipPaid(r3);
+      if(!cut){ toast("مفيش حاجة تتصحّح"); return; }
+      r3.editedBy = me || "غير محدد"; r3.at = Date.now();
+      saveSoon("sales"); renderAll();
+      toast("اتصحّح: " + (squish(r3.shipCo) || "الشركة") + " حصّلت " + money(Number(r3.paid)||0) +
+            " — محفظتها نزلت " + money(cut), 4200);
+      return;
+    }
     // خطوة ٥: كل القطع الراجعة وصلت
     var ab = e.target.closest("[data-allback]");
     if(ab){
@@ -9815,9 +9871,20 @@
       }
     }
 
+    // الشركة بتحصّل تمن اللي العميل خده بس — أكتر من كده مش حقيقي
+    var paidV = status === "cancelled" ? 0 : (Number(draft.paid)||0);
+    if(status === "delivered" && viaShip(draft)){
+      var owedV = lines.reduce(function(a, l){ return a + (l.qty - l.ret) * l.price; }, 0) +
+                  (Number(draft.shipIn)||0);
+      if(paidV > owedV + 0.009){
+        toast((squish(draft.shipCo) || "الشركة") + " بتحصّل تمن اللي العميل خده بس — المحصّل اتعدّل لـ " +
+              money(owedV), 4200);
+        paidV = Math.round(owedV * 100) / 100;
+      }
+    }
     var fields = {
       date: draft.date || today(), partyId: draft.partyId, lines: lines, status: status,
-      paid: status === "cancelled" ? 0 : (Number(draft.paid)||0),
+      paid: paidV,
       owner: (draft.owner||"").trim(), shipCo: (draft.shipCo||"").trim(),
       shipCode: (draft.shipCode||"").trim(), payVia: draft.payVia,
       shipIn: Number(draft.shipIn)||0, shipOut: Number(draft.shipOut)||0,
