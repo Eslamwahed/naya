@@ -1016,6 +1016,17 @@
 
   <div class="tbl-wrap"><table id="t-shipco"></table></div>
 
+  <div class="panel" id="held-panel">
+    <h3>بضاعة عند شركات الشحن</h3>
+    <p class="hint">العميل عاين ورفض؟ البضاعة بترجع لشركة الشحن مش لمخزنك على طول. القطع دي <strong>لسه ملكك ومحسوبة في المخزون</strong> — بس مكانها برّه. سجّل «رجعت المخزن» أول ما تستلمها عشان تعرف اللي لسه معلّق.</p>
+    <div class="quick" id="held-quick">
+      <button type="button" data-heldonly="open" class="on">لسه عندهم</button>
+      <button type="button" data-heldonly="back">رجعت المخزن</button>
+      <button type="button" data-heldonly="all">الكل</button>
+    </div>
+    <div class="tbl-wrap"><table id="t-held"></table></div>
+  </div>
+
   <div class="panel" id="shstmt-panel" hidden>
     <div class="dhead">
       <h3 id="shstmt-title">كشف حساب</h3>
@@ -2117,8 +2128,29 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "73";
+  var VERSION = "76";
   var CHANGELOG = [
+    { v:"76", d:"2026-09-29", items:[
+      "حالة على مستوى الصنف مش الفاتورة: العميل ممكن ياخد صنف ويرجّع صنف، وكل سطر في تفاصيل الأوردر بقى بيقول حالته",
+      "التلات حالات: «مع شركة الشحن» لسه ما اتسلّمش · «العميل خدها» · «راجعة عند شركة الشحن» لحد ما تستلمها",
+      "زرار «رجعت المخزن» بقى على السطر نفسه — من تفاصيل الأوردر أو من شاشة شركات الشحن",
+      "جدول البضاعة الراجعة بقى سطر لكل صنف راجع بدل سطر لكل فاتورة",
+      "الصنف الراجع بيفضل في المخزون طول ما هو عند شركة الشحن — العميل ما استلموش، فينفع تبيعيه لعميلة تانية"
+    ]},
+    { v:"75", d:"2026-09-29", items:[
+      "تتبّع بضاعة المعاينة: العميل عاين ورفض؟ البضاعة عند شركة الشحن — وفي شاشة «شركات الشحن» جدول بيقولك إيه بالظبط وعند مين",
+      "زرار «رجعت المخزن» بتاريخه، وفلتر «لسه عندهم / رجعت / الكل»",
+      "عمود «قطع راجعة عندها» في جدول الشركات، وكارت «قطع راجعة عندهم» في الإحصائيات",
+      "وكارت في المخزون «قطع عند شركات الشحن» — عشان الجرد اليدوي ما يطلعش ناقص وإنت مش عارف ليه",
+      "مافيش أي أثر محاسبي: القطع دي أصلاً ما اتشالتش من المخزون لأنها ما اتباعتش — ده تتبّع مكان بس"
+    ]},
+    { v:"74", d:"2026-09-29", items:[
+      "تصحيح: «بعد الخصم» هو اللي بتدفعه لشركة الشحن — القاهرة والجيزة 50، المدن الجديدة 55، بحري 70، قبلي 80، الحدودية 125",
+      "«قبل الخصم» بقى عمود مرجع مكتوب إنه مش بيدخل في أي حساب",
+      "اللي بتحمّله للعميل بقى قرارك في كل أوردر — المنطقة مابتملاهوش إلا لو إنت حطيت افتراضي ليها بنفسك",
+      "السطر تحت منطقة الشحن بيتحدّث وإنت بتكتب: «هتدفع 50 · بتحمّل العميل 30 → 20 من جيبك»",
+      "الترقية بتصلّح المسجّل عندك لوحدها — اللي كان متخزّن كسعر بيتحوّل للشكل الصح"
+    ]},
     { v:"73", d:"2026-09-29", items:[
       "كشف الحساب بيتقفل: دوس على الاسم تاني، أو على × جنب العنوان — والاسم المفتوح كشفه بقى متعلّم",
       "سطر إجمالي في آخر الكشف: إجمالي المدين وإجمالي الدائن والرصيد النهائي",
@@ -5353,11 +5385,26 @@
     units:"قطع في المخزن", value:"قيمة المخزون بالتكلفة", retail:"قيمتها لو اتباعت كلها",
     rsv:"محجوز لأوردرات جارية", bought:"قطع اتشترت", sold:"قطع اتباعت",
     pret:"قطع رجعت للمورد", ret:"قطع رجعت من العملاء",
-    out:"خلص من المخزن", low:"قرب يخلص" };
+    out:"خلص من المخزن", low:"قرب يخلص", held:"قطع عند شركات الشحن" };
 
   /* كل دالة بتاخد الأسطر اللي ظاهرة قدامك (بعد الفلتر) وبترجّع جدول.
      الفترة بتتقرا من periodRange زي باقي الشاشة. */
   var INV_DETAIL = {
+    /* بضاعة معاينة رجعت لشركة الشحن. لسه في المخزون على الورق —
+       فلازم تبان هنا وإلا الجرد اليدوي هيطلع ناقص وإنت مش عارف ليه. */
+    held: function(){
+      var rows = heldOpen().map(function(x){
+        return "<tr><td class='num'>" + (x.s.no ? "#" + esc(x.s.no) : "—") + "</td>" +
+          "<td class='num'>" + esc(x.s.date || "—") + "</td>" +
+          "<td class='wide'>" + esc(heldWhat(x)) + "</td>" +
+          "<td>" + esc(shipCoLabel(x.s.shipCo)) + "</td>" +
+          "<td class='num'>" + qty(x.n) + "</td></tr>";
+      });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","","","<b>"+qty(heldOpenQty())+"</b>"]));
+      return { note:"العميل عاين ورفض، والبضاعة عند شركة الشحن لسه. محسوبة في المخزون لأنها ملكك — بس مش في مخزنك. سجّل استلامها من شاشة «شركات الشحن».",
+        head:["الأوردر","التاريخ","الراجع","شركة الشحن","قطع"], rows:rows };
+    },
+
     units: function(src){
       var rows = src.filter(function(x){ return Math.abs(x.stock) > 0.0001; })
         .sort(function(a,b){ return b.stock - a.stock; })
@@ -5677,7 +5724,9 @@
       ["pret",   "قطع رجعت للمورد", qty(prets), prets?"v-due":"", "<span class='sub'>في الفترة</span>"],
       ["ret",    "قطع رجعت من العملاء", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
       ["out",    "خلص من المخزن", qty(outCount), outCount?"v-due":"", scope || "<span class='sub'>لون/مقاس رصيده صفر</span>"],
-      ["low",    "قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"]
+      ["low",    "قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"],
+      ["held",   "قطع عند شركات الشحن", qty(heldOpenQty()), heldOpenQty()?"v-due":"",
+       "<span class='sub'>" + (heldOpenQty() ? "محسوبة فوق بس مش في مخزنك" : "كله في مخزنك") + "</span>"]
     ];
     document.getElementById("inv-kpis").innerHTML = cells.map(function(c){
       return '<div class="kpi' + (invKpiOpen === c[0] ? ' on' : '') +
@@ -6452,7 +6501,8 @@
       "</div>";
 
     /* الأصناف — بالتكلفة والربح لكل صنف، مش الإجمالي بس */
-    var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع","إجمالي البيع","ربح البضاعة"];
+    var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع",
+              "إجمالي البيع","ربح البضاعة","حالة الصنف"];
     var body = SL(s).map(function(l, i){
       var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l,s);
       var c = m.known ? lineCost(l) : null;
@@ -6473,11 +6523,25 @@
         money(l.price),
         retCell,
         money(lineTotal(l,s)),
-        gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>"
+        gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>",
+        /* الصنف بيرجع لوحده — العميل ممكن ياخد اتنين ويرجّع واحد.
+           فالحالة هنا على السطر مش على الفاتورة. */
+        (function(){
+          var stt = lineState(l, s);
+          var html = "<span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
+                     (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "");
+          if(stt.k === "held" && canEdit() && !saleLocked(s))
+            html += "<button class='del' style='color:var(--teal)' data-heldback='" +
+                    esc(s.id) + "|" + i + "'>رجعت المخزن</button>";
+          if(stt.k === "back" && canEdit() && !saleLocked(s))
+            html += "<button class='del' data-heldback='" + esc(s.id) + "|" + i +
+                    "' data-undo='1'>تراجع</button>";
+          return html;
+        })()
       ];
       // عمود تكلفة القطعة (٣) وربح البضاعة (٧) بيكشفوا الهامش
       return "<tr>" + cells.map(function(c2, k){
-        var cl = (k === 0 ? "wide" : (k >= 2 ? "num" : "")) + ((k===3||k===7) ? " money-only" : "");
+        var cl = (k === 0 ? "wide" : (k >= 2 && k <= 7 ? "num" : "")) + ((k===3||k===7) ? " money-only" : "");
         return "<td data-l='" + esc(LH[k]) + "'" + (cl ? " class='"+cl+"'" : "") + ">" + c2 + "</td>";
       }).join("") + "</tr>";
     }).join("");
@@ -7334,12 +7398,154 @@
   }
 
   var SHIP_HEAD = ["شركة الشحن","أوردرات","حصّلت من العملاء","عمولتها","استلمته منها",
-                   "لك عندها","شحن من جيبك"];
+                   "لك عندها","شحن من جيبك","قطع راجعة عندها"];
+
+
+  /* ---------- بضاعة راجعة عند شركة الشحن ----------
+     المعاينة: العميل بيشوف المنتج قبل ما يستلم. رفضه؟ يرجّعه لمندوب
+     شركة الشحن ويدفع الشحن بس. فالبضاعة بتقعد عند الشركة لحد ما
+     تستلمها — هي لسه ملكك ومحسوبة في المخزون (ما اتباعتش)، بس
+     مكانها مش مخزنك، وده اللي الشاشة دي بتتابعه.
+
+     backAt = تاريخ ما رجعت مخزنك. فاضي = لسه عندهم.
+     مافيش أي أثر محاسبي هنا — الكميات دي أصلاً ما اتشالتش من المخزون،
+     فالميزانية ما بتتحركش. ده تتبّع مكان بس. */
+  /* الأوردر الواحد ممكن العميل ياخد منه صنف ويرجّع صنف. فالحالة
+     على مستوى **السطر** مش الفاتورة: كل سطر بيعرف كام رجع منه وكام
+     رجع مخزنك. الحالة دي مستنتجة من الأرقام مش محفوظة كحالة لوحدها،
+     فمفيش حالة ممكن تتعارض مع الأرقام. */
+  function lineBack(l, s){
+    // الشكل القديم كان تاريخ واحد على الفاتورة كلها
+    return l.backAt || (s && s.backAt) || "";
+  }
+  function lineHeld(l, s){
+    if(isCancelled(s)) return Number(l.qty)||0;   // اترفض كله
+    if(isDelivered(s)) return lineRet(l);         // رجّع جزء
+    return 0;                                     // لسه جاري — ما رجعش حاجة
+  }
+  // حالة السطر بالعربي: خدها · راجعة عند الشركة · رجعت المخزن
+  function lineState(l, s){
+    var q = Number(l.qty)||0, h = lineHeld(l, s), kept = q - h;
+    if(!isDelivered(s) && !isCancelled(s))
+      return { k:"way", t:"مع شركة الشحن", sub:"لسه ما اتسلّمتش", cls:"progress" };
+    if(h <= 0) return { k:"kept", t:"العميل خدها", sub:"", cls:"delivered" };
+    var back = !!lineBack(l, s);
+    return { k: back ? "back" : "held",
+             t: back ? "رجعت المخزن" : "راجعة عند شركة الشحن",
+             sub: (kept > 0 ? "خد " + qty(kept) + " ورجّع " + qty(h) : "رجّع " + qty(h)) +
+                  (back ? " · " + lineBack(l, s) : ""),
+             cls: back ? "delivered" : "cancelled" };
+  }
+  function heldPieces(s){
+    return SL(s).reduce(function(a, l){ return a + lineHeld(l, s); }, 0);
+  }
+  // شحنت فعلاً؟ من غير شركة شحن البضاعة ما راحتش لحد
+  function heldShipped(s){
+    return !!(squish(s.shipCo) || shipOut(s) || shipIn(s) || viaShip(s));
+  }
+  // سطر لكل صنف راجع — مش سطر لكل فاتورة، عشان الصنف بيرجع لوحده
+  function heldList(){
+    var out = [];
+    live("sales").forEach(function(s){
+      if(!heldShipped(s)) return;
+      SL(s).forEach(function(l, i){
+        var n = lineHeld(l, s);
+        if(n > 0) out.push({ s:s, l:l, i:i, n:n, back:lineBack(l, s) });
+      });
+    });
+    return out.sort(function(a, b){ return byDate(a.s, b.s); });
+  }
+  function heldOpen(){ return heldList().filter(function(x){ return !x.back; }); }
+  function heldOpenQty(){
+    return heldOpen().reduce(function(a, x){ return a + x.n; }, 0);
+  }
+  // القطع المعلّقة عند شركة معيّنة
+  function heldQtyFor(co){
+    var nm = squish(co);
+    return heldOpen().reduce(function(a, x){
+      return a + (squish(x.s.shipCo) === nm ? x.n : 0); }, 0);
+  }
+  function heldWhat(x){
+    var l = x.l;
+    return qty(x.n) + " × " + itemName(l.itemId) +
+           (vLabel(vColor(l), vSize(l)) ? " · " + vLabel(vColor(l), vSize(l)) : "");
+  }
+
+  var heldFilt = "open";
+  var HELD_HEAD = ["الأوردر","التاريخ","العميل","شركة الشحن","الصنف الراجع","قطع","الحالة",""];
+
+  function renderHeld(){
+    var all = heldList();
+    var list = all.filter(function(x){
+      if(heldFilt === "open") return !x.back;
+      if(heldFilt === "back") return !!x.back;
+      return true;
+    });
+    var ed = canEdit();
+    var rows = list.map(function(x){
+      var s = x.s, key = esc(s.id) + "|" + x.i;
+      return "<tr>" +
+        "<td class='num'>" + (s.no ? "#" + esc(s.no) : "—") + "</td>" +
+        "<td class='num'>" + esc(s.date || "—") + "</td>" +
+        "<td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
+        "<td>" + esc(shipCoLabel(s.shipCo)) + "</td>" +
+        "<td class='wide'>" + esc(heldWhat(x)) +
+          "<span class='sub'>" + (isCancelled(s) ? "الأوردر اترفض كله" : "العميل خد باقي الأوردر") + "</span></td>" +
+        "<td class='num'>" + esc(qty(x.n)) + "</td>" +
+        "<td>" + (x.back
+          ? "<span class='st st-delivered'>رجعت المخزن</span><span class='sub'>" + esc(x.back) + "</span>"
+          : "<span class='st st-cancelled'>عند الشركة</span>") + "</td>" +
+        "<td>" + (ed
+          ? (x.back
+              ? "<button class='del' data-heldback='" + key + "' data-undo='1'>تراجع</button>"
+              : "<button class='del' style='color:var(--teal)' data-heldback='" + key + "'>رجعت المخزن</button>")
+          : "") + "</td></tr>";
+    });
+    table("t-held", HELD_HEAD, rows,
+      heldFilt === "back" ? "لسه ما استلمتش حاجة راجعة."
+        : (all.length ? "مفيش بضاعة معلّقة — كله رجع المخزن."
+                      : "مفيش بضاعة راجعة. أول ما عميلة ترفض صنف هتلاقيه هنا."));
+  }
+
+  document.getElementById("held-quick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-heldonly]"); if(!b) return;
+    heldFilt = b.dataset.heldonly;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+      x.classList.toggle("on", x === b); });
+    renderHeld();
+  });
+  function markLineBack(saleId, li, undo){
+    var s = db.sales.find(function(x){ return x.id === saleId; });
+    if(!s) return false;
+    var l = SL(s)[li]; if(!l) return false;
+    /* التاريخ القديم كان على الفاتورة. أول ما نلمس سطر واحد، بنوزّعه
+       على كل السطور الراجعة الأول عشان الباقي ما يرجعش «عند الشركة». */
+    if(s.backAt){
+      SL(s).forEach(function(x){ if(lineHeld(x, s) > 0 && !x.backAt) x.backAt = s.backAt; });
+      delete s.backAt;
+    }
+    if(undo) delete l.backAt; else l.backAt = today();
+    s.at = Date.now(); s.editedBy = me || "غير محدد";
+    saveSoon("sales");
+    return true;
+  }
+  // الزرار موجود في مكانين: جدول شركات الشحن وتفاصيل الأوردر
+  document.body.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-heldback]"); if(!btn) return;
+    e.stopPropagation();
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var parts = String(btn.dataset.heldback).split("|");
+    if(!markLineBack(parts[0], Number(parts[1]), !!btn.dataset.undo)) return;
+    toast(btn.dataset.undo ? "رجعت لـ«عند الشركة»" : "اتسجّل إنها رجعت المخزن");
+    if(activeTab === "sales") renderSales(); else { renderHeld(); renderShipCos(); }
+    ["inv","log","ship","sales"].forEach(function(t){ dirtyTabs[t] = 1; });
+    delete dirtyTabs[activeTab];
+  });
 
   function renderShipCos(){
     var cos = shipBuckets().map(function(co){
-      var o = shipCoStats(co); o.co = co; return o;
-    }).filter(function(x){ return x.n || x.collected || x.fees || x.drawn; })
+      var o = shipCoStats(co); o.co = co; o.held = heldQtyFor(co); return o;
+    }).filter(function(x){ return x.n || x.collected || x.fees || x.drawn || x.held; })
       .sort(function(a,b){ return b.bal - a.bal; });
 
     var tot = cos.reduce(function(a,x){
@@ -7354,7 +7560,9 @@
        tot.pocket > 0.009 ? "v-due" : "v-gain",
        tot.pocket >= 0 ? "دفعت للشركات أكتر مما حمّلته للعملاء"
                        : "حمّلت العملاء أكتر مما دفعته للشركات"],
-      ["أوردرات عندهم", qty(tot.open), "", "مشحونة ولسه ما اتسلّمتش"]
+      ["أوردرات عندهم", qty(tot.open), "", "مشحونة ولسه ما اتسلّمتش"],
+      ["قطع راجعة عندهم", qty(heldOpenQty()), heldOpenQty() ? "v-due" : "",
+       heldOpenQty() ? "عميل عاين ورفض — لسه ما استلمتهاش" : "مفيش بضاعة معلّقة"]
     ].map(function(c){
       return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
         "<small>"+esc(c[3])+"</small></div>";
@@ -7371,7 +7579,9 @@
         "<td class='num " + (x.bal > 0.009 ? "v-gain" : (x.bal < -0.009 ? "v-due" : "")) + "'>" +
           money(x.bal) + "</td>" +
         "<td class='num " + (x.pocket > 0.009 ? "v-due" : "v-gain") + "'>" +
-          money(Math.abs(x.pocket)) + "</td></tr>";
+          money(Math.abs(x.pocket)) + "</td>" +
+        "<td class='num " + (x.held ? "v-due" : "") + "'>" +
+          (x.held ? qty(x.held) : "—") + "</td></tr>";
     });
     table("t-shipco", SHIP_HEAD, rows,
       "لما تكتب اسم شركة الشحن في الأوردرات، هتلاقي هنا حساب كل شركة بالتفصيل.");
@@ -7489,16 +7699,21 @@
     var rows = shipZones().map(function(z){
       var used = live("parties").filter(function(p){
         return p.type === "customer" && zoneForParty(p) && zoneForParty(p).id === z.id; }).length;
-      var gap = zoneGap(z);
       var num = function(f, v){
         return "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
           "data-zf='"+f+"' data-zid='"+esc(z.id)+"' value='"+esc(Number(v)||0)+"'></td>";
       };
       return "<tr><td class='wide'><input data-zf='name' data-zid='"+esc(z.id)+"' value='"+esc(z.name)+"' autocomplete='off'></td>" +
-        num("cost", z.cost) + num("price", z.price) +
-        "<td class='num " + (gap > 0 ? "v-due" : (gap < 0 ? "v-gain" : "")) + "'>" +
-          (gap ? money(Math.abs(gap)) + "<span class='sub'>" + (gap > 0 ? "من جيبك" : "بتكسب") + "</span>"
-               : "—") + "</td>" +
+        num("cost", z.cost) +
+        "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
+          "data-zf='list' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.list)||0)+"'>" +
+          "<span class='sub'>مرجع · مش بيتحسب</span></td>" +
+        "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
+          "data-zf='charge' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.charge)||0)+"'>" +
+          "<span class='sub'>" + ((Number(z.charge)||0) > 0
+            ? ((Number(z.charge)||0) >= (Number(z.cost)||0)
+                ? "بتغطّي اللي بتدفعه" : "<span class='v-due'>" + money((Number(z.cost)||0) - (Number(z.charge)||0)) + " من جيبك</span>")
+            : "صفر = تكتبه في الأوردر") + "</span></td>" +
         "<td><input data-zf='days' data-zid='"+esc(z.id)+"' style='max-width:120px' " +
           "placeholder='خلال 24 ساعة' autocomplete='off' value='"+esc(z.days||"")+"'></td>" +
         "<td class='wide'><input list='gov-list' data-zf='govs' data-zid='"+esc(z.id)+"' " +
@@ -7509,8 +7724,9 @@
           "<span class='sub'>بتتدوّر في عنوان العميل وبتسبق المحافظة</span></td>" +
         "<td><button class='del' type='button' data-zdel='"+esc(z.id)+"'>حذف</button></td></tr>";
     });
-    table("t-zones", ["المنطقة","بتدفع لشركة الشحن","بتحصّل من العميل","الفرق",
-                      "مدة التوصيل","المحافظات اللي جواها","أحياء ومدن (اختياري)",""], rows,
+    table("t-zones", ["المنطقة","بتدفع لشركة الشحن (بعد الخصم)","سعرهم قبل الخصم",
+                      "بتحمّل العميل (افتراضي)","مدة التوصيل",
+                      "المحافظات اللي جواها","أحياء ومدن (اختياري)",""], rows,
       "مفيش مناطق — دوس «+ منطقة» أو «رجّع الأسعار المبدئية».");
     // محافظات مش متحطوطة في أي منطقة — عشان ما تكتشفش ده وإنت بتسجّل أوردر
     var miss = GOVS.filter(function(g){ return !zoneForGov(g); });
@@ -7531,7 +7747,7 @@
     if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
     seedZones();
     if(!Array.isArray(settings.shipZones)) settings.shipZones = [];
-    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", cost:0, price:0,
+    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", cost:0, list:0, charge:0,
                               days:"", govs:[], areas:[] });
     saveSoon("settings"); renderZones(); fillZoneSelect();
   });
@@ -7556,17 +7772,22 @@
     var f = el.dataset.zf;
     if(f === "name")  z.name  = el.value;
     if(f === "days")  z.days  = el.value;
-    if(f === "cost")  z.cost  = Number(el.value)||0;
-    if(f === "price") z.price = Number(el.value)||0;
+    if(f === "cost")   z.cost   = Number(el.value)||0;
+    if(f === "list")   z.list   = Number(el.value)||0;
+    if(f === "charge") z.charge = Number(el.value)||0;
     if(f === "govs")  z.govs  = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
     if(f === "areas") z.areas = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
     saveSoon("settings"); fillZoneSelect();
-    // «الفرق» بيتحسب من الرقمين، فلازم يتحدّث وإنت بتكتب
-    if(f === "cost" || f === "price"){
-      var td = el.closest("tr").children[3], g = zoneGap(z);
-      if(td){
-        td.className = "num " + (g > 0 ? "v-due" : (g < 0 ? "v-gain" : ""));
-        td.innerHTML = g ? money(Math.abs(g)) + "<span class='sub'>" + (g > 0 ? "من جيبك" : "بتكسب") + "</span>" : "—";
+    // السطر اللي تحت خانة «بتحمّل العميل» بيتحسب من الرقمين
+    if(f === "cost" || f === "charge"){
+      var sub = el.closest("tr").querySelector("[data-zf='charge']");
+      sub = sub && sub.parentNode.querySelector(".sub");
+      if(sub){
+        var ch = Number(z.charge)||0, cs = Number(z.cost)||0;
+        sub.innerHTML = ch > 0
+          ? (ch >= cs ? "بتغطّي اللي بتدفعه"
+                      : "<span class='v-due'>" + money(cs - ch) + " من جيبك</span>")
+          : "صفر = تكتبه في الأوردر";
       }
     }
   });
@@ -7581,8 +7802,8 @@
   function fillZoneSelect(){
     var el = document.getElementById("e-zone"); if(!el) return;
     var zs = shipZones().map(function(z){
-      // الرقم اللي في القايمة هو اللي بتقوله للعميل — ده اللي بتختار على أساسه
-      return { v:z.id, t:z.name + " — تحصّل " + money(Number(z.price)||0) }; });
+      // الرقم في القايمة هو اللي هيخرج من الخزنة لشركة الشحن
+      return { v:z.id, t:z.name + " — تدفع " + money(Number(z.cost)||0) }; });
     el.innerHTML = optsHTML(zs, draft && draft.zoneId ? draft.zoneId : "", "من غير منطقة");
   }
   /* بنفتكر الرقمين اللي المنطقة كتبتهم. لو غيّرت العميل والرقم لسه
@@ -7604,17 +7825,17 @@
     if(zoneMayWrite(draft.shipOut, zoneFilled.out)){
       draft.shipOut = Number(z.cost)||0; zoneFilled.out = draft.shipOut;
     }
-    if(zoneMayWrite(draft.shipIn, zoneFilled.inn)){
-      draft.shipIn = Number(z.price)||0; zoneFilled.inn = draft.shipIn;
+    /* اللي بتحمّله للعميل قرارك في كل أوردر، مش رقم شركة الشحن.
+       فمابنملاهوش إلا لو إنت بنفسك حطيت افتراضي للمنطقة. */
+    var ch = Number(z.charge)||0;
+    if(ch > 0 && zoneMayWrite(draft.shipIn, zoneFilled.inn)){
+      draft.shipIn = ch; zoneFilled.inn = ch;
     }
     return true;
   }
-  function syncZoneUI(){
-    fillZoneSelect();
-    var out = document.getElementById("e-shipout");
-    if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
-    var inn = document.getElementById("e-shipin");
-    if(inn) inn.value = draft.shipIn === "" || draft.shipIn == null ? "" : draft.shipIn;
+  /* السطر ده بيتحدّث وإنت بتكتب شحن العميل، فبيترسم لوحده من غير
+     ما نلمس قيم الخانات — الكتابة في خانة والمؤشر فيها بيقفز. */
+  function zoneNote(){
     var note = document.getElementById("e-zonenote");
     if(!note) return;
     var z = draft.zoneId ? zoneById(draft.zoneId) : null;
@@ -7623,22 +7844,37 @@
     var where = squish(pt.address || "") && (z.areas||[]).some(function(a){
       var k = squish(a); return k && squish(pt.address).indexOf(k) > -1; })
       ? "عنوانها" : ("«" + squish(pt.gov || "") + "»");
-    var gap = zoneGap(z);
-    note.innerHTML = esc(where) + " في منطقة «" + esc(z.name) + "»: بتدفع <strong>" +
-      esc(money(Number(z.cost)||0)) + "</strong> وبتحصّل <strong>" +
-      esc(money(Number(z.price)||0)) + "</strong>" +
-      (gap > 0 ? " — يعني <span class='v-due'>" + esc(money(gap)) + " من جيبك</span>"
-               : (gap < 0 ? " — يعني <span class='v-gain'>" + esc(money(-gap)) + " ليك</span>" : "")) +
-      (z.days ? " · التوصيل " + esc(z.days) : "") + ". غيّرهم لو مختلفين.";
+    var cost = Number(z.cost)||0, got = Number(draft.shipIn)||0;
+    var gap  = cost - got;
+    var t = esc(where) + " في منطقة «" + esc(z.name) + "»: هتدفع لشركة الشحن <strong>" +
+            esc(money(cost)) + "</strong>" + (z.days ? " · التوصيل " + esc(z.days) : "") + ".";
+    t += got > 0
+      ? " وبتحمّل العميل <strong>" + esc(money(got)) + "</strong>" +
+        (gap > 0 ? " — يعني <span class='v-due'><strong>" + esc(money(gap)) + "</strong> من جيبك</span>."
+                 : (gap < 0 ? " — يعني <span class='v-gain'><strong>" + esc(money(-gap)) + "</strong> ليك</span>."
+                            : " — يعني الشحن مغطّى بالظبط."))
+      : " <span class='v-due'>اكتب شحن العميل فوق</span> — كل جنيه أقل من " +
+        esc(money(cost)) + " بيطلع من جيبك.";
+    note.innerHTML = t;
     note.hidden = false;
+  }
+  function syncZoneUI(){
+    fillZoneSelect();
+    var out = document.getElementById("e-shipout");
+    if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
+    var inn = document.getElementById("e-shipin");
+    if(inn) inn.value = draft.shipIn === "" || draft.shipIn == null ? "" : draft.shipIn;
+    zoneNote();
   }
   document.getElementById("e-zone").addEventListener("change", function(){
     draft.zoneId = this.value;
     var z = zoneById(this.value);
     // اختيار صريح للمنطقة بيكتب الرقمين — ده المقصود من الاختيار
     if(z){
-      draft.shipOut = Number(z.cost)||0; draft.shipIn = Number(z.price)||0;
-      setZoneFilled(draft.shipOut, draft.shipIn);
+      draft.shipOut = Number(z.cost)||0;
+      zoneFilled.out = draft.shipOut;
+      var ch = Number(z.charge)||0;
+      if(ch > 0){ draft.shipIn = ch; zoneFilled.inn = ch; }
     } else clearZoneFilled();
     syncZoneUI(); updateEntryCalc();
   });
@@ -7647,7 +7883,7 @@
     // الترقية بتتحفظ مرة واحدة بدل ما تتعاد مع كل فتحة، وعشان
     // الأسعار توصل باقي الأجهزة بالمزامنة
     if(seedZones()) saveSoon("settings");
-    renderZones(); renderShipCos();
+    renderZones(); renderShipCos(); renderHeld();
   }
 
   /* ---------- فلاتر الخزنة ---------- */
@@ -8801,7 +9037,7 @@
         if(!draft.shipCo) suggestShipping();
         syncZoneUI();
       }
-      if(f === "shipIn")  zoneFilled.inn = null;
+      if(f === "shipIn"){ zoneFilled.inn = null; zoneNote(); }
       // كتبت رقم بإيدك؟ المنطقة ما بقتش هي المصدر
       if(f === "shipOut"){
         zoneFilled.out = null;
@@ -8824,24 +9060,31 @@
      بدل ما تكتب رقم الشحن في كل أوردر: بتحدّد المنطقة مرة واحدة
      بسعرها والمحافظات اللي جواها، وبعدها أول ما تختار العميل بيتملّى
      لوحده من محافظته. كله قابل للتعديل من شاشة «شركات الشحن». */
-  /* المنطقة فيها رقمين مختلفين، والخلط بينهم بيضيّع فلوس من غير ما تحس:
-       cost  = اللي بتدفعه لشركة الشحن  (عمود «قبل الخصم» في ورقة الأسعار)
-       price = اللي بتحصّله من العميل   (عمود «بعد الخصم»)
-     الفرق بينهم بيطلع من جيبك في كل أوردر، فبيتحسب ويتعرض صريح. */
+  /* ثلاث أرقام مختلفة، والخلط بينهم بيضيّع فلوس من غير ما تحس:
+       cost   = اللي **بتدفعه** لشركة الشحن. ده عمود «بعد الخصم» في
+                ورقة أسعارهم — السعر المتفق عليه فعلاً، وهو الرقم
+                الوحيد اللي السيستم بيعتمد عليه.
+       list   = عمود «قبل الخصم» — سعر الشركة الرسمي. مرجع بس،
+                مابيدخلش في أي حساب.
+       charge = اللي بتحمّله للعميل. ده **قرارك إنت** في كل أوردر
+                (ممكن 30 وممكن مجاني)، مش رقم شركة الشحن. الرقم اللي
+                هنا مجرد افتراضي بتحطه إنت، وبصفر معناه «اكتبه بإيدك».
+     الفرق (cost − charge) هو اللي بيطلع من جيبك، وبيتحسب في الأوردر
+     نفسه لأنه بيتغيّر من أوردر للتاني. */
   var ZONES_SEED = [
-    { name:"القاهرة والجيزة", cost:75, price:50, days:"خلال 24 ساعة",
+    { name:"القاهرة والجيزة", cost:50, list:75, charge:0, days:"خلال 24 ساعة",
       govs:["القاهرة","الجيزة"], areas:[] },
-    { name:"المدن الجديدة والأطراف", cost:80, price:55, days:"خلال 24 ساعة",
+    { name:"المدن الجديدة والأطراف", cost:55, list:80, charge:0, days:"خلال 24 ساعة",
       govs:[],
       // دي أحياء جوّه القاهرة والجيزة مش محافظات، فبتتعرف من العنوان
       areas:["القاهرة الجديدة","التجمع","الشروق","بدر","العبور","العاصمة الإدارية",
              "6 أكتوبر","أكتوبر","الشيخ زايد","حدائق أكتوبر"] },
-    { name:"الوجه البحري", cost:95, price:70, days:"48–72 ساعة",
+    { name:"الوجه البحري", cost:70, list:95, charge:0, days:"48–72 ساعة",
       govs:["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية",
             "الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"], areas:[] },
-    { name:"الوجه القبلي", cost:105, price:80, days:"48–72 ساعة",
+    { name:"الوجه القبلي", cost:80, list:105, charge:0, days:"48–72 ساعة",
       govs:["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"], areas:[] },
-    { name:"المحافظات الحدودية", cost:150, price:125, days:"5–6 أيام",
+    { name:"المحافظات الحدودية", cost:125, list:150, charge:0, days:"5–6 أيام",
       govs:["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"], areas:[] }
   ];
   function shipZones(){
@@ -8851,30 +9094,33 @@
   function seedZones(){
     if(Array.isArray(settings.shipZones)) return migrateZones();
     settings.shipZones = ZONES_SEED.map(function(z, i){
-      return { id:"z"+(i+1), name:z.name, cost:z.cost, price:z.price, days:z.days,
-               govs:z.govs.slice(), areas:(z.areas||[]).slice() };
+      return { id:"z"+(i+1), name:z.name, cost:z.cost, list:z.list, charge:z.charge,
+               days:z.days, govs:z.govs.slice(), areas:(z.areas||[]).slice() };
     });
     return true;
   }
-  /* الشكل القديم كان رقم واحد اسمه price ومعناه «اللي بتدفعه».
-     بنرقّيه من غير ما نلمس رقم غيّرته بإيدك: الرقم القديم بيروح
-     لخانة «بتدفع»، وسعر العميل بيتحط من الورقة الجديدة بس لو الرقم
-     القديم لسه زي ما السيستم حطّه. */
-  var ZONE_DISCOUNT = { 75:50, 80:55, 95:70, 105:80, 150:125 };
+  /* شكلين قدام: واحد قديم فيه price لوحده معناه «اللي بتدفعه بالسعر
+     الرسمي»، وواحد أحدث فيه {cost,price} كان فاهم price غلط على إنه
+     سعر العميل. الاتنين بيترقّوا لنفس الشكل: بندفع بعد الخصم، والسعر
+     الرسمي مرجع، وسعر العميل بيفضل قرارك. */
+  var ZONE_AFTER = { 75:50, 80:55, 95:70, 105:80, 150:125 };
   function migrateZones(){
     var changed = false;
     shipZones().forEach(function(z){
-      if(z.cost == null){
-        z.cost  = Number(z.price)||0;
-        z.price = ZONE_DISCOUNT[z.cost] != null ? ZONE_DISCOUNT[z.cost] : z.cost;
+      if(z.list == null){
+        var oldCost = Number(z.cost != null ? z.cost : z.price) || 0;
+        z.list   = oldCost;                                  // ده كان السعر الرسمي
+        z.cost   = ZONE_AFTER[oldCost] != null ? ZONE_AFTER[oldCost] : oldCost;
+        z.charge = 0;                                        // سعر العميل قرارك
+        delete z.price;
         changed = true;
       }
+      if(z.charge == null){ z.charge = 0; changed = true; }
       if(z.days == null){
         var sd = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
         z.days = sd ? sd.days : "";
         changed = true;
       }
-      // أحياء المدن الجديدة: بتتحط مرة واحدة على منطقة الـ80 لو لسه فاضية
       if(!Array.isArray(z.areas)){
         var sa = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
         z.areas = (sa && sa.areas.length) ? sa.areas.slice() : [];
@@ -8909,9 +9155,7 @@
     return zoneForGov(pt.gov);
   }
   function zoneCost(id){ var z = zoneById(id); return z ? (Number(z.cost)||0) : 0; }
-  function zonePrice(id){ var z = zoneById(id); return z ? (Number(z.price)||0) : 0; }
-  // اللي بيطلع من جيبك في الأوردر الواحد من المنطقة دي
-  function zoneGap(z){ return (Number(z.cost)||0) - (Number(z.price)||0); }
+  function zoneCharge(id){ var z = zoneById(id); return z ? (Number(z.charge)||0) : 0; }
 
   /* آخر شركة شحن اتستخدمت للمحافظة دي. الأرقام دي فلوس، فما ينفعش
      تتحط في الخانات من غير ما اللي بيسجّل يعرف — بيظهر سطر بيقول جت منين.
