@@ -1204,6 +1204,7 @@
       فلاتر <span class="fcount" id="cf-count" hidden>0</span>
     </button>
     <button class="tbtn primary" type="button" data-openentry="cash">+ حركة نقدية</button>
+    <button class="tbtn" type="button" id="b-cash-img">نزّل صورة للموبايل</button>
   </div>
 
   <div class="filters" id="cash-filters" hidden>
@@ -2112,8 +2113,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "71";
+  var VERSION = "72";
   var CHANGELOG = [
+    { v:"72", d:"2026-09-29", items:[
+      "زرار «نزّل صورة للموبايل» في شاشة الخزنة: بينزّل صورة PNG فيها الأرصدة وكل حركة في كارت",
+      "الصورة مرسومة بعرض تليفون وخط كبير — مش لقطة شاشة، فبتتقرا وهي متبعوتة على واتساب من غير تكبير",
+      "بتتبع الفلتر اللي قدامك، والفلتر نفسه مكتوب فوق في الصورة عشان محدش يفهمها غلط",
+      "بتتعمل فاتحة دايمًا حتى لو السيستم على الوضع الليلي — الصورة بتتشارك مع ناس تانية"
+    ]},
     { v:"71", d:"2026-09-29", items:[
       "أسعار الشحن الجديدة بعد الخصم اتسجّلت، والمنطقة بقى فيها رقمين مش رقم واحد: «بتدفع لشركة الشحن» و«بتحصّل من العميل»",
       "عمود «الفرق» بيقولك كام بيطلع من جيبك في الأوردر الواحد من كل منطقة",
@@ -7729,6 +7736,177 @@
                : "الخزنة فاضية. أول حركة في السيستم هي تسجيل رأس المال من تبويب «رأس المال» — وهو اللي بتشتري بيه بضاعة وتدفع منه المصاريف.");
     renderCashStats(shown, tin, tout);
   }
+
+
+  /* ---------- صورة الخزنة للموبايل ----------
+     مش لقطة شاشة: الشاشة عرضها لابتوب، ولو صوّرناها الخط بيطلع
+     صغير على التليفون. بنرسم كارت لكل حركة على canvas بعرض تليفون
+     وخط كبير، فالصورة بتتقرا وهي متبعوتة على واتساب من غير تكبير.
+     وبنرسمها فاتحة دايمًا حتى لو السيستم ليلي — الصورة بتتشارك. */
+  var CI = { W:760, PAD:28, S:3 };          // العرض بالنقط · الهامش · درجة الوضوح
+  var CI_C = {
+    bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
+    brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
+  };
+  function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
+  function ciRound(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    ctx.closePath();
+  }
+  // نص عربي من اليمين ورقم من الشمال — كل واحد برسمة لوحده
+  function ciR(ctx, t, x, y, font, color){
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = "right"; ctx.direction = "rtl";
+    ctx.fillText(String(t), x, y);
+  }
+  function ciL(ctx, t, x, y, font, color){
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = "left"; ctx.direction = "ltr";
+    ctx.fillText(String(t), x, y);
+  }
+  function ciCut(ctx, t, font, max){
+    ctx.font = font;
+    var v = String(t == null ? "" : t);
+    if(ctx.measureText(v).width <= max) return v;
+    while(v.length > 1 && ctx.measureText(v + "…").width > max) v = v.slice(0, -1);
+    return v + "…";
+  }
+
+  // اللي هيتصوّر: نفس اللي قدامك بالفلتر، بس من غير تقسيم صفحات
+  function cashImgData(){
+    var L = cashLedger(), run = 0, out = [], tin = 0, tout = 0;
+    L.forEach(function(x){
+      run += x.inn - x.out;                 // الرصيد الحقيقي بيعدّ كل حركة حتى المخفية
+      if(!cashMatch(x)) return;
+      tin += x.inn; tout += x.out;
+      out.push({ d:x.d, t:x.t, src:x.src, who:x.who, note:x.note,
+                 inn:x.inn, out:x.out, run:run });
+    });
+    return { rows:out, tin:tin, tout:tout };
+  }
+  function cashImgFilterTxt(){
+    var on = Object.keys(CF_LABEL).filter(function(k){ return cfilt[k]; })
+      .map(function(k){ return CF_LABEL[k] + ": " + cfilt[k]; });
+    return on.length ? on.join("  ·  ") : "كل الحركات من أول يوم";
+  }
+
+  function drawCashImage(){
+    var d = cashImgData();
+    var CAP = 200;
+    var rows = d.rows.slice(-CAP);            // الأحدث لو الدفتر طويل
+    var cut = d.rows.length - rows.length;
+
+    var W = CI.W, P = CI.PAD, inner = W - P*2;
+    var HEAD = 150, STAT = 116, GAP = 12, ROW = 128, FOOT = cut ? 92 : 56;
+    var statH = STAT*2 + GAP;
+    var bodyTop = HEAD + statH + 26;
+    var H = bodyTop + (rows.length ? rows.length*(ROW+GAP) : 110) + FOOT + P;
+
+    var cv = document.createElement("canvas");
+    cv.width = W*CI.S; cv.height = H*CI.S;
+    var ctx = cv.getContext("2d");
+    ctx.scale(CI.S, CI.S);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = CI_C.bg; ctx.fillRect(0, 0, W, H);
+
+    // ترويسة
+    ctx.fillStyle = CI_C.brand; ctx.fillRect(0, 0, W, 6);
+    var R = W - P;                                     // حرف اليمين
+    ciR(ctx, "الخزنة", R, 70, ciFont(700, 40), CI_C.brand);
+    ciR(ctx, "Lora Collection", R, 104, ciFont(500, 20), CI_C.soft);
+    ciR(ctx, ciCut(ctx, cashImgFilterTxt(), ciFont(400, 18), inner), R, 132, ciFont(400, 18), CI_C.soft);
+    ciL(ctx, today(), P, 70, ciFont(500, 20), CI_C.soft);
+
+    // أربع كروت
+    var bal = cashBox(), wal = walletsTotal();
+    var cells = [
+      ["رصيد الخزنة", money(bal), bal >= 0 ? CI_C.brand : CI_C.due],
+      ["في محافظ الشحن", money(wal), wal > 0.009 ? CI_C.due : CI_C.soft],
+      ["داخل", money(d.tin),  d.tin  ? CI_C.gain : CI_C.soft],
+      ["خارج", money(d.tout), d.tout ? CI_C.due  : CI_C.soft]
+    ];
+    var cw = (inner - GAP) / 2;
+    cells.forEach(function(c, i){
+      var col = i % 2, rowi = (i / 2) | 0;
+      // العمود الأول على اليمين — الشاشة كلها من اليمين للشمال
+      var x = P + (col === 0 ? cw + GAP : 0);
+      var y = HEAD + rowi * (STAT + GAP);
+      ctx.fillStyle = CI_C.card; ciRound(ctx, x, y, cw, STAT, 14); ctx.fill();
+      ctx.strokeStyle = CI_C.line; ctx.lineWidth = 1; ctx.stroke();
+      ciR(ctx, c[0], x + cw - 18, y + 36, ciFont(500, 19), CI_C.soft);
+      ciR(ctx, c[1], x + cw - 18, y + 80, ciFont(700, 30), c[2]);
+    });
+
+    // كارت لكل حركة
+    if(!rows.length){
+      ciR(ctx, "مفيش حركات في الفلتر ده.", R, bodyTop + 50, ciFont(500, 22), CI_C.soft);
+    }
+    rows.forEach(function(x, i){
+      var y = bodyTop + i * (ROW + GAP);
+      ctx.fillStyle = CI_C.bg; ciRound(ctx, P, y, inner, ROW, 14); ctx.fill();
+      ctx.strokeStyle = CI_C.line; ctx.lineWidth = 1; ctx.stroke();
+      // شريط جانبي بلون الاتجاه — بيخلّي الداخل والخارج يتفرزوا بالعين
+      ctx.fillStyle = x.inn ? CI_C.gain : CI_C.due;
+      ciRound(ctx, P + inner - 5, y, 5, ROW, 3); ctx.fill();
+
+      ciR(ctx, ciCut(ctx, x.t, ciFont(600, 24), inner*0.55), P + inner - 20, y + 36,
+          ciFont(600, 24), CI_C.ink);
+      ciL(ctx, x.d, P + 18, y + 36, ciFont(500, 19), CI_C.soft);
+
+      // المصروف مالوش جهة، فـ«—» كانت بتطلع قبل البيان من غير لزمة
+      var nm = (x.who && x.who !== "—") ? x.who : "";
+      var who = [nm, x.note].filter(Boolean).join(" · ") || "—";
+      ciR(ctx, ciCut(ctx, who, ciFont(400, 20), inner - 40), P + inner - 20, y + 68,
+          ciFont(400, 20), CI_C.soft);
+
+      var amt = x.inn ? money(x.inn) : money(x.out);
+      ciR(ctx, (x.inn ? "داخل " : "خارج ") + amt, P + inner - 20, y + 106,
+          ciFont(700, 24), x.inn ? CI_C.gain : CI_C.due);
+      ciL(ctx, "الرصيد " + money(x.run), P + 18, y + 106, ciFont(600, 21),
+          x.run < 0 ? CI_C.due : CI_C.soft);
+    });
+
+    var fy = bodyTop + (rows.length ? rows.length*(ROW+GAP) : 110) + 16;
+    ctx.strokeStyle = CI_C.line; ctx.beginPath();
+    ctx.moveTo(P, fy); ctx.lineTo(W - P, fy); ctx.stroke();
+    if(cut){
+      ciR(ctx, "الصورة فيها آخر " + qty(rows.length) + " حركة من " + qty(d.rows.length) +
+               " — فلتر بالتاريخ عشان تاخد الباقي.", R, fy + 34, ciFont(500, 18), CI_C.due);
+    }
+    ciR(ctx, qty(d.rows.length) + " حركة · إصدار " + VERSION, R, fy + (cut ? 64 : 34),
+        ciFont(400, 17), CI_C.soft);
+    return cv;
+  }
+
+  function downloadBlob(name, blob){
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+  document.getElementById("b-cash-img").addEventListener("click", function(){
+    var btn = this, old = btn.textContent;
+    btn.disabled = true; btn.textContent = "بيحضّر…";
+    var go = function(){
+      try{
+        drawCashImage().toBlob(function(blob){
+          btn.disabled = false; btn.textContent = old;
+          if(!blob){ toast("المتصفح ما قدرش يعمل الصورة"); return; }
+          downloadBlob("lora-khazna-" + today() + ".png", blob);
+          toast("الصورة نزلت");
+        }, "image/png");
+      } catch(e){
+        btn.disabled = false; btn.textContent = old;
+        toast("الصورة ما اتعملتش: " + (e && e.message || e));
+      }
+    };
+    // الخط لازم يبقى محمّل قبل الرسم وإلا بيترسم بخط افتراضي
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(go, go);
+    else go();
+  });
 
   function renderItems(){
     var rows = live("items").map(function(i){
