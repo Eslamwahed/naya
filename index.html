@@ -272,7 +272,7 @@
   .stabs button.on b{opacity:.9}
   @media (max-width:560px){
     .stabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
-      padding-bottom:4px;margin-inline:-14px;padding-inline:var(--sp-3)}
+      padding-bottom:4px}
     .stabs button{flex:0 0 auto}
   }
 
@@ -332,6 +332,81 @@
   .stepline.done{color:var(--gain)}
   .owarn p{margin:0 0 var(--sp-1);font-size:var(--fs-2);color:var(--ink-soft);line-height:1.5}
   @media (max-width:820px){ .osum{grid-template-columns:1fr 1fr} }
+
+  /* ================= مراحل الأوردر ================= */
+  .sg-phase{display:grid;grid-template-columns:2fr 2fr 1fr;gap:var(--sp-2);font-size:var(--fs-1);color:var(--ink-soft);margin-bottom:4px}
+  .sg-phase div{border-top:2px solid var(--line);padding-top:2px}
+  .sg-phase .ph-cu{border-color:var(--teal)} .sg-phase .ph-co{border-color:var(--warn)}
+  .sg-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);margin-bottom:var(--sp-4)}
+  .sg-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:var(--sp-3);cursor:pointer;text-align:start;font:inherit;color:inherit;min-width:0}
+  .sg-card:hover{border-color:var(--teal)}
+  .sg-card .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--teal-soft);
+    color:var(--teal);font-size:var(--fs-1);font-weight:700;margin-inline-end:6px}
+  .sg-card .t{font-weight:600}
+  .sg-card .c{display:block;font-size:var(--fs-6);font-weight:700;margin-top:4px}
+  .sg-card .s{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .sg-card .s.bad{color:var(--due)}
+  .sg-card.on{border-color:var(--teal);box-shadow:inset 0 -3px 0 var(--teal)}
+  .sg-card.on .n{background:var(--teal);color:var(--card)}
+  .sg-card.alert .c{color:var(--due)}
+  #b-sall.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
+  .sg-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4)}
+  .sg-ph{margin-bottom:var(--sp-3)}
+  .sg-ph h3{margin:0;font-size:var(--fs-4)}
+  .sg-ph p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-2)}
+  .sg-empty{color:var(--ink-soft);text-align:center;padding:var(--sp-5) 0;margin:0}
+  .sg-row{display:grid;grid-template-columns:110px 1.2fr 1.4fr 110px minmax(0,auto);gap:var(--sp-3);align-items:center;
+    padding:var(--sp-3) 0;border-top:1px solid var(--line)}
+  .sg-rows > .sg-row:first-child{border-top:0}
+  .sg-row .ono{font-weight:700;color:var(--ink);text-decoration:none}
+  .sg-ck{display:inline-flex;align-items:center;gap:6px}
+  .sg-ck input{width:18px;height:18px;margin:0}
+  .sg-row .ono:hover{color:var(--teal);text-decoration:underline}
+  .sg-sub{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .sg-amt{font-weight:600;text-align:end}
+  .sg-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .sg-acts .tbtn{padding:6px 10px;font-size:var(--fs-2)}
+  .sg-pill{display:inline-block;font-size:var(--fs-1);padding:2px 8px;border-radius:var(--r-pill);background:var(--teal-soft);color:var(--teal)}
+  .sg-pill.bad{background:var(--paper);color:var(--due);border:1px solid var(--due)}
+  .sg-inl{display:flex;gap:6px;min-width:0}
+  .sg-inl input{width:100%;min-width:0;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-sm);font:inherit;
+    font-size:var(--fs-2);background:var(--card);color:var(--ink)}
+  .sg-inl .tbtn{padding:6px 12px;font-size:var(--fs-2)}
+  .sg-bulk{display:flex;gap:var(--sp-2);align-items:center;background:var(--teal-soft);border-radius:var(--r-sm);
+    padding:var(--sp-2) var(--sp-3);margin-bottom:var(--sp-3);flex-wrap:wrap}
+  .sg-bulk b{color:var(--teal)}
+  .sg-bulk .tbtn{padding:6px 10px;font-size:var(--fs-2)}
+  .sg-part{grid-column:1 / -1;background:var(--paper);border-radius:var(--r-sm);padding:var(--sp-3);display:grid;gap:var(--sp-2)}
+  .sg-part .pl{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+  .sg-part .pl span{flex:1;min-width:140px}
+  .sg-part input{width:80px;padding:6px 8px;border:1px solid var(--line);border-radius:var(--r-sm);font:inherit;background:var(--card);color:var(--ink)}
+  .sg-co{border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .sg-co-h{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);
+    background:var(--teal-soft);flex-wrap:wrap}
+  .sg-co-h .nm{font-weight:700;font-size:var(--fs-4)}
+  .sg-co-h .big{font-size:var(--fs-6);font-weight:700;color:var(--gain)}
+  .sg-co-b{padding:0 var(--sp-4)}
+  .sg-co-b .sg-row{grid-template-columns:90px 1.3fr 1fr 1fr 1fr}
+  .sg-co-b .sg-row.ret{grid-template-columns:90px 1.2fr 1.6fr 60px auto}
+  .sg-co-f{display:flex;gap:var(--sp-2);align-items:center;padding:var(--sp-3) var(--sp-4);border-top:1px solid var(--line);flex-wrap:wrap}
+  .sg-co-f input{width:130px;padding:7px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font:inherit;background:var(--card);color:var(--ink)}
+  .sg-panel .sg-row.done{grid-template-columns:90px 1.2fr 1.4fr 110px auto}
+  @media (max-width:760px){
+    .sg-phase{display:none}
+    .sg-bar{display:flex;overflow-x:auto;gap:6px;margin:0 0 var(--sp-3);padding:0 0 4px;
+      scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+    .sg-card{flex:0 0 136px;scroll-snap-align:start;padding:10px}
+    .sg-card .c{font-size:var(--fs-5)}
+    .sg-panel{padding:var(--sp-3)}
+    .sg-row,.sg-co-b .sg-row,.sg-co-b .sg-row.ret,.sg-panel .sg-row.done{grid-template-columns:1fr auto;gap:6px var(--sp-2)}
+    .sg-row .items,.sg-row .sg-inl,.sg-row .sg-acts{grid-column:1 / -1}
+    .sg-row .sg-amt{grid-column:1 / -1;text-align:start}
+    .sg-row .sg-acts{justify-content:stretch}
+    .sg-row .sg-acts .tbtn{flex:1;justify-content:center;text-align:center}
+    .sg-co-b{padding:0 var(--sp-3)}
+    .sg-co-h .big{font-size:var(--fs-5)}
+  }
 
   /* بيانات الأوردر — سطر واحد بدل شبكة عشر خانات */
   .dmeta{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);align-items:center;
@@ -975,8 +1050,7 @@
 
 <!-- مبيعات -->
 <section id="tab-sales" hidden>
-  <h2>مبيعات</h2>
-  <p class="hint">زرار <strong>+ أوردر جديد</strong> بيفتح فورم الإدخال على الجنب — انتقل بين الخانات بـTab، وEnter يحفظ، وEsc يقفل. دوس على أي أوردر في الجدول عشان تفتح تفاصيله: الشحن والربح والتحصيل، والتاريخ والحالة بيتعدّلوا من هناك على طول.</p>
+  <h2>الأوردرات</h2>
 
   <div class="toolbar">
     <div class="s-search">
@@ -985,12 +1059,21 @@
         <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
       </svg>
     </div>
+    <button class="tbtn" type="button" id="b-sall" aria-pressed="false">الكل</button>
     <button class="tbtn" type="button" id="b-filters" aria-expanded="false" aria-controls="filters-panel">
       فلاتر <span class="fcount" id="flt-count" hidden>0</span>
     </button>
     <button class="tbtn primary" type="button" id="b-newsale">+ أوردر جديد</button>
   </div>
 
+  <!-- مراحل الأوردر: كل مرحلة ليها بانل فيها الحاجة اللي تخصها بس -->
+  <div id="s-stagebox">
+    <div class="sg-phase" aria-hidden="true"><div class="ph-cu">مع العميل</div><div class="ph-co">مع شركة الشحن</div><div>أرشيف</div></div>
+    <div class="sg-bar" id="s-stages" role="group" aria-label="مراحل الأوردر"></div>
+    <div class="sg-panel" id="s-stage-panel"></div>
+  </div>
+
+  <div id="s-allview">
   <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
   <input type="hidden" id="flt-status" value="">
 
@@ -1036,6 +1119,7 @@
 
   <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
+  </div>
   <datalist id="ship-list"></datalist>
   <datalist id="owner-list"></datalist>
 </section>
@@ -2178,8 +2262,19 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "83";
+  var VERSION = "84";
   var CHANGELOG = [
+    { v:"84", d:"2026-09-29", items:[
+      "شاشة المبيعات بقت مراحل: ١ جديد · ٢ مع المندوب · ٣ فلوسك عند الشركة · ٤ مرتجع عند الشركة · ٥ خلص — كل مرحلة ليها بانل فيها حاجتها بس",
+      "١ جديد: الشركة وكود البوليصة بيتكتبوا في السطر على طول، ودوسة «اتبعت» تنقله لـ«مع المندوب»",
+      "٢ مع المندوب: خد كله · خد جزء (المرتجع بيتكتب في البانل نفسها) · رفض — وتقدر تعلّم على كذا أوردر وتسجّلهم مرة واحدة",
+      "٢ مع المندوب: الأوردر اللي بقاله ٥ أيام أو أكتر بيطلع عليه تنبيه أحمر",
+      "٣ فلوسك عند الشركة: مجمّعة بالشركة زي كشفها — «استلمت كلهم» أو جزء، وبيدخل الخزنة على طول. والتحصيل المباشر ليه مجموعة لوحده",
+      "٤ مرتجع عند الشركة: القطع الراجعة مجمّعة بالشركة، «وصلني» لكل قطعة أو للكل",
+      "زرار «الكل» بيفتح الجدول القديم بكل حاجة فيه، والبحث بيفتحه لوحده، ورقم أي أوردر في البانلات بيفتح تفاصيله",
+      "الشاشة بتفتكر آخر مرحلة كنت فاتحها",
+      "إصلاح: شريط الفلاتر في الموبايل كان بيعمل سكرول بالعرض"
+    ]},
     { v:"83", d:"2026-09-29", items:[
       "الأوردر بقى قصتين ورا بعض: «مع العميل» (١ اتسجّل · ٢ اتبعت · ٣ العميل استلم ودفع للمندوب) وبعدها «مع شركة الشحن» (٤ فلوسك عندها · ٥ المرتجع عندها)",
       "خطوة ٣: خد كله · خد جزء ورجّع جزء · رفض كله — وأول ما يستلم، السيستم بيسجّل إنه دفع للمندوب تمن اللي خده + الشحن. العميل خرج من القصة ومش عليه حاجة",
@@ -7151,6 +7246,7 @@
   });
 
   function renderSales(){
+    renderStages();
     var list = filteredSales().slice().sort(byDate);
     renderStatusTabs();
     renderChips();
@@ -7188,6 +7284,447 @@
     setTimeout(function(){ freshId = null; }, 1600);
     if(SD_OPEN) updateEntryCalc();
   }
+
+  /* ================= مراحل الأوردر =================
+     الشاشة الرئيسية للمبيعات: خمس بانلات، كل بانل فيها الأوردرات اللي
+     مستنية حاجة في المرحلة دي بس، وزراير المرحلة دي بس:
+       ١ جديد (ناقصه الشركة أو الكود) · ٢ مع المندوب (العميل استلم؟)
+       ٣ فلوسك عند الشركة · ٤ مرتجع عند الشركة · ٥ خلص
+     المرحلة مش متخزّنة — بتتحسب من orderStep زي الخطوات بالظبط، فمستحيل
+     الأوردر يبان في بانل والداتا تقول حاجة تانية. ٣ و٤ مش بالترتيب،
+     فالأوردر ممكن يبان في الاتنين (فلوسه والمرتجع لسه عند الشركة).
+     «الكل» = الجدول القديم بكل حاجة فيه (الفلاتر والتفاصيل والتعديل). */
+  var sView = null;                     // "1".."5" أو "all"
+  try{ if(LS) sView = LS.getItem("naya:sview"); }catch(e){}
+  var sgSel = {};                       // المختار في بانل ٢
+  var sgPart = null;                    // الأوردر اللي مفتوح فيه «خد جزء»
+  var SG_STALE = 5;                     // بعد كام يوم مع المندوب يطلع تنبيه
+  var sgNote = null;                    // نتيجة الإجراء الجماعي — بتفضل ظاهرة لحد الحركة الجاية
+
+  function setSView(v, keep){
+    sView = v;
+    if(!keep){ try{ if(LS) LS.setItem("naya:sview", v); }catch(e){} }
+    sgPart = null; sgNote = null;
+    renderSales();
+  }
+  function daysSince(d){
+    if(!d) return 0;
+    var t = Date.parse(d + "T00:00:00"), n = Date.parse(today() + "T00:00:00");
+    return isNaN(t) ? 0 : Math.max(0, Math.round((n - t) / 86400000));
+  }
+  function sgNum(v){ return (Number(v)||0).toLocaleString("en-US", { maximumFractionDigits:2 }); }
+
+  function stageLists(){
+    var st = { 1:[], 2:[], 3:[], 4:[], 5:[] }, direct = [];
+    var month = today().slice(0, 7);
+    live("sales").forEach(function(s){
+      var sp = orderStep(s);
+      if(sp.k === "ship") st[1].push(s);
+      else if(sp.k === "inspect" || sp.k === "custpaid") st[2].push(s);
+      if(viaShip(s) && shipCounts(s) && !(isDelivered(s) && shipPaidGap(s)) && shipPend(s).left > 0.009) st[3].push(s);
+      if(!viaShip(s) && (sp.k === "collect" || sp.k === "refund")) direct.push(s);
+      if(heldShipped(s) && heldLeft(s) > 0) st[4].push(s);
+      if(sp.done && (s.date || "").slice(0, 7) === month) st[5].push(s);
+    });
+    var asc = function(a, b){ return -byDate(a, b); };     // الأقدم فوق: ده اللي مستني من زمان
+    st[1].sort(asc); st[2].sort(asc); st[3].sort(asc); st[4].sort(asc); direct.sort(asc);
+    st[5].sort(byDate);
+    return { st:st, direct:direct };
+  }
+  function sgPickDefault(g){
+    if(!live("sales").length) return "all";
+    var k = ["1","2","3","4"].find(function(x){
+      return g.st[x].length || (x === "3" && g.direct.length); });
+    return k || "5";
+  }
+
+  function renderStages(){
+    var bar = document.getElementById("s-stages"), pnl = document.getElementById("s-stage-panel");
+    if(!bar || !pnl) return;
+    var g = stageLists();
+    if(!sView || (sView !== "all" && !g.st[sView])) sView = sgPickDefault(g);
+    var all = sView === "all";
+
+    document.getElementById("s-allview").hidden = !all;
+    var bf = document.getElementById("b-filters");
+    if(bf) bf.hidden = !all;
+    var ba = document.getElementById("b-sall");
+    if(ba){ ba.classList.toggle("on", all); ba.setAttribute("aria-pressed", all ? "true" : "false"); }
+
+    var left3 = g.st[3].reduce(function(a, s){ return a + shipPend(s).left; }, 0);
+    var due3 = g.direct.reduce(function(a, s){ return a + Math.max(0, sDue(s)); }, 0);
+    var held = g.st[4].reduce(function(a, s){ return a + heldLeft(s); }, 0);
+    var stale = g.st[2].filter(function(s){ return daysSince(s.date) >= SG_STALE; }).length;
+    var cards = [
+      ["1", "جديد", qty(g.st[1].length), "ناقصه شحن أو كود", ""],
+      ["2", "مع المندوب", qty(g.st[2].length),
+        stale ? qty(stale) + " بقالهم " + SG_STALE + " أيام أو أكتر" : "مستني نتيجة التسليم", stale ? "bad" : ""],
+      ["3", "فلوسك عند الشركة", sgNum(left3),
+        "من " + qty(g.st[3].length) + " أوردرات" + (due3 > 0.009 ? " · و" + sgNum(due3) + " عند عملاء" : ""), ""],
+      ["4", "مرتجع عند الشركة", qty(held) + " قطع", "من " + qty(g.st[4].length) + " أوردر", ""],
+      ["5", "خلص", qty(g.st[5].length), "الشهر ده", ""]
+    ];
+    bar.innerHTML = cards.map(function(c){
+      return "<button type='button' class='sg-card" + (sView === c[0] ? " on" : "") +
+        (c[0] === "4" && held ? " alert" : "") + "' data-sgview='" + c[0] + "' aria-pressed='" +
+        (sView === c[0] ? "true" : "false") + "'>" +
+        "<span class='n'>" + "١٢٣٤٥"[Number(c[0]) - 1] + "</span><span class='t'>" + esc(c[1]) + "</span>" +
+        "<span class='c num'>" + esc(c[2]) + "</span>" +
+        "<span class='s" + (c[4] ? " " + c[4] : "") + "'>" + esc(c[3]) + "</span></button>";
+    }).join("");
+
+    pnl.hidden = all;
+    if(all) return;
+    pnl.innerHTML = SG_PANEL[sView](g);
+  }
+
+  // رقم الأوردر في أي بانل بيفتح تفاصيله الكاملة في «الكل»
+  function sgNo(s){
+    return "<a href='#' class='ono' data-sgopen='" + esc(s.id) + "'>#" + esc(s.no || "—") + "</a>";
+  }
+  function sgCust(s){
+    var p = db.parties.find(function(x){ return x.id === s.partyId; }) || {};
+    return esc(partyName(s.partyId)) +
+      (p.gov || p.phone ? "<span class='sg-sub'>" + esc([p.gov, p.phone].filter(Boolean).join(" · ")) + "</span>" : "");
+  }
+  function sgItems(s){
+    var n = SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
+    return "<span class='items'>" + esc(itemsLabel(s)) +
+      "<span class='sg-sub'>" + qty(n) + " قطعة" + (shipIn(s) ? " · شحن " + sgNum(shipIn(s)) : "") + "</span></span>";
+  }
+  // اللي العميل هيدفعه لو خد كله
+  function sgFull(s){
+    return SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0) * (Number(l.price)||0); }, 0) + shipIn(s);
+  }
+  function sgHead(t, p){ return "<div class='sg-ph'><h3>" + esc(t) + "</h3>" + (p ? "<p>" + esc(p) + "</p>" : "") + "</div>"; }
+  function sgEmpty(t){ return "<p class='sg-empty'>" + esc(t) + "</p>"; }
+  function sgCan(s){ return canEdit() && !saleLocked(s); }
+
+  var SG_PANEL = {
+    "1": function(g){
+      var rows = g.st[1].map(function(s){
+        var ed = sgCan(s);
+        return "<div class='sg-row' data-sgrow='" + esc(s.id) + "'>" +
+          "<span>" + sgNo(s) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
+          "<span>" + sgCust(s) + "</span>" + sgItems(s) +
+          "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" +
+          (ed ? "<span class='sg-inl'>" +
+                "<input list='ship-list' data-sgco='" + esc(s.id) + "' placeholder='الشركة' value='" + esc(squish(s.shipCo)) + "' aria-label='شركة الشحن'>" +
+                "<input data-sgcode='" + esc(s.id) + "' placeholder='كود البوليصة' value='" + esc(squish(s.shipCode)) + "' aria-label='كود البوليصة'>" +
+                "<button class='tbtn primary' type='button' data-sgship='" + esc(s.id) + "'>اتبعت</button></span>"
+              : "<span class='sg-sub'>" + (canEdit() ? "في فترة مقفولة" : "مالكش صلاحية تعدّل") + "</span>") +
+          "</div>";
+      });
+      return sgHead("١ · جديد — ابعته مع شركة الشحن",
+               "اكتب الشركة وكود البوليصة هنا على طول، والأوردر بينقل لوحده لـ«مع المندوب».") +
+        (rows.length ? "<div class='sg-rows'>" + rows.join("") + "</div>" : sgEmpty("مفيش أوردرات مستنية شحن."));
+    },
+
+    "2": function(g){
+      Object.keys(sgSel).forEach(function(id){
+        if(!g.st[2].some(function(s){ return s.id === id; })) delete sgSel[id]; });
+      var nSel = Object.keys(sgSel).length;
+      var rows = g.st[2].map(function(s){
+        var ed = sgCan(s), sp = orderStep(s), co = squish(s.shipCo) || "الشركة";
+        var d = daysSince(s.date), acts;
+        if(!ed) acts = "<span class='sg-sub'>" + (canEdit() ? "في فترة مقفولة" : "مالكش صلاحية تعدّل") + "</span>";
+        else if(sp.k === "custpaid")
+          acts = "<span class='sg-acts'><button class='tbtn primary' type='button' data-sgfix='" + esc(s.id) + "'>العميل دفع " +
+                 esc(sgNum(shipPaidOf(s))) + " لـ " + esc(co) + "</button></span>";
+        else
+          acts = "<span class='sg-acts'>" +
+            "<button class='tbtn primary' type='button' data-sggo='" + esc(s.id) + "|all'>خد كله</button>" +
+            "<button class='tbtn' type='button' data-sggo='" + esc(s.id) + "|part'>خد جزء</button>" +
+            "<button class='tbtn' type='button' data-sggo='" + esc(s.id) + "|none'>رفض</button></span>";
+        var part = "";
+        if(sgPart === s.id && ed){
+          part = "<div class='sg-part'><b>العميل رجّع إيه؟ اكتب عدد اللي رجع من كل صنف</b>" +
+            SL(s).map(function(l, i){
+              var vl = vLabel(vColor(l), vSize(l));
+              return "<div class='pl'><span>" + esc(itemName(l.itemId)) + (vl ? " (" + esc(vl) + ")" : "") +
+                " — اتبعت " + qty(Number(l.qty)||0) + "</span>" +
+                "<label>رجّع <input inputmode='decimal' data-sgret='" + esc(s.id) + "|" + i + "' placeholder='0'></label></div>";
+            }).join("") +
+            "<div class='sg-acts' style='justify-content:flex-start'>" +
+              "<button class='tbtn primary' type='button' data-sgpartok='" + esc(s.id) + "'>سجّل — والباقي العميل خده ودفعه</button>" +
+              "<button class='tbtn' type='button' data-sgpartno='1'>إلغاء</button></div></div>";
+        }
+        return "<div class='sg-row' data-sgrow='" + esc(s.id) + "'>" +
+          "<span>" + (ed && sp.k === "inspect"
+              ? "<label class='sg-ck'><input type='checkbox' data-sgsel='" + esc(s.id) + "'" + (sgSel[s.id] ? " checked" : "") +
+                " aria-label='اختار أوردر " + esc(s.no || "") + "'>" + sgNo(s) + "</label>"
+              : sgNo(s)) +
+            "<span class='sg-sub num'>" + esc(co) + (squish(s.shipCode) ? " · " + esc(squish(s.shipCode)) : "") + "</span></span>" +
+          "<span>" + sgCust(s) + (d >= SG_STALE ? " <span class='sg-pill bad'>بقاله " + qty(d) + " يوم</span>" : "") + "</span>" +
+          sgItems(s) +
+          "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" + acts + part + "</div>";
+      });
+      var bulk = nSel
+        ? "<div class='sg-bulk'><b>" + qty(nSel) + " مختارين</b>" +
+          "<button class='tbtn primary' type='button' data-sgbulk='all'>كلهم خدوا كله ودفعوا</button>" +
+          "<button class='tbtn' type='button' data-sgbulk='none'>كلهم رفضوا</button>" +
+          "<button class='tbtn' type='button' data-sgbulk='clear'>شيل الاختيار</button></div>"
+        : (g.st[2].length > 1 ? "<p class='sg-sub' style='margin:0 0 var(--sp-2)'>المندوب رجع بكذا أوردر؟ علّم عليهم وسجّلهم مرة واحدة.</p>" : "");
+      var note = sgNote ? "<p class='note " + (sgNote.bad ? "bad" : "ok") + "'>" + esc(sgNote.t) + "</p>" : "";
+      return sgHead("٢ · مع المندوب — العميل استلم؟",
+               "اللي العميل بيخده بيدفع تمنه للمندوب على الباب وخلاص — بعدها العميل مش عليه حاجة.") +
+        note + bulk + (rows.length ? "<div class='sg-rows'>" + rows.join("") + "</div>" : sgEmpty("مفيش أوردرات مع المندوب دلوقتي."));
+    },
+
+    "3": function(g){
+      var by = {};
+      g.st[3].forEach(function(s){ var c = squish(s.shipCo); (by[c] = by[c] || []).push(s); });
+      var cos = Object.keys(by).sort(function(a, b){
+        var sa = by[a].reduce(function(x, s){ return x + shipPend(s).left; }, 0);
+        var sb = by[b].reduce(function(x, s){ return x + shipPend(s).left; }, 0);
+        return sb - sa; });
+      var html = cos.map(function(co){
+        var L = by[co], tot = L.reduce(function(a, s){ return a + shipPend(s).left; }, 0);
+        var can = canEdit() && !!co;
+        var rows = L.map(function(s){
+          var got = isCancelled(s) ? shipIn(s) : (Number(s.paid)||0);
+          return "<div class='sg-row'>" + "<span>" + sgNo(s) + "</span>" +
+            "<span>" + esc(partyName(s.partyId)) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
+            "<span class='sg-sub'>" + (isCancelled(s) ? "رفض · دفع الشحن " : "العميل دفع ") + sgNum(got) + "</span>" +
+            "<span class='sg-sub'>" + (shipOut(s) ? "شحنها " + sgNum(shipOut(s)) : "") + "</span>" +
+            "<span class='sg-amt num'>" + sgNum(shipPend(s).left) + "</span></div>";
+        }).join("");
+        return "<div class='sg-co'>" +
+          "<div class='sg-co-h'><span class='nm'>" + (co ? esc(co) : "⚠ من غير اسم شركة") + "</span>" +
+            "<span>لك عندها <span class='big num'>" + esc(sgNum(tot)) + "</span></span></div>" +
+          "<div class='sg-co-b'>" + rows + "</div>" +
+          (can
+            ? "<div class='sg-co-f'>" +
+                "<button class='tbtn primary' type='button' data-sgdraw='" + esc(co) + "|all'>استلمت " + esc(sgNum(tot)) + " كلهم</button>" +
+                "<span>أو جزء:</span><input inputmode='decimal' class='num' data-sgamt='" + esc(co) + "' placeholder='المبلغ'>" +
+                "<button class='tbtn' type='button' data-sgdraw='" + esc(co) + "|part'>سجّل</button>" +
+                "<span class='sg-sub'>الجزء بيقفل الأوردرات الأقدم الأول · بيدخل الخزنة على طول</span></div>"
+            : (co ? "" : "<div class='sg-co-f'><span class='sg-sub'>افتح الأوردر واكتب اسم شركة الشحن — من غيره الفلوس مالهاش مكان.</span></div>")) +
+          "</div>";
+      }).join("");
+      if(g.direct.length){
+        html += "<div class='sg-co'><div class='sg-co-h'><span class='nm'>تحصيل مباشر — عند العملاء</span>" +
+          "<span>لك عندهم <span class='big num'>" + esc(sgNum(g.direct.reduce(function(a, s){ return a + Math.max(0, sDue(s)); }, 0))) +
+          "</span></span></div><div class='sg-co-b'>" +
+          g.direct.map(function(s){
+            var d = sDue(s), ed = sgCan(s);
+            return "<div class='sg-row'><span>" + sgNo(s) + "</span><span>" + sgCust(s) + "</span>" +
+              "<span class='sg-sub'>دفع " + sgNum(Number(s.paid)||0) + " من " + sgNum(saleTotal(s) + shipIn(s)) + "</span>" +
+              "<span class='sg-amt num'>" + (d < 0 ? "ترجّعله " + sgNum(-d) : sgNum(d)) + "</span>" +
+              "<span class='sg-acts'>" + (!ed ? "" : (d > 0
+                ? "<button class='tbtn primary' type='button' data-sgqpay='" + esc(s.id) + "'>العميل دفع الكل</button>"
+                : "<button class='tbtn' type='button' data-edit='sales|" + esc(s.id) + "'>تعديل</button>")) + "</span></div>";
+          }).join("") + "</div></div>";
+      }
+      return sgHead("٣ · فلوسك عند شركة الشحن",
+               "العملاء دفعوا للمندوب — الشركة خصمت شحنها وماسكة الباقي. كل شركة لوحدها زي كشفها بالظبط.") +
+        (html || sgEmpty("كل فلوسك وصلتك — مفيش حاجة عند شركات الشحن."));
+    },
+
+    "4": function(g){
+      var by = {};
+      heldOpen().forEach(function(x){ var c = squish(x.s.shipCo); (by[c] = by[c] || []).push(x); });
+      var html = Object.keys(by).map(function(co){
+        var L = by[co].sort(function(a, b){ return -byDate(a.s, b.s); });
+        var n = L.reduce(function(a, x){ return a + x.n; }, 0);
+        var rows = L.map(function(x){
+          var vl = vLabel(vColor(x.l), vSize(x.l)), ed = sgCan(x.s);
+          return "<div class='sg-row ret'><span>" + sgNo(x.s) + "</span>" +
+            "<span>" + esc(partyName(x.s.partyId)) + "<span class='sg-sub'>" + (isCancelled(x.s) ? "رفض كله" : "خد جزء") + "</span></span>" +
+            "<span class='items'>" + esc(itemName(x.l.itemId)) + (vl ? " (" + esc(vl) + ")" : "") + "</span>" +
+            "<span class='num'>" + qty(x.n) + "</span>" +
+            "<span class='sg-acts'>" + (ed ? "<button class='tbtn primary' type='button' data-heldback='" +
+              esc(x.s.id) + "|" + x.i + "'>وصلني</button>" : "") + "</span></div>";
+        }).join("");
+        return "<div class='sg-co'><div class='sg-co-h'><span class='nm'>" + (co ? esc(co) : "⚠ من غير اسم شركة") + "</span>" +
+          "<span>" + qty(n) + " قطعة</span></div><div class='sg-co-b'>" + rows + "</div>" +
+          (canEdit() && L.length > 1 ? "<div class='sg-co-f'><button class='tbtn' type='button' data-sgbackall='" + esc(co) + "'>كل مرتجع " +
+            esc(co || "الأوردرات دي") + " وصلني</button></div>" : "") + "</div>";
+      }).join("");
+      return sgHead("٤ · مرتجع عند شركة الشحن",
+               "قطع العميل رجّعها ولسه ما وصلتكش. لسه محسوبة في مخزونك — دوس «وصلني» أول ما تستلمها.") +
+        (html || sgEmpty("مفيش مرتجع عند شركات الشحن."));
+    },
+
+    "5": function(g){
+      var rows = g.st[5].map(function(s){
+        return "<div class='sg-row done'><span>" + sgNo(s) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
+          "<span>" + esc(partyName(s.partyId)) + "</span>" +
+          "<span class='items'>" + esc(itemsLabel(s)) + (retQty(s) ? "<span class='sg-sub'>رجّع " + qty(retQty(s)) + "</span>" : "") + "</span>" +
+          "<span class='sg-amt num'>" + sgNum(saleTotal(s) + (isCancelled(s) ? 0 : shipIn(s))) + "</span>" +
+          "<span class='sg-acts'><span class='sg-pill'>" + (isCancelled(s) ? "رفض · خلص" : "✓ خلص") + "</span></span></div>";
+      });
+      return sgHead("٥ · خلص — الشهر ده",
+               "العميل دفع، وفلوسك وصلتك، والمرتجع رجع المخزن. الأقدم تلاقيه في «الكل».") +
+        (rows.length ? "<div class='sg-rows'>" + rows.join("") + "</div>" : sgEmpty("لسه مفيش أوردرات خلصت الشهر ده."));
+    }
+  };
+
+  /* ---------- أحداث البانلات ---------- */
+  // «خد جزء»: المرتجع بيتكتب في البانل نفسها، وبعدين نفس setSaleStatus
+  function sgPartSave(id){
+    var rec = db.sales.find(function(x){ return x.id === id; });
+    if(!rec) return;
+    var rets = [], bad = null, any = false;
+    SL(rec).forEach(function(l, i){
+      var box = document.querySelector("[data-sgret='" + id + "|" + i + "']");
+      var v = Number(toEn(box ? box.value : ""))||0;
+      if(v < 0) v = 0;
+      if(v > (Number(l.qty)||0)) bad = itemName(l.itemId) + ": المرتجع أكبر من المشحون (" + qty(Number(l.qty)||0) + ")";
+      if(v > 0) any = true;
+      rets.push(v);
+    });
+    if(bad){ toast(bad); return; }
+    if(!any){ toast("اكتب عدد اللي رجع — أو دوس «خد كله» لو ما رجّعش حاجة"); return; }
+    var old = SL(rec).map(function(l){ return l.ret; });
+    SL(rec).forEach(function(l, i){ l.ret = rets[i]; });
+    sgPart = null;
+    if(!setSaleStatus(rec, "delivered")){
+      SL(rec).forEach(function(l, i){ l.ret = old[i]; });
+      return;
+    }
+  }
+  // استلام فلوس من الشركة — نفس حركة «سجّل الاستلام» في شاشة الشركات
+  function settleCo(co, amt){
+    var name = squish(co), bal = walletOf(name);
+    if(!name){ toast("الأوردرات دي من غير اسم شركة — افتحها واكتب الاسم الأول"); return false; }
+    if(!(amt > 0)){ toast("اكتب المبلغ اللي استلمته"); return false; }
+    if(amt > bal + 0.009){ toast("المبلغ أكبر من رصيدك عندها (" + money(bal) + ")"); return false; }
+    var d = today();
+    if(!guardLock(d, "الاستلام")) return false;
+    db.cash.push(stamp({ date:d, type:"settle", partyId:"", amount:Math.round(amt * 100) / 100,
+      shipCo:name, note:"استلام من " + name }));
+    saveSoon("cash"); renderAll();
+    var left = bal - amt;
+    toast("اتسجّل استلام " + money(amt) + " من " + name + " — دخل الخزنة" +
+          (left > 0.009 ? " · باقي لك " + money(left) : " · خلص رصيدك عندها"), 4200);
+    return true;
+  }
+  function sgOpenRow(id){
+    sView = "all";                                   // تنقّل بس — مش اختيار يتفتكر
+    openRows = {}; openRows[id] = 1;
+    renderSales();
+    var tr = document.querySelector("#t-sales tr[data-row='" + id + "']");
+    if(tr) tr.scrollIntoView({ block:"center" });
+  }
+
+  document.getElementById("s-stages").addEventListener("click", function(e){
+    var c = e.target.closest("[data-sgview]"); if(!c) return;
+    setSView(c.dataset.sgview);
+  });
+  document.getElementById("b-sall").addEventListener("click", function(){ setSView("all"); });
+  // البحث بيدوّر في كل المراحل — فبيفتح «الكل»
+  document.getElementById("flt-text").addEventListener("input", function(){
+    if(this.value.trim() && sView !== "all"){ sView = "all"; renderSales(); }
+  });
+
+  var SGP = document.getElementById("s-stage-panel");
+  SGP.addEventListener("click", function(e){
+    var t;
+    if(e.target.closest("button")) sgNote = null;     // الرسالة القديمة ما تفضلش بعد حركة جديدة
+    if((t = e.target.closest("[data-sgopen]"))){ e.preventDefault(); sgOpenRow(t.dataset.sgopen); return; }
+
+    // ١) اتبعت
+    if((t = e.target.closest("[data-sgship]"))){
+      var id = t.dataset.sgship, rec = db.sales.find(function(x){ return x.id === id; });
+      if(!rec) return;
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      if(saleLocked(rec)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+      var coEl = SGP.querySelector("[data-sgco='" + id + "']"), cdEl = SGP.querySelector("[data-sgcode='" + id + "']");
+      var co = squish(coEl ? coEl.value : ""), cd = squish(cdEl ? cdEl.value : "");
+      if(!co){ toast("اكتب اسم شركة الشحن"); if(coEl) coEl.focus(); return; }
+      if(!cd){ toast("اكتب كود البوليصة"); if(cdEl) cdEl.focus(); return; }
+      rec.shipCo = co; rec.shipCode = cd;
+      rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+      saveSoon("sales"); renderAll();
+      toast("#" + (rec.no || "") + " اتبعت مع " + co + " — بقى في «مع المندوب»");
+      return;
+    }
+
+    // ٢) نتيجة التسليم
+    if((t = e.target.closest("[data-sggo]"))){
+      var pr = t.dataset.sggo.split("|");
+      var r2 = db.sales.find(function(x){ return x.id === pr[0]; });
+      if(!r2) return;
+      if(pr[1] === "part"){ sgPart = (sgPart === r2.id ? null : r2.id); renderStages();
+        var f = SGP.querySelector("[data-sgret='" + r2.id + "|0']"); if(f) f.focus(); return; }
+      delete sgSel[r2.id];
+      setSaleStatus(r2, pr[1] === "none" ? "cancelled" : "delivered");
+      return;
+    }
+    if((t = e.target.closest("[data-sgpartok]"))){ sgPartSave(t.dataset.sgpartok); return; }
+    if(e.target.closest("[data-sgpartno]")){ sgPart = null; renderStages(); return; }
+    if((t = e.target.closest("[data-sgfix]"))){
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      var r3 = db.sales.find(function(x){ return x.id === t.dataset.sgfix; });
+      if(!r3 || saleLocked(r3)) return;
+      if(!syncShipPaid(r3)){ toast("مفيش حاجة تتصحّح"); return; }
+      r3.editedBy = me || "غير محدد"; r3.at = Date.now();
+      saveSoon("sales"); renderAll();
+      toast("اتسجّل: العميل دفع " + money(Number(r3.paid)||0) + " لـ " + (squish(r3.shipCo) || "الشركة") +
+            " — مش عليه حاجة خلاص", 4200);
+      return;
+    }
+    if((t = e.target.closest("[data-sgbulk]"))){
+      var k = t.dataset.sgbulk;
+      if(k === "clear"){ sgSel = {}; renderStages(); return; }
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      // نفس الإجراء الجماعي بتاع الجدول — نفس الحواجز بالظبط
+      selSales = {}; Object.keys(sgSel).forEach(function(id){ selSales[id] = 1; });
+      sgSel = {};
+      if(k === "all") bulkRun("deliverpay"); else bulkRun(null, "cancelled");
+      // النتيجة بتتكتب في الجدول (مستخبّي هنا) — بنعرضها في البانل
+      var res = document.getElementById("s-bulk-res");
+      sgNote = res && !res.hidden ? { t:res.textContent, bad:/bad/.test(res.className) } : null;
+      renderStages();
+      return;
+    }
+
+    // ٣) الفلوس
+    if((t = e.target.closest("[data-sgdraw]"))){
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      var q = t.dataset.sgdraw.split("|"), cname = q[0];
+      if(q[1] === "all"){
+        var g = stageLists();
+        var tot = g.st[3].filter(function(s){ return squish(s.shipCo) === cname; })
+          .reduce(function(a, s){ return a + shipPend(s).left; }, 0);
+        settleCo(cname, Math.min(tot, walletOf(cname)));
+      } else {
+        var box = SGP.querySelector("[data-sgamt='" + cname + "']");
+        var v = Number(toEn(box ? box.value : ""))||0;
+        if(!settleCo(cname, v) && box) box.focus();
+      }
+      return;
+    }
+    if((t = e.target.closest("[data-sgqpay]"))){ quickPay(t.dataset.sgqpay, true); return; }
+
+    // ٤) كل مرتجع الشركة وصل
+    if((t = e.target.closest("[data-sgbackall]"))){
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      var cn = t.dataset.sgbackall, n = 0;
+      heldOpen().forEach(function(x){
+        if(squish(x.s.shipCo) !== cn || saleLocked(x.s)) return;
+        if(markLineBack(x.s.id, x.i, false)) n += x.n;
+      });
+      renderAll();
+      toast(n ? "اتسجّل إن " + qty(n) + " قطعة رجعت المخزن" : "مفيش حاجة معلّقة");
+      return;
+    }
+  });
+  SGP.addEventListener("change", function(e){
+    var c = e.target.closest("[data-sgsel]"); if(!c) return;
+    if(c.checked) sgSel[c.dataset.sgsel] = 1; else delete sgSel[c.dataset.sgsel];
+    renderStages();
+  });
+  SGP.addEventListener("keydown", function(e){
+    if(e.key !== "Enter") return;
+    var t = e.target.closest("[data-sgcode],[data-sgco]");
+    if(t){ e.preventDefault(); var b = t.parentNode.querySelector("[data-sgship]"); if(b) b.click(); return; }
+    var a = e.target.closest("[data-sgamt]");
+    if(a){ e.preventDefault(); var b2 = a.parentNode.querySelector("[data-sgdraw$='|part']"); if(b2) b2.click(); return; }
+    var r = e.target.closest("[data-sgret]");
+    if(r){ e.preventDefault(); sgPartSave(r.dataset.sgret.split("|")[0]); }
+  });
 
   function renderBulkBar(){
     var n = selIds().length, bar = document.getElementById("s-bulk");
