@@ -678,8 +678,8 @@
   .dclose:hover{background:var(--paper);color:var(--ink)}
   .panel:not(.as-drawer) .dclose{display:none}
   /* كشف الشركة لوحة بتتفتح وبتتقفل، فالـ× لازم يبان */
-  #shstmt-panel > .dhead{display:flex;align-items:center;gap:var(--sp-3)}
-  #shstmt-panel .dclose{display:block}
+  #shstmt-panel > .dhead,#statement-panel > .dhead{display:flex;align-items:center;gap:var(--sp-3)}
+  #shstmt-panel .dclose,#statement-panel .dclose{display:block}
 
   /* شريط الإجراء فوق كل جدول */
   .tbar{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-3)}
@@ -1388,7 +1388,11 @@
   </div>
   <div class="tbl-wrap"><table id="t-parties"></table></div>
   <div class="panel" id="statement-panel" hidden>
-    <h3 id="statement-title"></h3>
+    <div class="dhead">
+      <h3 id="statement-title"></h3>
+      <button class="dclose" type="button" id="b-stmt-close" aria-label="قفل الكشف">&times;</button>
+    </div>
+    <p class="note" id="statement-sum"></p>
     <div class="tbl-wrap"><table id="t-statement"></table></div>
   </div>
 </section>
@@ -2113,8 +2117,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "72";
+  var VERSION = "73";
   var CHANGELOG = [
+    { v:"73", d:"2026-09-29", items:[
+      "كشف الحساب بيتقفل: دوس على الاسم تاني، أو على × جنب العنوان — والاسم المفتوح كشفه بقى متعلّم",
+      "سطر إجمالي في آخر الكشف: إجمالي المدين وإجمالي الدائن والرصيد النهائي",
+      "وسطر بالعربي فوق الجدول: «اشتريت منه بكام · دفعتله كام · لسه عليك كام» — وللعميل «باعت له بكام · حصّلت منه كام»"
+    ]},
     { v:"72", d:"2026-09-29", items:[
       "زرار «نزّل صورة للموبايل» في شاشة الخزنة: بينزّل صورة PNG فيها الأرصدة وكل حركة في كارت",
       "الصورة مرسومة بعرض تليفون وخط كبير — مش لقطة شاشة، فبتتقرا وهي متبعوتة على واتساب من غير تكبير",
@@ -7887,6 +7896,9 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
   }
+  document.getElementById("b-stmt-close").addEventListener("click", function(){
+    statementFor = null; renderStatement(); renderParties();
+  });
   document.getElementById("b-cash-img").addEventListener("click", function(){
     var btn = this, old = btn.textContent;
     btn.disabled = true; btn.textContent = "بيحضّر…";
@@ -7997,7 +8009,11 @@
         : (b>0 ? "<span class='pill due'>ليك "+money(b)+"</span>" : "<span class='pill due'>عليك "+money(-b)+"</span>");
       var orders = live("sales").filter(function(x){ return x.partyId===p.id; });
       var cancelled = orders.filter(isCancelled).length;
-      return "<tr><td class='wide'><button class='del' style='color:var(--teal)' data-stmt='"+p.id+"'>"+esc(p.name)+"</button></td>"+
+      var isOpen = statementFor === p.id;
+      return "<tr" + (isOpen ? " class='on'" : "") + "><td class='wide'>" +
+        "<button class='del' style='color:var(--teal)' data-stmt='"+p.id+"'" +
+        " title='" + (isOpen ? "اقفل الكشف" : "افتح كشف الحساب") + "'>" +
+        esc(p.name) + (isOpen ? " ▾" : "") + "</button></td>"+
         "<td>"+(p.type==="supplier"?"مورد":"عميل")+"</td><td>"+esc(p.phone||"—")+"</td>"+
         "<td>"+esc(p.gov||"—")+"</td>"+
         "<td class='num'>"+(orders.length ? qty(orders.length) + (cancelled ? " ("+qty(cancelled)+" ملغي)" : "") : "—")+"</td>"+
@@ -8028,14 +8044,42 @@
       if(c.type==="out") lines.push({d:c.date,t:"دفع نقدي",dr:Number(c.amount)||0,cr:0});
     });
     lines.sort(function(a,b){ return a.d < b.d ? -1 : 1; });
-    var run = 0;
+    var run = 0, tdr = 0, tcr = 0;
     var rows = lines.map(function(l){
-      run += l.dr - l.cr;
+      run += l.dr - l.cr; tdr += l.dr; tcr += l.cr;
       return "<tr><td class='num'>"+esc(l.d)+"</td><td class='wide'>"+esc(l.t)+"</td>"+
         "<td class='num'>"+money(l.dr)+"</td><td class='num'>"+money(l.cr)+"</td>"+
         "<td class='num'>"+money(run)+"</td></tr>";
     });
+    if(rows.length){
+      rows.push("<tr class='sumrow'><td></td><td class='wide'>الإجمالي</td>" +
+        "<td class='num'>"+money(tdr)+"</td><td class='num'>"+money(tcr)+"</td>" +
+        "<td class='num'>"+money(run)+"</td></tr>");
+    }
     table("t-statement", ["التاريخ","البيان","مدين","دائن","الرصيد"], rows, "مفيش حركات على الحساب ده.");
+
+    /* «مدين ودائن» مصطلح محاسبي — السطر ده بيترجمه لجملة تفهمها
+       على طول، وبيختلف حسب المورد ولا العميل لأن اتجاه الفلوس مقلوب. */
+    var sum = document.getElementById("statement-sum");
+    if(!sum) return;
+    if(!rows.length){ sum.textContent = ""; return; }
+    var sup = p.type === "supplier";
+    var bought = sup ? tcr : tdr;          // قيمة اللي اتعامل عليه
+    var paid   = sup ? tdr : tcr;          // اللي اتدفع أو اتحصّل
+    var txt = sup
+      ? "اشتريت منه بـ <strong>" + esc(money(bought)) + "</strong> · دفعتله <strong>" +
+        esc(money(paid)) + "</strong>"
+      : "باعت له بـ <strong>" + esc(money(bought)) + "</strong> · حصّلت منه <strong>" +
+        esc(money(paid)) + "</strong>";
+    var bal = bought - paid;               // موجب = لسه في فلوس معلّقة
+    txt += " · " + (Math.abs(bal) < 0.009
+      ? "<span class='v-gain'>الحساب مقفول</span>"
+      : (bal > 0
+          ? (sup ? "<span class='v-due'>لسه عليك <strong>" + esc(money(bal)) + "</strong></span>"
+                 : "<span class='v-due'>لسه ليك <strong>" + esc(money(bal)) + "</strong></span>")
+          : (sup ? "<span class='v-gain'>دفعتله زيادة <strong>" + esc(money(-bal)) + "</strong></span>"
+                 : "<span class='v-gain'>حصّلت منه زيادة <strong>" + esc(money(-bal)) + "</strong></span>")));
+    sum.innerHTML = txt;
   }
 
   function renderLog(){
@@ -10163,8 +10207,14 @@
 
   document.body.addEventListener("click", async function(e){
     var stmt = e.target.closest("[data-stmt]");
-    if(stmt){ statementFor = stmt.dataset.stmt; renderStatement();
-      document.getElementById("statement-panel").scrollIntoView({block:"nearest"}); return; }
+    if(stmt){
+      // نفس الاسم تاني = اقفل. من غير كده الكشف بيفضل مفتوح ومفيش طريقة تقفله
+      var same = statementFor === stmt.dataset.stmt;
+      statementFor = same ? null : stmt.dataset.stmt;
+      renderStatement(); renderParties();
+      if(!same) document.getElementById("statement-panel").scrollIntoView({block:"nearest"});
+      return;
+    }
     var lb = e.target.closest("[data-label]");
     if(lb){ printLabel(lb.dataset.label); return; }
     var rp = e.target.closest("[data-repeat]");
