@@ -1003,17 +1003,6 @@
 
   <div class="stats" id="sh-stats"></div>
 
-  <div class="panel">
-    <h3>أسعار الشحن بالمنطقة</h3>
-    <p class="hint">حدّد سعر الشحن لكل منطقة والمحافظات اللي جواها مرة واحدة. بعد كده أول ما تختار العميل في الأوردر، «شحن بتدفعه لشركة الشحن» بيتملّى لوحده من محافظته.</p>
-    <div class="tbl-wrap"><table id="t-zones"></table></div>
-    <div class="row-actions">
-      <button class="tbtn primary" type="button" id="b-zone-add">+ منطقة</button>
-      <button class="tbtn" type="button" id="b-zone-reset">رجّع الأسعار المبدئية</button>
-    </div>
-    <datalist id="gov-list"></datalist>
-  </div>
-
   <div class="tbl-wrap"><table id="t-shipco"></table></div>
 
   <div class="panel" id="held-panel">
@@ -2006,19 +1995,17 @@
 
   <div class="drawer-body" id="sd-body">
     <div class="fset">
-      <h3>بيانات الأوردر</h3>
+      <h3>الأوردر</h3>
       <div class="fgrid">
-        <div><label for="e-date">التاريخ</label>
-          <input id="e-date" type="date" data-f="date"></div>
-        <div><label for="e-status">الحالة</label>
-          <select id="e-status" data-f="status"></select></div>
         <div class="span2"><label for="e-party">العميل</label>
           <div class="withbtn">
             <select id="e-party" data-f="partyId"></select>
             <button type="button" class="tbtn" id="b-newcust">+ عميل</button>
           </div></div>
-        <div><label for="e-owner">مسؤول الأوردر</label>
-          <input id="e-owner" list="owner-list" data-f="owner" autocomplete="off"></div>
+        <div><label for="e-date">التاريخ</label>
+          <input id="e-date" type="date" data-f="date"></div>
+        <div><label for="e-status">الحالة</label>
+          <select id="e-status" data-f="status"></select></div>
       </div>
       <p class="hintline" id="e-cust"></p>
       <p class="hintline bad" id="e-repeat" hidden></p>
@@ -2052,30 +2039,38 @@
     </div>
 
     <div class="fset">
-      <h3>الشحن والتحصيل</h3>
+      <h3>الشحن</h3>
       <div class="fgrid">
         <div><label for="e-shipco">شركة الشحن</label>
           <input id="e-shipco" list="ship-list" data-f="shipCo" autocomplete="off"></div>
-        <div><label for="e-shipcode">كود البوليصة</label>
-          <input id="e-shipcode" data-f="shipCode" autocomplete="off"></div>
-        <div><label for="e-shipin">شحن بتحصّله من العميل</label>
+        <div><label for="e-shipin">شحن على العميل</label>
           <input id="e-shipin" type="number" step="any" min="0" data-f="shipIn"></div>
-        <div><label for="e-zone">منطقة الشحن</label>
-          <select id="e-zone"></select></div>
-        <div><label for="e-shipout">شحن بتدفعه لشركة الشحن</label>
+        <div><label for="e-shipout">شحن هتدفعه للشركة</label>
           <input id="e-shipout" type="number" step="any" min="0" data-f="shipOut"></div>
-        <div class="span2"><label for="e-payvia">التحصيل بيتم عن طريق</label>
-          <select id="e-payvia" data-f="payVia">
-            <option value="ship">شركة الشحن</option>
-            <option value="direct">مباشر ليك</option>
-          </select></div>
-        <div><label for="e-paid" id="e-paid-lab">المحصّل من العميل</label>
-          <input id="e-paid" type="number" step="any" min="0" data-f="paid"></div>
-        <div class="span2"><label for="e-note">ملاحظة</label>
-          <input id="e-note" data-f="note" autocomplete="off"></div>
       </div>
-      <p class="hintline" id="e-zonenote" hidden></p>
       <p class="hintline" id="e-shipnote" hidden></p>
+      <p class="hintline" id="e-pocket" hidden></p>
+
+      <!-- اللي بيتملّى بعدين: البوليصة والتحصيل والملاحظة. مش وإنت
+           بتكتب الأوردر، فمطوي — وبيتفتح لوحده لو فيه حاجة متكتوبة. -->
+      <details class="rsec" id="e-more">
+        <summary>تفاصيل زيادة <b>كود البوليصة · التحصيل · المحصّل · المسؤول · ملاحظة</b></summary>
+        <div class="fgrid">
+          <div><label for="e-shipcode">كود البوليصة</label>
+            <input id="e-shipcode" data-f="shipCode" autocomplete="off"></div>
+          <div><label for="e-payvia">التحصيل بيتم عن طريق</label>
+            <select id="e-payvia" data-f="payVia">
+              <option value="ship">شركة الشحن</option>
+              <option value="direct">مباشر ليك</option>
+            </select></div>
+          <div><label for="e-paid" id="e-paid-lab">المحصّل من العميل</label>
+            <input id="e-paid" type="number" step="any" min="0" data-f="paid"></div>
+          <div><label for="e-owner">مسؤول الأوردر</label>
+            <input id="e-owner" list="owner-list" data-f="owner" autocomplete="off"></div>
+          <div class="span2"><label for="e-note">ملاحظة</label>
+            <input id="e-note" data-f="note" autocomplete="off"></div>
+        </div>
+      </details>
       <div class="paybox" id="e-paybox" hidden></div>
     </div>
   </div>
@@ -2128,8 +2123,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "76";
+  var VERSION = "77";
   var CHANGELOG = [
+    { v:"77", d:"2026-09-29", items:[
+      "جدول «أسعار الشحن بالمنطقة» اتشال خالص — كان تمن أعمدة بتتزحلق عشان رقم بيتغيّر مرة في السنة",
+      "بدله: أول ما تختار العميل، شركة الشحن والشحن بيتملّوا من آخر أوردر لنفس المحافظة — بيتعلّم من شغلك من غير أي إعداد",
+      "درج الأوردر بقى ٦ خانات ظاهرة بدل ١٣: العميل · التاريخ · الحالة · الأصناف · شركة الشحن · شحن على العميل · شحن هتدفعه",
+      "كود البوليصة والتحصيل والمحصّل والمسؤول والملاحظة اتجمّعوا في «تفاصيل زيادة» مطوية — بتتفتح لوحدها لو فيها حاجة متكتوبة",
+      "سطر تحت الشحن بيقول وإنت بتكتب: «بتدفع 50 · بتحمّل العميل 30 → 20 من جيبك»"
+    ]},
     { v:"76", d:"2026-09-29", items:[
       "حالة على مستوى الصنف مش الفاتورة: العميل ممكن ياخد صنف ويرجّع صنف، وكل سطر في تفاصيل الأوردر بقى بيقول حالته",
       "التلات حالات: «مع شركة الشحن» لسه ما اتسلّمش · «العميل خدها» · «راجعة عند شركة الشحن» لحد ما تستلمها",
@@ -5958,14 +5960,10 @@
   /* ================= الإدخال جوه الجدول ================= */
   // مسوّدة الأوردر اللي بتتكتب دلوقتي — بتتحدّث مع كل ضغطة زرار
   var draft = null;
-  /* الرقمين اللي جدول المناطق كتبهم في الأوردر — بيتقارنوا بالموجود
-     عشان نفرّق بين رقم إحنا حطّيناه ورقم إنت كتبته. (الإعلان فوق هنا
-     لأن التصفير بيتنادى وقت التهيئة قبل أي سطر تحت.) */
-  var zoneFilled = { out:null, inn:null };
   function blankLine(){ return { itemId:"", color:"", size:"", qty:"", price:"", ret:"", manual:false }; }
   function newDraft(keep){
     return { date: firstOpenDate(), status:"progress", partyId:"", owner: me || "",
-             shipCo: keep ? keep.shipCo : "", shipCode:"", zoneId:"",
+             shipCo: keep ? keep.shipCo : "", shipCode:"",
              shipIn:"", shipOut:"", payVia: keep ? keep.payVia : "ship",
              paid:"", note:"", lines:[ blankLine() ] };
   }
@@ -5984,7 +5982,6 @@
       return { itemId:l.itemId, color:l.color, size:l.size,
                qty:l.qty, price:l.price, ret:"", manual:true };
     });
-    d.zoneId = rec.zoneId || "";          // نفس العميل = نفس المنطقة
     d.fromNo = rec.no || "";
     return d;
   }
@@ -6003,7 +6000,6 @@
   function draftFrom(rec){
     return { date: rec.date || today(), status: stOf(rec), partyId: rec.partyId || "",
              owner: rec.owner || "", shipCo: rec.shipCo || "", shipCode: rec.shipCode || "",
-             zoneId: rec.zoneId || "",
              shipIn: rec.shipIn || "", shipOut: rec.shipOut || "", payVia: payVia(rec),
              paid: rec.paid || "", note: rec.note || "",
              lines: SL(rec).map(function(l){
@@ -6014,7 +6010,6 @@
              }) };
   }
   draft = newDraft();
-  clearZoneFilled();
 
   function optsHTML(list, sel, ph){
     return '<option value="">'+esc(ph)+'</option>' + list.map(function(o){
@@ -6184,8 +6179,8 @@
     document.getElementById("newcust-box").hidden = true;
     var sn = document.getElementById("e-shipnote");
     if(sn){ sn.textContent = ""; sn.hidden = true; }
-    if(seedZones()) saveSoon("settings");
-    syncZoneUI();
+    if(!draft.partyId) suggestFor = null;
+    shipHint(); syncMore();
     var cf = document.getElementById("e-conflict");
     if(cf){ cf.textContent = ""; cf.hidden = true; }
     var rp = document.getElementById("e-repeat");
@@ -7688,202 +7683,13 @@
       });
   }
 
-  /* ---------- تعديل مناطق الشحن ---------- */
-  function renderZones(){
-    var box = document.getElementById("t-zones");
-    if(!box) return;
-    var dl = document.getElementById("gov-list");
-    if(dl && !dl.children.length)
-      dl.innerHTML = GOVS.map(function(g){ return "<option value='"+esc(g)+"'></option>"; }).join("");
-
-    var rows = shipZones().map(function(z){
-      var used = live("parties").filter(function(p){
-        return p.type === "customer" && zoneForParty(p) && zoneForParty(p).id === z.id; }).length;
-      var num = function(f, v){
-        return "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
-          "data-zf='"+f+"' data-zid='"+esc(z.id)+"' value='"+esc(Number(v)||0)+"'></td>";
-      };
-      return "<tr><td class='wide'><input data-zf='name' data-zid='"+esc(z.id)+"' value='"+esc(z.name)+"' autocomplete='off'></td>" +
-        num("cost", z.cost) +
-        "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
-          "data-zf='list' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.list)||0)+"'>" +
-          "<span class='sub'>مرجع · مش بيتحسب</span></td>" +
-        "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
-          "data-zf='charge' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.charge)||0)+"'>" +
-          "<span class='sub'>" + ((Number(z.charge)||0) > 0
-            ? ((Number(z.charge)||0) >= (Number(z.cost)||0)
-                ? "بتغطّي اللي بتدفعه" : "<span class='v-due'>" + money((Number(z.cost)||0) - (Number(z.charge)||0)) + " من جيبك</span>")
-            : "صفر = تكتبه في الأوردر") + "</span></td>" +
-        "<td><input data-zf='days' data-zid='"+esc(z.id)+"' style='max-width:120px' " +
-          "placeholder='خلال 24 ساعة' autocomplete='off' value='"+esc(z.days||"")+"'></td>" +
-        "<td class='wide'><input list='gov-list' data-zf='govs' data-zid='"+esc(z.id)+"' " +
-          "placeholder='القاهرة، الجيزة' autocomplete='off' value='"+esc((z.govs||[]).join("، "))+"'>" +
-          "<span class='sub'>" + (used ? qty(used) + " عميل في المنطقة دي" : "مفيش عملاء فيها لسه") + "</span></td>" +
-        "<td class='wide'><input data-zf='areas' data-zid='"+esc(z.id)+"' " +
-          "placeholder='التجمع، 6 أكتوبر' autocomplete='off' value='"+esc((z.areas||[]).join("، "))+"'>" +
-          "<span class='sub'>بتتدوّر في عنوان العميل وبتسبق المحافظة</span></td>" +
-        "<td><button class='del' type='button' data-zdel='"+esc(z.id)+"'>حذف</button></td></tr>";
-    });
-    table("t-zones", ["المنطقة","بتدفع لشركة الشحن (بعد الخصم)","سعرهم قبل الخصم",
-                      "بتحمّل العميل (افتراضي)","مدة التوصيل",
-                      "المحافظات اللي جواها","أحياء ومدن (اختياري)",""], rows,
-      "مفيش مناطق — دوس «+ منطقة» أو «رجّع الأسعار المبدئية».");
-    // محافظات مش متحطوطة في أي منطقة — عشان ما تكتشفش ده وإنت بتسجّل أوردر
-    var miss = GOVS.filter(function(g){ return !zoneForGov(g); });
-    var n = document.getElementById("zone-miss");
-    if(!n){
-      n = document.createElement("p");
-      n.id = "zone-miss"; n.className = "note";
-      box.parentNode.parentNode.insertBefore(n, box.parentNode.nextSibling);
-    }
-    n.textContent = miss.length
-      ? "محافظات لسه من غير منطقة: " + miss.slice(0,6).join("، ") +
-        (miss.length > 6 ? " وغيرهم (" + qty(miss.length) + ")" : "") +
-        " — العميل اللي منها مش هيتملّى سعر شحن لوحده."
-      : "";
-  }
-
-  document.getElementById("b-zone-add").addEventListener("click", function(){
-    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
-    seedZones();
-    if(!Array.isArray(settings.shipZones)) settings.shipZones = [];
-    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", cost:0, list:0, charge:0,
-                              days:"", govs:[], areas:[] });
-    saveSoon("settings"); renderZones(); fillZoneSelect();
-  });
-  document.getElementById("b-zone-reset").addEventListener("click", function(){
-    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
-    if(this.dataset.armed !== "1"){
-      this.dataset.armed = "1"; this.textContent = "تأكيد؟";
-      var btn = this;
-      setTimeout(function(){
-        if(btn.dataset.armed === "1"){ btn.dataset.armed = ""; btn.textContent = "رجّع الأسعار المبدئية"; }
-      }, 4000);
-      return;
-    }
-    this.dataset.armed = ""; this.textContent = "رجّع الأسعار المبدئية";
-    settings.shipZones = undefined; seedZones();
-    saveSoon("settings"); renderZones(); fillZoneSelect();
-    toast("رجعنا الأسعار المبدئية");
-  });
-  document.getElementById("t-zones").addEventListener("input", function(e){
-    var el = e.target.closest("[data-zf]"); if(!el) return;
-    var z = zoneById(el.dataset.zid); if(!z) return;
-    var f = el.dataset.zf;
-    if(f === "name")  z.name  = el.value;
-    if(f === "days")  z.days  = el.value;
-    if(f === "cost")   z.cost   = Number(el.value)||0;
-    if(f === "list")   z.list   = Number(el.value)||0;
-    if(f === "charge") z.charge = Number(el.value)||0;
-    if(f === "govs")  z.govs  = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
-    if(f === "areas") z.areas = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
-    saveSoon("settings"); fillZoneSelect();
-    // السطر اللي تحت خانة «بتحمّل العميل» بيتحسب من الرقمين
-    if(f === "cost" || f === "charge"){
-      var sub = el.closest("tr").querySelector("[data-zf='charge']");
-      sub = sub && sub.parentNode.querySelector(".sub");
-      if(sub){
-        var ch = Number(z.charge)||0, cs = Number(z.cost)||0;
-        sub.innerHTML = ch > 0
-          ? (ch >= cs ? "بتغطّي اللي بتدفعه"
-                      : "<span class='v-due'>" + money(cs - ch) + " من جيبك</span>")
-          : "صفر = تكتبه في الأوردر";
-      }
-    }
-  });
-  document.getElementById("t-zones").addEventListener("click", function(e){
-    var d = e.target.closest("[data-zdel]"); if(!d) return;
-    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
-    settings.shipZones = shipZones().filter(function(z){ return z.id !== d.dataset.zdel; });
-    saveSoon("settings"); renderZones(); fillZoneSelect();
-  });
-
-  /* ---------- المنطقة في درج الأوردر ---------- */
-  function fillZoneSelect(){
-    var el = document.getElementById("e-zone"); if(!el) return;
-    var zs = shipZones().map(function(z){
-      // الرقم في القايمة هو اللي هيخرج من الخزنة لشركة الشحن
-      return { v:z.id, t:z.name + " — تدفع " + money(Number(z.cost)||0) }; });
-    el.innerHTML = optsHTML(zs, draft && draft.zoneId ? draft.zoneId : "", "من غير منطقة");
-  }
-  /* بنفتكر الرقمين اللي المنطقة كتبتهم. لو غيّرت العميل والرقم لسه
-     زي ما إحنا حطّيناه، يبقى مش رقمك — يتحدّث لمنطقة العميل الجديد.
-     ولو كتبت رقم بإيدك بيفضل زي ما هو. (من غير ده كنت بتختار عميلة
-     من أسوان وتلاقي شحن القاهرة واقف في الخانة.) */
-  function clearZoneFilled(){ zoneFilled = { out:null, inn:null }; }
-  function setZoneFilled(o, i){ zoneFilled.out = o; zoneFilled.inn = i; }
-  function zoneMayWrite(cur, mine){
-    var n = Number(cur)||0;
-    return !n || (mine !== null && n === (Number(mine)||0));
-  }
-  // المحافظة (أو الحي) بتحدّد المنطقة، والمنطقة بتحدّد الرقمين
-  function applyZoneFromParty(){
-    var pt = db.parties.find(function(x){ return x.id === draft.partyId; });
-    var z = pt ? zoneForParty(pt) : null;
-    if(!z) return false;
-    draft.zoneId = z.id;
-    if(zoneMayWrite(draft.shipOut, zoneFilled.out)){
-      draft.shipOut = Number(z.cost)||0; zoneFilled.out = draft.shipOut;
-    }
-    /* اللي بتحمّله للعميل قرارك في كل أوردر، مش رقم شركة الشحن.
-       فمابنملاهوش إلا لو إنت بنفسك حطيت افتراضي للمنطقة. */
-    var ch = Number(z.charge)||0;
-    if(ch > 0 && zoneMayWrite(draft.shipIn, zoneFilled.inn)){
-      draft.shipIn = ch; zoneFilled.inn = ch;
-    }
-    return true;
-  }
-  /* السطر ده بيتحدّث وإنت بتكتب شحن العميل، فبيترسم لوحده من غير
-     ما نلمس قيم الخانات — الكتابة في خانة والمؤشر فيها بيقفز. */
-  function zoneNote(){
-    var note = document.getElementById("e-zonenote");
-    if(!note) return;
-    var z = draft.zoneId ? zoneById(draft.zoneId) : null;
-    var pt = db.parties.find(function(x){ return x.id === draft.partyId; });
-    if(!z || !pt){ note.textContent = ""; note.hidden = true; return; }
-    var where = squish(pt.address || "") && (z.areas||[]).some(function(a){
-      var k = squish(a); return k && squish(pt.address).indexOf(k) > -1; })
-      ? "عنوانها" : ("«" + squish(pt.gov || "") + "»");
-    var cost = Number(z.cost)||0, got = Number(draft.shipIn)||0;
-    var gap  = cost - got;
-    var t = esc(where) + " في منطقة «" + esc(z.name) + "»: هتدفع لشركة الشحن <strong>" +
-            esc(money(cost)) + "</strong>" + (z.days ? " · التوصيل " + esc(z.days) : "") + ".";
-    t += got > 0
-      ? " وبتحمّل العميل <strong>" + esc(money(got)) + "</strong>" +
-        (gap > 0 ? " — يعني <span class='v-due'><strong>" + esc(money(gap)) + "</strong> من جيبك</span>."
-                 : (gap < 0 ? " — يعني <span class='v-gain'><strong>" + esc(money(-gap)) + "</strong> ليك</span>."
-                            : " — يعني الشحن مغطّى بالظبط."))
-      : " <span class='v-due'>اكتب شحن العميل فوق</span> — كل جنيه أقل من " +
-        esc(money(cost)) + " بيطلع من جيبك.";
-    note.innerHTML = t;
-    note.hidden = false;
-  }
-  function syncZoneUI(){
-    fillZoneSelect();
-    var out = document.getElementById("e-shipout");
-    if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
-    var inn = document.getElementById("e-shipin");
-    if(inn) inn.value = draft.shipIn === "" || draft.shipIn == null ? "" : draft.shipIn;
-    zoneNote();
-  }
-  document.getElementById("e-zone").addEventListener("change", function(){
-    draft.zoneId = this.value;
-    var z = zoneById(this.value);
-    // اختيار صريح للمنطقة بيكتب الرقمين — ده المقصود من الاختيار
-    if(z){
-      draft.shipOut = Number(z.cost)||0;
-      zoneFilled.out = draft.shipOut;
-      var ch = Number(z.charge)||0;
-      if(ch > 0){ draft.shipIn = ch; zoneFilled.inn = ch; }
-    } else clearZoneFilled();
-    syncZoneUI(); updateEntryCalc();
-  });
-
+  /* المناطق اتشالت: كانت جدول تمن أعمدة بيتزحلق أفقياً عشان رقم
+     بيتغيّر مرة في السنة. الملء التلقائي بقى من آخر أوردر لنفس
+     المحافظة (suggestShipping) — بيتعلّم من شغلك من غير أي إعداد. */
   function renderShip(){
     // الترقية بتتحفظ مرة واحدة بدل ما تتعاد مع كل فتحة، وعشان
     // الأسعار توصل باقي الأجهزة بالمزامنة
-    if(seedZones()) saveSoon("settings");
-    renderZones(); renderShipCos(); renderHeld();
+    renderShipCos(); renderHeld();
   }
 
   /* ---------- فلاتر الخزنة ---------- */
@@ -9031,20 +8837,8 @@
     } else {
       draft[f] = v;
       if(f === "status"){ renderDrawerLines(); return; }  // المرتجع بيظهر ويختفي مع الحالة
-      if(f === "partyId"){
-        // جدول الأسعار أولى من «آخر أوردر لنفس المحافظة» — ده رقم متفق عليه
-        applyZoneFromParty();
-        if(!draft.shipCo) suggestShipping();
-        syncZoneUI();
-      }
-      if(f === "shipIn"){ zoneFilled.inn = null; zoneNote(); }
-      // كتبت رقم بإيدك؟ المنطقة ما بقتش هي المصدر
-      if(f === "shipOut"){
-        zoneFilled.out = null;
-        draft.zoneId = "";
-        var zs = document.getElementById("e-zone"); if(zs) zs.value = "";
-        var zn = document.getElementById("e-zonenote"); if(zn){ zn.textContent = ""; zn.hidden = true; }
-      }
+      if(f === "partyId"){ suggestShipping(); shipHint(); }
+      if(f === "shipIn" || f === "shipOut") shipHint();
     }
     updateEntryCalc();
   }
@@ -9060,107 +8854,39 @@
      بدل ما تكتب رقم الشحن في كل أوردر: بتحدّد المنطقة مرة واحدة
      بسعرها والمحافظات اللي جواها، وبعدها أول ما تختار العميل بيتملّى
      لوحده من محافظته. كله قابل للتعديل من شاشة «شركات الشحن». */
-  /* ثلاث أرقام مختلفة، والخلط بينهم بيضيّع فلوس من غير ما تحس:
-       cost   = اللي **بتدفعه** لشركة الشحن. ده عمود «بعد الخصم» في
-                ورقة أسعارهم — السعر المتفق عليه فعلاً، وهو الرقم
-                الوحيد اللي السيستم بيعتمد عليه.
-       list   = عمود «قبل الخصم» — سعر الشركة الرسمي. مرجع بس،
-                مابيدخلش في أي حساب.
-       charge = اللي بتحمّله للعميل. ده **قرارك إنت** في كل أوردر
-                (ممكن 30 وممكن مجاني)، مش رقم شركة الشحن. الرقم اللي
-                هنا مجرد افتراضي بتحطه إنت، وبصفر معناه «اكتبه بإيدك».
-     الفرق (cost − charge) هو اللي بيطلع من جيبك، وبيتحسب في الأوردر
-     نفسه لأنه بيتغيّر من أوردر للتاني. */
-  var ZONES_SEED = [
-    { name:"القاهرة والجيزة", cost:50, list:75, charge:0, days:"خلال 24 ساعة",
-      govs:["القاهرة","الجيزة"], areas:[] },
-    { name:"المدن الجديدة والأطراف", cost:55, list:80, charge:0, days:"خلال 24 ساعة",
-      govs:[],
-      // دي أحياء جوّه القاهرة والجيزة مش محافظات، فبتتعرف من العنوان
-      areas:["القاهرة الجديدة","التجمع","الشروق","بدر","العبور","العاصمة الإدارية",
-             "6 أكتوبر","أكتوبر","الشيخ زايد","حدائق أكتوبر"] },
-    { name:"الوجه البحري", cost:70, list:95, charge:0, days:"48–72 ساعة",
-      govs:["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية",
-            "الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"], areas:[] },
-    { name:"الوجه القبلي", cost:80, list:105, charge:0, days:"48–72 ساعة",
-      govs:["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"], areas:[] },
-    { name:"المحافظات الحدودية", cost:125, list:150, charge:0, days:"5–6 أيام",
-      govs:["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"], areas:[] }
-  ];
-  function shipZones(){
-    if(!Array.isArray(settings.shipZones)) return [];
-    return settings.shipZones.filter(function(z){ return z && squish(z.name); });
-  }
-  function seedZones(){
-    if(Array.isArray(settings.shipZones)) return migrateZones();
-    settings.shipZones = ZONES_SEED.map(function(z, i){
-      return { id:"z"+(i+1), name:z.name, cost:z.cost, list:z.list, charge:z.charge,
-               days:z.days, govs:z.govs.slice(), areas:(z.areas||[]).slice() };
-    });
-    return true;
-  }
-  /* شكلين قدام: واحد قديم فيه price لوحده معناه «اللي بتدفعه بالسعر
-     الرسمي»، وواحد أحدث فيه {cost,price} كان فاهم price غلط على إنه
-     سعر العميل. الاتنين بيترقّوا لنفس الشكل: بندفع بعد الخصم، والسعر
-     الرسمي مرجع، وسعر العميل بيفضل قرارك. */
-  var ZONE_AFTER = { 75:50, 80:55, 95:70, 105:80, 150:125 };
-  function migrateZones(){
-    var changed = false;
-    shipZones().forEach(function(z){
-      if(z.list == null){
-        var oldCost = Number(z.cost != null ? z.cost : z.price) || 0;
-        z.list   = oldCost;                                  // ده كان السعر الرسمي
-        z.cost   = ZONE_AFTER[oldCost] != null ? ZONE_AFTER[oldCost] : oldCost;
-        z.charge = 0;                                        // سعر العميل قرارك
-        delete z.price;
-        changed = true;
-      }
-      if(z.charge == null){ z.charge = 0; changed = true; }
-      if(z.days == null){
-        var sd = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
-        z.days = sd ? sd.days : "";
-        changed = true;
-      }
-      if(!Array.isArray(z.areas)){
-        var sa = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
-        z.areas = (sa && sa.areas.length) ? sa.areas.slice() : [];
-        changed = true;
-      }
-    });
-    return changed;
-  }
-  function zoneById(id){
-    return shipZones().find(function(z){ return z.id === id; }) || null;
-  }
-  // المنطقة اللي المحافظة دي جواها
-  function zoneForGov(gov){
-    var g = squish(gov); if(!g) return null;
-    return shipZones().find(function(z){
-      return (z.govs||[]).some(function(x){ return squish(x) === g; });
-    }) || null;
-  }
-  /* العنوان بيسبق المحافظة: عميلة في «التجمع» محافظتها القاهرة،
-     بس سعرها سعر المدن الجديدة. من غير ده كنا هنحمّلها ناقص. */
-  function zoneForParty(pt){
-    if(!pt) return null;
-    var ad = squish(pt.address || "");
-    if(ad){
-      var hit = shipZones().find(function(z){
-        return (z.areas||[]).some(function(a){
-          var k = squish(a); return k && ad.indexOf(k) > -1;
-        });
-      });
-      if(hit) return hit;
-    }
-    return zoneForGov(pt.gov);
-  }
-  function zoneCost(id){ var z = zoneById(id); return z ? (Number(z.cost)||0) : 0; }
-  function zoneCharge(id){ var z = zoneById(id); return z ? (Number(z.charge)||0) : 0; }
 
   /* آخر شركة شحن اتستخدمت للمحافظة دي. الأرقام دي فلوس، فما ينفعش
      تتحط في الخانات من غير ما اللي بيسجّل يعرف — بيظهر سطر بيقول جت منين.
      والملغي مش مصدر: مصاريفه مش بتاعت توصيل ناجح. */
+  /* الفرق بين اللي بتدفعه واللي بتحمّله بيطلع من جيبك في كل أوردر،
+     فبيتقال وإنت بتكتب مش بعد ما تحفظ. */
+  function shipHint(){
+    var el = document.getElementById("e-pocket");
+    if(!el) return;
+    var out = Number(draft.shipOut)||0, inn = Number(draft.shipIn)||0;
+    if(!out && !inn){ el.textContent = ""; el.hidden = true; return; }
+    var gap = out - inn;
+    el.innerHTML = "بتدفع <strong>" + esc(money(out)) + "</strong> · بتحمّل العميل <strong>" +
+      esc(money(inn)) + "</strong>" +
+      (Math.abs(gap) < 0.009 ? " — الشحن مغطّى بالظبط."
+        : (gap > 0 ? " — يعني <span class='v-due'><strong>" + esc(money(gap)) + "</strong> من جيبك</span>."
+                   : " — يعني <span class='v-gain'><strong>" + esc(money(-gap)) + "</strong> ليك</span>."));
+    el.hidden = false;
+  }
+  // «تفاصيل زيادة» بتتفتح لوحدها لو فيها حاجة متكتوبة — عشان ما تختفيش
+  function syncMore(){
+    var d = document.getElementById("e-more");
+    if(!d) return;
+    d.open = !!(squish(draft.shipCode || "") || Number(draft.paid) ||
+                squish(draft.note || "") || draft.payVia === "direct");
+  }
+  /* اختيار العميل من القايمة بيبعت input و change، فالدالة كانت
+     بتتنفّذ مرتين: الأولى بتملا وبتكتب السطر، والتانية بتلاقي الخانات
+     مليانة فتمسحه. بنعمل الاقتراح مرة واحدة لكل عميل. */
+  var suggestFor = null;
   function suggestShipping(){
+    if(suggestFor === draft.partyId) return;
+    suggestFor = draft.partyId;
     var note = document.getElementById("e-shipnote");
     if(note){ note.textContent = ""; note.hidden = true; }
     var p = db.parties.find(function(x){ return x.id === draft.partyId; });
@@ -9170,11 +8896,11 @@
       return q && q.gov === p.gov && !isCancelled(x) && squish(x.shipCo);
     }).sort(byDate)[0];
     if(!last) return;
-    /* السطر ده لازم يقول اللي اتملّى فعلاً بس. جدول المناطق بيملا
-       «للشركة» قبل ما نوصل هنا، فلو قلنا إنها جت من آخر أوردر يبقى
-       السطر بيكدب على الخانة اللي قدامك. */
+    // السطر ده لازم يقول اللي اتملّى فعلاً بس، مش كل اللي في آخر أوردر
     var filled = [];
-    draft.shipCo = last.shipCo; filled.push(squish(last.shipCo));
+    if(!squish(draft.shipCo || "")){
+      draft.shipCo = last.shipCo; filled.push(squish(last.shipCo));
+    }
     if(!draft.shipIn && (Number(last.shipIn)||0)){
       draft.shipIn = last.shipIn;
       filled.push("على العميل " + money(shipIn(last)));
@@ -9187,7 +8913,7 @@
       var el = SD.querySelector("[data-f='"+f+"']:not([data-li])");
       if(el) el.value = draft[f];
     });
-    if(note){
+    if(note && filled.length){
       // «لـ» + «الإسكندرية» بتتكتب «للإسكندرية» مش «لـالإسكندرية»
       var gv = p.gov.indexOf("ال") === 0 ? "ل" + p.gov.slice(1) : "لـ" + p.gov;
       note.textContent = "من آخر أوردر " + gv + " (#" + (last.no || "—") + "): " +
@@ -9206,8 +8932,7 @@
   document.getElementById("b-newsale").addEventListener("click", function(){
     editing.sales = null; clearEditBase("sales");
     draft = newDraft(draft);
-    clearZoneFilled();
-    openDrawer();
+      openDrawer();
   });
 
   SD.addEventListener("click", function(e){
@@ -9489,8 +9214,7 @@
     var wasEditing = !!editing.sales;
     editing.sales = null; clearEditBase("sales");
     draft = newDraft(draft);
-    clearZoneFilled();
-    closeDrawer();
+      closeDrawer();
     renderSales();
     if(wasEditing) toast("اتلغى التعديل");
   }
@@ -9556,7 +9280,6 @@
       paid: status === "cancelled" ? 0 : (Number(draft.paid)||0),
       owner: (draft.owner||"").trim(), shipCo: (draft.shipCo||"").trim(),
       shipCode: (draft.shipCode||"").trim(), payVia: draft.payVia,
-      zoneId: draft.zoneId || "",
       shipIn: Number(draft.shipIn)||0, shipOut: Number(draft.shipOut)||0,
       note: (draft.note||"").trim(),
       itemId:"", color:"", size:"", qty:0, price:0, ret:0
@@ -9582,8 +9305,7 @@
     saveSoon("sales");
     document.getElementById("s-allow").checked = false;
     draft = newDraft(draft);           // شركة الشحن وطريقة التحصيل بيفضلوا زي ما هم
-    clearZoneFilled();
-    closeDrawer();
+      closeDrawer();
     renderAll();
   }
 
@@ -9593,8 +9315,7 @@
     editing.sales = null;                 // ده أوردر جديد مش تعديل
     clearEditBase("sales");
     draft = draftRepeat(rec);
-    clearZoneFilled();
-    goTab("sales");
+      goTab("sales");
     openDrawer();
     toast("أوردر جديد بنفس أصناف #" + (rec.no || "") + " — راجعه واحفظه");
   }
@@ -9605,8 +9326,7 @@
     editing.sales = id;
     markEditBase("sales", rec);
     draft = draftFrom(rec);
-    clearZoneFilled();
-    goTab("sales");
+      goTab("sales");
     openDrawer();
     toast("بتعدّل أوردر #" + (rec.no || ""));
   }
