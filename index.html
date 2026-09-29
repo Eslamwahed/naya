@@ -1016,6 +1016,17 @@
 
   <div class="tbl-wrap"><table id="t-shipco"></table></div>
 
+  <div class="panel" id="held-panel">
+    <h3>بضاعة عند شركات الشحن</h3>
+    <p class="hint">العميل عاين ورفض؟ البضاعة بترجع لشركة الشحن مش لمخزنك على طول. القطع دي <strong>لسه ملكك ومحسوبة في المخزون</strong> — بس مكانها برّه. سجّل «رجعت المخزن» أول ما تستلمها عشان تعرف اللي لسه معلّق.</p>
+    <div class="quick" id="held-quick">
+      <button type="button" data-heldonly="open" class="on">لسه عندهم</button>
+      <button type="button" data-heldonly="back">رجعت المخزن</button>
+      <button type="button" data-heldonly="all">الكل</button>
+    </div>
+    <div class="tbl-wrap"><table id="t-held"></table></div>
+  </div>
+
   <div class="panel" id="shstmt-panel" hidden>
     <div class="dhead">
       <h3 id="shstmt-title">كشف حساب</h3>
@@ -2117,8 +2128,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "74";
+  var VERSION = "75";
   var CHANGELOG = [
+    { v:"75", d:"2026-09-29", items:[
+      "تتبّع بضاعة المعاينة: العميل عاين ورفض؟ البضاعة عند شركة الشحن — وفي شاشة «شركات الشحن» جدول بيقولك إيه بالظبط وعند مين",
+      "زرار «رجعت المخزن» بتاريخه، وفلتر «لسه عندهم / رجعت / الكل»",
+      "عمود «قطع راجعة عندها» في جدول الشركات، وكارت «قطع راجعة عندهم» في الإحصائيات",
+      "وكارت في المخزون «قطع عند شركات الشحن» — عشان الجرد اليدوي ما يطلعش ناقص وإنت مش عارف ليه",
+      "مافيش أي أثر محاسبي: القطع دي أصلاً ما اتشالتش من المخزون لأنها ما اتباعتش — ده تتبّع مكان بس"
+    ]},
     { v:"74", d:"2026-09-29", items:[
       "تصحيح: «بعد الخصم» هو اللي بتدفعه لشركة الشحن — القاهرة والجيزة 50، المدن الجديدة 55، بحري 70، قبلي 80، الحدودية 125",
       "«قبل الخصم» بقى عمود مرجع مكتوب إنه مش بيدخل في أي حساب",
@@ -5360,11 +5378,26 @@
     units:"قطع في المخزن", value:"قيمة المخزون بالتكلفة", retail:"قيمتها لو اتباعت كلها",
     rsv:"محجوز لأوردرات جارية", bought:"قطع اتشترت", sold:"قطع اتباعت",
     pret:"قطع رجعت للمورد", ret:"قطع رجعت من العملاء",
-    out:"خلص من المخزن", low:"قرب يخلص" };
+    out:"خلص من المخزن", low:"قرب يخلص", held:"قطع عند شركات الشحن" };
 
   /* كل دالة بتاخد الأسطر اللي ظاهرة قدامك (بعد الفلتر) وبترجّع جدول.
      الفترة بتتقرا من periodRange زي باقي الشاشة. */
   var INV_DETAIL = {
+    /* بضاعة معاينة رجعت لشركة الشحن. لسه في المخزون على الورق —
+       فلازم تبان هنا وإلا الجرد اليدوي هيطلع ناقص وإنت مش عارف ليه. */
+    held: function(){
+      var rows = heldOpen().map(function(s){
+        return "<tr><td class='num'>" + (s.no ? "#" + esc(s.no) : "—") + "</td>" +
+          "<td class='num'>" + esc(s.date || "—") + "</td>" +
+          "<td class='wide'>" + esc(heldWhat(s)) + "</td>" +
+          "<td>" + esc(shipCoLabel(s.shipCo)) + "</td>" +
+          "<td class='num'>" + qty(heldPieces(s)) + "</td></tr>";
+      });
+      if(rows.length) rows.push(sumRow(["الإجمالي","","","","<b>"+qty(heldOpenQty())+"</b>"]));
+      return { note:"العميل عاين ورفض، والبضاعة عند شركة الشحن لسه. محسوبة في المخزون لأنها ملكك — بس مش في مخزنك. سجّل استلامها من شاشة «شركات الشحن».",
+        head:["الأوردر","التاريخ","الراجع","شركة الشحن","قطع"], rows:rows };
+    },
+
     units: function(src){
       var rows = src.filter(function(x){ return Math.abs(x.stock) > 0.0001; })
         .sort(function(a,b){ return b.stock - a.stock; })
@@ -5684,7 +5717,9 @@
       ["pret",   "قطع رجعت للمورد", qty(prets), prets?"v-due":"", "<span class='sub'>في الفترة</span>"],
       ["ret",    "قطع رجعت من العملاء", qty(rets), rets?"v-due":"", "<span class='sub'>في الفترة</span>"],
       ["out",    "خلص من المخزن", qty(outCount), outCount?"v-due":"", scope || "<span class='sub'>لون/مقاس رصيده صفر</span>"],
-      ["low",    "قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"]
+      ["low",    "قرب يخلص", qty(lowCount), lowCount?"v-due":"", scope || "<span class='sub'>محتاج تطلبه</span>"],
+      ["held",   "قطع عند شركات الشحن", qty(heldOpenQty()), heldOpenQty()?"v-due":"",
+       "<span class='sub'>" + (heldOpenQty() ? "محسوبة فوق بس مش في مخزنك" : "كله في مخزنك") + "</span>"]
     ];
     document.getElementById("inv-kpis").innerHTML = cells.map(function(c){
       return '<div class="kpi' + (invKpiOpen === c[0] ? ' on' : '') +
@@ -7341,12 +7376,114 @@
   }
 
   var SHIP_HEAD = ["شركة الشحن","أوردرات","حصّلت من العملاء","عمولتها","استلمته منها",
-                   "لك عندها","شحن من جيبك"];
+                   "لك عندها","شحن من جيبك","قطع راجعة عندها"];
+
+
+  /* ---------- بضاعة راجعة عند شركة الشحن ----------
+     المعاينة: العميل بيشوف المنتج قبل ما يستلم. رفضه؟ يرجّعه لمندوب
+     شركة الشحن ويدفع الشحن بس. فالبضاعة بتقعد عند الشركة لحد ما
+     تستلمها — هي لسه ملكك ومحسوبة في المخزون (ما اتباعتش)، بس
+     مكانها مش مخزنك، وده اللي الشاشة دي بتتابعه.
+
+     backAt = تاريخ ما رجعت مخزنك. فاضي = لسه عندهم.
+     مافيش أي أثر محاسبي هنا — الكميات دي أصلاً ما اتشالتش من المخزون،
+     فالميزانية ما بتتحركش. ده تتبّع مكان بس. */
+  function heldPieces(s){
+    if(isCancelled(s)) return SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
+    if(isDelivered(s)) return SL(s).reduce(function(a, l){ return a + lineRet(l); }, 0);
+    return 0;                                  // لسه جاري أو مقترح — ما رجعش حاجة
+  }
+  // شحنت فعلاً؟ من غير شركة شحن البضاعة ما راحتش لحد
+  function heldShipped(s){
+    return !!(squish(s.shipCo) || shipOut(s) || shipIn(s) || viaShip(s));
+  }
+  function heldList(){
+    return live("sales").filter(function(s){
+      return heldShipped(s) && heldPieces(s) > 0;
+    }).sort(byDate);
+  }
+  function heldOpen(){ return heldList().filter(function(s){ return !s.backAt; }); }
+  function heldOpenQty(){
+    return heldOpen().reduce(function(a, s){ return a + heldPieces(s); }, 0);
+  }
+  // القطع المعلّقة عند شركة معيّنة
+  function heldQtyFor(co){
+    var n = squish(co);
+    return heldOpen().reduce(function(a, s){
+      return a + (squish(s.shipCo) === n ? heldPieces(s) : 0); }, 0);
+  }
+  // إيه اللي راجع بالظبط من الأوردر ده
+  function heldWhat(s){
+    var parts = [];
+    SL(s).forEach(function(l){
+      var q = isCancelled(s) ? (Number(l.qty)||0) : lineRet(l);
+      if(q <= 0) return;
+      parts.push(qty(q) + " × " + itemName(l.itemId) +
+                 (vLabel(vColor(l), vSize(l)) ? " (" + vLabel(vColor(l), vSize(l)) + ")" : ""));
+    });
+    return parts.join(" · ") || "—";
+  }
+
+  var heldFilt = "open";
+  var HELD_HEAD = ["الأوردر","التاريخ","العميل","شركة الشحن","الراجع","قطع","الحالة",""];
+
+  function renderHeld(){
+    var all = heldList();
+    var list = all.filter(function(s){
+      if(heldFilt === "open") return !s.backAt;
+      if(heldFilt === "back") return !!s.backAt;
+      return true;
+    });
+    var ed = canEdit();
+    var rows = list.map(function(s){
+      var n = heldPieces(s);
+      return "<tr>" +
+        "<td class='num'>" + (s.no ? "#" + esc(s.no) : "—") + "</td>" +
+        "<td class='num'>" + esc(s.date || "—") + "</td>" +
+        "<td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
+        "<td>" + esc(shipCoLabel(s.shipCo)) + "</td>" +
+        "<td class='wide'>" + esc(heldWhat(s)) +
+          "<span class='sub'>" + (isCancelled(s) ? "الأوردر اترفض كله" : "مرتجع جزئي") + "</span></td>" +
+        "<td class='num'>" + esc(qty(n)) + "</td>" +
+        "<td>" + (s.backAt
+          ? "<span class='st st-delivered'>رجعت المخزن</span><span class='sub'>" + esc(s.backAt) + "</span>"
+          : "<span class='st st-progress'>عند الشركة</span>") + "</td>" +
+        "<td>" + (ed
+          ? (s.backAt
+              ? "<button class='del' data-heldback='" + esc(s.id) + "' data-undo='1'>تراجع</button>"
+              : "<button class='del' style='color:var(--teal)' data-heldback='" + esc(s.id) + "'>رجعت المخزن</button>")
+          : "") + "</td></tr>";
+    });
+    table("t-held", HELD_HEAD, rows,
+      heldFilt === "back" ? "لسه ما استلمتش حاجة راجعة."
+        : (all.length ? "مفيش بضاعة معلّقة — كله رجع المخزن."
+                      : "مفيش بضاعة راجعة. أول ما ترفض عميلة أوردر (أو جزء منه) هتلاقيه هنا."));
+  }
+
+  document.getElementById("held-quick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-heldonly]"); if(!b) return;
+    heldFilt = b.dataset.heldonly;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+      x.classList.toggle("on", x === b); });
+    renderHeld();
+  });
+  document.getElementById("t-held").addEventListener("click", function(e){
+    var btn = e.target.closest("[data-heldback]"); if(!btn) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var s = db.sales.find(function(x){ return x.id === btn.dataset.heldback; });
+    if(!s) return;
+    if(btn.dataset.undo){ delete s.backAt; toast("رجعت لـ«عند الشركة»"); }
+    else { s.backAt = today(); toast("اتسجّل إنها رجعت المخزن"); }
+    s.at = Date.now(); s.editedBy = me || "غير محدد";
+    saveSoon("sales");
+    renderHeld(); renderShipCos();
+    dirtyTabs.inv = 1; dirtyTabs.log = 1;
+  });
 
   function renderShipCos(){
     var cos = shipBuckets().map(function(co){
-      var o = shipCoStats(co); o.co = co; return o;
-    }).filter(function(x){ return x.n || x.collected || x.fees || x.drawn; })
+      var o = shipCoStats(co); o.co = co; o.held = heldQtyFor(co); return o;
+    }).filter(function(x){ return x.n || x.collected || x.fees || x.drawn || x.held; })
       .sort(function(a,b){ return b.bal - a.bal; });
 
     var tot = cos.reduce(function(a,x){
@@ -7361,7 +7498,9 @@
        tot.pocket > 0.009 ? "v-due" : "v-gain",
        tot.pocket >= 0 ? "دفعت للشركات أكتر مما حمّلته للعملاء"
                        : "حمّلت العملاء أكتر مما دفعته للشركات"],
-      ["أوردرات عندهم", qty(tot.open), "", "مشحونة ولسه ما اتسلّمتش"]
+      ["أوردرات عندهم", qty(tot.open), "", "مشحونة ولسه ما اتسلّمتش"],
+      ["قطع راجعة عندهم", qty(heldOpenQty()), heldOpenQty() ? "v-due" : "",
+       heldOpenQty() ? "عميل عاين ورفض — لسه ما استلمتهاش" : "مفيش بضاعة معلّقة"]
     ].map(function(c){
       return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
         "<small>"+esc(c[3])+"</small></div>";
@@ -7378,7 +7517,9 @@
         "<td class='num " + (x.bal > 0.009 ? "v-gain" : (x.bal < -0.009 ? "v-due" : "")) + "'>" +
           money(x.bal) + "</td>" +
         "<td class='num " + (x.pocket > 0.009 ? "v-due" : "v-gain") + "'>" +
-          money(Math.abs(x.pocket)) + "</td></tr>";
+          money(Math.abs(x.pocket)) + "</td>" +
+        "<td class='num " + (x.held ? "v-due" : "") + "'>" +
+          (x.held ? qty(x.held) : "—") + "</td></tr>";
     });
     table("t-shipco", SHIP_HEAD, rows,
       "لما تكتب اسم شركة الشحن في الأوردرات، هتلاقي هنا حساب كل شركة بالتفصيل.");
@@ -7680,7 +7821,7 @@
     // الترقية بتتحفظ مرة واحدة بدل ما تتعاد مع كل فتحة، وعشان
     // الأسعار توصل باقي الأجهزة بالمزامنة
     if(seedZones()) saveSoon("settings");
-    renderZones(); renderShipCos();
+    renderZones(); renderShipCos(); renderHeld();
   }
 
   /* ---------- فلاتر الخزنة ---------- */
