@@ -678,8 +678,8 @@
   .dclose:hover{background:var(--paper);color:var(--ink)}
   .panel:not(.as-drawer) .dclose{display:none}
   /* كشف الشركة لوحة بتتفتح وبتتقفل، فالـ× لازم يبان */
-  #shstmt-panel > .dhead{display:flex;align-items:center;gap:var(--sp-3)}
-  #shstmt-panel .dclose{display:block}
+  #shstmt-panel > .dhead,#statement-panel > .dhead{display:flex;align-items:center;gap:var(--sp-3)}
+  #shstmt-panel .dclose,#statement-panel .dclose{display:block}
 
   /* شريط الإجراء فوق كل جدول */
   .tbar{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-3)}
@@ -1204,6 +1204,7 @@
       فلاتر <span class="fcount" id="cf-count" hidden>0</span>
     </button>
     <button class="tbtn primary" type="button" data-openentry="cash">+ حركة نقدية</button>
+    <button class="tbtn" type="button" id="b-cash-img">نزّل صورة للموبايل</button>
   </div>
 
   <div class="filters" id="cash-filters" hidden>
@@ -1387,7 +1388,11 @@
   </div>
   <div class="tbl-wrap"><table id="t-parties"></table></div>
   <div class="panel" id="statement-panel" hidden>
-    <h3 id="statement-title"></h3>
+    <div class="dhead">
+      <h3 id="statement-title"></h3>
+      <button class="dclose" type="button" id="b-stmt-close" aria-label="قفل الكشف">&times;</button>
+    </div>
+    <p class="note" id="statement-sum"></p>
     <div class="tbl-wrap"><table id="t-statement"></table></div>
   </div>
 </section>
@@ -2112,8 +2117,27 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "70";
+  var VERSION = "73";
   var CHANGELOG = [
+    { v:"73", d:"2026-09-29", items:[
+      "كشف الحساب بيتقفل: دوس على الاسم تاني، أو على × جنب العنوان — والاسم المفتوح كشفه بقى متعلّم",
+      "سطر إجمالي في آخر الكشف: إجمالي المدين وإجمالي الدائن والرصيد النهائي",
+      "وسطر بالعربي فوق الجدول: «اشتريت منه بكام · دفعتله كام · لسه عليك كام» — وللعميل «باعت له بكام · حصّلت منه كام»"
+    ]},
+    { v:"72", d:"2026-09-29", items:[
+      "زرار «نزّل صورة للموبايل» في شاشة الخزنة: بينزّل صورة PNG فيها الأرصدة وكل حركة في كارت",
+      "الصورة مرسومة بعرض تليفون وخط كبير — مش لقطة شاشة، فبتتقرا وهي متبعوتة على واتساب من غير تكبير",
+      "بتتبع الفلتر اللي قدامك، والفلتر نفسه مكتوب فوق في الصورة عشان محدش يفهمها غلط",
+      "بتتعمل فاتحة دايمًا حتى لو السيستم على الوضع الليلي — الصورة بتتشارك مع ناس تانية"
+    ]},
+    { v:"71", d:"2026-09-29", items:[
+      "أسعار الشحن الجديدة بعد الخصم اتسجّلت، والمنطقة بقى فيها رقمين مش رقم واحد: «بتدفع لشركة الشحن» و«بتحصّل من العميل»",
+      "عمود «الفرق» بيقولك كام بيطلع من جيبك في الأوردر الواحد من كل منطقة",
+      "أول ما تختار العميل، الخانتين بيتملوا مع بعض — اللي بتدفعه واللي بتحصّله",
+      "المدن الجديدة (التجمع · الشروق · بدر · العبور · 6 أكتوبر · الشيخ زايد · العاصمة الإدارية) بقت تتعرف من عنوان العميل، لأنها أحياء جوّه القاهرة والجيزة مش محافظات — وسعرها مختلف",
+      "مدة التوصيل لكل منطقة اتسجّلت عشان تقولها للعميل وإنت بتسجّل الأوردر",
+      "أسعارك القديمة ما اتمستش: الرقم اللي كان مسجّل راح لخانة «بتدفع»، وسعر العميل اتحط من الورقة الجديدة"
+    ]},
     { v:"70", d:"2026-09-28", items:[
       "شيت الفاتورة بقى فيه الشراء بالكرتونة: عمودين جداد «عدد الكراتين» و«سعر الكرتونة»",
       "بالقطعة؟ املا «تكلفة القطعة» بس. بالكرتونة؟ سيبها فاضية واملا العمودين الجداد وكررهم في كل سطر من الشحنة",
@@ -5885,6 +5909,10 @@
   /* ================= الإدخال جوه الجدول ================= */
   // مسوّدة الأوردر اللي بتتكتب دلوقتي — بتتحدّث مع كل ضغطة زرار
   var draft = null;
+  /* الرقمين اللي جدول المناطق كتبهم في الأوردر — بيتقارنوا بالموجود
+     عشان نفرّق بين رقم إحنا حطّيناه ورقم إنت كتبته. (الإعلان فوق هنا
+     لأن التصفير بيتنادى وقت التهيئة قبل أي سطر تحت.) */
+  var zoneFilled = { out:null, inn:null };
   function blankLine(){ return { itemId:"", color:"", size:"", qty:"", price:"", ret:"", manual:false }; }
   function newDraft(keep){
     return { date: firstOpenDate(), status:"progress", partyId:"", owner: me || "",
@@ -5937,6 +5965,7 @@
              }) };
   }
   draft = newDraft();
+  clearZoneFilled();
 
   function optsHTML(list, sel, ph){
     return '<option value="">'+esc(ph)+'</option>' + list.map(function(o){
@@ -6106,7 +6135,8 @@
     document.getElementById("newcust-box").hidden = true;
     var sn = document.getElementById("e-shipnote");
     if(sn){ sn.textContent = ""; sn.hidden = true; }
-    seedZones(); syncZoneUI();
+    if(seedZones()) saveSoon("settings");
+    syncZoneUI();
     var cf = document.getElementById("e-conflict");
     if(cf){ cf.textContent = ""; cf.hidden = true; }
     var rp = document.getElementById("e-repeat");
@@ -7458,16 +7488,29 @@
 
     var rows = shipZones().map(function(z){
       var used = live("parties").filter(function(p){
-        return p.type === "customer" && zoneForGov(p.gov) && zoneForGov(p.gov).id === z.id; }).length;
+        return p.type === "customer" && zoneForParty(p) && zoneForParty(p).id === z.id; }).length;
+      var gap = zoneGap(z);
+      var num = function(f, v){
+        return "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
+          "data-zf='"+f+"' data-zid='"+esc(z.id)+"' value='"+esc(Number(v)||0)+"'></td>";
+      };
       return "<tr><td class='wide'><input data-zf='name' data-zid='"+esc(z.id)+"' value='"+esc(z.name)+"' autocomplete='off'></td>" +
-        "<td class='num'><input type='number' step='any' min='0' style='max-width:110px' " +
-          "data-zf='price' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.price)||0)+"'></td>" +
+        num("cost", z.cost) + num("price", z.price) +
+        "<td class='num " + (gap > 0 ? "v-due" : (gap < 0 ? "v-gain" : "")) + "'>" +
+          (gap ? money(Math.abs(gap)) + "<span class='sub'>" + (gap > 0 ? "من جيبك" : "بتكسب") + "</span>"
+               : "—") + "</td>" +
+        "<td><input data-zf='days' data-zid='"+esc(z.id)+"' style='max-width:120px' " +
+          "placeholder='خلال 24 ساعة' autocomplete='off' value='"+esc(z.days||"")+"'></td>" +
         "<td class='wide'><input list='gov-list' data-zf='govs' data-zid='"+esc(z.id)+"' " +
           "placeholder='القاهرة، الجيزة' autocomplete='off' value='"+esc((z.govs||[]).join("، "))+"'>" +
           "<span class='sub'>" + (used ? qty(used) + " عميل في المنطقة دي" : "مفيش عملاء فيها لسه") + "</span></td>" +
+        "<td class='wide'><input data-zf='areas' data-zid='"+esc(z.id)+"' " +
+          "placeholder='التجمع، 6 أكتوبر' autocomplete='off' value='"+esc((z.areas||[]).join("، "))+"'>" +
+          "<span class='sub'>بتتدوّر في عنوان العميل وبتسبق المحافظة</span></td>" +
         "<td><button class='del' type='button' data-zdel='"+esc(z.id)+"'>حذف</button></td></tr>";
     });
-    table("t-zones", ["المنطقة","سعر الشحن","المحافظات اللي جواها",""], rows,
+    table("t-zones", ["المنطقة","بتدفع لشركة الشحن","بتحصّل من العميل","الفرق",
+                      "مدة التوصيل","المحافظات اللي جواها","أحياء ومدن (اختياري)",""], rows,
       "مفيش مناطق — دوس «+ منطقة» أو «رجّع الأسعار المبدئية».");
     // محافظات مش متحطوطة في أي منطقة — عشان ما تكتشفش ده وإنت بتسجّل أوردر
     var miss = GOVS.filter(function(g){ return !zoneForGov(g); });
@@ -7488,7 +7531,8 @@
     if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
     seedZones();
     if(!Array.isArray(settings.shipZones)) settings.shipZones = [];
-    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", price:0, govs:[] });
+    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", cost:0, price:0,
+                              days:"", govs:[], areas:[] });
     saveSoon("settings"); renderZones(); fillZoneSelect();
   });
   document.getElementById("b-zone-reset").addEventListener("click", function(){
@@ -7510,10 +7554,21 @@
     var el = e.target.closest("[data-zf]"); if(!el) return;
     var z = zoneById(el.dataset.zid); if(!z) return;
     var f = el.dataset.zf;
-    if(f === "name")  z.name = el.value;
+    if(f === "name")  z.name  = el.value;
+    if(f === "days")  z.days  = el.value;
+    if(f === "cost")  z.cost  = Number(el.value)||0;
     if(f === "price") z.price = Number(el.value)||0;
-    if(f === "govs")  z.govs = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
+    if(f === "govs")  z.govs  = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
+    if(f === "areas") z.areas = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
     saveSoon("settings"); fillZoneSelect();
+    // «الفرق» بيتحسب من الرقمين، فلازم يتحدّث وإنت بتكتب
+    if(f === "cost" || f === "price"){
+      var td = el.closest("tr").children[3], g = zoneGap(z);
+      if(td){
+        td.className = "num " + (g > 0 ? "v-due" : (g < 0 ? "v-gain" : ""));
+        td.innerHTML = g ? money(Math.abs(g)) + "<span class='sub'>" + (g > 0 ? "من جيبك" : "بتكسب") + "</span>" : "—";
+      }
+    }
   });
   document.getElementById("t-zones").addEventListener("click", function(e){
     var d = e.target.closest("[data-zdel]"); if(!d) return;
@@ -7526,42 +7581,74 @@
   function fillZoneSelect(){
     var el = document.getElementById("e-zone"); if(!el) return;
     var zs = shipZones().map(function(z){
-      return { v:z.id, t:z.name + " — " + money(Number(z.price)||0) }; });
+      // الرقم اللي في القايمة هو اللي بتقوله للعميل — ده اللي بتختار على أساسه
+      return { v:z.id, t:z.name + " — تحصّل " + money(Number(z.price)||0) }; });
     el.innerHTML = optsHTML(zs, draft && draft.zoneId ? draft.zoneId : "", "من غير منطقة");
   }
-  // المحافظة بتحدّد المنطقة، والمنطقة بتحدّد السعر
+  /* بنفتكر الرقمين اللي المنطقة كتبتهم. لو غيّرت العميل والرقم لسه
+     زي ما إحنا حطّيناه، يبقى مش رقمك — يتحدّث لمنطقة العميل الجديد.
+     ولو كتبت رقم بإيدك بيفضل زي ما هو. (من غير ده كنت بتختار عميلة
+     من أسوان وتلاقي شحن القاهرة واقف في الخانة.) */
+  function clearZoneFilled(){ zoneFilled = { out:null, inn:null }; }
+  function setZoneFilled(o, i){ zoneFilled.out = o; zoneFilled.inn = i; }
+  function zoneMayWrite(cur, mine){
+    var n = Number(cur)||0;
+    return !n || (mine !== null && n === (Number(mine)||0));
+  }
+  // المحافظة (أو الحي) بتحدّد المنطقة، والمنطقة بتحدّد الرقمين
   function applyZoneFromParty(){
     var pt = db.parties.find(function(x){ return x.id === draft.partyId; });
-    var z = pt ? zoneForGov(pt.gov) : null;
+    var z = pt ? zoneForParty(pt) : null;
     if(!z) return false;
     draft.zoneId = z.id;
-    // ما نلمسش رقم كتبته بإيدك
-    var cur = Number(draft.shipOut)||0;
-    if(!cur) draft.shipOut = Number(z.price)||0;
+    if(zoneMayWrite(draft.shipOut, zoneFilled.out)){
+      draft.shipOut = Number(z.cost)||0; zoneFilled.out = draft.shipOut;
+    }
+    if(zoneMayWrite(draft.shipIn, zoneFilled.inn)){
+      draft.shipIn = Number(z.price)||0; zoneFilled.inn = draft.shipIn;
+    }
     return true;
   }
   function syncZoneUI(){
     fillZoneSelect();
     var out = document.getElementById("e-shipout");
     if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
+    var inn = document.getElementById("e-shipin");
+    if(inn) inn.value = draft.shipIn === "" || draft.shipIn == null ? "" : draft.shipIn;
     var note = document.getElementById("e-zonenote");
     if(!note) return;
     var z = draft.zoneId ? zoneById(draft.zoneId) : null;
     var pt = db.parties.find(function(x){ return x.id === draft.partyId; });
-    if(z && pt && squish(pt.gov)){
-      note.textContent = "«" + squish(pt.gov) + "» في منطقة «" + z.name + "» — الشحن " +
-        money(Number(z.price)||0) + ". غيّره لو مختلف.";
-      note.hidden = false;
-    } else { note.textContent = ""; note.hidden = true; }
+    if(!z || !pt){ note.textContent = ""; note.hidden = true; return; }
+    var where = squish(pt.address || "") && (z.areas||[]).some(function(a){
+      var k = squish(a); return k && squish(pt.address).indexOf(k) > -1; })
+      ? "عنوانها" : ("«" + squish(pt.gov || "") + "»");
+    var gap = zoneGap(z);
+    note.innerHTML = esc(where) + " في منطقة «" + esc(z.name) + "»: بتدفع <strong>" +
+      esc(money(Number(z.cost)||0)) + "</strong> وبتحصّل <strong>" +
+      esc(money(Number(z.price)||0)) + "</strong>" +
+      (gap > 0 ? " — يعني <span class='v-due'>" + esc(money(gap)) + " من جيبك</span>"
+               : (gap < 0 ? " — يعني <span class='v-gain'>" + esc(money(-gap)) + " ليك</span>" : "")) +
+      (z.days ? " · التوصيل " + esc(z.days) : "") + ". غيّرهم لو مختلفين.";
+    note.hidden = false;
   }
   document.getElementById("e-zone").addEventListener("change", function(){
     draft.zoneId = this.value;
     var z = zoneById(this.value);
-    if(z) draft.shipOut = Number(z.price)||0;
+    // اختيار صريح للمنطقة بيكتب الرقمين — ده المقصود من الاختيار
+    if(z){
+      draft.shipOut = Number(z.cost)||0; draft.shipIn = Number(z.price)||0;
+      setZoneFilled(draft.shipOut, draft.shipIn);
+    } else clearZoneFilled();
     syncZoneUI(); updateEntryCalc();
   });
 
-  function renderShip(){ seedZones(); renderZones(); renderShipCos(); }
+  function renderShip(){
+    // الترقية بتتحفظ مرة واحدة بدل ما تتعاد مع كل فتحة، وعشان
+    // الأسعار توصل باقي الأجهزة بالمزامنة
+    if(seedZones()) saveSoon("settings");
+    renderZones(); renderShipCos();
+  }
 
   /* ---------- فلاتر الخزنة ---------- */
   var cfilt = { dir:"", kind:"", src:"", from:"", to:"", text:"" };
@@ -7659,6 +7746,180 @@
     renderCashStats(shown, tin, tout);
   }
 
+
+  /* ---------- صورة الخزنة للموبايل ----------
+     مش لقطة شاشة: الشاشة عرضها لابتوب، ولو صوّرناها الخط بيطلع
+     صغير على التليفون. بنرسم كارت لكل حركة على canvas بعرض تليفون
+     وخط كبير، فالصورة بتتقرا وهي متبعوتة على واتساب من غير تكبير.
+     وبنرسمها فاتحة دايمًا حتى لو السيستم ليلي — الصورة بتتشارك. */
+  var CI = { W:760, PAD:28, S:3 };          // العرض بالنقط · الهامش · درجة الوضوح
+  var CI_C = {
+    bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
+    brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
+  };
+  function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
+  function ciRound(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y,   x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x,   y+h, r);
+    ctx.arcTo(x,   y+h, x,   y,   r);
+    ctx.arcTo(x,   y,   x+w, y,   r);
+    ctx.closePath();
+  }
+  // نص عربي من اليمين ورقم من الشمال — كل واحد برسمة لوحده
+  function ciR(ctx, t, x, y, font, color){
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = "right"; ctx.direction = "rtl";
+    ctx.fillText(String(t), x, y);
+  }
+  function ciL(ctx, t, x, y, font, color){
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = "left"; ctx.direction = "ltr";
+    ctx.fillText(String(t), x, y);
+  }
+  function ciCut(ctx, t, font, max){
+    ctx.font = font;
+    var v = String(t == null ? "" : t);
+    if(ctx.measureText(v).width <= max) return v;
+    while(v.length > 1 && ctx.measureText(v + "…").width > max) v = v.slice(0, -1);
+    return v + "…";
+  }
+
+  // اللي هيتصوّر: نفس اللي قدامك بالفلتر، بس من غير تقسيم صفحات
+  function cashImgData(){
+    var L = cashLedger(), run = 0, out = [], tin = 0, tout = 0;
+    L.forEach(function(x){
+      run += x.inn - x.out;                 // الرصيد الحقيقي بيعدّ كل حركة حتى المخفية
+      if(!cashMatch(x)) return;
+      tin += x.inn; tout += x.out;
+      out.push({ d:x.d, t:x.t, src:x.src, who:x.who, note:x.note,
+                 inn:x.inn, out:x.out, run:run });
+    });
+    return { rows:out, tin:tin, tout:tout };
+  }
+  function cashImgFilterTxt(){
+    var on = Object.keys(CF_LABEL).filter(function(k){ return cfilt[k]; })
+      .map(function(k){ return CF_LABEL[k] + ": " + cfilt[k]; });
+    return on.length ? on.join("  ·  ") : "كل الحركات من أول يوم";
+  }
+
+  function drawCashImage(){
+    var d = cashImgData();
+    var CAP = 200;
+    var rows = d.rows.slice(-CAP);            // الأحدث لو الدفتر طويل
+    var cut = d.rows.length - rows.length;
+
+    var W = CI.W, P = CI.PAD, inner = W - P*2;
+    var HEAD = 150, STAT = 116, GAP = 12, ROW = 128, FOOT = cut ? 92 : 56;
+    var statH = STAT*2 + GAP;
+    var bodyTop = HEAD + statH + 26;
+    var H = bodyTop + (rows.length ? rows.length*(ROW+GAP) : 110) + FOOT + P;
+
+    var cv = document.createElement("canvas");
+    cv.width = W*CI.S; cv.height = H*CI.S;
+    var ctx = cv.getContext("2d");
+    ctx.scale(CI.S, CI.S);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = CI_C.bg; ctx.fillRect(0, 0, W, H);
+
+    // ترويسة
+    ctx.fillStyle = CI_C.brand; ctx.fillRect(0, 0, W, 6);
+    var R = W - P;                                     // حرف اليمين
+    ciR(ctx, "الخزنة", R, 70, ciFont(700, 40), CI_C.brand);
+    ciR(ctx, "Lora Collection", R, 104, ciFont(500, 20), CI_C.soft);
+    ciR(ctx, ciCut(ctx, cashImgFilterTxt(), ciFont(400, 18), inner), R, 132, ciFont(400, 18), CI_C.soft);
+    ciL(ctx, today(), P, 70, ciFont(500, 20), CI_C.soft);
+
+    // أربع كروت
+    var bal = cashBox(), wal = walletsTotal();
+    var cells = [
+      ["رصيد الخزنة", money(bal), bal >= 0 ? CI_C.brand : CI_C.due],
+      ["في محافظ الشحن", money(wal), wal > 0.009 ? CI_C.due : CI_C.soft],
+      ["داخل", money(d.tin),  d.tin  ? CI_C.gain : CI_C.soft],
+      ["خارج", money(d.tout), d.tout ? CI_C.due  : CI_C.soft]
+    ];
+    var cw = (inner - GAP) / 2;
+    cells.forEach(function(c, i){
+      var col = i % 2, rowi = (i / 2) | 0;
+      // العمود الأول على اليمين — الشاشة كلها من اليمين للشمال
+      var x = P + (col === 0 ? cw + GAP : 0);
+      var y = HEAD + rowi * (STAT + GAP);
+      ctx.fillStyle = CI_C.card; ciRound(ctx, x, y, cw, STAT, 14); ctx.fill();
+      ctx.strokeStyle = CI_C.line; ctx.lineWidth = 1; ctx.stroke();
+      ciR(ctx, c[0], x + cw - 18, y + 36, ciFont(500, 19), CI_C.soft);
+      ciR(ctx, c[1], x + cw - 18, y + 80, ciFont(700, 30), c[2]);
+    });
+
+    // كارت لكل حركة
+    if(!rows.length){
+      ciR(ctx, "مفيش حركات في الفلتر ده.", R, bodyTop + 50, ciFont(500, 22), CI_C.soft);
+    }
+    rows.forEach(function(x, i){
+      var y = bodyTop + i * (ROW + GAP);
+      ctx.fillStyle = CI_C.bg; ciRound(ctx, P, y, inner, ROW, 14); ctx.fill();
+      ctx.strokeStyle = CI_C.line; ctx.lineWidth = 1; ctx.stroke();
+      // شريط جانبي بلون الاتجاه — بيخلّي الداخل والخارج يتفرزوا بالعين
+      ctx.fillStyle = x.inn ? CI_C.gain : CI_C.due;
+      ciRound(ctx, P + inner - 5, y, 5, ROW, 3); ctx.fill();
+
+      ciR(ctx, ciCut(ctx, x.t, ciFont(600, 24), inner*0.55), P + inner - 20, y + 36,
+          ciFont(600, 24), CI_C.ink);
+      ciL(ctx, x.d, P + 18, y + 36, ciFont(500, 19), CI_C.soft);
+
+      // المصروف مالوش جهة، فـ«—» كانت بتطلع قبل البيان من غير لزمة
+      var nm = (x.who && x.who !== "—") ? x.who : "";
+      var who = [nm, x.note].filter(Boolean).join(" · ") || "—";
+      ciR(ctx, ciCut(ctx, who, ciFont(400, 20), inner - 40), P + inner - 20, y + 68,
+          ciFont(400, 20), CI_C.soft);
+
+      var amt = x.inn ? money(x.inn) : money(x.out);
+      ciR(ctx, (x.inn ? "داخل " : "خارج ") + amt, P + inner - 20, y + 106,
+          ciFont(700, 24), x.inn ? CI_C.gain : CI_C.due);
+      ciL(ctx, "الرصيد " + money(x.run), P + 18, y + 106, ciFont(600, 21),
+          x.run < 0 ? CI_C.due : CI_C.soft);
+    });
+
+    var fy = bodyTop + (rows.length ? rows.length*(ROW+GAP) : 110) + 16;
+    ctx.strokeStyle = CI_C.line; ctx.beginPath();
+    ctx.moveTo(P, fy); ctx.lineTo(W - P, fy); ctx.stroke();
+    if(cut){
+      ciR(ctx, "الصورة فيها آخر " + qty(rows.length) + " حركة من " + qty(d.rows.length) +
+               " — فلتر بالتاريخ عشان تاخد الباقي.", R, fy + 34, ciFont(500, 18), CI_C.due);
+    }
+    ciR(ctx, qty(d.rows.length) + " حركة · إصدار " + VERSION, R, fy + (cut ? 64 : 34),
+        ciFont(400, 17), CI_C.soft);
+    return cv;
+  }
+
+  function downloadBlob(name, blob){
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+  document.getElementById("b-stmt-close").addEventListener("click", function(){
+    statementFor = null; renderStatement(); renderParties();
+  });
+  document.getElementById("b-cash-img").addEventListener("click", function(){
+    var btn = this, old = btn.textContent;
+    btn.disabled = true; btn.textContent = "بيحضّر…";
+    var go = function(){
+      try{
+        drawCashImage().toBlob(function(blob){
+          btn.disabled = false; btn.textContent = old;
+          if(!blob){ toast("المتصفح ما قدرش يعمل الصورة"); return; }
+          downloadBlob("lora-khazna-" + today() + ".png", blob);
+          toast("الصورة نزلت");
+        }, "image/png");
+      } catch(e){
+        btn.disabled = false; btn.textContent = old;
+        toast("الصورة ما اتعملتش: " + (e && e.message || e));
+      }
+    };
+    // الخط لازم يبقى محمّل قبل الرسم وإلا بيترسم بخط افتراضي
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(go, go);
+    else go();
+  });
+
   function renderItems(){
     var rows = live("items").map(function(i){
       var n = (i.tiers||[]).length;
@@ -7748,7 +8009,11 @@
         : (b>0 ? "<span class='pill due'>ليك "+money(b)+"</span>" : "<span class='pill due'>عليك "+money(-b)+"</span>");
       var orders = live("sales").filter(function(x){ return x.partyId===p.id; });
       var cancelled = orders.filter(isCancelled).length;
-      return "<tr><td class='wide'><button class='del' style='color:var(--teal)' data-stmt='"+p.id+"'>"+esc(p.name)+"</button></td>"+
+      var isOpen = statementFor === p.id;
+      return "<tr" + (isOpen ? " class='on'" : "") + "><td class='wide'>" +
+        "<button class='del' style='color:var(--teal)' data-stmt='"+p.id+"'" +
+        " title='" + (isOpen ? "اقفل الكشف" : "افتح كشف الحساب") + "'>" +
+        esc(p.name) + (isOpen ? " ▾" : "") + "</button></td>"+
         "<td>"+(p.type==="supplier"?"مورد":"عميل")+"</td><td>"+esc(p.phone||"—")+"</td>"+
         "<td>"+esc(p.gov||"—")+"</td>"+
         "<td class='num'>"+(orders.length ? qty(orders.length) + (cancelled ? " ("+qty(cancelled)+" ملغي)" : "") : "—")+"</td>"+
@@ -7779,14 +8044,42 @@
       if(c.type==="out") lines.push({d:c.date,t:"دفع نقدي",dr:Number(c.amount)||0,cr:0});
     });
     lines.sort(function(a,b){ return a.d < b.d ? -1 : 1; });
-    var run = 0;
+    var run = 0, tdr = 0, tcr = 0;
     var rows = lines.map(function(l){
-      run += l.dr - l.cr;
+      run += l.dr - l.cr; tdr += l.dr; tcr += l.cr;
       return "<tr><td class='num'>"+esc(l.d)+"</td><td class='wide'>"+esc(l.t)+"</td>"+
         "<td class='num'>"+money(l.dr)+"</td><td class='num'>"+money(l.cr)+"</td>"+
         "<td class='num'>"+money(run)+"</td></tr>";
     });
+    if(rows.length){
+      rows.push("<tr class='sumrow'><td></td><td class='wide'>الإجمالي</td>" +
+        "<td class='num'>"+money(tdr)+"</td><td class='num'>"+money(tcr)+"</td>" +
+        "<td class='num'>"+money(run)+"</td></tr>");
+    }
     table("t-statement", ["التاريخ","البيان","مدين","دائن","الرصيد"], rows, "مفيش حركات على الحساب ده.");
+
+    /* «مدين ودائن» مصطلح محاسبي — السطر ده بيترجمه لجملة تفهمها
+       على طول، وبيختلف حسب المورد ولا العميل لأن اتجاه الفلوس مقلوب. */
+    var sum = document.getElementById("statement-sum");
+    if(!sum) return;
+    if(!rows.length){ sum.textContent = ""; return; }
+    var sup = p.type === "supplier";
+    var bought = sup ? tcr : tdr;          // قيمة اللي اتعامل عليه
+    var paid   = sup ? tdr : tcr;          // اللي اتدفع أو اتحصّل
+    var txt = sup
+      ? "اشتريت منه بـ <strong>" + esc(money(bought)) + "</strong> · دفعتله <strong>" +
+        esc(money(paid)) + "</strong>"
+      : "باعت له بـ <strong>" + esc(money(bought)) + "</strong> · حصّلت منه <strong>" +
+        esc(money(paid)) + "</strong>";
+    var bal = bought - paid;               // موجب = لسه في فلوس معلّقة
+    txt += " · " + (Math.abs(bal) < 0.009
+      ? "<span class='v-gain'>الحساب مقفول</span>"
+      : (bal > 0
+          ? (sup ? "<span class='v-due'>لسه عليك <strong>" + esc(money(bal)) + "</strong></span>"
+                 : "<span class='v-due'>لسه ليك <strong>" + esc(money(bal)) + "</strong></span>")
+          : (sup ? "<span class='v-gain'>دفعتله زيادة <strong>" + esc(money(-bal)) + "</strong></span>"
+                 : "<span class='v-gain'>حصّلت منه زيادة <strong>" + esc(money(-bal)) + "</strong></span>")));
+    sum.innerHTML = txt;
   }
 
   function renderLog(){
@@ -8508,8 +8801,10 @@
         if(!draft.shipCo) suggestShipping();
         syncZoneUI();
       }
+      if(f === "shipIn")  zoneFilled.inn = null;
       // كتبت رقم بإيدك؟ المنطقة ما بقتش هي المصدر
       if(f === "shipOut"){
+        zoneFilled.out = null;
         draft.zoneId = "";
         var zs = document.getElementById("e-zone"); if(zs) zs.value = "";
         var zn = document.getElementById("e-zonenote"); if(zn){ zn.textContent = ""; zn.hidden = true; }
@@ -8529,28 +8824,64 @@
      بدل ما تكتب رقم الشحن في كل أوردر: بتحدّد المنطقة مرة واحدة
      بسعرها والمحافظات اللي جواها، وبعدها أول ما تختار العميل بيتملّى
      لوحده من محافظته. كله قابل للتعديل من شاشة «شركات الشحن». */
+  /* المنطقة فيها رقمين مختلفين، والخلط بينهم بيضيّع فلوس من غير ما تحس:
+       cost  = اللي بتدفعه لشركة الشحن  (عمود «قبل الخصم» في ورقة الأسعار)
+       price = اللي بتحصّله من العميل   (عمود «بعد الخصم»)
+     الفرق بينهم بيطلع من جيبك في كل أوردر، فبيتحسب ويتعرض صريح. */
   var ZONES_SEED = [
-    { name:"القاهرة والجيزة", price:75,
-      govs:["القاهرة","الجيزة"] },
-    { name:"مناطق جديدة وأطراف", price:80, govs:[] },
-    { name:"الوجه بحري", price:95,
+    { name:"القاهرة والجيزة", cost:75, price:50, days:"خلال 24 ساعة",
+      govs:["القاهرة","الجيزة"], areas:[] },
+    { name:"المدن الجديدة والأطراف", cost:80, price:55, days:"خلال 24 ساعة",
+      govs:[],
+      // دي أحياء جوّه القاهرة والجيزة مش محافظات، فبتتعرف من العنوان
+      areas:["القاهرة الجديدة","التجمع","الشروق","بدر","العبور","العاصمة الإدارية",
+             "6 أكتوبر","أكتوبر","الشيخ زايد","حدائق أكتوبر"] },
+    { name:"الوجه البحري", cost:95, price:70, days:"48–72 ساعة",
       govs:["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية",
-            "الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"] },
-    { name:"الوجه قبلي", price:105,
-      govs:["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"] },
-    { name:"المحافظات الحدودية", price:150,
-      govs:["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"] }
+            "الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"], areas:[] },
+    { name:"الوجه القبلي", cost:105, price:80, days:"48–72 ساعة",
+      govs:["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"], areas:[] },
+    { name:"المحافظات الحدودية", cost:150, price:125, days:"5–6 أيام",
+      govs:["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"], areas:[] }
   ];
   function shipZones(){
     if(!Array.isArray(settings.shipZones)) return [];
     return settings.shipZones.filter(function(z){ return z && squish(z.name); });
   }
   function seedZones(){
-    if(Array.isArray(settings.shipZones)) return false;
+    if(Array.isArray(settings.shipZones)) return migrateZones();
     settings.shipZones = ZONES_SEED.map(function(z, i){
-      return { id:"z"+(i+1), name:z.name, price:z.price, govs:z.govs.slice() };
+      return { id:"z"+(i+1), name:z.name, cost:z.cost, price:z.price, days:z.days,
+               govs:z.govs.slice(), areas:(z.areas||[]).slice() };
     });
     return true;
+  }
+  /* الشكل القديم كان رقم واحد اسمه price ومعناه «اللي بتدفعه».
+     بنرقّيه من غير ما نلمس رقم غيّرته بإيدك: الرقم القديم بيروح
+     لخانة «بتدفع»، وسعر العميل بيتحط من الورقة الجديدة بس لو الرقم
+     القديم لسه زي ما السيستم حطّه. */
+  var ZONE_DISCOUNT = { 75:50, 80:55, 95:70, 105:80, 150:125 };
+  function migrateZones(){
+    var changed = false;
+    shipZones().forEach(function(z){
+      if(z.cost == null){
+        z.cost  = Number(z.price)||0;
+        z.price = ZONE_DISCOUNT[z.cost] != null ? ZONE_DISCOUNT[z.cost] : z.cost;
+        changed = true;
+      }
+      if(z.days == null){
+        var sd = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
+        z.days = sd ? sd.days : "";
+        changed = true;
+      }
+      // أحياء المدن الجديدة: بتتحط مرة واحدة على منطقة الـ80 لو لسه فاضية
+      if(!Array.isArray(z.areas)){
+        var sa = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
+        z.areas = (sa && sa.areas.length) ? sa.areas.slice() : [];
+        changed = true;
+      }
+    });
+    return changed;
   }
   function zoneById(id){
     return shipZones().find(function(z){ return z.id === id; }) || null;
@@ -8562,9 +8893,25 @@
       return (z.govs||[]).some(function(x){ return squish(x) === g; });
     }) || null;
   }
-  function zonePrice(id){
-    var z = zoneById(id); return z ? (Number(z.price)||0) : 0;
+  /* العنوان بيسبق المحافظة: عميلة في «التجمع» محافظتها القاهرة،
+     بس سعرها سعر المدن الجديدة. من غير ده كنا هنحمّلها ناقص. */
+  function zoneForParty(pt){
+    if(!pt) return null;
+    var ad = squish(pt.address || "");
+    if(ad){
+      var hit = shipZones().find(function(z){
+        return (z.areas||[]).some(function(a){
+          var k = squish(a); return k && ad.indexOf(k) > -1;
+        });
+      });
+      if(hit) return hit;
+    }
+    return zoneForGov(pt.gov);
   }
+  function zoneCost(id){ var z = zoneById(id); return z ? (Number(z.cost)||0) : 0; }
+  function zonePrice(id){ var z = zoneById(id); return z ? (Number(z.price)||0) : 0; }
+  // اللي بيطلع من جيبك في الأوردر الواحد من المنطقة دي
+  function zoneGap(z){ return (Number(z.cost)||0) - (Number(z.price)||0); }
 
   /* آخر شركة شحن اتستخدمت للمحافظة دي. الأرقام دي فلوس، فما ينفعش
      تتحط في الخانات من غير ما اللي بيسجّل يعرف — بيظهر سطر بيقول جت منين.
@@ -8615,6 +8962,7 @@
   document.getElementById("b-newsale").addEventListener("click", function(){
     editing.sales = null; clearEditBase("sales");
     draft = newDraft(draft);
+    clearZoneFilled();
     openDrawer();
   });
 
@@ -8897,6 +9245,7 @@
     var wasEditing = !!editing.sales;
     editing.sales = null; clearEditBase("sales");
     draft = newDraft(draft);
+    clearZoneFilled();
     closeDrawer();
     renderSales();
     if(wasEditing) toast("اتلغى التعديل");
@@ -8989,6 +9338,7 @@
     saveSoon("sales");
     document.getElementById("s-allow").checked = false;
     draft = newDraft(draft);           // شركة الشحن وطريقة التحصيل بيفضلوا زي ما هم
+    clearZoneFilled();
     closeDrawer();
     renderAll();
   }
@@ -8999,6 +9349,7 @@
     editing.sales = null;                 // ده أوردر جديد مش تعديل
     clearEditBase("sales");
     draft = draftRepeat(rec);
+    clearZoneFilled();
     goTab("sales");
     openDrawer();
     toast("أوردر جديد بنفس أصناف #" + (rec.no || "") + " — راجعه واحفظه");
@@ -9010,6 +9361,7 @@
     editing.sales = id;
     markEditBase("sales", rec);
     draft = draftFrom(rec);
+    clearZoneFilled();
     goTab("sales");
     openDrawer();
     toast("بتعدّل أوردر #" + (rec.no || ""));
@@ -9855,8 +10207,14 @@
 
   document.body.addEventListener("click", async function(e){
     var stmt = e.target.closest("[data-stmt]");
-    if(stmt){ statementFor = stmt.dataset.stmt; renderStatement();
-      document.getElementById("statement-panel").scrollIntoView({block:"nearest"}); return; }
+    if(stmt){
+      // نفس الاسم تاني = اقفل. من غير كده الكشف بيفضل مفتوح ومفيش طريقة تقفله
+      var same = statementFor === stmt.dataset.stmt;
+      statementFor = same ? null : stmt.dataset.stmt;
+      renderStatement(); renderParties();
+      if(!same) document.getElementById("statement-panel").scrollIntoView({block:"nearest"});
+      return;
+    }
     var lb = e.target.closest("[data-label]");
     if(lb){ printLabel(lb.dataset.label); return; }
     var rp = e.target.closest("[data-repeat]");
