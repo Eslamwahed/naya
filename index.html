@@ -2117,8 +2117,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "73";
+  var VERSION = "74";
   var CHANGELOG = [
+    { v:"74", d:"2026-09-29", items:[
+      "تصحيح: «بعد الخصم» هو اللي بتدفعه لشركة الشحن — القاهرة والجيزة 50، المدن الجديدة 55، بحري 70، قبلي 80، الحدودية 125",
+      "«قبل الخصم» بقى عمود مرجع مكتوب إنه مش بيدخل في أي حساب",
+      "اللي بتحمّله للعميل بقى قرارك في كل أوردر — المنطقة مابتملاهوش إلا لو إنت حطيت افتراضي ليها بنفسك",
+      "السطر تحت منطقة الشحن بيتحدّث وإنت بتكتب: «هتدفع 50 · بتحمّل العميل 30 → 20 من جيبك»",
+      "الترقية بتصلّح المسجّل عندك لوحدها — اللي كان متخزّن كسعر بيتحوّل للشكل الصح"
+    ]},
     { v:"73", d:"2026-09-29", items:[
       "كشف الحساب بيتقفل: دوس على الاسم تاني، أو على × جنب العنوان — والاسم المفتوح كشفه بقى متعلّم",
       "سطر إجمالي في آخر الكشف: إجمالي المدين وإجمالي الدائن والرصيد النهائي",
@@ -7489,16 +7496,21 @@
     var rows = shipZones().map(function(z){
       var used = live("parties").filter(function(p){
         return p.type === "customer" && zoneForParty(p) && zoneForParty(p).id === z.id; }).length;
-      var gap = zoneGap(z);
       var num = function(f, v){
         return "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
           "data-zf='"+f+"' data-zid='"+esc(z.id)+"' value='"+esc(Number(v)||0)+"'></td>";
       };
       return "<tr><td class='wide'><input data-zf='name' data-zid='"+esc(z.id)+"' value='"+esc(z.name)+"' autocomplete='off'></td>" +
-        num("cost", z.cost) + num("price", z.price) +
-        "<td class='num " + (gap > 0 ? "v-due" : (gap < 0 ? "v-gain" : "")) + "'>" +
-          (gap ? money(Math.abs(gap)) + "<span class='sub'>" + (gap > 0 ? "من جيبك" : "بتكسب") + "</span>"
-               : "—") + "</td>" +
+        num("cost", z.cost) +
+        "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
+          "data-zf='list' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.list)||0)+"'>" +
+          "<span class='sub'>مرجع · مش بيتحسب</span></td>" +
+        "<td class='num'><input type='number' step='any' min='0' style='max-width:100px' " +
+          "data-zf='charge' data-zid='"+esc(z.id)+"' value='"+esc(Number(z.charge)||0)+"'>" +
+          "<span class='sub'>" + ((Number(z.charge)||0) > 0
+            ? ((Number(z.charge)||0) >= (Number(z.cost)||0)
+                ? "بتغطّي اللي بتدفعه" : "<span class='v-due'>" + money((Number(z.cost)||0) - (Number(z.charge)||0)) + " من جيبك</span>")
+            : "صفر = تكتبه في الأوردر") + "</span></td>" +
         "<td><input data-zf='days' data-zid='"+esc(z.id)+"' style='max-width:120px' " +
           "placeholder='خلال 24 ساعة' autocomplete='off' value='"+esc(z.days||"")+"'></td>" +
         "<td class='wide'><input list='gov-list' data-zf='govs' data-zid='"+esc(z.id)+"' " +
@@ -7509,8 +7521,9 @@
           "<span class='sub'>بتتدوّر في عنوان العميل وبتسبق المحافظة</span></td>" +
         "<td><button class='del' type='button' data-zdel='"+esc(z.id)+"'>حذف</button></td></tr>";
     });
-    table("t-zones", ["المنطقة","بتدفع لشركة الشحن","بتحصّل من العميل","الفرق",
-                      "مدة التوصيل","المحافظات اللي جواها","أحياء ومدن (اختياري)",""], rows,
+    table("t-zones", ["المنطقة","بتدفع لشركة الشحن (بعد الخصم)","سعرهم قبل الخصم",
+                      "بتحمّل العميل (افتراضي)","مدة التوصيل",
+                      "المحافظات اللي جواها","أحياء ومدن (اختياري)",""], rows,
       "مفيش مناطق — دوس «+ منطقة» أو «رجّع الأسعار المبدئية».");
     // محافظات مش متحطوطة في أي منطقة — عشان ما تكتشفش ده وإنت بتسجّل أوردر
     var miss = GOVS.filter(function(g){ return !zoneForGov(g); });
@@ -7531,7 +7544,7 @@
     if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
     seedZones();
     if(!Array.isArray(settings.shipZones)) settings.shipZones = [];
-    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", cost:0, price:0,
+    settings.shipZones.push({ id:uid(), name:"منطقة جديدة", cost:0, list:0, charge:0,
                               days:"", govs:[], areas:[] });
     saveSoon("settings"); renderZones(); fillZoneSelect();
   });
@@ -7556,17 +7569,22 @@
     var f = el.dataset.zf;
     if(f === "name")  z.name  = el.value;
     if(f === "days")  z.days  = el.value;
-    if(f === "cost")  z.cost  = Number(el.value)||0;
-    if(f === "price") z.price = Number(el.value)||0;
+    if(f === "cost")   z.cost   = Number(el.value)||0;
+    if(f === "list")   z.list   = Number(el.value)||0;
+    if(f === "charge") z.charge = Number(el.value)||0;
     if(f === "govs")  z.govs  = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
     if(f === "areas") z.areas = String(el.value).split(/[,،؛;\n]/).map(squish).filter(Boolean);
     saveSoon("settings"); fillZoneSelect();
-    // «الفرق» بيتحسب من الرقمين، فلازم يتحدّث وإنت بتكتب
-    if(f === "cost" || f === "price"){
-      var td = el.closest("tr").children[3], g = zoneGap(z);
-      if(td){
-        td.className = "num " + (g > 0 ? "v-due" : (g < 0 ? "v-gain" : ""));
-        td.innerHTML = g ? money(Math.abs(g)) + "<span class='sub'>" + (g > 0 ? "من جيبك" : "بتكسب") + "</span>" : "—";
+    // السطر اللي تحت خانة «بتحمّل العميل» بيتحسب من الرقمين
+    if(f === "cost" || f === "charge"){
+      var sub = el.closest("tr").querySelector("[data-zf='charge']");
+      sub = sub && sub.parentNode.querySelector(".sub");
+      if(sub){
+        var ch = Number(z.charge)||0, cs = Number(z.cost)||0;
+        sub.innerHTML = ch > 0
+          ? (ch >= cs ? "بتغطّي اللي بتدفعه"
+                      : "<span class='v-due'>" + money(cs - ch) + " من جيبك</span>")
+          : "صفر = تكتبه في الأوردر";
       }
     }
   });
@@ -7581,8 +7599,8 @@
   function fillZoneSelect(){
     var el = document.getElementById("e-zone"); if(!el) return;
     var zs = shipZones().map(function(z){
-      // الرقم اللي في القايمة هو اللي بتقوله للعميل — ده اللي بتختار على أساسه
-      return { v:z.id, t:z.name + " — تحصّل " + money(Number(z.price)||0) }; });
+      // الرقم في القايمة هو اللي هيخرج من الخزنة لشركة الشحن
+      return { v:z.id, t:z.name + " — تدفع " + money(Number(z.cost)||0) }; });
     el.innerHTML = optsHTML(zs, draft && draft.zoneId ? draft.zoneId : "", "من غير منطقة");
   }
   /* بنفتكر الرقمين اللي المنطقة كتبتهم. لو غيّرت العميل والرقم لسه
@@ -7604,17 +7622,17 @@
     if(zoneMayWrite(draft.shipOut, zoneFilled.out)){
       draft.shipOut = Number(z.cost)||0; zoneFilled.out = draft.shipOut;
     }
-    if(zoneMayWrite(draft.shipIn, zoneFilled.inn)){
-      draft.shipIn = Number(z.price)||0; zoneFilled.inn = draft.shipIn;
+    /* اللي بتحمّله للعميل قرارك في كل أوردر، مش رقم شركة الشحن.
+       فمابنملاهوش إلا لو إنت بنفسك حطيت افتراضي للمنطقة. */
+    var ch = Number(z.charge)||0;
+    if(ch > 0 && zoneMayWrite(draft.shipIn, zoneFilled.inn)){
+      draft.shipIn = ch; zoneFilled.inn = ch;
     }
     return true;
   }
-  function syncZoneUI(){
-    fillZoneSelect();
-    var out = document.getElementById("e-shipout");
-    if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
-    var inn = document.getElementById("e-shipin");
-    if(inn) inn.value = draft.shipIn === "" || draft.shipIn == null ? "" : draft.shipIn;
+  /* السطر ده بيتحدّث وإنت بتكتب شحن العميل، فبيترسم لوحده من غير
+     ما نلمس قيم الخانات — الكتابة في خانة والمؤشر فيها بيقفز. */
+  function zoneNote(){
     var note = document.getElementById("e-zonenote");
     if(!note) return;
     var z = draft.zoneId ? zoneById(draft.zoneId) : null;
@@ -7623,22 +7641,37 @@
     var where = squish(pt.address || "") && (z.areas||[]).some(function(a){
       var k = squish(a); return k && squish(pt.address).indexOf(k) > -1; })
       ? "عنوانها" : ("«" + squish(pt.gov || "") + "»");
-    var gap = zoneGap(z);
-    note.innerHTML = esc(where) + " في منطقة «" + esc(z.name) + "»: بتدفع <strong>" +
-      esc(money(Number(z.cost)||0)) + "</strong> وبتحصّل <strong>" +
-      esc(money(Number(z.price)||0)) + "</strong>" +
-      (gap > 0 ? " — يعني <span class='v-due'>" + esc(money(gap)) + " من جيبك</span>"
-               : (gap < 0 ? " — يعني <span class='v-gain'>" + esc(money(-gap)) + " ليك</span>" : "")) +
-      (z.days ? " · التوصيل " + esc(z.days) : "") + ". غيّرهم لو مختلفين.";
+    var cost = Number(z.cost)||0, got = Number(draft.shipIn)||0;
+    var gap  = cost - got;
+    var t = esc(where) + " في منطقة «" + esc(z.name) + "»: هتدفع لشركة الشحن <strong>" +
+            esc(money(cost)) + "</strong>" + (z.days ? " · التوصيل " + esc(z.days) : "") + ".";
+    t += got > 0
+      ? " وبتحمّل العميل <strong>" + esc(money(got)) + "</strong>" +
+        (gap > 0 ? " — يعني <span class='v-due'><strong>" + esc(money(gap)) + "</strong> من جيبك</span>."
+                 : (gap < 0 ? " — يعني <span class='v-gain'><strong>" + esc(money(-gap)) + "</strong> ليك</span>."
+                            : " — يعني الشحن مغطّى بالظبط."))
+      : " <span class='v-due'>اكتب شحن العميل فوق</span> — كل جنيه أقل من " +
+        esc(money(cost)) + " بيطلع من جيبك.";
+    note.innerHTML = t;
     note.hidden = false;
+  }
+  function syncZoneUI(){
+    fillZoneSelect();
+    var out = document.getElementById("e-shipout");
+    if(out) out.value = draft.shipOut === "" || draft.shipOut == null ? "" : draft.shipOut;
+    var inn = document.getElementById("e-shipin");
+    if(inn) inn.value = draft.shipIn === "" || draft.shipIn == null ? "" : draft.shipIn;
+    zoneNote();
   }
   document.getElementById("e-zone").addEventListener("change", function(){
     draft.zoneId = this.value;
     var z = zoneById(this.value);
     // اختيار صريح للمنطقة بيكتب الرقمين — ده المقصود من الاختيار
     if(z){
-      draft.shipOut = Number(z.cost)||0; draft.shipIn = Number(z.price)||0;
-      setZoneFilled(draft.shipOut, draft.shipIn);
+      draft.shipOut = Number(z.cost)||0;
+      zoneFilled.out = draft.shipOut;
+      var ch = Number(z.charge)||0;
+      if(ch > 0){ draft.shipIn = ch; zoneFilled.inn = ch; }
     } else clearZoneFilled();
     syncZoneUI(); updateEntryCalc();
   });
@@ -8801,7 +8834,7 @@
         if(!draft.shipCo) suggestShipping();
         syncZoneUI();
       }
-      if(f === "shipIn")  zoneFilled.inn = null;
+      if(f === "shipIn"){ zoneFilled.inn = null; zoneNote(); }
       // كتبت رقم بإيدك؟ المنطقة ما بقتش هي المصدر
       if(f === "shipOut"){
         zoneFilled.out = null;
@@ -8824,24 +8857,31 @@
      بدل ما تكتب رقم الشحن في كل أوردر: بتحدّد المنطقة مرة واحدة
      بسعرها والمحافظات اللي جواها، وبعدها أول ما تختار العميل بيتملّى
      لوحده من محافظته. كله قابل للتعديل من شاشة «شركات الشحن». */
-  /* المنطقة فيها رقمين مختلفين، والخلط بينهم بيضيّع فلوس من غير ما تحس:
-       cost  = اللي بتدفعه لشركة الشحن  (عمود «قبل الخصم» في ورقة الأسعار)
-       price = اللي بتحصّله من العميل   (عمود «بعد الخصم»)
-     الفرق بينهم بيطلع من جيبك في كل أوردر، فبيتحسب ويتعرض صريح. */
+  /* ثلاث أرقام مختلفة، والخلط بينهم بيضيّع فلوس من غير ما تحس:
+       cost   = اللي **بتدفعه** لشركة الشحن. ده عمود «بعد الخصم» في
+                ورقة أسعارهم — السعر المتفق عليه فعلاً، وهو الرقم
+                الوحيد اللي السيستم بيعتمد عليه.
+       list   = عمود «قبل الخصم» — سعر الشركة الرسمي. مرجع بس،
+                مابيدخلش في أي حساب.
+       charge = اللي بتحمّله للعميل. ده **قرارك إنت** في كل أوردر
+                (ممكن 30 وممكن مجاني)، مش رقم شركة الشحن. الرقم اللي
+                هنا مجرد افتراضي بتحطه إنت، وبصفر معناه «اكتبه بإيدك».
+     الفرق (cost − charge) هو اللي بيطلع من جيبك، وبيتحسب في الأوردر
+     نفسه لأنه بيتغيّر من أوردر للتاني. */
   var ZONES_SEED = [
-    { name:"القاهرة والجيزة", cost:75, price:50, days:"خلال 24 ساعة",
+    { name:"القاهرة والجيزة", cost:50, list:75, charge:0, days:"خلال 24 ساعة",
       govs:["القاهرة","الجيزة"], areas:[] },
-    { name:"المدن الجديدة والأطراف", cost:80, price:55, days:"خلال 24 ساعة",
+    { name:"المدن الجديدة والأطراف", cost:55, list:80, charge:0, days:"خلال 24 ساعة",
       govs:[],
       // دي أحياء جوّه القاهرة والجيزة مش محافظات، فبتتعرف من العنوان
       areas:["القاهرة الجديدة","التجمع","الشروق","بدر","العبور","العاصمة الإدارية",
              "6 أكتوبر","أكتوبر","الشيخ زايد","حدائق أكتوبر"] },
-    { name:"الوجه البحري", cost:95, price:70, days:"48–72 ساعة",
+    { name:"الوجه البحري", cost:70, list:95, charge:0, days:"48–72 ساعة",
       govs:["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية",
             "الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"], areas:[] },
-    { name:"الوجه القبلي", cost:105, price:80, days:"48–72 ساعة",
+    { name:"الوجه القبلي", cost:80, list:105, charge:0, days:"48–72 ساعة",
       govs:["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"], areas:[] },
-    { name:"المحافظات الحدودية", cost:150, price:125, days:"5–6 أيام",
+    { name:"المحافظات الحدودية", cost:125, list:150, charge:0, days:"5–6 أيام",
       govs:["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"], areas:[] }
   ];
   function shipZones(){
@@ -8851,30 +8891,33 @@
   function seedZones(){
     if(Array.isArray(settings.shipZones)) return migrateZones();
     settings.shipZones = ZONES_SEED.map(function(z, i){
-      return { id:"z"+(i+1), name:z.name, cost:z.cost, price:z.price, days:z.days,
-               govs:z.govs.slice(), areas:(z.areas||[]).slice() };
+      return { id:"z"+(i+1), name:z.name, cost:z.cost, list:z.list, charge:z.charge,
+               days:z.days, govs:z.govs.slice(), areas:(z.areas||[]).slice() };
     });
     return true;
   }
-  /* الشكل القديم كان رقم واحد اسمه price ومعناه «اللي بتدفعه».
-     بنرقّيه من غير ما نلمس رقم غيّرته بإيدك: الرقم القديم بيروح
-     لخانة «بتدفع»، وسعر العميل بيتحط من الورقة الجديدة بس لو الرقم
-     القديم لسه زي ما السيستم حطّه. */
-  var ZONE_DISCOUNT = { 75:50, 80:55, 95:70, 105:80, 150:125 };
+  /* شكلين قدام: واحد قديم فيه price لوحده معناه «اللي بتدفعه بالسعر
+     الرسمي»، وواحد أحدث فيه {cost,price} كان فاهم price غلط على إنه
+     سعر العميل. الاتنين بيترقّوا لنفس الشكل: بندفع بعد الخصم، والسعر
+     الرسمي مرجع، وسعر العميل بيفضل قرارك. */
+  var ZONE_AFTER = { 75:50, 80:55, 95:70, 105:80, 150:125 };
   function migrateZones(){
     var changed = false;
     shipZones().forEach(function(z){
-      if(z.cost == null){
-        z.cost  = Number(z.price)||0;
-        z.price = ZONE_DISCOUNT[z.cost] != null ? ZONE_DISCOUNT[z.cost] : z.cost;
+      if(z.list == null){
+        var oldCost = Number(z.cost != null ? z.cost : z.price) || 0;
+        z.list   = oldCost;                                  // ده كان السعر الرسمي
+        z.cost   = ZONE_AFTER[oldCost] != null ? ZONE_AFTER[oldCost] : oldCost;
+        z.charge = 0;                                        // سعر العميل قرارك
+        delete z.price;
         changed = true;
       }
+      if(z.charge == null){ z.charge = 0; changed = true; }
       if(z.days == null){
         var sd = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
         z.days = sd ? sd.days : "";
         changed = true;
       }
-      // أحياء المدن الجديدة: بتتحط مرة واحدة على منطقة الـ80 لو لسه فاضية
       if(!Array.isArray(z.areas)){
         var sa = ZONES_SEED.find(function(x){ return x.cost === (Number(z.cost)||0); });
         z.areas = (sa && sa.areas.length) ? sa.areas.slice() : [];
@@ -8909,9 +8952,7 @@
     return zoneForGov(pt.gov);
   }
   function zoneCost(id){ var z = zoneById(id); return z ? (Number(z.cost)||0) : 0; }
-  function zonePrice(id){ var z = zoneById(id); return z ? (Number(z.price)||0) : 0; }
-  // اللي بيطلع من جيبك في الأوردر الواحد من المنطقة دي
-  function zoneGap(z){ return (Number(z.cost)||0) - (Number(z.price)||0); }
+  function zoneCharge(id){ var z = zoneById(id); return z ? (Number(z.charge)||0) : 0; }
 
   /* آخر شركة شحن اتستخدمت للمحافظة دي. الأرقام دي فلوس، فما ينفعش
      تتحط في الخانات من غير ما اللي بيسجّل يعرف — بيظهر سطر بيقول جت منين.
