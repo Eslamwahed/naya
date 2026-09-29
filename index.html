@@ -2128,8 +2128,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "75";
+  var VERSION = "76";
   var CHANGELOG = [
+    { v:"76", d:"2026-09-29", items:[
+      "حالة على مستوى الصنف مش الفاتورة: العميل ممكن ياخد صنف ويرجّع صنف، وكل سطر في تفاصيل الأوردر بقى بيقول حالته",
+      "التلات حالات: «مع شركة الشحن» لسه ما اتسلّمش · «العميل خدها» · «راجعة عند شركة الشحن» لحد ما تستلمها",
+      "زرار «رجعت المخزن» بقى على السطر نفسه — من تفاصيل الأوردر أو من شاشة شركات الشحن",
+      "جدول البضاعة الراجعة بقى سطر لكل صنف راجع بدل سطر لكل فاتورة",
+      "الصنف الراجع بيفضل في المخزون طول ما هو عند شركة الشحن — العميل ما استلموش، فينفع تبيعيه لعميلة تانية"
+    ]},
     { v:"75", d:"2026-09-29", items:[
       "تتبّع بضاعة المعاينة: العميل عاين ورفض؟ البضاعة عند شركة الشحن — وفي شاشة «شركات الشحن» جدول بيقولك إيه بالظبط وعند مين",
       "زرار «رجعت المخزن» بتاريخه، وفلتر «لسه عندهم / رجعت / الكل»",
@@ -5386,12 +5393,12 @@
     /* بضاعة معاينة رجعت لشركة الشحن. لسه في المخزون على الورق —
        فلازم تبان هنا وإلا الجرد اليدوي هيطلع ناقص وإنت مش عارف ليه. */
     held: function(){
-      var rows = heldOpen().map(function(s){
-        return "<tr><td class='num'>" + (s.no ? "#" + esc(s.no) : "—") + "</td>" +
-          "<td class='num'>" + esc(s.date || "—") + "</td>" +
-          "<td class='wide'>" + esc(heldWhat(s)) + "</td>" +
-          "<td>" + esc(shipCoLabel(s.shipCo)) + "</td>" +
-          "<td class='num'>" + qty(heldPieces(s)) + "</td></tr>";
+      var rows = heldOpen().map(function(x){
+        return "<tr><td class='num'>" + (x.s.no ? "#" + esc(x.s.no) : "—") + "</td>" +
+          "<td class='num'>" + esc(x.s.date || "—") + "</td>" +
+          "<td class='wide'>" + esc(heldWhat(x)) + "</td>" +
+          "<td>" + esc(shipCoLabel(x.s.shipCo)) + "</td>" +
+          "<td class='num'>" + qty(x.n) + "</td></tr>";
       });
       if(rows.length) rows.push(sumRow(["الإجمالي","","","","<b>"+qty(heldOpenQty())+"</b>"]));
       return { note:"العميل عاين ورفض، والبضاعة عند شركة الشحن لسه. محسوبة في المخزون لأنها ملكك — بس مش في مخزنك. سجّل استلامها من شاشة «شركات الشحن».",
@@ -6494,7 +6501,8 @@
       "</div>";
 
     /* الأصناف — بالتكلفة والربح لكل صنف، مش الإجمالي بس */
-    var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع","إجمالي البيع","ربح البضاعة"];
+    var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع",
+              "إجمالي البيع","ربح البضاعة","حالة الصنف"];
     var body = SL(s).map(function(l, i){
       var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l,s);
       var c = m.known ? lineCost(l) : null;
@@ -6515,11 +6523,25 @@
         money(l.price),
         retCell,
         money(lineTotal(l,s)),
-        gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>"
+        gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>",
+        /* الصنف بيرجع لوحده — العميل ممكن ياخد اتنين ويرجّع واحد.
+           فالحالة هنا على السطر مش على الفاتورة. */
+        (function(){
+          var stt = lineState(l, s);
+          var html = "<span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
+                     (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "");
+          if(stt.k === "held" && canEdit() && !saleLocked(s))
+            html += "<button class='del' style='color:var(--teal)' data-heldback='" +
+                    esc(s.id) + "|" + i + "'>رجعت المخزن</button>";
+          if(stt.k === "back" && canEdit() && !saleLocked(s))
+            html += "<button class='del' data-heldback='" + esc(s.id) + "|" + i +
+                    "' data-undo='1'>تراجع</button>";
+          return html;
+        })()
       ];
       // عمود تكلفة القطعة (٣) وربح البضاعة (٧) بيكشفوا الهامش
       return "<tr>" + cells.map(function(c2, k){
-        var cl = (k === 0 ? "wide" : (k >= 2 ? "num" : "")) + ((k===3||k===7) ? " money-only" : "");
+        var cl = (k === 0 ? "wide" : (k >= 2 && k <= 7 ? "num" : "")) + ((k===3||k===7) ? " money-only" : "");
         return "<td data-l='" + esc(LH[k]) + "'" + (cl ? " class='"+cl+"'" : "") + ">" + c2 + "</td>";
       }).join("") + "</tr>";
     }).join("");
@@ -7388,76 +7410,101 @@
      backAt = تاريخ ما رجعت مخزنك. فاضي = لسه عندهم.
      مافيش أي أثر محاسبي هنا — الكميات دي أصلاً ما اتشالتش من المخزون،
      فالميزانية ما بتتحركش. ده تتبّع مكان بس. */
+  /* الأوردر الواحد ممكن العميل ياخد منه صنف ويرجّع صنف. فالحالة
+     على مستوى **السطر** مش الفاتورة: كل سطر بيعرف كام رجع منه وكام
+     رجع مخزنك. الحالة دي مستنتجة من الأرقام مش محفوظة كحالة لوحدها،
+     فمفيش حالة ممكن تتعارض مع الأرقام. */
+  function lineBack(l, s){
+    // الشكل القديم كان تاريخ واحد على الفاتورة كلها
+    return l.backAt || (s && s.backAt) || "";
+  }
+  function lineHeld(l, s){
+    if(isCancelled(s)) return Number(l.qty)||0;   // اترفض كله
+    if(isDelivered(s)) return lineRet(l);         // رجّع جزء
+    return 0;                                     // لسه جاري — ما رجعش حاجة
+  }
+  // حالة السطر بالعربي: خدها · راجعة عند الشركة · رجعت المخزن
+  function lineState(l, s){
+    var q = Number(l.qty)||0, h = lineHeld(l, s), kept = q - h;
+    if(!isDelivered(s) && !isCancelled(s))
+      return { k:"way", t:"مع شركة الشحن", sub:"لسه ما اتسلّمتش", cls:"progress" };
+    if(h <= 0) return { k:"kept", t:"العميل خدها", sub:"", cls:"delivered" };
+    var back = !!lineBack(l, s);
+    return { k: back ? "back" : "held",
+             t: back ? "رجعت المخزن" : "راجعة عند شركة الشحن",
+             sub: (kept > 0 ? "خد " + qty(kept) + " ورجّع " + qty(h) : "رجّع " + qty(h)) +
+                  (back ? " · " + lineBack(l, s) : ""),
+             cls: back ? "delivered" : "cancelled" };
+  }
   function heldPieces(s){
-    if(isCancelled(s)) return SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
-    if(isDelivered(s)) return SL(s).reduce(function(a, l){ return a + lineRet(l); }, 0);
-    return 0;                                  // لسه جاري أو مقترح — ما رجعش حاجة
+    return SL(s).reduce(function(a, l){ return a + lineHeld(l, s); }, 0);
   }
   // شحنت فعلاً؟ من غير شركة شحن البضاعة ما راحتش لحد
   function heldShipped(s){
     return !!(squish(s.shipCo) || shipOut(s) || shipIn(s) || viaShip(s));
   }
+  // سطر لكل صنف راجع — مش سطر لكل فاتورة، عشان الصنف بيرجع لوحده
   function heldList(){
-    return live("sales").filter(function(s){
-      return heldShipped(s) && heldPieces(s) > 0;
-    }).sort(byDate);
+    var out = [];
+    live("sales").forEach(function(s){
+      if(!heldShipped(s)) return;
+      SL(s).forEach(function(l, i){
+        var n = lineHeld(l, s);
+        if(n > 0) out.push({ s:s, l:l, i:i, n:n, back:lineBack(l, s) });
+      });
+    });
+    return out.sort(function(a, b){ return byDate(a.s, b.s); });
   }
-  function heldOpen(){ return heldList().filter(function(s){ return !s.backAt; }); }
+  function heldOpen(){ return heldList().filter(function(x){ return !x.back; }); }
   function heldOpenQty(){
-    return heldOpen().reduce(function(a, s){ return a + heldPieces(s); }, 0);
+    return heldOpen().reduce(function(a, x){ return a + x.n; }, 0);
   }
   // القطع المعلّقة عند شركة معيّنة
   function heldQtyFor(co){
-    var n = squish(co);
-    return heldOpen().reduce(function(a, s){
-      return a + (squish(s.shipCo) === n ? heldPieces(s) : 0); }, 0);
+    var nm = squish(co);
+    return heldOpen().reduce(function(a, x){
+      return a + (squish(x.s.shipCo) === nm ? x.n : 0); }, 0);
   }
-  // إيه اللي راجع بالظبط من الأوردر ده
-  function heldWhat(s){
-    var parts = [];
-    SL(s).forEach(function(l){
-      var q = isCancelled(s) ? (Number(l.qty)||0) : lineRet(l);
-      if(q <= 0) return;
-      parts.push(qty(q) + " × " + itemName(l.itemId) +
-                 (vLabel(vColor(l), vSize(l)) ? " (" + vLabel(vColor(l), vSize(l)) + ")" : ""));
-    });
-    return parts.join(" · ") || "—";
+  function heldWhat(x){
+    var l = x.l;
+    return qty(x.n) + " × " + itemName(l.itemId) +
+           (vLabel(vColor(l), vSize(l)) ? " · " + vLabel(vColor(l), vSize(l)) : "");
   }
 
   var heldFilt = "open";
-  var HELD_HEAD = ["الأوردر","التاريخ","العميل","شركة الشحن","الراجع","قطع","الحالة",""];
+  var HELD_HEAD = ["الأوردر","التاريخ","العميل","شركة الشحن","الصنف الراجع","قطع","الحالة",""];
 
   function renderHeld(){
     var all = heldList();
-    var list = all.filter(function(s){
-      if(heldFilt === "open") return !s.backAt;
-      if(heldFilt === "back") return !!s.backAt;
+    var list = all.filter(function(x){
+      if(heldFilt === "open") return !x.back;
+      if(heldFilt === "back") return !!x.back;
       return true;
     });
     var ed = canEdit();
-    var rows = list.map(function(s){
-      var n = heldPieces(s);
+    var rows = list.map(function(x){
+      var s = x.s, key = esc(s.id) + "|" + x.i;
       return "<tr>" +
         "<td class='num'>" + (s.no ? "#" + esc(s.no) : "—") + "</td>" +
         "<td class='num'>" + esc(s.date || "—") + "</td>" +
         "<td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
         "<td>" + esc(shipCoLabel(s.shipCo)) + "</td>" +
-        "<td class='wide'>" + esc(heldWhat(s)) +
-          "<span class='sub'>" + (isCancelled(s) ? "الأوردر اترفض كله" : "مرتجع جزئي") + "</span></td>" +
-        "<td class='num'>" + esc(qty(n)) + "</td>" +
-        "<td>" + (s.backAt
-          ? "<span class='st st-delivered'>رجعت المخزن</span><span class='sub'>" + esc(s.backAt) + "</span>"
-          : "<span class='st st-progress'>عند الشركة</span>") + "</td>" +
+        "<td class='wide'>" + esc(heldWhat(x)) +
+          "<span class='sub'>" + (isCancelled(s) ? "الأوردر اترفض كله" : "العميل خد باقي الأوردر") + "</span></td>" +
+        "<td class='num'>" + esc(qty(x.n)) + "</td>" +
+        "<td>" + (x.back
+          ? "<span class='st st-delivered'>رجعت المخزن</span><span class='sub'>" + esc(x.back) + "</span>"
+          : "<span class='st st-cancelled'>عند الشركة</span>") + "</td>" +
         "<td>" + (ed
-          ? (s.backAt
-              ? "<button class='del' data-heldback='" + esc(s.id) + "' data-undo='1'>تراجع</button>"
-              : "<button class='del' style='color:var(--teal)' data-heldback='" + esc(s.id) + "'>رجعت المخزن</button>")
+          ? (x.back
+              ? "<button class='del' data-heldback='" + key + "' data-undo='1'>تراجع</button>"
+              : "<button class='del' style='color:var(--teal)' data-heldback='" + key + "'>رجعت المخزن</button>")
           : "") + "</td></tr>";
     });
     table("t-held", HELD_HEAD, rows,
       heldFilt === "back" ? "لسه ما استلمتش حاجة راجعة."
         : (all.length ? "مفيش بضاعة معلّقة — كله رجع المخزن."
-                      : "مفيش بضاعة راجعة. أول ما ترفض عميلة أوردر (أو جزء منه) هتلاقيه هنا."));
+                      : "مفيش بضاعة راجعة. أول ما عميلة ترفض صنف هتلاقيه هنا."));
   }
 
   document.getElementById("held-quick").addEventListener("click", function(e){
@@ -7467,17 +7514,32 @@
       x.classList.toggle("on", x === b); });
     renderHeld();
   });
-  document.getElementById("t-held").addEventListener("click", function(e){
-    var btn = e.target.closest("[data-heldback]"); if(!btn) return;
-    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
-    var s = db.sales.find(function(x){ return x.id === btn.dataset.heldback; });
-    if(!s) return;
-    if(btn.dataset.undo){ delete s.backAt; toast("رجعت لـ«عند الشركة»"); }
-    else { s.backAt = today(); toast("اتسجّل إنها رجعت المخزن"); }
+  function markLineBack(saleId, li, undo){
+    var s = db.sales.find(function(x){ return x.id === saleId; });
+    if(!s) return false;
+    var l = SL(s)[li]; if(!l) return false;
+    /* التاريخ القديم كان على الفاتورة. أول ما نلمس سطر واحد، بنوزّعه
+       على كل السطور الراجعة الأول عشان الباقي ما يرجعش «عند الشركة». */
+    if(s.backAt){
+      SL(s).forEach(function(x){ if(lineHeld(x, s) > 0 && !x.backAt) x.backAt = s.backAt; });
+      delete s.backAt;
+    }
+    if(undo) delete l.backAt; else l.backAt = today();
     s.at = Date.now(); s.editedBy = me || "غير محدد";
     saveSoon("sales");
-    renderHeld(); renderShipCos();
-    dirtyTabs.inv = 1; dirtyTabs.log = 1;
+    return true;
+  }
+  // الزرار موجود في مكانين: جدول شركات الشحن وتفاصيل الأوردر
+  document.body.addEventListener("click", function(e){
+    var btn = e.target.closest("[data-heldback]"); if(!btn) return;
+    e.stopPropagation();
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var parts = String(btn.dataset.heldback).split("|");
+    if(!markLineBack(parts[0], Number(parts[1]), !!btn.dataset.undo)) return;
+    toast(btn.dataset.undo ? "رجعت لـ«عند الشركة»" : "اتسجّل إنها رجعت المخزن");
+    if(activeTab === "sales") renderSales(); else { renderHeld(); renderShipCos(); }
+    ["inv","log","ship","sales"].forEach(function(t){ dirtyTabs[t] = 1; });
+    delete dirtyTabs[activeTab];
   });
 
   function renderShipCos(){
