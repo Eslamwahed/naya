@@ -333,6 +333,79 @@
   .owarn p{margin:0 0 var(--sp-1);font-size:var(--fs-2);color:var(--ink-soft);line-height:1.5}
   @media (max-width:820px){ .osum{grid-template-columns:1fr 1fr} }
 
+  /* ================= تفاصيل الأوردر ================= */
+  .dd{display:grid;gap:var(--sp-4)}
+  .dd h5{margin:0 0 var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
+  .dd-head{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
+  .dd-id{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+  .dd-no{font-size:var(--fs-5);font-weight:700}
+  .dd-code{font:inherit;font-family:ui-monospace,Menlo,monospace;font-size:var(--fs-2);background:var(--paper);color:var(--ink);
+    border:1px solid var(--line);border-radius:var(--r-sm);padding:2px 8px;cursor:pointer}
+  .dd-code:hover{border-color:var(--teal)}
+  .dd-acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .dd-more{position:relative}
+  .dd-more summary{list-style:none;cursor:pointer}
+  .dd-more summary::-webkit-details-marker{display:none}
+  .dd-more > div{position:absolute;inset-inline-end:0;top:calc(100% + 4px);z-index:5;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--r-sm);padding:6px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+  .dd-more > div .tbtn{color:var(--due);white-space:nowrap}
+  .dd-step{display:grid;grid-template-columns:1fr auto;gap:var(--sp-2) var(--sp-4);align-items:center;margin:0}
+  .dd-step .dd-k{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .dd-step-t b{font-size:var(--fs-4)}
+  .dd-step .dd-step-b{margin:0;justify-content:flex-end}
+  .dd-step .ostep-ph{grid-column:1 / -1;margin-top:var(--sp-1)}
+  .dd-cards{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:var(--sp-3);align-items:start}
+  .dd-card{border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);background:var(--card);min-width:0}
+  .dd-nm{font-size:var(--fs-4);font-weight:700}
+  .dd-ph{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}
+  .dd-ph .tbtn{padding:5px 10px;font-size:var(--fs-2);text-decoration:none}
+  .dd-addr{font-size:var(--fs-2)}
+  .dd-memo{margin:var(--sp-2) 0 4px;background:#FFF7E0;color:#6b4d00;border-radius:var(--r-sm);padding:6px 10px;font-size:var(--fs-2)}
+  [data-theme="dark"] .dd-memo{background:#3a2f12;color:#F0D78A}
+  .dd-ml{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);padding:3px 0}
+  .dd-ml > span:last-child{text-align:end;white-space:nowrap}
+  .dd-profit b{white-space:nowrap}
+  .dd-ml.sub2{color:var(--ink-soft);font-size:var(--fs-2)}
+  .dd-ml.tot{border-top:1px solid var(--line);margin-top:4px;padding-top:6px;font-weight:700}
+  .dd-ml.big{font-size:var(--fs-4)}
+  .dd-ml .v-gain{font-size:var(--fs-2);font-weight:600}
+  .dd-fn{margin:4px 0 0;font-size:var(--fs-1);color:var(--ink-soft)}
+  .dd-money .quickpay{margin-top:var(--sp-2)}
+  .dd-money .owarn{margin-top:var(--sp-2)}
+  .dd-profit{margin-top:var(--sp-2);display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);
+    background:var(--paper);border-radius:var(--r-sm);padding:6px 10px;font-size:var(--fs-2)}
+  .dd-profit small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .dd-profit small.v-due{display:inline;color:var(--due)}
+  .dd-tl{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .dd-tl li{display:grid;grid-template-columns:12px 1fr auto;gap:8px;align-items:start;font-size:var(--fs-2)}
+  .dd-tl li i{width:10px;height:10px;border-radius:50%;background:var(--gain);margin-top:5px}
+  .dd-tl li.wait i{background:transparent;border:2px solid var(--warn)}
+  .dd-tl .d{color:var(--ink-soft);font-size:var(--fs-1);white-space:nowrap}
+  .dd-it{display:grid;grid-template-columns:44px 1.5fr 1fr 1.1fr 1.4fr;gap:var(--sp-3);align-items:center;
+    padding:var(--sp-2) 0;border-top:1px solid var(--line)}
+  .dd-items h5 + .dd-it{border-top:0}
+  .dd-it .thumb{width:44px;height:44px;margin:0}
+  .dd-noimg{width:44px;height:44px;border-radius:var(--r-sm);background:var(--teal-soft);color:var(--teal);
+    display:grid;place-items:center;font-weight:700}
+  .dd-in{font-weight:600}
+  .dd-dim{color:var(--ink-soft);text-decoration:line-through}
+  .dd-ia{display:flex;align-items:center;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+  .dd-ret{font-size:var(--fs-2);color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px}
+  .dd-ret .retin{width:60px}
+  .dd-ia .tbtn{padding:5px 10px;font-size:var(--fs-2)}
+  @media (max-width:820px){
+    .dd-cards{grid-template-columns:1fr}
+    .dd-step{grid-template-columns:1fr}
+    .dd-step .dd-step-b{justify-content:stretch}
+    .dd-step .dd-step-b .tbtn{flex:1;justify-content:center}
+    .dd-acts{width:100%}
+    .dd-acts > .tbtn{flex:1;justify-content:center}
+    .dd-it{grid-template-columns:44px 1fr auto;gap:4px var(--sp-2)}
+    .dd-it > span:nth-child(3){grid-column:2 / 3}
+    .dd-it > span:nth-child(4){grid-column:3 / 4;grid-row:1 / 3;align-self:start}
+    .dd-it .dd-ia{grid-column:1 / -1;justify-content:space-between}
+  }
+
   /* ================= مراحل الأوردر ================= */
   .sg-phase{display:grid;grid-template-columns:2fr 2fr 1fr;gap:var(--sp-2);font-size:var(--fs-1);color:var(--ink-soft);margin-bottom:4px}
   .sg-phase div{border-top:2px solid var(--line);padding-top:2px}
@@ -828,17 +901,27 @@
     .s-wrap{overflow:visible;max-height:none;border:none;background:none}
     #t-sales thead{display:none}
     #t-sales tbody tr.order{
-      display:grid;grid-template-columns:1fr auto;gap:var(--sp-1) var(--sp-2);
+      display:grid;grid-template-columns:minmax(0,1fr) minmax(min-content,48%);gap:var(--sp-1) var(--sp-2);
       background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
       margin-bottom:var(--sp-2);padding:var(--sp-3) var(--sp-3);align-items:center;
     }
-    #t-sales tbody tr.order td{border:none;padding:var(--sp-1) 0;background:none!important}
+    #t-sales tbody tr.order td{border:none;padding:var(--sp-1) 0;background:none!important;min-width:0}
+    #t-sales{width:100%;table-layout:fixed}
     #t-sales td.lead{border-inline-start:none;grid-column:1;grid-row:1}
     #t-sales td.cust{grid-column:1;grid-row:2}
     #t-sales td.items{grid-column:1/-1;grid-row:3;margin-top:var(--sp-2);padding-top:8px!important;
       border-top:1px dashed var(--line)!important}
     #t-sales td.total{grid-column:1;grid-row:4;padding-top:8px!important}
     #t-sales td.stat{grid-column:2;grid-row:1;text-align:left}
+    /* كارت الأوردر على الموبايل: من غير تسمية قبل كل خانة (الكارت
+       واضح لوحده)، والحالة ما تتقصّش، والمبلغ ما يتكسرش على سطرين */
+    #t-sales tbody tr.order td{display:block}
+    #t-sales tbody tr.order td::before{content:none}
+    #t-sales td.stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:start}
+    #t-sales td.stat select.rowst{flex:0 0 auto;max-width:100%}
+    #t-sales td.stat .stepline{text-align:end}
+    #t-sales td.total .pill,#t-sales td.total .primary{white-space:nowrap}
+    #t-sales td.cust .primary{display:block}
     #t-sales td.rowacts{grid-column:2;grid-row:4;text-align:left;align-self:end}
     #t-sales tr.detail td{background:none;border:none}
     .detail-in{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
@@ -2262,8 +2345,19 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "84";
+  var VERSION = "85";
   var CHANGELOG = [
+    { v:"85", d:"2026-09-29", items:[
+      "تفاصيل الأوردر اتنظّمت من فوق لتحت: الرأس (الرقم · الحالة · الشركة · الكود) ← الخطوة الجاية ← تلات كروت ← الأصناف",
+      "كود البوليصة بدوسة بيتنسخ، و«حذف» بقى جوه «⋯» عشان ما يتداسش بالغلط جنب «تعديل»",
+      "كارت العميل: التليفون بزرار «اتصال» و«واتساب»، والعنوان، والملاحظة بلون أصفر عشان تبان",
+      "كارت الفلوس: حساب واحد بيتقري من فوق لتحت — البضاعة + الشحن = العميل دفع، − شحن الشركة = لسه عندها — وتحته صافي الربح والشحن اللي من جيبك",
+      "كارت «مشوار الأوردر»: حصل إيه وإمتى، وإيه اللي لسه مستني",
+      "الأصناف بقت صنف في سطر: الصورة والاسم والسعر وحالته وخانة المرتجع — على الموبايل ٤ سطور بدل ٩",
+      "التاريخ والحالة اتشالوا من التفاصيل: التاريخ في «تعديل»، والحالة في السطر وزراير الخطوة",
+      "السيستم بقى بيسجّل تاريخ الشحن وتاريخ الرفض (الأوردرات القديمة بتعرض تاريخ الأوردر مكانهم)",
+      "كارت الأوردر في الموبايل اتنظّف: من غير تسميات قبل كل خانة، والحالة ما بتتقصّش، ومفيش سكرول بالعرض"
+    ]},
     { v:"84", d:"2026-09-29", items:[
       "شاشة المبيعات بقت مراحل: ١ جديد · ٢ مع المندوب · ٣ فلوسك عند الشركة · ٤ مرتجع عند الشركة · ٥ خلص — كل مرحلة ليها بانل فيها حاجتها بس",
       "١ جديد: الشركة وكود البوليصة بيتكتبوا في السطر على طول، ودوسة «اتبعت» تنقله لـ«مع المندوب»",
@@ -3285,6 +3379,17 @@
       // رجع لحالة تانية: التاريخ يتلغي عشان لو اتسلّم تاني ياخد تاريخه الصح
       delete rec.deliveredAt;
     }
+    // تاريخ الرفض — لمشوار الأوردر في التفاصيل
+    if(stOf(rec) === "cancelled"){ if(!rec.cancelledAt) rec.cancelledAt = today(); }
+    else delete rec.cancelledAt;
+    stampShipped(rec);
+  }
+  /* تاريخ الشحن: أول مرة الشركة والكود يتكتبوا الاتنين. الأوردرات
+     القديمة ما عندهاش التاريخ ده، فالمشوار بيعرض تاريخ الأوردر مكانه. */
+  function stampShipped(rec){
+    if(!rec) return;
+    if(squish(rec.shipCo) && squish(rec.shipCode)){ if(!rec.shippedAt) rec.shippedAt = today(); }
+    else delete rec.shippedAt;
   }
   function lineRet(l){
     var r = Number(l.ret)||0, q = Number(l.qty)||0;
@@ -6824,12 +6929,53 @@
       "<b class='num'>" + (sign || "") + esc(money(val)) + "</b></div>";
   }
 
-  function detailRowHTML(s){
-    var st = stOf(s), m = saleMoney(s), canc = isCancelled(s);
-    var q = "—";
+  /* تليفون مصري → رابط واتساب: 010… بيبقى 2010… */
+  function waLink(phone){
+    var d = String(phone || "").replace(/[^\d]/g, "");
+    if(!d) return "";
+    if(d.indexOf("00") === 0) d = d.slice(2);
+    else if(d.charAt(0) === "0") d = "2" + d;
+    return "https://wa.me/" + d;
+  }
+  // تاريخ قصير للمشوار: 2026-09-28 → 28/9
+  function dShort(d){
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || "");
+    return m ? Number(m[3]) + "/" + Number(m[2]) : "";
+  }
 
-    /* الخطوة الجاية — أول حاجة في التفاصيل، ومعاها زرارها. */
-    var sp = orderStep(s), ed = canEdit() && !saleLocked(s), btns = "";
+  /* تفاصيل الأوردر — من فوق لتحت بالأهمية:
+       ١ الرأس: الأوردر ده مين (الرقم · الحالة · الشركة · الكود) وأزراره
+       ٢ الخطوة الجاية وزرارها
+       ٣ تلات كروت: العميل (تكلّمه إزاي) · الفلوس (حساب واحد بيتقري
+         من فوق لتحت) · مشوار الأوردر (حصل إيه وإمتى، وإيه اللي مستني)
+       ٤ الأصناف: صنف في سطر، وحالته ومرتجعه جنبه
+     التاريخ والحالة اتشالوا من هنا: التاريخ في «تعديل»، والحالة في
+     السطر وزراير الخطوة — مكانين يغيّروا نفس الحاجة كانوا بيلخبطوا.
+     و«حذف» جوه «⋯» عشان ما يتداسش بالغلط جنب «تعديل». */
+  function detailRowHTML(s){
+    var st = stOf(s), m = saleMoney(s), canc = isCancelled(s), deliv = isDelivered(s);
+    var via = viaShip(s), co = squish(s.shipCo), coN = co || "شركة الشحن";
+    var p = db.parties.find(function(x){ return x.id === s.partyId; }) || {};
+    var ed = canEdit() && !saleLocked(s);
+
+    /* ---- ١ الرأس ---- */
+    var head = "<div class='dd-head'><div class='dd-id'>" +
+        "<span class='dd-no'>#" + esc(s.no || "—") + "</span>" +
+        "<span class='st st-" + st + "'>" + esc(saleStateTxt(s)) + "</span>" +
+        (co ? "<span>" + esc(co) + "</span>" : "") +
+        (squish(s.shipCode)
+          ? "<button type='button' class='dd-code num' data-copy='" + esc(squish(s.shipCode)) +
+            "' title='دوس تنسخ الكود'>" + esc(squish(s.shipCode)) + " ⧉</button>" : "") +
+      "</div><div class='dd-acts'>" +
+        "<button class='tbtn' type='button' data-edit='sales|" + s.id + "'>✎ تعديل</button>" +
+        "<button class='tbtn' type='button' data-repeat='" + s.id + "'>كرّر</button>" +
+        "<button class='tbtn' type='button' data-label='" + s.id + "'>بوليصة</button>" +
+        "<details class='dd-more'><summary class='tbtn' aria-label='حاجات تانية'>⋯</summary>" +
+          "<div><button class='tbtn' type='button' data-del='sales' data-id='" + s.id + "'>حذف الأوردر</button></div></details>" +
+      "</div></div>";
+
+    /* ---- ٢ الخطوة الجاية ---- */
+    var sp = orderStep(s), btns = "";
     if(ed && sp.k === "ship")
       btns = "<button class='tbtn primary' type='button' data-stepship='" + s.id + "'>اكتب الشركة والكود</button>";
     if(ed && sp.k === "inspect")
@@ -6840,10 +6986,10 @@
       btns = "<button class='tbtn primary' type='button' data-qpayall='" + s.id + "'>العميل دفع الكل</button>";
     if(ed && sp.k === "custpaid")
       btns = "<button class='tbtn primary' type='button' data-fixpaid='" + s.id + "'>العميل دفع " +
-             esc(money(shipPaidOf(s))) + " لـ " + esc(squish(s.shipCo) || "الشركة") + "</button>";
+             esc(money(shipPaidOf(s))) + " لـ " + esc(coN) + "</button>";
     if(sp.k === "draw" && canEdit())
       btns = "<button class='tbtn primary' type='button' data-stepdraw='" + s.id + "'>استلم " +
-             esc(money(sp.upto)) + " من " + esc(squish(s.shipCo) || "الشركة") + "</button>";
+             esc(money(sp.upto)) + " من " + esc(coN) + "</button>";
     if(ed && sp.k === "refund")
       btns = "<button class='tbtn' type='button' data-edit='sales|" + s.id + "'>تعديل الأوردر</button>";
     if(ed && sp.k === "back")
@@ -6852,167 +6998,162 @@
     if(ed && sp.k !== "back" && !sp.done && sp.n >= 4 && heldLeft(s))
       btns += "<button class='tbtn' type='button' data-allback='" + s.id + "'>المرتجع وصلني (" +
               qty(heldLeft(s)) + " قطعة)</button>";
-    /* النقط بأساميها ومقسومة نصين: مع العميل | مع شركة الشحن.
-       الأوردر المباشر خطوة ٤ فيه مع العميل برضه. */
-    var via = viaShip(s);
-    var DOTS = ["اتسجّل", "اتبعت", via ? "العميل استلم ودفع" : "العميل استلم",
-                via ? "فلوسك من الشركة" : "فلوسك من العميل", "المرتجع من الشركة"];
+    var DOTS = ["اتسجّل", "اتبعت", via ? "استلم ودفع" : "العميل استلم",
+                via ? "فلوسك" : "فلوسك من العميل", "المرتجع"];
     var dot = function(i){
       return "<li class='" + (sp.done || i < sp.n ? "ok" : (i === sp.n ? "now" : "")) + "'><i></i>" +
              "<span>" + esc(DOTS[i - 1]) + "</span></li>";
     };
-    var stepBox = "<div class='ostep" + (sp.done ? " done" : "") + "'>" +
-      "<div class='ostep-h'>" + (sp.done ? "<b>✓ الأوردر خلص</b>"
-        : "<span>الخطوة الجاية · " + sp.n + " من " + STEP_N + "</span><b>" + esc(sp.t) + "</b>") + "</div>" +
-      (sp.hint ? "<p>" + esc(sp.hint) + "</p>" : "") +
-      (sp.also ? "<p>" + esc(sp.also) + "</p>" : "") +
-      (btns ? "<div class='ostep-b'>" + btns + "</div>" : "") +
+    var step = "<div class='ostep dd-step" + (sp.done ? " done" : "") + "'>" +
+      "<div class='dd-step-t'>" + (sp.done ? "<b>✓ الأوردر خلص</b>"
+          : "<span class='dd-k'>الخطوة الجاية · " + sp.n + " من " + STEP_N + "</span><b>" + esc(sp.t) + "</b>") +
+        (sp.hint ? "<p>" + esc(sp.hint) + "</p>" : "") +
+        (sp.also ? "<p>" + esc(sp.also) + "</p>" : "") + "</div>" +
+      (btns ? "<div class='ostep-b dd-step-b'>" + btns + "</div>" : "") +
       "<div class='ostep-ph' aria-hidden='true'>" +
         "<div><em>مع العميل</em><ol class='ostep-dots'>" + [1,2,3].map(dot).join("") + "</ol></div>" +
         "<div><em>" + (via ? "مع شركة الشحن" : "بعد الاستلام") + "</em><ol class='ostep-dots'>" +
           [4,5].map(dot).join("") + "</ol></div>" +
       "</div></div>";
 
-    /* شريط واحد بأربع أرقام بدل تلات صناديق. التفصيل اللي كان
-       جواهم موجود أصلاً في جدول الأصناف تحت (تكلفة القطعة وربحها)،
-       فكان تكرار بياخد نص الشاشة — وعلى الموبايل كان بيطوّلها ضعفين.
-       التحذيرات بس هي اللي فضلت، لأنها اللي بتنبّهك على حاجة غلط. */
-    var strip = "<div class='osum'>" +
-      "<div><span>المطلوب من العميل</span><b class='num'>" + money(m.owed) + "</b></div>" +
-      "<div><span>" + (via ? "العميل دفع لـ " + esc(squish(s.shipCo) || "الشركة") : "المحصّل") + "</span>" +
-        "<b class='num'>" + money(m.paid) + "</b></div>" +
-      /* أوردر الشركة: الخانة التالتة مش «باقي على العميل» (هو خرج من
-         القصة) — هي فلوسك اللي لسه عند الشركة من الأوردر ده. */
-      (via && isDelivered(s) && !shipPaidGap(s)
-        ? "<div><span>لسه عند " + esc(squish(s.shipCo) || "الشركة") + "</span>" +
-          "<b class='num" + (shipPend(s).left > 0.009 ? "" : " v-gain") + "'>" +
-          (shipPend(s).left > 0.009 ? money(shipPend(s).left) : "وصلك ✓") + "</b>" +
-          "<small>العميل: خالص ✓</small></div>"
-      /* «خالص» على أوردر لسه ما اتسلّمش كانت كدبة: الباقي بيتحسب بعد
-         التسليم بس، فكان بيطلع صفر ويتقري «خالص» والعميل ما دفعش حاجة. */
-      : isDelivered(s)
-        ? "<div><span>" + (m.due > 0.009 ? (via ? "لسه ما اتسجّلش" : "باقي عليه")
-                          : (m.due < -0.009 ? (via ? "مسجّل زيادة" : "ترجّعله") : "الحساب")) + "</span>" +
-          "<b class='num " + (Math.abs(m.due) < 0.009 ? "v-gain" : "v-due") + "'>" +
-          (Math.abs(m.due) < 0.009 ? "خالص" : money(Math.abs(m.due))) + "</b></div>"
-        : "<div><span>الحساب</span><b>" + (canc ? "ملغي" : "بعد التسليم") + "</b>" +
-          "<small>" + (canc ? "مفيش مطلوب من العميل" : "بيتحسب لما العميل يستلم") + "</small></div>") +
-      "<div class='money-only'><span>صافي ربح الأوردر</span>" +
-        "<b class='num " + (m.known ? (m.profit >= 0 ? "v-gain" : "v-due") : "") + "'>" +
-        (m.known ? money(m.profit) : "—") + "</b>" +
-        "<small>" + (m.known ? esc(money(m.owed)) + " − " + esc(money(m.outlay))
-                             : "بيتحسب لما يتسلّم") + "</small></div>" +
+    /* ---- ٣أ العميل ---- */
+    var ph = squish(p.phone || "");
+    var cust = "<div class='dd-card dd-cust'><h5>العميل</h5>" +
+      "<div class='dd-nm'>" + esc(partyName(s.partyId)) + "</div>" +
+      (ph ? "<div class='dd-ph'><span class='num'>" + esc(ph) + "</span>" +
+            "<a class='tbtn' href='tel:" + esc(ph.replace(/[^\d+]/g, "")) + "'>📞 اتصال</a>" +
+            (waLink(ph) ? "<a class='tbtn' href='" + esc(waLink(ph)) + "' target='_blank' rel='noopener'>واتساب</a>" : "") +
+          "</div>" : "") +
+      (p.gov || p.address ? "<div class='dd-addr'>" + esc([p.gov, p.address].filter(Boolean).join(" · ")) + "</div>" : "") +
+      (s.note ? "<div class='dd-memo'>📝 " + esc(s.note) + "</div>" : "") +
+      (squish(s.owner) ? "<span class='sub'>المسؤول: " + esc(squish(s.owner)) + "</span>" : "") +
       "</div>";
 
-    // التحذيرات: دي اللي بتمسك الغلط، فبتفضل ظاهرة
+    /* ---- ٣ب الفلوس: حساب واحد بيتقري من فوق لتحت ---- */
+    var ML = function(a, b, cls){
+      return "<div class='dd-ml" + (cls ? " " + cls : "") + "'><span>" + a + "</span><span class='num'>" + b + "</span></div>";
+    };
+    var left = via ? shipPend(s).left : 0, gap = via ? shipPaidGap(s) : 0, fin = "";
+    if(canc){
+      fin += ML("الأوردر ملغي", "مفيش مطلوب من العميل", "sub2");
+      if(shipIn(s)) fin += ML(via ? "العميل دفع الشحن لـ " + esc(coN) : "الشحن اللي دفعه العميل", esc(money(shipIn(s))), "tot");
+      if(shipOut(s)) fin += ML("− شحن " + esc(coN), esc(money(shipOut(s))), "sub2");
+    } else if(!deliv){
+      fin += ML("المطلوب من العميل", esc(money(sgFull(s))), "tot");
+      fin += ML("الحساب", "بعد التسليم", "sub2");
+      fin += "<p class='dd-fn'>" + (via ? "أول ما العميل يستلم ويدفع للمندوب، السيستم بيسجّل المبلغ لوحده."
+                                        : "بيتحسب لما العميل يستلم.") + "</p>";
+      if(!via && (Number(s.paid)||0) > 0.009) fin += ML("دفع مقدّم", esc(money(Number(s.paid)||0)));
+    } else if(via && !gap){
+      fin += ML("البضاعة اللي خدها", esc(money(m.goods)));
+      if(m.shipIn) fin += ML("+ الشحن على العميل", esc(money(m.shipIn)), "sub2");
+      fin += ML("العميل دفع لـ " + esc(coN), esc(money(m.paid)) + " <span class='v-gain'>العميل: خالص ✓</span>", "tot");
+      if(m.shipOut) fin += ML("− شحن " + esc(coN), esc(money(m.shipOut)), "sub2");
+      fin += ML("لسه عند " + esc(coN), left > 0.009 ? esc(money(left)) : "<span class='v-gain'>وصلك ✓</span>", "tot big");
+    } else if(via){
+      // أوردر قديم: المسجّل مش مطابق للي العميل خده
+      fin += ML("المطلوب من العميل", esc(money(m.owed)), "tot");
+      fin += ML("العميل دفع لـ " + esc(coN) + " (المسجّل)", esc(money(m.paid)));
+      fin += ML(m.due > 0 ? "لسه ما اتسجّلش" : "مسجّل زيادة", "<span class='v-due'>" + esc(money(Math.abs(m.due))) + "</span>");
+    } else {
+      fin += ML("البضاعة اللي خدها", esc(money(m.goods)));
+      if(m.shipIn) fin += ML("+ الشحن على العميل", esc(money(m.shipIn)), "sub2");
+      fin += ML("المطلوب من العميل", esc(money(m.owed)), "tot");
+      fin += ML("المحصّل", esc(money(m.paid)));
+      fin += ML(m.due > 0.009 ? "باقي عليه" : (m.due < -0.009 ? "ترجّعله" : "الحساب"),
+                Math.abs(m.due) < 0.009 ? "<span class='v-gain'>خالص ✓</span>"
+                                        : "<span class='v-due'>" + esc(money(Math.abs(m.due))) + "</span>", "tot big");
+    }
+    /* تحصيل مباشر: العميل دفع الباقي — من غير ما تفتح الدرج */
+    if(!via && deliv && m.due > 0.009 && ed)
+      fin += "<div class='quickpay'>" +
+        "<label for='qp-" + s.id + "'>تحصيل من العميل</label>" +
+        "<input id='qp-" + s.id + "' inputmode='decimal' data-qp='" + s.id + "' placeholder='" + esc(money(m.due)) + "'>" +
+        "<button class='tbtn primary' type='button' data-qpay='" + s.id + "'>سجّل</button>" +
+        "<button class='tbtn' type='button' data-qpayall='" + s.id + "'>حصّلت الكل</button>" +
+        "<p class='hintline'>الباقي " + esc(money(m.due)) + " — بيدخل الخزنة على طول</p></div>";
     var warns = [];
     if(m.due < -0.009 && !via)
-      warns.push(["حصّلت منه أكتر من المطلوب — ترجّعله " + money(-m.due) + ".", "v-due"]);
+      warns.push("حصّلت منه أكتر من المطلوب — ترجّعله " + money(-m.due) + ".");
     /* الأوردر الملغي بيتفك بالكامل: السيستم بيفترض إن العربون رجع للعميل.
        لو إنت ماسكه (مصاريف إلغاء مثلًا) لازم تسجّله دخل في الخزنة. */
     if(canc && (Number(s.paid)||0) > 0.009)
-      warns.push(["العميل كان دافع " + money(Number(s.paid)||0) +
-        " — السيستم بيعتبرها رجعتله مع الإلغاء. لو ماسكها، سجّلها «دخل» في الخزنة.", "v-due"]);
-    if(m.known && m.pocket > 0.009)
-      warns.push(["شحن من جيبك " + money(m.pocket) + " — حمّلت العميل " +
-        money(m.shipIn) + " ودفعت " + money(m.shipOut) + ".", "v-due"]);
-    var warnBox = warns.length
-      ? "<div class='owarn'>" + warns.map(function(w){
-          return "<p class='" + w[1] + "'>" + esc(w[0]) + "</p>"; }).join("") + "</div>"
-      : "";
-
-    /* بيانات الأوردر — سطر واحد مضغوط بدل شبكة عشر خانات */
-    var meta = "<div class='dmeta'>" +
-      "<label>التاريخ <input type='date' data-date='"+s.id+"' value='"+esc(s.date||"")+"'></label>" +
-      "<label>الحالة <select class='stsel' data-status='"+s.id+"'>" +
-        stChoices(st).map(function(k){
-          return "<option value='"+k+"'"+(k===st?" selected":"")+">"+esc(stOptTxt(s,k))+"</option>";
-        }).join("") + "</select></label>" +
-      "<span>شركة الشحن <b>" + (esc(squish(s.shipCo)) || q) + "</b></span>" +
-      "<span>كود البوليصة <b class='num'>" + (esc(squish(s.shipCode)) || q) + "</b></span>" +
-      "<span>التحصيل <b>" + (viaShip(s) ? "عن طريق الشركة" : "مباشر ليك") + "</b></span>" +
-      "<span>المسؤول <b>" + (esc(squish(s.owner)) || q) + "</b></span>" +
-      (retQty(s) ? "<span>مرتجع <b class='num'>" + qty(retQty(s)) + "</b></span>" : "") +
+      warns.push("العميل كان دافع " + money(Number(s.paid)||0) +
+        " — السيستم بيعتبرها رجعتله مع الإلغاء. لو ماسكها، سجّلها «دخل» في الخزنة.");
+    var money_ = "<div class='dd-card dd-money'><h5>الفلوس</h5>" + fin +
+      (warns.length ? "<div class='owarn'>" + warns.map(function(w){
+          return "<p class='v-due'>" + esc(w) + "</p>"; }).join("") + "</div>" : "") +
+      "<div class='dd-profit money-only'><span>صافي ربح الأوردر" +
+        (m.known && m.pocket > 0.009 ? " <small class='v-due'>(شحن من جيبك " + esc(money(m.pocket)) + ")</small>" : "") +
+        (m.known ? "<small>" + esc(money(m.owed)) + " − " + esc(money(m.outlay)) + "</small>" : "") + "</span>" +
+        "<b class='num " + (m.known ? (m.profit >= 0 ? "v-gain" : "v-due") : "") + "'>" +
+        (m.known ? esc(money(m.profit)) : "بيتحسب لما يتسلّم") + "</b></div>" +
       "</div>";
 
-    /* الأصناف — بالتكلفة والربح لكل صنف، مش الإجمالي بس */
-    /* تسع أعمدة كانت بتبقى تسع سطور لكل صنف على الموبايل. اللون
-       والمقاس نزلوا تحت اسم الصنف، والتكلفة نزلت تحت الربح — نفس
-       المعلومة في سبع أعمدة بدل تسعة. */
-    var LH = ["الصنف","الكمية","سعر البيع","مرتجع","إجمالي البيع","ربح البضاعة","حالة الصنف"];
-    var body = SL(s).map(function(l, i){
-      var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l,s);
-      var c = m.known ? lineCost(l) : null;
+    /* ---- ٣ج مشوار الأوردر ---- */
+    var TL = [], add = function(ok, t, d){ TL.push([ok, t, d || ""]); };
+    add(true, "اتسجّل", dShort(s.date));
+    if(co && squish(s.shipCode)) add(true, "اتبعت مع " + esc(co), dShort(s.shippedAt || s.date));
+    else add(false, "لسه ما اتبعتش", "مستني");
+    var retN = retQty(s);
+    if(deliv)
+      add(true, (via ? "العميل استلم ودفع " + esc(money(m.paid)) : "العميل استلم") +
+                (retN ? " — رجّع " + qty(retN) + " قطعة" : ""), dShort(s.deliveredAt));
+    else if(canc) add(true, "العميل رفض الأوردر", dShort(s.cancelledAt));
+    else if(co && squish(s.shipCode)) add(false, "العميل لسه ما استلمش", "مستني");
+    if(deliv || canc){
+      if(via){
+        var net = (canc ? shipIn(s) : (Number(s.paid)||0)) - shipOut(s);
+        if(left > 0.009) add(false, "فلوسك لسه عند " + esc(coN) + " (" + esc(money(left)) + ")", "مستني");
+        else if(net > 0.009) add(true, "فلوسك وصلتك من " + esc(coN), "");
+      } else if(deliv){
+        if(m.due > 0.009) add(false, "لسه " + esc(money(m.due)) + " على العميل", "مستني");
+        else add(true, "العميل دفعلك", "");
+      }
+      var held = heldLeft(s), backs = SL(s).map(function(l){ return l.backAt || s.backAt || ""; })
+        .filter(Boolean).sort();
+      if(held) add(false, qty(held) + " قطعة راجعة لسه عند " + esc(coN), "مستني");
+      else if(heldPieces(s) && backs.length) add(true, "المرتجع رجع المخزن", dShort(backs[backs.length - 1]));
+    }
+    var tl = "<div class='dd-card'><h5>مشوار الأوردر</h5><ul class='dd-tl'>" +
+      TL.map(function(x){
+        return "<li class='" + (x[0] ? "ok" : "wait") + "'><i></i><span>" + x[1] + "</span>" +
+               "<span class='d num'>" + esc(x[2]) + "</span></li>"; }).join("") + "</ul></div>";
+
+    /* ---- ٤ الأصناف: صنف في سطر ---- */
+    var items = SL(s).map(function(l, i){
+      var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l, s), q0 = Number(l.qty)||0;
       var gp = m.known ? ((Number(l.price)||0) - lineCost(l)) * sold : null;
-      /* المرتجع كان محتاج تفتح درج التعديل وتدوّر على السطر. بقى خانة هنا
-         زي التحصيل السريع — بتتحفظ أول ما تسيبها، وبترجّع البضاعة للمخزن. */
-      var canRet = isDelivered(s) && !saleLocked(s);
-      var retCell = canRet
-        ? "<input class='retin' inputmode='decimal' data-ret='" + s.id + "|" + i + "' " +
+      var allBack = deliv && lineRet(l) >= q0 && q0 > 0;
+      var stt = lineState(l, s);
+      var canRet = deliv && !saleLocked(s) && canEdit();
+      var acts = "";
+      if(canRet)
+        acts += "<label class='dd-ret'>مرتجع <input class='retin' inputmode='decimal' data-ret='" + s.id + "|" + i + "' " +
           "value='" + (lineRet(l) ? esc(qty(lineRet(l))) : "") + "' placeholder='0' " +
-          "aria-label='مرتجع من " + esc(itemName(l.itemId)) + "'>"
-        : (lineRet(l) ? qty(lineRet(l)) : q);
-      var cells = [
-        thumbHTML(l.itemId) + esc(itemName(l.itemId)) +
-          (vl ? "<span class='sub'>" + esc(vl) + "</span>" : ""),
-        qty(Number(l.qty)||0),
-        money(l.price),
-        retCell,
-        money(lineTotal(l,s)),
-        (gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>") +
-          (c === null ? "" : "<span class='sub'>تكلفة القطعة " + money(c) + "</span>"),
-        /* الصنف بيرجع لوحده — العميل ممكن ياخد اتنين ويرجّع واحد.
-           فالحالة هنا على السطر مش على الفاتورة. */
-        (function(){
-          var stt = lineState(l, s);
-          var html = "<span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
-                     (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "");
-          if(stt.k === "held" && canEdit() && !saleLocked(s))
-            html += "<button class='del' style='color:var(--teal)' data-heldback='" +
-                    esc(s.id) + "|" + i + "'>رجعت المخزن</button>";
-          if(stt.k === "back" && canEdit() && !saleLocked(s))
-            html += "<button class='del' data-heldback='" + esc(s.id) + "|" + i +
-                    "' data-undo='1'>تراجع</button>";
-          return html;
-        })()
-      ];
-      // عمود تكلفة القطعة (٣) وربح البضاعة (٧) بيكشفوا الهامش
-      return "<tr>" + cells.map(function(c2, k){
-        var cl = (k === 0 ? "wide" : (k >= 1 && k <= 5 ? "num" : "")) + (k === 5 ? " money-only" : "");
-        return "<td data-l='" + esc(LH[k]) + "'" + (cl ? " class='"+cl+"'" : "") + ">" + c2 + "</td>";
-      }).join("") + "</tr>";
+          "aria-label='مرتجع من " + esc(itemName(l.itemId)) + "'></label>";
+      else if(lineRet(l)) acts += "<span class='sub'>مرتجع " + qty(lineRet(l)) + "</span>";
+      if(stt.k === "held" && ed)
+        acts += "<button class='tbtn' type='button' data-heldback='" + esc(s.id) + "|" + i + "'>وصلتني</button>";
+      if(stt.k === "back" && ed)
+        acts += "<button class='tbtn ghostx' type='button' data-heldback='" + esc(s.id) + "|" + i + "' data-undo='1'>تراجع</button>";
+      return "<div class='dd-it'>" +
+        (thumbHTML(l.itemId) || "<span class='dd-noimg' aria-hidden='true'>" + esc(itemName(l.itemId).charAt(0)) + "</span>") +
+        "<span><span class='dd-in'>" + esc(itemName(l.itemId)) + "</span>" +
+          (vl ? "<span class='sub'>" + esc(vl) + "</span>" : "") + "</span>" +
+        "<span class='num'><span" + (allBack ? " class='dd-dim'" : "") + ">" + qty(q0) + " × " + esc(money(l.price)) + "</span>" +
+          (allBack ? "<span class='sub'>رجّعها</span>"
+                   : (gp !== null ? "<span class='sub money-only'>ربح " + esc(money(gp)) + "</span>" : "")) + "</span>" +
+        "<span><span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
+          (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "") + "</span>" +
+        "<span class='dd-ia'>" + acts + "</span></div>";
     }).join("");
 
-    /* الحركة اليومية الأكتر تكرار: العميل دفع الباقي. من غير ما تفتح الدرج. */
-    var viaS = viaShip(s), shco = squish(s.shipCo) || "شركة الشحن";
-    // أوردر الشركة مالوش تحصيل من العميل — العميل دفع للمندوب وقت الاستلام
-    var pay = (m.due <= 0.009 || viaS) ? "" :
-      "<div class='quickpay'>" +
-        "<label for='qp-"+s.id+"'>" +
-          (viaS ? esc(shco) + " حصّلت" : "تحصيل من العميل") + "</label>" +
-        "<input id='qp-"+s.id+"' inputmode='decimal' data-qp='"+s.id+"' " +
-          "placeholder='"+esc(money(m.due))+"'>" +
-        "<button class='tbtn primary' type='button' data-qpay='"+s.id+"'>سجّل</button>" +
-        "<button class='tbtn' type='button' data-qpayall='"+s.id+"'>حصّلت الكل</button>" +
-        "<p class='hintline'>" + (viaS
-          ? "لسه " + esc(money(m.due)) + " عند العميل — أول ما " + esc(shco) +
-            " تحصّلها سجّلها هنا، وتقعد في محفظتها لحد ما تستلمها من «شركات الشحن»."
-          : "الباقي " + esc(money(m.due)) + " — بيدخل الخزنة على طول") + "</p>" +
-      "</div>";
-
-    return "<tr class='detail' data-detail='"+s.id+"'><td colspan='"+SALE_HEAD.length+"'><div class='detail-in'>" +
-      stepBox + strip + warnBox + pay + meta +
-      (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") +
-      "<div class='dlines'><table><thead><tr>" +
-        LH.map(function(h, k){
-          return "<th" + (k === 5 ? " class='money-only'" : "") + ">"+esc(h)+"</th>"; }).join("") +
-      "</tr></thead><tbody>" + body + "</tbody></table></div>" +
-      "<div class='detail-actions'>" +
-        "<button class='tbtn' type='button' data-edit='sales|"+s.id+"'>تعديل الأوردر</button>" +
-        "<button class='tbtn primary' type='button' data-repeat='"+s.id+"'>كرّر الأوردر</button>" +
-        "<button class='tbtn' type='button' data-label='"+s.id+"'>طباعة بوليصة</button>" +
-        "<button class='tbtn' type='button' data-del='sales' data-id='"+s.id+"'>حذف</button>" +
-      "</div></div></td></tr>";
+    return "<tr class='detail' data-detail='" + s.id + "'><td colspan='" + SALE_HEAD.length + "'><div class='detail-in dd'>" +
+      head + step +
+      "<div class='dd-cards'>" + cust + money_ + tl + "</div>" +
+      "<div class='dd-items'><h5>الأصناف</h5>" + items + "</div>" +
+      "</div></td></tr>";
   }
 
   /* ---------- الفلاتر: chips + عدّاد ---------- */
@@ -7634,7 +7775,7 @@
       var co = squish(coEl ? coEl.value : ""), cd = squish(cdEl ? cdEl.value : "");
       if(!co){ toast("اكتب اسم شركة الشحن"); if(coEl) coEl.focus(); return; }
       if(!cd){ toast("اكتب كود البوليصة"); if(cdEl) cdEl.focus(); return; }
-      rec.shipCo = co; rec.shipCode = cd;
+      rec.shipCo = co; rec.shipCode = cd; stampShipped(rec);
       rec.editedBy = me || "غير محدد"; rec.at = Date.now();
       saveSoon("sales"); renderAll();
       toast("#" + (rec.no || "") + " اتبعت مع " + co + " — بقى في «مع المندوب»");
@@ -11492,6 +11633,18 @@
     }
     var lb = e.target.closest("[data-label]");
     if(lb){ printLabel(lb.dataset.label); return; }
+    // كود البوليصة بدوسة — عشان تلصقه في موقع شركة الشحن أو للعميل
+    var cp = e.target.closest("[data-copy]");
+    if(cp){
+      e.stopPropagation();
+      var txt = cp.dataset.copy, done = function(){ toast("اتنسخ: " + txt); };
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function(){ toast(txt); });
+        else { var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select();
+               document.execCommand("copy"); ta.remove(); done(); }
+      }catch(err){ toast(txt); }
+      return;
+    }
     var rp = e.target.closest("[data-repeat]");
     if(rp){
       if(!canEdit()){ toast("مالكش صلاحية تضيف أوردرات"); return; }
