@@ -2054,7 +2054,7 @@
       <!-- اللي بيتملّى بعدين: البوليصة والتحصيل والملاحظة. مش وإنت
            بتكتب الأوردر، فمطوي — وبيتفتح لوحده لو فيه حاجة متكتوبة. -->
       <details class="rsec" id="e-more">
-        <summary>تفاصيل زيادة <b>كود البوليصة · التحصيل · المحصّل · المسؤول · ملاحظة</b></summary>
+        <summary>تفاصيل زيادة <b id="e-more-sum">كود البوليصة · التحصيل · المحصّل · المسؤول · ملاحظة</b></summary>
         <div class="fgrid">
           <div><label for="e-shipcode">كود البوليصة</label>
             <input id="e-shipcode" data-f="shipCode" autocomplete="off"></div>
@@ -2123,8 +2123,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "77";
+  var VERSION = "78";
   var CHANGELOG = [
+    { v:"78", d:"2026-09-29", items:[
+      "«التحصيل بيتم عن طريق» بقى مكتوب في عنوان «تفاصيل زيادة» من غير ما تفتحه — هو اللي بيحدّد الفلوس هتنزل الخزنة ولا محفظة شركة الشحن، فمينفعش يبقى مخفي تمامًا",
+      "والعنوان بيقول كمان المحصّل وكود البوليصة لو متكتوبين",
+      "«تفاصيل زيادة» بتتفتح لوحدها بس عمرها ما بتتقفل لوحدها — كانت هتتقفل في وشك وإنت بتكتب جواها"
+    ]},
     { v:"77", d:"2026-09-29", items:[
       "جدول «أسعار الشحن بالمنطقة» اتشال خالص — كان تمن أعمدة بتتزحلق عشان رقم بيتغيّر مرة في السنة",
       "بدله: أول ما تختار العميل، شركة الشحن والشحن بيتملّوا من آخر أوردر لنفس المحافظة — بيتعلّم من شغلك من غير أي إعداد",
@@ -6180,7 +6185,7 @@
     var sn = document.getElementById("e-shipnote");
     if(sn){ sn.textContent = ""; sn.hidden = true; }
     if(!draft.partyId) suggestFor = null;
-    shipHint(); syncMore();
+    shipHint(); syncMore(true);
     var cf = document.getElementById("e-conflict");
     if(cf){ cf.textContent = ""; cf.hidden = true; }
     var rp = document.getElementById("e-repeat");
@@ -8839,6 +8844,7 @@
       if(f === "status"){ renderDrawerLines(); return; }  // المرتجع بيظهر ويختفي مع الحالة
       if(f === "partyId"){ suggestShipping(); shipHint(); }
       if(f === "shipIn" || f === "shipOut") shipHint();
+      if(f === "payVia" || f === "paid" || f === "shipCode" || f === "note") syncMore();
     }
     updateEntryCalc();
   }
@@ -8873,12 +8879,27 @@
                    : " — يعني <span class='v-gain'><strong>" + esc(money(-gap)) + "</strong> ليك</span>."));
     el.hidden = false;
   }
-  // «تفاصيل زيادة» بتتفتح لوحدها لو فيها حاجة متكتوبة — عشان ما تختفيش
-  function syncMore(){
+  /* «تفاصيل زيادة» بتتفتح لوحدها لو فيها حاجة متكتوبة. و«التحصيل»
+     بالذات بيبان في عنوان المطوي من غير ما تفتحه — لأنه هو اللي
+     بيحدّد الفلوس هتنزل الخزنة ولا محفظة شركة الشحن، ومينفعش يبقى
+     مخفي تمامًا. */
+  function syncMore(reset){
     var d = document.getElementById("e-more");
     if(!d) return;
-    d.open = !!(squish(draft.shipCode || "") || Number(draft.paid) ||
-                squish(draft.note || "") || draft.payVia === "direct");
+    var hasCode = !!squish(draft.shipCode || ""), hasPaid = !!Number(draft.paid);
+    var hasNote = !!squish(draft.note || ""), direct = draft.payVia === "direct";
+    var want = hasCode || hasPaid || hasNote || direct;
+    /* بيتفتح لوحده بس عمره ما بيتقفل لوحده: لو فتحته بإيدك وبعدين
+       مسحت الرقم، القسم كان هيتقفل في وشك وإنت بتكتب جواه. */
+    d.open = reset ? want : (d.open || want);
+    var sum = document.getElementById("e-more-sum");
+    if(!sum) return;
+    var bits = ["التحصيل: " + (direct ? "مباشر ليك" : "شركة الشحن")];
+    if(hasPaid) bits.push("محصّل " + money(Number(draft.paid)||0));
+    if(hasCode) bits.push("بوليصة " + squish(draft.shipCode));
+    if(!hasPaid) bits.push("المحصّل");
+    bits.push("ملاحظة");
+    sum.textContent = bits.join(" · ");
   }
   /* اختيار العميل من القايمة بيبعت input و change، فالدالة كانت
      بتتنفّذ مرتين: الأولى بتملا وبتكتب السطر، والتانية بتلاقي الخانات
