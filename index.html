@@ -300,6 +300,16 @@
   .mbig{font-size:var(--fs-6);font-weight:600;letter-spacing:-.3px;margin-top:var(--sp-1)}
   .mbox.big{display:flex;flex-direction:column;justify-content:center}
   @media (max-width:820px){ .money3{grid-template-columns:1fr} }
+  /* شريط ملخّص الأوردر: أربع أرقام في سطر، وعلى الموبايل اتنين في صف */
+  .osum{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-bottom:var(--sp-3)}
+  .osum > div{background:var(--card);padding:var(--sp-3)}
+  .osum span{display:block;color:var(--ink-soft);font-size:var(--fs-2);margin-bottom:var(--sp-1)}
+  .osum b{font-size:var(--fs-5);font-weight:600;letter-spacing:-.3px}
+  .osum small{display:block;color:var(--ink-soft);font-size:var(--fs-1);margin-top:2px}
+  .owarn{margin-bottom:var(--sp-3)}
+  .owarn p{margin:0 0 var(--sp-1);font-size:var(--fs-2);color:var(--ink-soft);line-height:1.5}
+  @media (max-width:820px){ .osum{grid-template-columns:1fr 1fr} }
 
   /* بيانات الأوردر — سطر واحد بدل شبكة عشر خانات */
   .dmeta{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);align-items:center;
@@ -2123,8 +2133,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "78";
+  var VERSION = "79";
   var CHANGELOG = [
+    { v:"79", d:"2026-09-29", items:[
+      "حالة الأوردر بقت بتقول القصة: «مسلّم بالكامل» لو العميل خد كل حاجة، و«مسلّم جزئيًا» لو رجّع صنف، و«رجع بالكامل» لو رجّع كله",
+      "الوصف ده مستنتج من الكميات مش حالة متخزّنة — فمستحيل يقول حاجة والأرقام تقول حاجة تانية، وبيتغيّر لوحده أول ما تكتب مرتجع",
+      "وبيظهر في كل مكان: سطر الأوردر · التفاصيل · سجل الحركات · دفتر الخزنة · تصدير الإكسل",
+      "شاشة عرض الأوردر اتبسّطت: شريط واحد بأربع أرقام (المطلوب · المحصّل · الباقي · صافي الربح) بدل تلات صناديق كانت بتكرّر اللي في جدول الأصناف",
+      "التحذيرات فضلت زي ما هي — دي اللي بتمسك الغلط"
+    ]},
     { v:"78", d:"2026-09-29", items:[
       "«التحصيل بيتم عن طريق» بقى مكتوب في عنوان «تفاصيل زيادة» من غير ما تفتحه — هو اللي بيحدّد الفلوس هتنزل الخزنة ولا محفظة شركة الشحن، فمينفعش يبقى مخفي تمامًا",
       "والعنوان بيقول كمان المحصّل وكود البوليصة لو متكتوبين",
@@ -3275,6 +3292,18 @@
     "بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان","البحر الأحمر","الوادي الجديد","مطروح"];
 
   var ST_LABEL = { proposed:"مقترح", progress:"جاري", delivered:"مسلّم", cancelled:"ملغي" };
+  /* «مسلّم» لوحدها مش بتقول القصة: العميل ممكن ياخد صنف ويرجّع صنف.
+     الوصف مستنتج من الأرقام مش حالة متخزّنة لوحدها، فمستحيل يتعارض
+     مع الكميات. الحالة المتخزّنة فاضلة أربعة زي ما هي — ودي اللي كل
+     الحسابات بتشتغل عليها. */
+  function saleStateTxt(s){
+    if(stOf(s) !== "delivered") return ST_LABEL[stOf(s)];
+    var r = retQty(s);
+    if(!r) return "مسلّم بالكامل";
+    return soldQty(s) > 0 ? "مسلّم جزئيًا" : "رجع بالكامل";
+  }
+  // نفس الكلام بس لخيار في قايمة الحالة
+  function stOptTxt(s, k){ return k === "delivered" ? saleStateTxt(s) : ST_LABEL[k]; }
   // السجلات القديمة من غير حالة تتعامل كمسلّمة عشان أرقامها ما تتغيّرش
   function stOf(s){ return s.status || "delivered"; }
   // رقم الأوردر: تسلسلي، بيتحسب من أعلى رقم موجود
@@ -5853,7 +5882,7 @@
             note:tag + (lineRet(l) ? "مشحون "+qty(l.qty)+" ومرتجع "+qty(lineRet(l)) : "بسعر "+money(l.price)),
             inn:0, out:lineSold(l,x)});
         } else {
-          L.push({d:x.date, at:x.at, t:ST_LABEL[st], who:partyName(x.partyId),
+          L.push({d:x.date, at:x.at, t:saleStateTxt(x), who:partyName(x.partyId),
             note:tag + (st==="progress" ? "محجوز "+qty(l.qty) : "ما أثّرش على الرصيد"),
             inn:0, out:0, ghost:true});
         }
@@ -6417,7 +6446,7 @@
         (canEdit() ? "" : " disabled") + " aria-label='حالة الأوردر'>" +
         ["proposed","progress","delivered","cancelled"].map(function(k){
           return "<option value='" + k + "'" + (k === st ? " selected" : "") + ">" +
-                 ST_LABEL[k] + "</option>"; }).join("") +
+                 esc(stOptTxt(s, k)) + "</option>"; }).join("") +
       "</select></td>" +
       "<td class='rowacts'>" +
         "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل'>تعديل</button>" +
@@ -6438,60 +6467,50 @@
     var st = stOf(s), m = saleMoney(s), canc = isCancelled(s);
     var q = "—";
 
-    /* ١) فلوس العميل — من البضاعة لحد الباقي عليه، خطوة بخطوة */
-    var inBox = "<div class='mbox'><h4>العميل عليه كام؟</h4>" +
-      mRow("البضاعة", m.goods) +
-      (m.shipIn ? mRow("شحن محمّل عليه", m.shipIn, "", "+ ") : "") +
-      mRow("المطلوب منه", m.owed, "tot") +
-      mRow(viaShip(s) ? "حصّلته الشركة" : "محصّل", m.paid, "", "− ") +
-      mRow(m.due > 0.009 ? (viaShip(s) ? "لسه هتحصّله الشركة" : "باقي عليه")
-             : (m.due < -0.009 ? "ترجّعله" : "خالص"),
-           Math.abs(m.due), m.due > 0.009 ? "tot v-due"
-             : (m.due < -0.009 ? "tot v-due" : "tot v-gain")) +
-      (m.due > 0.009 && viaShip(s)
-        ? "<p class='mnote'>" + esc(squish(s.shipCo) || "شركة الشحن") +
-          " هي اللي بتحصّل — مش إنت اللي بتجري ورا العميل.</p>" : "") +
-      (m.due < -0.009
-        ? "<p class='mnote v-due'>حصّلت منه أكتر من المطلوب — ترجّعله " +
-          esc(money(-m.due)) + ".</p>" : "") +
-      /* الأوردر الملغي بيتفك بالكامل: السيستم بيفترض إن العربون رجع للعميل.
-         لو إنت ماسكه (مصاريف إلغاء مثلًا) لازم تسجّله دخل في الخزنة،
-         وإلا الرقم اللي في إيدك أكتر من اللي في السيستم. */
-      (canc && (Number(s.paid)||0) > 0.009
-        ? "<p class='mnote v-due'>العميل كان دافع " + esc(money(Number(s.paid)||0)) +
-          " — السيستم بيعتبرها رجعتله مع الإلغاء. لو ماسكها، سجّلها «دخل» في الخزنة.</p>" : "") +
+    /* شريط واحد بأربع أرقام بدل تلات صناديق. التفصيل اللي كان
+       جواهم موجود أصلاً في جدول الأصناف تحت (تكلفة القطعة وربحها)،
+       فكان تكرار بياخد نص الشاشة — وعلى الموبايل كان بيطوّلها ضعفين.
+       التحذيرات بس هي اللي فضلت، لأنها اللي بتنبّهك على حاجة غلط. */
+    var strip = "<div class='osum'>" +
+      "<div><span>المطلوب من العميل</span><b class='num'>" + money(m.owed) + "</b></div>" +
+      "<div><span>" + (viaShip(s) ? "حصّلته الشركة" : "المحصّل") + "</span>" +
+        "<b class='num'>" + money(m.paid) + "</b></div>" +
+      "<div><span>" + (m.due > 0.009 ? (viaShip(s) ? "لسه هتحصّله الشركة" : "باقي عليه")
+                        : (m.due < -0.009 ? "ترجّعله" : "الحساب")) + "</span>" +
+        "<b class='num " + (Math.abs(m.due) < 0.009 ? "v-gain" : "v-due") + "'>" +
+        (Math.abs(m.due) < 0.009 ? "خالص" : money(Math.abs(m.due))) + "</b></div>" +
+      "<div class='money-only'><span>صافي ربح الأوردر</span>" +
+        "<b class='num " + (m.known ? (m.profit >= 0 ? "v-gain" : "v-due") : "") + "'>" +
+        (m.known ? money(m.profit) : "—") + "</b>" +
+        "<small>" + (m.known ? esc(money(m.owed)) + " − " + esc(money(m.outlay))
+                             : "بيتحسب لما يتسلّم") + "</small></div>" +
       "</div>";
 
-    /* ٢) اللي طلع منك — التكلفة الحقيقية للأوردر */
-    var outBox = "<div class='mbox money-only'><h4>التكلفة عليك كام؟</h4>" +
-      (m.known
-        ? mRow("تكلفة البضاعة", m.cost) +
-          (m.shipOut ? mRow("مدفوع لشركة الشحن", m.shipOut) : "") +
-          mRow("إجمالي التكلفة", m.outlay, "tot") +
-          (m.pocket > 0.009
-            ? "<p class='mnote v-due'>شحن من جيبك " + esc(money(m.pocket)) +
-              " — حمّلت العميل " + esc(money(m.shipIn)) + " ودفعت " + esc(money(m.shipOut)) + "</p>"
-            : (m.pocket < -0.009
-               ? "<p class='mnote v-gain'>كسبت من الشحن " + esc(money(-m.pocket)) + "</p>"
-               : ""))
-        : "<p class='mnote'>التكلفة بتتثبّت لما الأوردر يتسلّم.</p>")
-      + "</div>";
-
-    /* ٣) النتيجة */
-    var profBox = "<div class='mbox big money-only'><h4>ربحت كام؟</h4>" +
-      (m.known
-        ? "<div class='mbig num " + (m.profit >= 0 ? "v-gain" : "v-due") + "'>" +
-            esc(money(m.profit)) + "</div>" +
-          "<p class='mnote'>" + esc(money(m.owed)) + " − " + esc(money(m.outlay)) + "</p>"
-        : "<div class='mbig'>—</div><p class='mnote'>لسه ما اتسلّمش</p>")
-      + "</div>";
+    // التحذيرات: دي اللي بتمسك الغلط، فبتفضل ظاهرة
+    var warns = [];
+    if(m.due > 0.009 && viaShip(s))
+      warns.push([(squish(s.shipCo) || "شركة الشحن") + " هي اللي بتحصّل — مش إنت اللي بتجري ورا العميل.", ""]);
+    if(m.due < -0.009)
+      warns.push(["حصّلت منه أكتر من المطلوب — ترجّعله " + money(-m.due) + ".", "v-due"]);
+    /* الأوردر الملغي بيتفك بالكامل: السيستم بيفترض إن العربون رجع للعميل.
+       لو إنت ماسكه (مصاريف إلغاء مثلًا) لازم تسجّله دخل في الخزنة. */
+    if(canc && (Number(s.paid)||0) > 0.009)
+      warns.push(["العميل كان دافع " + money(Number(s.paid)||0) +
+        " — السيستم بيعتبرها رجعتله مع الإلغاء. لو ماسكها، سجّلها «دخل» في الخزنة.", "v-due"]);
+    if(m.known && m.pocket > 0.009)
+      warns.push(["شحن من جيبك " + money(m.pocket) + " — حمّلت العميل " +
+        money(m.shipIn) + " ودفعت " + money(m.shipOut) + ".", "v-due"]);
+    var warnBox = warns.length
+      ? "<div class='owarn'>" + warns.map(function(w){
+          return "<p class='" + w[1] + "'>" + esc(w[0]) + "</p>"; }).join("") + "</div>"
+      : "";
 
     /* بيانات الأوردر — سطر واحد مضغوط بدل شبكة عشر خانات */
     var meta = "<div class='dmeta'>" +
       "<label>التاريخ <input type='date' data-date='"+s.id+"' value='"+esc(s.date||"")+"'></label>" +
       "<label>الحالة <select class='stsel' data-status='"+s.id+"'>" +
         ["proposed","progress","delivered","cancelled"].map(function(k){
-          return "<option value='"+k+"'"+(k===st?" selected":"")+">"+ST_LABEL[k]+"</option>";
+          return "<option value='"+k+"'"+(k===st?" selected":"")+">"+esc(stOptTxt(s,k))+"</option>";
         }).join("") + "</select></label>" +
       "<span>شركة الشحن <b>" + (esc(squish(s.shipCo)) || q) + "</b></span>" +
       "<span>كود البوليصة <b class='num'>" + (esc(squish(s.shipCode)) || q) + "</b></span>" +
@@ -6501,8 +6520,10 @@
       "</div>";
 
     /* الأصناف — بالتكلفة والربح لكل صنف، مش الإجمالي بس */
-    var LH = ["الصنف","اللون والمقاس","الكمية","تكلفة القطعة","سعر البيع","مرتجع",
-              "إجمالي البيع","ربح البضاعة","حالة الصنف"];
+    /* تسع أعمدة كانت بتبقى تسع سطور لكل صنف على الموبايل. اللون
+       والمقاس نزلوا تحت اسم الصنف، والتكلفة نزلت تحت الربح — نفس
+       المعلومة في سبع أعمدة بدل تسعة. */
+    var LH = ["الصنف","الكمية","سعر البيع","مرتجع","إجمالي البيع","ربح البضاعة","حالة الصنف"];
     var body = SL(s).map(function(l, i){
       var vl = vLabel(vColor(l), vSize(l)), sold = lineSold(l,s);
       var c = m.known ? lineCost(l) : null;
@@ -6516,14 +6537,14 @@
           "aria-label='مرتجع من " + esc(itemName(l.itemId)) + "'>"
         : (lineRet(l) ? qty(lineRet(l)) : q);
       var cells = [
-        thumbHTML(l.itemId) + esc(itemName(l.itemId)),
-        esc(vl) || q,
+        thumbHTML(l.itemId) + esc(itemName(l.itemId)) +
+          (vl ? "<span class='sub'>" + esc(vl) + "</span>" : ""),
         qty(Number(l.qty)||0),
-        c === null ? q : money(c),
         money(l.price),
         retCell,
         money(lineTotal(l,s)),
-        gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>",
+        (gp === null ? q : "<span class='" + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</span>") +
+          (c === null ? "" : "<span class='sub'>تكلفة القطعة " + money(c) + "</span>"),
         /* الصنف بيرجع لوحده — العميل ممكن ياخد اتنين ويرجّع واحد.
            فالحالة هنا على السطر مش على الفاتورة. */
         (function(){
@@ -6541,7 +6562,7 @@
       ];
       // عمود تكلفة القطعة (٣) وربح البضاعة (٧) بيكشفوا الهامش
       return "<tr>" + cells.map(function(c2, k){
-        var cl = (k === 0 ? "wide" : (k >= 2 && k <= 7 ? "num" : "")) + ((k===3||k===7) ? " money-only" : "");
+        var cl = (k === 0 ? "wide" : (k >= 1 && k <= 5 ? "num" : "")) + (k === 5 ? " money-only" : "");
         return "<td data-l='" + esc(LH[k]) + "'" + (cl ? " class='"+cl+"'" : "") + ">" + c2 + "</td>";
       }).join("") + "</tr>";
     }).join("");
@@ -6563,12 +6584,11 @@
       "</div>";
 
     return "<tr class='detail' data-detail='"+s.id+"'><td colspan='"+SALE_HEAD.length+"'><div class='detail-in'>" +
-      "<div class='money3'>" + inBox + outBox + profBox + "</div>" +
-      pay + meta +
+      strip + warnBox + pay + meta +
       (s.note ? "<p class='hintline'>ملاحظة: " + esc(s.note) + "</p>" : "") +
       "<div class='dlines'><table><thead><tr>" +
         LH.map(function(h, k){
-          return "<th" + ((k===3||k===7) ? " class='money-only'" : "") + ">"+esc(h)+"</th>"; }).join("") +
+          return "<th" + (k === 5 ? " class='money-only'" : "") + ">"+esc(h)+"</th>"; }).join("") +
       "</tr></thead><tbody>" + body + "</tbody></table></div>" +
       "<div class='detail-actions'>" +
         "<button class='tbtn' type='button' data-edit='sales|"+s.id+"'>تعديل الأوردر</button>" +
@@ -7272,7 +7292,7 @@
           note:"أوردر ملغي · "+what, inn:shipIn(s), out:0, src:"أوردر"});
       } else if(Number(s.paid)||0){
         L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
-          note:"أوردر "+ST_LABEL[stOf(s)]+" · "+what, inn:Number(s.paid)||0, out:0, src:"أوردر"});
+          note:"أوردر "+saleStateTxt(s)+" · "+what, inn:Number(s.paid)||0, out:0, src:"أوردر"});
       }
       if(shipCounts(s) && shipOut(s))
         L.push({d:s.date, at:s.at, t:"شحن مدفوع", who:(s.shipCo||"شركة شحن"), kind:"شحن",
@@ -8132,7 +8152,7 @@
   function renderLog(){
     var all = [];
     live("sales").forEach(function(s){ all.push({at:s.at,by:s.by,edited:s.editedBy,
-      t:"أوردر "+ST_LABEL[stOf(s)]+(s.no?" #"+s.no:""),
+      t:"أوردر "+saleStateTxt(s)+(s.no?" #"+s.no:""),
       d:partyName(s.partyId)+" · "+itemsLabel(s),v:saleTotal(s)}); });
     /* الفاتورة الواحدة كذا سجل — واحد لكل لون ومقاس. السجل بيتكلم عن
        «مين عمل إيه وإمتى»، وإنت سجّلت فاتورة واحدة مش ٤٧ حركة. */
@@ -10173,7 +10193,7 @@
     if(prev === "cancelled" && next === "delivered" && !(Number(rec.paid)||0))
       toast("الحالة بقت مسلّم — راجع خانة المحصّل من زرار تعديل");
     else
-      toast("الحالة بقت: " + ST_LABEL[next]);
+      toast("الحالة بقت: " + saleStateTxt(rec));
   });
 
   TSALES.addEventListener("click", function(e){
@@ -10744,7 +10764,7 @@
       var p = db.parties.find(function(x){ return x.id===s.partyId; }) || {};
       var ls = SL(s);
       ls.forEach(function(l, i){
-        lines.push([s.no||"", s.date, ST_LABEL[stOf(s)], partyName(s.partyId), p.phone||"", p.gov||"",
+        lines.push([s.no||"", s.date, saleStateTxt(s), partyName(s.partyId), p.phone||"", p.gov||"",
           itemName(l.itemId), vColor(l), vSize(l), Number(l.qty)||0, lineRet(l), lineSold(l,s),
           Number(l.price)||0, lineTotal(l,s),
           i===0 ? saleTotal(s) : "",
