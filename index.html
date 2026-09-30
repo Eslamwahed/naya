@@ -91,9 +91,22 @@
   header.top input::placeholder{color:rgba(255,255,255,.6)}
 
   nav{
-    display:flex;gap:var(--sp-1);background:var(--card);border-bottom:1px solid var(--line);
-    overflow-x:auto;padding:0 var(--sp-3);
+    display:block;background:var(--card);border-bottom:1px solid var(--line);
   }
+  /* ٥ أقسام فوق، وتحتها شاشات القسم المفتوح */
+  .nav-groups{display:flex;justify-content:center;gap:var(--sp-1);padding:0 var(--sp-3);overflow-x:auto}
+  .nav-groups button{display:flex;align-items:center;gap:8px;padding:var(--sp-3) var(--sp-4)}
+  .nav-groups button .ic{font-size:17px;line-height:1}
+  .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
+  .nav-groups .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+    background:var(--due);color:#fff;font-size:10px;font-weight:700;line-height:1}
+  .nav-groups .badge[hidden]{display:none}
+  .nav-sub{display:flex;justify-content:center;gap:6px;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line);
+    overflow-x:auto;background:var(--paper)}
+  .nav-sub.solo{display:none}
+  .nav-sub button{border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card);padding:6px 14px;font-size:var(--fs-2)}
+  .nav-sub button.grp-off{display:none}
+  .nav-sub button[aria-current="true"]{background:var(--teal);border-color:var(--teal);color:var(--card);font-weight:600}
   nav button{
     background:none;border:none;border-bottom:3px solid transparent;
     padding:var(--sp-3) var(--sp-3);font:inherit;font-size:var(--fs-3);color:var(--ink-soft);
@@ -332,6 +345,60 @@
   .stepline.done{color:var(--gain)}
   .owarn p{margin:0 0 var(--sp-1);font-size:var(--fs-2);color:var(--ink-soft);line-height:1.5}
   @media (max-width:820px){ .osum{grid-template-columns:1fr 1fr} }
+
+  /* ================= الرئيسية ================= */
+  .hm-hello{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-3)}
+  .hm-hello h2{margin:0}
+  .hm-hello p{margin:0;color:var(--ink-soft);font-size:var(--fs-2)}
+  .hm-per{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .hm-per select,.hm-per input{width:auto;border-radius:var(--r-pill);padding:6px 14px;font-size:var(--fs-2)}
+  .hm-todo{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-bottom:var(--sp-4)}
+  .hm-todo h3{margin:0;padding:var(--sp-3) var(--sp-4);font-size:var(--fs-4);display:flex;justify-content:space-between;
+    align-items:center;border-bottom:1px solid var(--line)}
+  .hm-todo h3 small{font-weight:400;color:var(--ink-soft);font-size:var(--fs-2)}
+  .hm-ti{display:grid;grid-template-columns:36px minmax(0,1fr) auto 14px;gap:var(--sp-3);align-items:center;width:100%;
+    padding:12px var(--sp-4);border:0;border-top:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .hm-ti:first-of-type{border-top:0}
+  .hm-ti:hover{background:var(--teal-soft)}
+  .hm-ti .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;background:var(--teal-soft)}
+  .hm-ti.bad .ic{background:#F6E3E8} .hm-ti.money .ic{background:#E3F1EA} .hm-ti.warn .ic{background:#F7EEDB}
+  [data-theme="dark"] .hm-ti.bad .ic,[data-theme="dark"] .hm-ti.money .ic,[data-theme="dark"] .hm-ti.warn .ic{background:var(--teal-soft)}
+  .hm-ti b{display:block;font-weight:600}
+  .hm-ti .s{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .hm-ti .s.red{color:var(--due);font-weight:600}
+  .hm-ti .v{font-weight:700;white-space:nowrap}
+  .hm-ti.money .v{color:var(--gain)} .hm-ti.bad .v{color:var(--due)}
+  .hm-ti .go{color:var(--ink-soft)}
+  .hm-ok{margin:0;padding:var(--sp-4);text-align:center;color:var(--gain);font-weight:600}
+  .hm-big{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-3);margin-bottom:var(--sp-4)}
+  .hm-k{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
+    cursor:pointer;font:inherit;color:inherit;text-align:start;min-width:0}
+  .hm-k:hover{border-color:var(--teal)}
+  .hm-k > span{font-size:var(--fs-2);color:var(--ink-soft)}
+  .hm-k strong{display:block;font-size:var(--fs-6);font-weight:700;margin:2px 0;white-space:nowrap}
+  .hm-k small{font-size:var(--fs-1);color:var(--ink-soft)}
+  .hm-month{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-4)}
+  .hm-month h3{margin:0 0 var(--sp-2);font-size:var(--fs-3);display:flex;justify-content:space-between;gap:var(--sp-2)}
+  .hm-month h3 button{font:inherit;font-weight:400;font-size:var(--fs-2);color:var(--teal);background:none;border:0;cursor:pointer}
+  .hm-mrow{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2)}
+  .hm-mrow div{padding:4px 0}
+  .hm-mrow span{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .hm-mrow b{font-size:var(--fs-4)}
+  .hm-bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:var(--sp-2);display:flex}
+  .hm-bar i{display:block;height:100%}
+  .hm-legend{display:flex;gap:var(--sp-3);font-size:var(--fs-1);color:var(--ink-soft);margin-top:4px;flex-wrap:wrap}
+  .hm-legend em{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:4px}
+  .hm-more{margin-top:var(--sp-2)}
+  .hm-more > summary{cursor:pointer;color:var(--teal);font-weight:600;padding:var(--sp-2) 0;font-size:var(--fs-3)}
+  @media (max-width:980px){ .hm-big{grid-template-columns:repeat(3,1fr)} }
+  @media (max-width:760px){
+    .hm-big{grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+    .hm-k{padding:var(--sp-3)}
+    .hm-k strong{font-size:var(--fs-5)}
+    .hm-big > .hm-k:last-child:nth-child(odd){grid-column:1 / -1}
+    .hm-mrow{grid-template-columns:repeat(3,1fr)}
+    .hm-ti{padding:12px var(--sp-3);gap:10px}
+  }
 
   /* ================= تفاصيل الأوردر ================= */
   .dd{display:grid;gap:var(--sp-4)}
@@ -938,7 +1005,18 @@
     header.top{padding:var(--sp-2) var(--sp-3);gap:var(--sp-2)}
     header.top h1{font-size:var(--fs-4)}
     header.top input{width:88px}
-    nav button{padding:var(--sp-3) var(--sp-2);font-size:var(--fs-3)}
+    /* الأقسام شريط ثابت تحت زي التطبيقات — صباعك بيوصله */
+    .nav-groups{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--card);border-top:1px solid var(--line);
+      display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
+      box-shadow:0 -2px 10px rgba(0,0,0,.05)}
+    .nav-groups button{flex-direction:column;gap:1px;padding:6px 0;font-size:11px;border-bottom:none;position:relative}
+    .nav-groups button[hidden]{display:none}
+    .nav-groups button .ic{font-size:20px}
+    .nav-groups button.on{border-bottom:none}
+    .nav-groups .badge{position:absolute;top:2px;inset-inline-start:calc(50% + 4px)}
+    .nav-sub{justify-content:flex-start;border-top:none}
+    .nav-sub button{flex:0 0 auto}
+    body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
     .panel{padding:var(--sp-3) var(--sp-3)}
     .fgroup{padding:var(--sp-3) var(--sp-2) var(--sp-2)}
     form.grid{grid-template-columns:1fr;gap:var(--sp-2)}
@@ -1047,27 +1125,57 @@
 <div id="offline" hidden style="background:#F6E7E8;color:#8C2F39;padding:9px 20px;font-size:var(--fs-3);border-bottom:1px solid #E4C9CB">
   مفيش تخزين متاح في المتصفح ده — الشغل في الذاكرة بس وهيضيع لما تقفل. روح تبويب "نسخة احتياطية" واربط ملف على جهازك، أو نزّل نسخة قبل ما تقفل.
 </div>
+<!-- التنقل: ٥ أقسام، وكل قسم تحته شاشاته. على الموبايل الأقسام شريط ثابت تحت. -->
 <nav id="nav">
-  <button data-tab="dash" aria-current="true">لوحة المتابعة</button>
-  <button data-tab="capital">رأس المال</button>
-  <button data-tab="cash">الخزنة</button>
-  <button data-tab="purch">المشتريات</button>
-  <button data-tab="items">الأصناف</button>
-  <button data-tab="price">التسعير</button>
-  <button data-tab="inv">المخزون</button>
-  <button data-tab="sales">المبيعات</button>
-  <button data-tab="ship">شركات الشحن</button>
-  <button data-tab="parties">العملاء والموردين</button>
-  <button data-tab="rep">تقارير</button>
-  <button data-tab="log">سجل الحركات</button>
-  <button data-tab="backup">الإعدادات</button>
+  <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
+    <button type="button" data-group="home"><span class="ic" aria-hidden="true">⌂</span><span class="lb">الرئيسية</span></button>
+    <button type="button" data-group="orders"><span class="ic" aria-hidden="true">📦</span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
+    <button type="button" data-group="goods"><span class="ic" aria-hidden="true">👗</span><span class="lb">البضاعة</span></button>
+    <button type="button" data-group="money"><span class="ic" aria-hidden="true">💰</span><span class="lb">الفلوس</span></button>
+    <button type="button" data-group="more"><span class="ic" aria-hidden="true">☰</span><span class="lb">المزيد</span></button>
+  </div>
+  <div class="nav-sub" id="nav-sub">
+    <button data-tab="dash" data-grp="home" aria-current="true">الرئيسية</button>
+    <button data-tab="sales" data-grp="orders">الأوردرات</button>
+    <button data-tab="items" data-grp="goods">الأصناف</button>
+    <button data-tab="price" data-grp="goods">التسعير</button>
+    <button data-tab="inv" data-grp="goods">المخزون</button>
+    <button data-tab="purch" data-grp="goods">المشتريات</button>
+    <button data-tab="cash" data-grp="money">الخزنة</button>
+    <button data-tab="ship" data-grp="money">شركات الشحن</button>
+    <button data-tab="capital" data-grp="money">رأس المال</button>
+    <button data-tab="parties" data-grp="more">العملاء والموردين</button>
+    <button data-tab="rep" data-grp="more">تقارير</button>
+    <button data-tab="log" data-grp="more">سجل الحركات</button>
+    <button data-tab="backup" data-grp="more">الإعدادات</button>
+  </div>
 </nav>
 
 <main>
 
 <!-- لوحة المتابعة -->
 <section id="tab-dash">
-  <h2>لوحة المتابعة</h2>
+  <!-- الرئيسية: اللي مستنيك · الأرقام الأساسية · الفترة — والتفاصيل كلها مطوية تحت -->
+  <div class="hm-hello">
+    <div><h2 id="hm-hi">أهلًا</h2><p id="hm-date"></p></div>
+    <div class="hm-per">
+      <select id="per-home" class="per" aria-label="الفترة">
+        <option value="all">كل الفترات</option>
+        <option value="month">الشهر ده</option>
+        <option value="prev">الشهر اللي فات</option>
+        <option value="d30">آخر ٣٠ يوم</option>
+        <option value="custom">فترة محددة</option>
+      </select>
+      <span class="per-cust" hidden><input type="date" id="per-from-home" class="per-from" aria-label="من"></span>
+      <span class="per-cust" hidden><input type="date" id="per-to-home" class="per-to" aria-label="لـ"></span>
+    </div>
+  </div>
+  <section class="hm-todo" id="hm-todo"></section>
+  <section class="hm-big" id="hm-big"></section>
+  <section class="hm-month" id="hm-month"></section>
+
+  <details class="hm-more" id="dash-more">
+  <summary>كل الأرقام والجداول بالتفصيل</summary>
   <p class="hint">أرقام اليوم مبنية على كل الحركات المسجلة. التكلفة محسوبة بمتوسط سعر الشراء لكل صنف.</p>
   <div class="panel" style="padding:12px 14px">
     <div class="grid" style="align-items:end">
@@ -1129,6 +1237,7 @@
       <div class="tbl-wrap"><table id="t-pay"></table></div>
     </div>
   </div>
+  </details>
 </section>
 
 <!-- مبيعات -->
@@ -2345,8 +2454,19 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "85";
+  var VERSION = "86";
   var CHANGELOG = [
+    { v:"86", d:"2026-09-30", items:[
+      "التنقل بقى ٥ أقسام بدل ١٣ زرار: الرئيسية · الأوردرات · البضاعة · الفلوس · المزيد — وكل قسم تحته شاشاته",
+      "على الموبايل الأقسام شريط ثابت تحت الشاشة زي التطبيقات، وعلى «الأوردرات» رقم أحمر بعدد اللي محتاج منك حاجة",
+      "دوسة على قسم بترجّعك لآخر شاشة كنت فيها جوّاه",
+      "لوحة المتابعة بقت «الرئيسية»: «محتاج منك النهارده» — كل حاجة مستنياك في سطر، ودوسة عليه بتوديك مكانها",
+      "كل صنف قرّب يخلص في سطر لوحده، وكل مورد ليه فلوس في سطر لوحده",
+      "تحتها الأرقام الأساسية: صافي الربح · لازم تبيع بكام · الخزنة · قيمة المخزون · لك عند شركات الشحن — ودوسة على أي رقم بتفتح تفاصيله",
+      "وشريط الفترة: المبيعات المسلّمة، وأوردرات الفترة اتسلّم منها كام ولسه ماشي كام واترفض كام",
+      "كل الأرقام والجداول القديمة موجودة زي ما هي في «كل الأرقام والجداول بالتفصيل» تحت — ونفس الحسابات بالظبط",
+      "الرئيسية على الموبايل بقت حوالي شاشة ونص بدل ٧ شاشات"
+    ]},
     { v:"85", d:"2026-09-29", items:[
       "تفاصيل الأوردر اتنظّمت من فوق لتحت: الرأس (الرقم · الحالة · الشركة · الكود) ← الخطوة الجاية ← تلات كروت ← الأصناف",
       "كود البوليصة بدوسة بيتنسخ، و«حذف» بقى جوه «⋯» عشان ما يتداسش بالغلط جنب «تعديل»",
@@ -4359,6 +4479,154 @@
     renderKpiDetail();
   }
 
+  /* ================= الرئيسية =================
+     سؤال واحد: «إيه اللي مستنيني النهارده؟» — وتحته الأرقام الأساسية.
+     مفيش ولا رقم هنا بيتحسب لوحده: كله من نفس الدوال اللي بتحسب
+     المبيعات والخزنة والمخزون واللوحة التفصيلية (stageLists · shipPend ·
+     heldOpen · lowStockList · partyBalance · periodStats · cashBox ·
+     stockBookValue · walletsTotal · cashBe*) — فالرقم هنا = الرقم هناك. */
+  function renderHome(){
+    var now = new Date(), h = now.getHours();
+    var hi = document.getElementById("hm-hi");
+    if(hi) hi.textContent = (h < 12 ? "صباح الخير" : "مساء الخير") + (squish(me) ? " يا " + squish(me) : "");
+    var dt = document.getElementById("hm-date");
+    if(dt){ try{ dt.textContent = now.toLocaleDateString("ar-EG-u-nu-latn", { weekday:"long", day:"numeric", month:"long" }); }
+            catch(e){ dt.textContent = today(); } }
+
+    /* ---- محتاج منك النهارده ---- */
+    var L = [];
+    var line = function(o){ L.push(o); };
+    if(canTab("sales")){
+      var g = stageLists();
+      if(g.st[1].length)
+        line({ ic:"🏷", t: g.st[1].length === 1 ? "أوردر ناقصه شحن" : "أوردرات ناقصها شحن",
+               s:"اكتب الشركة وكود البوليصة", v:qty(g.st[1].length), go:"sales|1" });
+      if(g.st[2].length){
+        var stale = g.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; }).length;
+        line({ ic:"🚚", cls: stale ? "bad" : "", t:"أوردرات مع المندوب",
+               s: stale ? qty(stale) + " بقالهم " + SG_STALE + " أيام أو أكتر — كلّم الشركة" : "مستني العميل يستلم",
+               red: !!stale, v:qty(g.st[2].length), go:"sales|2" });
+      }
+      var byCo = {};
+      g.st[3].forEach(function(x){ var c = squish(x.shipCo); (byCo[c] = byCo[c] || []).push(x); });
+      Object.keys(byCo).forEach(function(c){
+        var sum = byCo[c].reduce(function(a, x){ return a + shipPend(x).left; }, 0);
+        line({ ic:"💵", cls:"money", t:"فلوسك عند " + (c || "شركة من غير اسم"),
+               s:"من " + qty(byCo[c].length) + " أوردر — استلمها", v:money(sum), go:"sales|3" });
+      });
+      if(g.direct.length){
+        var due = g.direct.reduce(function(a, x){ return a + Math.max(0, sDue(x)); }, 0);
+        if(due > 0.009)
+          line({ ic:"🤝", cls:"money", t:"لك عند عملاء (تحصيل مباشر)",
+                 s:qty(g.direct.length) + " أوردر", v:money(due), go:"sales|3" });
+      }
+      var held = {};
+      heldOpen().forEach(function(x){ var c = squish(x.s.shipCo); (held[c] = held[c] || []).push(x); });
+      Object.keys(held).forEach(function(c){
+        var n = held[c].reduce(function(a, x){ return a + x.n; }, 0);
+        var names = held[c].map(function(x){ return itemName(x.l.itemId); })
+          .filter(function(v, i, a){ return a.indexOf(v) === i; });
+        line({ ic:"↩", t:"مرتجع عند " + (c || "شركة من غير اسم"),
+               s:names.slice(0, 2).join(" · ") + (names.length > 2 ? " و" + qty(names.length - 2) + " تاني" : ""),
+               v:qty(n) + " قطعة", go:"sales|4" });
+      });
+    }
+    if(canTab("inv")){
+      lowStockList().forEach(function(x){
+        var lb = vLabel(x.color, x.size);
+        line({ ic:"⚠", cls: x.free <= 0 ? "bad" : "warn",
+               t:x.name + (lb ? " · " + lb : "") + (x.free <= 0 ? " خلصت" : " قرّبت تخلص"),
+               s:"فاضل " + qty(x.free) + (x.min ? " — حد التنبيه " + qty(x.min) : ""), v:qty(x.free),
+               go:"inv|" + (x.free <= 0 ? "out" : "low") });
+      });
+    }
+    if(canTab("parties") && canMoney()){
+      live("parties").forEach(function(p){
+        if(p.type !== "supplier") return;
+        var b = partyBalance(p.id);
+        if(b < -0.009) line({ ic:"🧾", cls:"bad", t:"عليك لـ " + p.name, s:"من المشتريات",
+                              v:money(-b), go:"party|" + p.id });
+      });
+    }
+    var todo = document.getElementById("hm-todo");
+    if(todo) todo.innerHTML = "<h3>محتاج منك النهارده <small>" +
+        (L.length ? plural(L.length, "حاجة واحدة", "حاجتين", "حاجات") : "") + "</small></h3>" +
+      (L.length ? L.map(function(o){
+        return "<button type='button' class='hm-ti" + (o.cls ? " " + o.cls : "") + "' data-hgo='" + esc(o.go) + "'>" +
+          "<span class='ic' aria-hidden='true'>" + o.ic + "</span>" +
+          "<span><b>" + esc(o.t) + "</b><span class='s" + (o.red ? " red" : "") + "'>" + esc(o.s) + "</span></span>" +
+          "<span class='v num'>" + esc(o.v) + "</span><span class='go' aria-hidden='true'>‹</span></button>";
+      }).join("") : "<p class='hm-ok'>✓ مفيش حاجة مستنياك دلوقتي</p>");
+
+    /* ---- الأرقام الأساسية — نفس أرقام «كل الأرقام بالتفصيل» تحت ---- */
+    var cur = periodStats(periodRange());
+    var sel = document.getElementById("per-home");
+    var perTxt = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : "";
+    var be = toBreakCash();
+    var K = [
+      ["net", "صافي الربح", money(cur.net), cur.net >= 0 ? "v-gain" : "v-due", perTxt, 1],
+      ["be", "لازم تبيع بكام", cashBeTxt(), cashBeCls(), be > 0.009 ? "عشان ترجّع فلوسك" : "رجّعت فلوسك ✓", 1],
+      ["cash", "الخزنة", money(cashBox()), cashBox() >= 0 ? "" : "v-due", "الفلوس اللي في إيدك", 0],
+      ["stock", "قيمة المخزون", money(stockBookValue()), "", "بالتكلفة", 1],
+      ["wallet", "لك عند شركات الشحن", money(walletsTotal()), walletsTotal() > 0.009 ? "v-gain" : "", "لسه ما استلمتهاش", 0]
+    ];
+    var big = document.getElementById("hm-big");
+    if(big) big.innerHTML = K.map(function(k){
+      return "<button type='button' class='hm-k" + (k[5] ? " money-only" : "") + "' data-hkpi='" + k[0] + "'>" +
+        "<span>" + esc(k[1]) + "</span><strong class='num " + k[3] + "'>" + esc(k[2]) + "</strong>" +
+        "<small>" + esc(k[4]) + "</small></button>";
+    }).join("");
+
+    /* ---- الفترة: أوردراتها اتقسمت إزاي ---- */
+    var n = cur.list.length, dl = cur.deliv.length;
+    var cc = cur.list.filter(isCancelled).length, op = n - dl - cc;
+    var pct = function(x){ return n ? (x / n * 100).toFixed(1) + "%" : "0"; };
+    var mo = document.getElementById("hm-month");
+    if(mo) mo.innerHTML = "<h3><span>" + esc(perTxt) + "</span>" +
+        (canTab("rep") ? "<button type='button' data-hgo='rep'>التقارير ‹</button>" : "") + "</h3>" +
+      "<div class='hm-mrow'>" +
+        "<div><span>مبيعات مسلّمة</span><b class='num'>" + esc(money(cur.revenue)) + "</b></div>" +
+        "<div><span>أوردرات</span><b class='num'>" + qty(n) + "</b></div>" +
+        "<div><span>اتسلّم</span><b class='num'>" + qty(dl) + "</b></div>" +
+        "<div><span>لسه ماشي</span><b class='num'>" + qty(op) + "</b></div>" +
+        "<div><span>اترفض</span><b class='num" + (cc ? " v-due" : "") + "'>" + qty(cc) + "</b></div>" +
+      "</div>" +
+      (n ? "<div class='hm-bar' aria-hidden='true'><i style='width:" + pct(dl) + ";background:var(--gain)'></i>" +
+           "<i style='width:" + pct(op) + ";background:var(--warn)'></i><i style='width:" + pct(cc) + ";background:var(--due)'></i></div>" +
+           "<div class='hm-legend'><span><em style='background:var(--gain)'></em>اتسلّم " + qty(dl) + "</span>" +
+           "<span><em style='background:var(--warn)'></em>لسه ماشي " + qty(op) + "</span>" +
+           "<span><em style='background:var(--due)'></em>اترفض " + qty(cc) + "</span></div>" : "");
+  }
+
+  // دوسة على سطر في «محتاج منك» بتوديك مكانه على طول
+  document.getElementById("tab-dash").addEventListener("click", function(e){
+    var k = e.target.closest("[data-hkpi]");
+    if(k){
+      // نفس تفاصيل الكارت في «كل الأرقام بالتفصيل» — نفس الحساب بالظبط
+      var more = document.getElementById("dash-more");
+      if(more) more.open = true;
+      kpiOpen = k.dataset.hkpi; renderKPIs();
+      var pnl = document.getElementById("kpi-panel");
+      if(pnl) pnl.scrollIntoView({ block:"start" });
+      return;
+    }
+    var t = e.target.closest("[data-hgo]"); if(!t) return;
+    var q = t.dataset.hgo.split("|");
+    if(q[0] === "sales"){ goTab("sales"); setSView(q[1]); window.scrollTo(0, 0); return; }
+    if(q[0] === "party"){
+      goTab("parties"); statementFor = q[1]; renderStatement(); renderParties();
+      var sp = document.getElementById("statement-panel"); if(sp) sp.scrollIntoView({ block:"nearest" });
+      return;
+    }
+    if(q[0] === "inv"){
+      goTab("inv");
+      var low = document.querySelector("#tab-inv [data-invonly='" + (q[1] || "low") + "']");
+      if(low) low.click();
+      return;
+    }
+    goTab(q[0]);
+  });
+
   /* ================= تفاصيل كروت لوحة المتابعة ================= */
   /* كل رقم في اللوحة لازم يكون ليه «من فين جه». كل مفتاح بيرجّع
      {note, head, rows, foot} والجدول بيتبني منهم. الأرقام بتتحسب بنفس
@@ -4822,8 +5090,10 @@
       "مفيش أصناف لسه. ضيف أصنافك من تبويب الأصناف الأول.");
   }
 
-  function renderLowStock(){
-    var rows = [];
+  /* الأصناف اللي قربت تخلص أو خلصت — قاعدة واحدة للوحة التفصيلية
+     والرئيسية، عشان الاتنين يقولوا نفس الكلام. */
+  function lowStockList(){
+    var out = [];
     live("items").forEach(function(i){
       var min = Number(i.min)||0;
       variantsOf(i.id).forEach(function(v){
@@ -4832,14 +5102,19 @@
           return isDelivered(s) && SL(s).some(function(l){ return keyOf(l)===vKey(i.id,v.color,v.size); }); });
         var boughtEver = live("purchases").some(function(p){ return keyOf(p)===vKey(i.id,v.color,v.size); });
         var alert = (min > 0 && free <= min) || (free <= 0 && (soldEver || boughtEver));
-        if(!alert) return;
-        var lbl = vLabel(v.color, v.size);
-        rows.push("<tr><td class='wide'>"+esc(i.name)+
-          (lbl ? " <span class='pill'>"+esc(lbl)+"</span>" : "")+"</td>"+
-          "<td class='num "+(free<=0?"v-due":"")+"'>"+qty(free)+" "+esc(i.unit||"")+"</td>"+
-          "<td class='num'>"+(min?qty(min):"—")+"</td>"+
-          "<td>"+(free<=0?"<span class='pill due'>خلصان</span>":"<span class='pill due'>قرب يخلص</span>")+"</td></tr>");
+        if(alert) out.push({ itemId:i.id, name:i.name, unit:i.unit||"", color:v.color, size:v.size, free:free, min:min });
       });
+    });
+    return out;
+  }
+  function renderLowStock(){
+    var rows = lowStockList().map(function(x){
+      var lbl = vLabel(x.color, x.size), free = x.free, min = x.min;
+      return "<tr><td class='wide'>"+esc(x.name)+
+          (lbl ? " <span class='pill'>"+esc(lbl)+"</span>" : "")+"</td>"+
+          "<td class='num "+(free<=0?"v-due":"")+"'>"+qty(free)+" "+esc(x.unit)+"</td>"+
+          "<td class='num'>"+(min?qty(min):"—")+"</td>"+
+          "<td>"+(free<=0?"<span class='pill due'>خلصان</span>":"<span class='pill due'>قرب يخلص</span>")+"</td></tr>";
     });
     document.getElementById("low-panel").hidden = !rows.length;
     if(rows.length) table("t-low", ["الصنف","المتاح","حد التنبيه",""], rows, "");
@@ -9613,7 +9888,7 @@
      لـ١٨ ثانية للحركة الواحدة. دلوقتي بنرسم الشاشة المفتوحة بس،
      والباقي بيتعلّم "محتاج رسم" وبيترسم أول ما تفتحه. */
   var TAB_RENDER = {
-    dash:    function(){ syncPeriodUI(); renderKPIs(); renderDashPartners(); renderStock();
+    dash:    function(){ syncPeriodUI(); renderHome(); renderKPIs(); renderDashPartners(); renderStock();
                          renderLowStock(); renderShipping(); renderBalances(); },
     capital: function(){ renderCapital(); renderDistLimits(); },
     cash:    function(){ renderWallets(); renderCash(); },
@@ -9645,6 +9920,7 @@
     fillSelects();                       // القوايم بتتغذّى في كل الأدراج
     Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
     renderTab(activeTab);
+    navBadge();
   }
   // بتتنادى عند تغيير التبويب
   function showTab(tab){
@@ -9664,6 +9940,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("#nav button[data-tab]"), function(b){
       b.hidden = !canTab(b.dataset.tab);
     });
+    navPerms();
     // لو إنت واقف على شاشة مش من حقك، ارجع لأول شاشة مسموحة
     if(!canTab(activeTab)){
       var t = firstAllowedTab();
@@ -9772,12 +10049,62 @@
     if(SD_OPEN) closeDrawer();
     Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){ x.setAttribute("aria-current","false"); });
     b.setAttribute("aria-current","true");
+    navSync(b.dataset.tab);
     // بتتقرا من الـDOM بدل قايمة ثابتة بتتنسى مع كل تبويب جديد
     Array.prototype.forEach.call(document.querySelectorAll("main > section[id^='tab-']"), function(sec){
       sec.hidden = (sec.id !== "tab-" + b.dataset.tab);
     });
     showTab(b.dataset.tab);          // يترسم دلوقتي لو كان محتاج
     window.scrollTo(0,0);
+  });
+
+  /* ---------- الأقسام الخمسة ----------
+     كل شاشة ليها قسم (data-grp على زرارها). القسم المفتوح بيوري شاشاته
+     بس، والقسم اللي فيه شاشة واحدة (الرئيسية · الأوردرات) مالوش شريط
+     فرعي. دوسة على قسم بترجّعك لآخر شاشة كنت فيها جوّاه. */
+  var navLast = {};
+  function grpOf(tab){
+    var b = document.querySelector('#nav-sub button[data-tab="' + tab + '"]');
+    return b ? b.dataset.grp : "home";
+  }
+  function navSync(tab){
+    tab = tab || activeTab;
+    var g = grpOf(tab);
+    navLast[g] = tab;
+    Array.prototype.forEach.call(document.querySelectorAll("#nav-groups button[data-group]"), function(x){
+      x.classList.toggle("on", x.dataset.group === g);
+      x.setAttribute("aria-selected", x.dataset.group === g ? "true" : "false");
+    });
+    var shown = 0;
+    Array.prototype.forEach.call(document.querySelectorAll("#nav-sub button[data-tab]"), function(x){
+      var mine = x.dataset.grp === g;
+      x.classList.toggle("grp-off", !mine);
+      if(mine && !x.hidden) shown++;
+    });
+    var sub = document.getElementById("nav-sub");
+    if(sub) sub.classList.toggle("solo", shown <= 1);
+  }
+  // القسم بيختفي لو ولا شاشة فيه من حقك
+  function navPerms(){
+    Array.prototype.forEach.call(document.querySelectorAll("#nav-groups button[data-group]"), function(x){
+      x.hidden = !document.querySelector('#nav-sub button[data-grp="' + x.dataset.group + '"]:not([hidden])');
+    });
+    navSync(activeTab);
+  }
+  // الرقم الأحمر على «الأوردرات» = نفس عدّاد «محتاج مني حاجة» في شاشة المبيعات
+  function navBadge(){
+    var el = document.getElementById("nav-badge");
+    if(!el) return;
+    var n = canTab("sales") ? live("sales").filter(function(x){ return !orderStep(x).done; }).length : 0;
+    el.hidden = !n;
+    el.textContent = n > 99 ? "99+" : String(n);
+  }
+  document.getElementById("nav-groups").addEventListener("click", function(e){
+    var gb = e.target.closest("button[data-group]"); if(!gb) return;
+    var g = gb.dataset.group, want = navLast[g];
+    var btn = want && document.querySelector('#nav-sub button[data-tab="' + want + '"]:not([hidden])');
+    if(!btn) btn = document.querySelector('#nav-sub button[data-grp="' + g + '"]:not([hidden])');
+    if(btn) btn.click();
   });
 
   /* ---------- إدخال ---------- */
