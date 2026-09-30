@@ -1767,6 +1767,7 @@
             <input type="number" id="p-paid" step="any" min="0" value="0"></div>
           <div><label for="p-note">ملاحظة</label><input id="p-note" autocomplete="off"></div>
         </div>
+        <p class="hintline" id="p-paid-hint"></p>
         <p class="hintline">النقل بيتوزّع على الأصناف بنسبة قيمة كل صنف، وبيتخصم من الخزنة لوحده — مش بيتحسب دَين على المورد.</p>
       </div>
 
@@ -2834,8 +2835,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "89";
+  var VERSION = "90";
   var CHANGELOG = [
+    { v:"90", d:"2026-09-30", items:[
+      "فاتورة الشراء: «المدفوع للمورد» بيتملي لوحده بقيمة البضاعة (من غير النقل) وبيتغيّر مع الكميات والأسعار",
+      "لو كتبت المدفوع بإيدك (دفعت جزء بس) بيفضل رقمك، وزرار «ادفع الفاتورة كلها» بيرجّعه يتملي لوحده",
+      "تعديل فاتورة كانت مدفوعة كلها: المدفوع بيمشي مع التعديل — ومدفوع جزء منها: بيفضل زي ما هو",
+      "شيت الفاتورة: لو خانة المدفوع فاضية = الفاتورة كلها مدفوعة"
+    ]},
     { v:"89", d:"2026-09-30", items:[
       "رأس المال: شارة فوق — خضرا «✓ الميزانية مظبوطة» أو حمرا بالفرق، و«وريني التفاصيل» بتفتح جدول التوفيق",
       "شريط بنسبة كل شريك، وكارت لكل شريك: نسبته · رأس ماله · أرباح ليه لسه ما أخدهاش · إجمالي حقه",
@@ -8708,7 +8715,8 @@
     return (l.mix||[]).reduce(function(a,m){ return a + (Number(m.qty)||0); }, 0);
   }
   function newPDraft(){
-    return { date:firstOpenDate(), partyId:"", inv:"", freight:0, paid:0, note:"",
+    // paidAuto: المدفوع بيمشي ورا قيمة البضاعة لوحده لحد ما تكتب فيه بإيدك
+    return { date:firstOpenDate(), partyId:"", inv:"", freight:0, paid:0, paidAuto:true, note:"",
              lines:[newPLine()], batchId:"" };
   }
   function plPackQty(l){ var n = Number(l.packQty)||0; return n > 0 ? n : 1; }
@@ -8859,6 +8867,7 @@
 
     var goods = pdGoods(), freight = Number(pdraft.freight)||0;
     var pieces = pdraft.lines.reduce(function(a,l){ return a + plQty(l); }, 0);
+    syncPAutoPaid(goods);
     var paid = Number(pdraft.paid)||0;
     var rest = goods - paid;
     var box = document.getElementById("p-total");
@@ -8876,6 +8885,30 @@
         esc(money(paid + freight)) + "</b></div>";
     updateImpact("purchases");
   }
+
+  // المدفوع للمورد بيتملي لوحده بقيمة البضاعة (من غير النقل — النقل للناقل).
+  // أول ما تكتب فيه بإيدك بيقف، و«ادفع الفاتورة كلها» بترجّعه.
+  function syncPAutoPaid(goods){
+    var inp = document.getElementById("p-paid"), hint = document.getElementById("p-paid-hint");
+    if(pdraft.paidAuto){
+      pdraft.paid = goods;
+      if(inp) inp.value = goods ? String(Math.round(goods * 100) / 100) : 0;
+    }
+    if(!hint) return;
+    var paid = Number(pdraft.paid)||0, html = "";
+    if(pdraft.paidAuto)
+      html = "✓ المدفوع = قيمة البضاعة وبيتملي لوحده — لو دفعت جزء بس، اكتب اللي دفعته.";
+    else if(goods > 0.009 && Math.abs(goods - paid) > 0.009)
+      html = "إنت كاتب المدفوع بإيدك. <button class='rowact' type='button' id='b-paid-all'>ادفع الفاتورة كلها (" +
+        esc(money(goods)) + ")</button>";
+    // من غير تغيير ما نعيدش الكتابة — لو اتكتبت وإنت دايس على الزرار، الدوسة بتضيع
+    if(hint.dataset.h !== html){ hint.dataset.h = html; hint.innerHTML = html; }
+  }
+  document.getElementById("p-paid-hint").addEventListener("click", function(e){
+    if(!e.target.closest("#b-paid-all") || !pdraft) return;
+    pdraft.paidAuto = true;
+    clearPOver(); renderPCalc(); renderPDraftNote();
+  });
 
   // رصيد الخزنة من غير الفاتورة اللي بنعدّلها
   function cashBoxForPurch(){
@@ -9126,7 +9159,7 @@
     return groups;
   }
   function nInv(n){ return n === 1 ? "فاتورة واحدة" : plural(n, "فاتورة", "فاتورتين", "فواتير"); }
-  function nDays(n){ return n === 0 ? "النهارده" : plural(n, "يوم", "يومين", "أيام"); }
+  function nDays(n){ return plural(n, "يوم", "يومين", "أيام"); }
   function monthLabel(d){
     try{
       var t = new Date((d || "").slice(0,7) + "-01T00:00:00");
@@ -9181,7 +9214,7 @@
       var oldest = open.reduce(function(a, g){ return !a || (g.head.date||"") < a ? (g.head.date||"") : a; }, "");
       var sub = open.length
         ? plural(open.length, "فاتورة واحدة", "فاتورتين", "فواتير") + " مش خالصة" +
-          (oldest ? " · أقدم واحدة من " + nDays(Math.max(0, daysSince(oldest))) : "")
+          (oldest ? " · أقدم واحدة " + (daysSince(oldest) > 0 ? "من " + nDays(daysSince(oldest)) : "النهارده") : "")
         : "من كشف حسابه";
       return "<div class='pu-ow'><span><b>" + esc(x.p.name) + "</b><span class='sub'>" + esc(sub) + "</span></span>" +
         "<b class='num'>" + esc(money(x.owe)) + "</b>" +
@@ -11396,6 +11429,10 @@
           return l;
         })
       };
+      // كانت مدفوعة كلها؟ المدفوع يفضل ماشي ورا البضاعة لو غيّرت الكميات أو الأسعار.
+      // مدفوع جزء بس؟ يفضل الرقم اللي كان مكتوب زي ما هو.
+      var eg = pdGoods();
+      pdraft.paidAuto = eg > 0.009 && Math.abs(pdraft.paid - eg) < 0.01;
       // فاتورة قديمة من غير batchId: نديها واحد عشان التعديل يفضل وحدة واحدة
       if(!pdraft.batchId){ pdraft.batchId = rec.batchId = uid(); }
       clearPOver(); syncPHead(); renderPLines();
@@ -12278,7 +12315,7 @@
     pdraft.partyId = document.getElementById("p-party").value;
     pdraft.inv     = document.getElementById("p-inv").value.trim();
     pdraft.freight = Number(document.getElementById("p-freight").value)||0;
-    pdraft.paid    = Number(document.getElementById("p-paid").value)||0;
+    pdraft.paid    = pdraft.paidAuto ? pdGoods() : (Number(document.getElementById("p-paid").value)||0);
     pdraft.note    = document.getElementById("p-note").value.trim();
   }
 
@@ -12643,6 +12680,7 @@
     } else out.warn.push("خانة المورد فاضية — اختاره من الفورم");
     out.freight = Number(toEn(head.freight)) || 0;
     out.paid    = Number(toEn(head.paid))    || 0;
+    out.paidAuto = !squish(head.paid || "");   // خانة المدفوع فاضية = كل الفاتورة
     return out;
   }
 
@@ -12665,7 +12703,7 @@
     }
     editing.purchases = null; clearEditBase("purchases"); setEditUI("purchases");
     pdraft = { date:res.date, partyId:res.partyId, inv:res.inv, freight:res.freight,
-               paid:res.paid, note:res.note, lines:res.lines, batchId:"" };
+               paid:res.paid, paidAuto:!!res.paidAuto, note:res.note, lines:res.lines, batchId:"" };
     var pcs = res.lines.reduce(function(a, l){ return a + mixPieces(l); }, 0);
     clearPOver(); goTab("purch"); openEntry("purchases");
     syncPHead(); renderPLines(); renderPDraftNote();
@@ -12929,6 +12967,7 @@
     var el = document.getElementById(id);
     var h = function(){
       if(!pdraft) return;
+      if(id === "p-paid") pdraft.paidAuto = false;   // كتبت بإيدك — نسيب رقمك
       readPHead();
       clearPOver(); renderPCalc(); renderPDraftNote();
     };
@@ -12940,7 +12979,7 @@
   function pDraftDirty(){
     if(!pdraft || editing.purchases || pdraft.batchId) return false;
     if(pdraft.partyId || pdraft.inv || pdraft.note) return true;
-    if(Number(pdraft.freight) || Number(pdraft.paid)) return true;
+    if(Number(pdraft.freight) || (!pdraft.paidAuto && Number(pdraft.paid))) return true;
     return pdraft.lines.some(function(l){
       return l.itemId || Number(l.packCost) || Number(l.packs) || mixPieces(l) > 0;
     });
