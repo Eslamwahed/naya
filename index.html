@@ -457,6 +457,99 @@
     #inv-top > div:last-child:nth-child(odd),#cash-stats > div:last-child:nth-child(odd){grid-column:1 / -1}
   }
 
+  /* ================= العملاء والموردين ================= */
+  .pt-head{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-2)}
+  .pt-head h2{margin:0}
+  .pt-tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:var(--sp-3)}
+  .pt-tabs button{font:inherit;background:none;border:0;border-bottom:3px solid transparent;padding:10px 18px;cursor:pointer;color:var(--ink-soft)}
+  .pt-tabs button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
+  .pt-tabs button b,#pt-chips button b{font-weight:700;margin-inline-start:4px}
+  .pt-flag{display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:var(--r-pill);
+    background:#F6E3E8;color:var(--due);margin-inline-start:6px;vertical-align:middle;white-space:nowrap}
+  [data-theme="dark"] .pt-flag{background:var(--teal-soft)}
+  .pc{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3)}
+  .pc-h{display:grid;grid-template-columns:44px minmax(0,1.3fr) minmax(0,2fr) auto;gap:var(--sp-3);align-items:center;padding:var(--sp-3) var(--sp-4)}
+  .pc .av{width:44px;height:44px;border-radius:50%;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-weight:700;font-size:var(--fs-4)}
+  .pc-n b{font-size:var(--fs-4)}
+  .pc-n .sub{display:block}
+  .pc-st{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+  .pc-st small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .pc-st b{font-size:var(--fs-3)} .pc-st b.r{color:var(--due)}
+  .pc-bal{text-align:end}
+  .pc-bal small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .pc-bal b{font-size:var(--fs-4);white-space:nowrap}
+  .pc-bal b.muted{color:var(--ink-soft)}
+  .pc-a{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:0 var(--sp-4) var(--sp-3)}
+  .pc-a .sp{flex:1}
+  .pc-a .tbtn{padding:6px 12px;font-size:var(--fs-2);text-decoration:none}
+  .pc-stmt{border-top:1px solid var(--line);padding:var(--sp-3) var(--sp-4);background:var(--paper);border-radius:0 0 var(--r-md) var(--r-md)}
+  .pc-stmt h4{margin:0 0 var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);display:flex;justify-content:space-between}
+  .pc-stmt .sr{display:grid;grid-template-columns:52px minmax(0,1fr) 110px 130px;gap:var(--sp-2);padding:6px 0;
+    border-top:1px dashed var(--line);font-size:var(--fs-2);align-items:center}
+  .pc-stmt h4 + .sr{border-top:0}
+  .pc-stmt .d{color:var(--ink-soft)}
+  .pc-stmt .n{text-align:end;font-weight:600;white-space:nowrap}
+  .pc-stmt .run{text-align:end;color:var(--ink-soft);white-space:nowrap}
+  .pc-stmt .ono{color:var(--teal);font-weight:600}
+  .pc-note{margin:var(--sp-2) 0 0;font-size:var(--fs-1);color:var(--ink-soft)}
+  @media (max-width:760px){
+    .pt-tabs button{flex:1}
+    #pt-chips{flex-wrap:nowrap;overflow-x:auto} #pt-chips button{flex:0 0 auto}
+    .pc-h{grid-template-columns:44px minmax(0,1fr) auto;gap:6px var(--sp-3);padding:var(--sp-3)}
+    .pc-st{grid-column:1 / -1;order:3;gap:4px}
+    .pc-st > span{background:var(--paper);border-radius:var(--r-sm);padding:4px;text-align:center}
+    .pc-a{padding:0 var(--sp-3) var(--sp-3)}
+    .pc-a .sp{display:none}
+    .pc-stmt{padding:var(--sp-3)}
+    .pc-stmt .sr{grid-template-columns:44px minmax(0,1fr) auto}
+    .pc-stmt .run{grid-column:2 / -1;text-align:start}
+  }
+
+  /* ================= شركات الشحن: كارت لكل شركة ================= */
+  #shc-top{margin-bottom:var(--sp-3)}
+  .shc{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .shc-h{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--teal-soft);flex-wrap:wrap}
+  .shc-h .nm{font-size:var(--fs-5);font-weight:700}
+  .shc-h .big small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .shc-h .big b{font-size:var(--fs-6)}
+  .shc-h .big b.muted{color:var(--ink-soft)}
+  .shc-h .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .shc-part{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+  .shc-part label{display:inline-flex;gap:6px;align-items:center;font-size:var(--fs-2)}
+  .shc-part input{width:140px}
+  .shc-st{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);padding:var(--sp-3) var(--sp-4)}
+  .shc-st > div{background:var(--paper);border-radius:var(--r-sm);padding:6px 10px}
+  .shc-st small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .shc-st b{font-size:var(--fs-4)} .shc-st b.w{color:var(--warn)}
+  .shc-st .pct{font-size:var(--fs-1);font-weight:400}
+  .shc-sec{display:flex;align-items:center;gap:var(--sp-2);width:100%;border:0;border-top:1px solid var(--line);background:none;
+    font:inherit;color:inherit;padding:10px var(--sp-4);cursor:pointer;text-align:start}
+  .shc-sec:hover{background:var(--teal-soft)}
+  .shc-sec small{margin-inline-start:auto;color:var(--ink-soft);font-size:var(--fs-2)}
+  .shc-sec span{color:var(--ink-soft)}
+  .shc-b{padding:0 var(--sp-4) var(--sp-3)}
+  .shc-row{display:grid;grid-template-columns:56px minmax(0,1fr) 70px auto;gap:var(--sp-2);padding:8px 0;border-top:1px dashed var(--line);
+    align-items:center;font-size:var(--fs-2)}
+  .shc-b .shc-row:first-child{border-top:0}
+  .shc-row .sub{display:block}
+  .shc-row > b{text-align:end;white-space:nowrap}
+  .shc-row .ono{color:var(--teal);font-weight:600}
+  .shc-row.st{grid-template-columns:52px minmax(0,1fr) auto 130px}
+  .shc-row.st > .sub:last-child{text-align:end}
+  @media (max-width:760px){
+    #shc-top{display:grid;grid-template-columns:1fr 1fr}
+    .shc-h{padding:var(--sp-3)}
+    .shc-h .acts{width:100%} .shc-h .acts .tbtn{flex:1;justify-content:center}
+    .shc-part{padding:var(--sp-3)}
+    .shc-st{grid-template-columns:repeat(3,1fr);padding:var(--sp-3)}
+    .shc-sec{padding:10px var(--sp-3)}
+    .shc-b{padding:0 var(--sp-3) var(--sp-3)}
+    .shc-row{grid-template-columns:48px minmax(0,1fr) auto}
+    .shc-row > .sub.num{display:none}
+    .shc-row.st{grid-template-columns:44px minmax(0,1fr) auto}
+    .shc-row.st > .sub:last-child{grid-column:2 / -1;text-align:start}
+  }
+
   /* ================= الخزنة بالأيام ================= */
   .cq{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:var(--sp-2);margin:var(--sp-3) 0 var(--sp-4)}
   .cq .tbtn{padding:12px 14px;justify-content:center;gap:8px;font-size:var(--fs-3)}
@@ -1411,8 +1504,12 @@
 <!-- شركات الشحن -->
 <section id="tab-ship" hidden>
   <h2>شركات الشحن</h2>
-  <p class="hint">شركة الشحن بتحصّل من العميل بدالك، وبتخصم عمولتها من الفلوس اللي عندها، والباقي بتوصّلهولك. الشاشة دي بتوريك لكل شركة: حصّلت كام، وليها كام عندك، وباقي لك كام في محفظتها — وكشف بكل حركة.</p>
+  <div class="stats" id="shc-top"></div>
+  <!-- كارت لكل شركة: لك عندها كام، وأوردراتها، والمرتجع، والكشف -->
+  <div id="shc-cards"></div>
 
+  <details class="hm-more" id="ship-more">
+  <summary>كل الأرقام والجداول القديمة</summary>
   <div class="band" id="sh-stats"></div>
 
   <div class="panel" id="sh-kpi-panel" hidden>
@@ -1457,6 +1554,7 @@
       <div class="tbl-wrap"><table id="t-shstmt"></table></div>
     </div>
   </div>
+  </details>
 </section>
 
 
@@ -1795,11 +1893,20 @@
 
 <!-- العملاء والموردين -->
 <section id="tab-parties" hidden>
-  <h2>العملاء والموردين</h2>
-  <p class="hint">اضغط على أي اسم تشوف كشف حسابه. التليفون بيستخدم للتعرّف على العميل المتكرر.</p>
-  <div class="tbar">
+  <div class="pt-head">
+    <h2>العملاء والموردين</h2>
     <button class="tbtn primary" type="button" data-openentry="parties">+ عميل أو مورد</button>
   </div>
+  <div class="pt-tabs" id="pt-tabs" role="tablist" aria-label="عملاء أو موردين"></div>
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="pt-q" type="search" placeholder="دوّر بالاسم أو التليفون أو المحافظة…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+  </div>
+  <div class="quick" id="pt-chips" role="group" aria-label="فلتر"></div>
 
   <div class="panel" id="entry-parties" hidden>
     <div class="dhead">
@@ -1822,6 +1929,11 @@
     </form>
     </div>
   </div>
+  <!-- كارت لكل عميل أو مورد، وكشف حسابه بيتفتح جوّاه -->
+  <div id="pt-cards"></div>
+
+  <details class="hm-more" id="pt-more">
+  <summary>الجدول القديم وكشف الحساب بالمدين والدائن</summary>
   <div class="tbl-wrap"><table id="t-parties"></table></div>
   <div class="panel" id="statement-panel" hidden>
     <div class="dhead">
@@ -1831,6 +1943,7 @@
     <p class="note" id="statement-sum"></p>
     <div class="tbl-wrap"><table id="t-statement"></table></div>
   </div>
+  </details>
 </section>
 
 <!-- المخزون -->
@@ -2566,8 +2679,19 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "87";
+  var VERSION = "88";
   var CHANGELOG = [
+    { v:"88", d:"2026-09-30", items:[
+      "العملاء والموردين: تبويبين بعدّاد · بحث بالاسم والتليفون والمحافظة · فلاتر (ليك عنده · عليك له · بيرفض كتير)",
+      "كارت لكل عميل: أوردراته · اتسلّم · رفض · اشترى بكام · رصيده، وكشف الحساب بيتفتح جوّاه — ورقم الأوردر فيه بيفتح الأوردر نفسه",
+      "كشف الحساب: أوردر الشركة سطرين (الأوردر، وتحته «دفع للمندوب») — والرصيد في آخره = رصيد العميل بالظبط",
+      "العميل اللي رفض مرتين أو أكتر عليه علامة حمرا — وبتظهر كمان على أوردره في مرحلة «جديد» قبل ما تشحن",
+      "كارت المورد: فواتير · اشتريت · دفعت · عليك له، وزرار «ادفع له» بيفتح الدفع والمبلغ مكتوب",
+      "شركات الشحن: كارت لكل شركة — لك عندها كام (استلم الكل أو جزء) · أوردرات · اتسلّم · اترفض · مع المندوب · متوسط الشحن",
+      "وجوّاه: الأوردرات اللي فلوسها عندها · المرتجع بزرار «وصلني» · كشف الحساب — وكل رقم أوردر بيفتح الأوردر",
+      "إصلاح: الاستلام من الشركة كان بيتحسب على الأوردرات بترتيب تاريخ الأوردر — بقى بتاريخ التسليم، لأن الشركة ما بتمسكش فلوس أوردر قبل ما يتسلّم",
+      "الجداول القديمة موجودة مطوية تحت الشاشتين"
+    ]},
     { v:"87", d:"2026-09-30", items:[
       "الخزنة: ٣ أرقام (الرصيد · داخل · خارج من أول يوم) و٣ زراير كبيرة: مصروف · دفع لمورد · استلام من شركة شحن — النوع بيتحدّد لوحده",
       "الخزنة: الدفتر بقى بالأيام والأحدث فوق — كل يوم صافيه والرصيد في آخره، وكل حركة سطرين",
@@ -3914,9 +4038,12 @@
       if(c.type === "settle"){ var n = squish(c.shipCo); drawn[n] = (drawn[n]||0) + (Number(c.amount)||0); }
     });
     Object.keys(by).forEach(function(co){
-      // الأقدم الأول: بالتاريخ وبعدين رقم الأوردر (مش وقت آخر تعديل — ده بيتغيّر)
+      /* الأقدم الأول — بتاريخ ما الفلوس وصلت الشركة (التسليم أو الرفض)،
+         مش تاريخ الأوردر: استلام اتعمل قبل ما الأوردر يتسلّم مستحيل
+         يكون فيه فلوسه. وبعدين رقم الأوردر (مش وقت آخر تعديل — ده بيتغيّر). */
+      var moneyDate = function(x){ return x.deliveredAt || x.cancelledAt || x.date || ""; };
       var L = by[co].sort(function(a, b){
-        var da = a.s.date || "", dbb = b.s.date || "";
+        var da = moneyDate(a.s), dbb = moneyDate(b.s);
         return da !== dbb ? (da < dbb ? -1 : 1) : (Number(a.s.no)||0) - (Number(b.s.no)||0);
       });
       var pool = drawn[co] || 0;
@@ -4735,11 +4862,7 @@
     var t = e.target.closest("[data-hgo]"); if(!t) return;
     var q = t.dataset.hgo.split("|");
     if(q[0] === "sales"){ goTab("sales"); setSView(q[1]); window.scrollTo(0, 0); return; }
-    if(q[0] === "party"){
-      goTab("parties"); statementFor = q[1]; renderStatement(); renderParties();
-      var sp = document.getElementById("statement-panel"); if(sp) sp.scrollIntoView({ block:"nearest" });
-      return;
-    }
+    if(q[0] === "party"){ openPartyCard(q[1]); return; }
     if(q[0] === "inv"){
       goTab("inv");
       var low = document.querySelector("#tab-inv [data-invonly='" + (q[1] || "low") + "']");
@@ -8061,7 +8184,8 @@
         var ed = sgCan(s);
         return "<div class='sg-row' data-sgrow='" + esc(s.id) + "'>" +
           "<span>" + sgNo(s) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
-          "<span>" + sgCust(s) + "</span>" + sgItems(s) +
+          // عميل رفض قبل كده؟ تشوفها قبل ما تشحن
+          "<span>" + sgCust(s) + refusalFlag(s.partyId) + "</span>" + sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" +
           (ed ? "<span class='sg-inl'>" +
                 "<input list='ship-list' data-sgco='" + esc(s.id) + "' placeholder='الشركة' value='" + esc(squish(s.shipCo)) + "' aria-label='شركة الشحن'>" +
@@ -9227,7 +9351,7 @@
     var parts = String(btn.dataset.heldback).split("|");
     if(!markLineBack(parts[0], Number(parts[1]), !!btn.dataset.undo)) return;
     toast(btn.dataset.undo ? "رجعت لـ«عند الشركة»" : "اتسجّل إنها رجعت المخزن");
-    if(activeTab === "sales") renderSales(); else { renderHeld(); renderShipCos(); }
+    if(activeTab === "sales") renderSales(); else { renderShipCards(); renderHeld(); renderShipCos(); }
     ["inv","log","ship","sales"].forEach(function(t){ dirtyTabs[t] = 1; });
     delete dirtyTabs[activeTab];
   });
@@ -9419,6 +9543,33 @@
 
   var SHSTMT_HEAD = ["التاريخ","الحركة","البيان","داخل المحفظة","خارج منها","الرصيد"];
 
+  /* حركات محفظة شركة شحن — مصدر واحد للكشف القديم وكارت الشركة */
+  function shipStmtEvents(name){
+    var ev = [];
+    live("sales").forEach(function(s){
+      var t = revDate(s) || s.date || "";
+      if(viaShip(s) && squish(s.shipCo) === name){
+        var got = isCancelled(s) ? shipIn(s) : (Number(s.paid)||0);
+        if(Math.abs(got) > 0.009)
+          ev.push({ d:t, at:s.at||0, k:"تحصيل",
+                    t:"من " + partyName(s.partyId) + " · أوردر #" + (s.no||"—") +
+                      (isCancelled(s) ? " (ملغي — شحن بس)" : ""),
+                    in:got, out:0, id:s.id });
+      }
+      if(viaShip(s) && squish(s.shipCo) === name && shipCounts(s) && shipOut(s) > 0.009)
+        ev.push({ d:t, at:(s.at||0)+0.5, k:"عمولة",
+                  t:"شحن أوردر #" + (s.no||"—") + " · " + partyName(s.partyId),
+                  in:0, out:shipOut(s), id:s.id });
+    });
+    live("cash").forEach(function(c){
+      if(c.type !== "settle" || squish(c.shipCo) !== name) return;
+      ev.push({ d:c.date||"", at:c.at||0, k:"استلام",
+                t:squish(c.note) || "استلمت من الشركة ودخلت الخزنة",
+                in:0, out:Number(c.amount)||0, cash:c.id });
+    });
+    ev.sort(function(a,b){ return a.d !== b.d ? (a.d < b.d ? -1 : 1) : (a.at - b.at); });
+    return ev;
+  }
   function renderShipStmt(){
     var pnl = document.getElementById("shstmt-panel");
     if(shipFor === null){ pnl.hidden = true; return; }
@@ -9457,29 +9608,7 @@
     if(da) da.placeholder = money(Math.max(o.bal, 0));
 
     /* الحركات: كل أوردر بيضيف تحصيل ويخصم عمولة، وكل استلام بيخصم */
-    var ev = [];
-    live("sales").forEach(function(s){
-      var t = revDate(s) || s.date || "";
-      if(viaShip(s) && squish(s.shipCo) === name){
-        var got = isCancelled(s) ? shipIn(s) : (Number(s.paid)||0);
-        if(Math.abs(got) > 0.009)
-          ev.push({ d:t, at:s.at||0, k:"تحصيل",
-                    t:"من " + partyName(s.partyId) + " · أوردر #" + (s.no||"—") +
-                      (isCancelled(s) ? " (ملغي — شحن بس)" : ""),
-                    in:got, out:0, id:s.id });
-      }
-      if(viaShip(s) && squish(s.shipCo) === name && shipCounts(s) && shipOut(s) > 0.009)
-        ev.push({ d:t, at:(s.at||0)+0.5, k:"عمولة",
-                  t:"شحن أوردر #" + (s.no||"—") + " · " + partyName(s.partyId),
-                  in:0, out:shipOut(s), id:s.id });
-    });
-    live("cash").forEach(function(c){
-      if(c.type !== "settle" || squish(c.shipCo) !== name) return;
-      ev.push({ d:c.date||"", at:c.at||0, k:"استلام",
-                t:squish(c.note) || "استلمت من الشركة ودخلت الخزنة",
-                in:0, out:Number(c.amount)||0, cash:c.id });
-    });
-    ev.sort(function(a,b){ return a.d !== b.d ? (a.d < b.d ? -1 : 1) : (a.at - b.at); });
+    var ev = shipStmtEvents(name);
 
     var run = 0;
     var rows = ev.map(function(x){
@@ -9513,10 +9642,154 @@
   /* المناطق اتشالت: كانت جدول تمن أعمدة بيتزحلق أفقياً عشان رقم
      بيتغيّر مرة في السنة. الملء التلقائي بقى من آخر أوردر لنفس
      المحافظة (suggestShipping) — بيتعلّم من شغلك من غير أي إعداد. */
+  /* ================= شركات الشحن: كارت لكل شركة =================
+     كل رقم من نفس مصادر الشاشة القديمة: walletOf للرصيد، shipPend
+     للأوردرات اللي فلوسها عندها، heldOpen للمرتجع، shipStmtEvents
+     للكشف — فمجموع الكروت = الجدول القديم بالظبط. */
+  var shcOpen = {};                      // {co: "orders"|"held"|"stmt"}
+  var shcPart = null;                    // الشركة اللي مفتوح فيها «استلم جزء»
+  function renderShipCards(){
+    var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
+    if(!top || !box) return;
+    var cos = shipBuckets();
+    var S = live("sales");
+    var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
+    var pocket = 0;
+    cos.forEach(function(co){ pocket += shipCoStats(co).pocket; });
+    var wal = walletsTotal(), held = heldOpenQty();
+    var cells = [
+      ["لك عند الشركات", money(wal), wal > 0.009 ? "v-gain" : "", "لسه ما استلمتهاش"],
+      ["مع المندوب", qty(withCourier.length), "", "أوردر مستني العميل يستلم"],
+      ["مرتجع عندهم", qty(held) + " قطعة", held ? "v-due" : "", held ? "لسه ما رجعش المخزن" : "كله رجع"],
+      [pocket >= 0 ? "شحن من جيبك" : "كسبت من الشحن", money(Math.abs(pocket)), pocket > 0.009 ? "v-due" : "v-gain",
+       pocket >= 0 ? "دفعت للشركات أكتر مما حمّلت العملاء" : "حمّلت العملاء أكتر مما دفعت للشركات"]
+    ];
+    top.innerHTML = cells.map(function(c){
+      return "<div><span>" + esc(c[0]) + "</span><strong class='num " + c[2] + "'>" + esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
+    }).join("");
+    if(!cos.length){
+      box.innerHTML = "<p class='cd-empty'>لما تكتب اسم شركة الشحن في الأوردرات، هتلاقي هنا حساب كل شركة.</p>";
+      return;
+    }
+    var ed = canEdit();
+    cos.sort(function(a, b){ return walletOf(b) - walletOf(a); });
+    box.innerHTML = cos.map(function(co){
+      var name = squish(co), bal = walletOf(name);
+      var L = S.filter(function(x){ return squish(x.shipCo) === name; });
+      var dl = L.filter(isDelivered).length, cc = L.filter(isCancelled).length;
+      var withC = L.filter(function(x){ return orderStep(x).k === "inspect"; }).length;
+      var counted = L.filter(shipCounts), fees = counted.reduce(function(a, x){ return a + shipOut(x); }, 0);
+      var avg = counted.length ? fees / counted.length : 0;
+      var pend = L.filter(function(x){ return viaShip(x) && shipPend(x).left > 0.009; })
+        .sort(function(a, b){ return -byDate(a, b); });
+      var hl = heldOpen().filter(function(h){ return squish(h.s.shipCo) === name; });
+      var hq = hl.reduce(function(a, h){ return a + h.n; }, 0);
+      var sec = shcOpen[name] || (pend.length ? "orders" : "");
+      var head = "<div class='shc-h'><span class='nm'>" + (name ? esc(name) : "⚠ من غير اسم شركة") + "</span>" +
+        "<span class='big'><small>لك عندها</small><b class='num" + (bal > 0.009 ? " v-gain" : (bal < -0.009 ? " v-due" : " muted")) + "'>" + esc(money(bal)) + "</b></span>" +
+        "<span class='acts'>" + (bal > 0.009 && name && ed
+          ? "<button class='tbtn primary' type='button' data-shcall='" + esc(name) + "'>استلم " + esc(money(bal)) + "</button>" +
+            "<button class='tbtn' type='button' data-shcpart='" + esc(name) + "'>استلم جزء</button>"
+          : (bal > 0.009 && !name ? "<span class='sub'>افتح الأوردرات واكتب اسم الشركة</span>"
+             : (bal < -0.009 ? "<span class='sub'>الشركة خصمت أكتر ما حصّلت</span>" : "<span class='sub'>✓ كل فلوسك وصلتك</span>"))) +
+        "</span></div>";
+      var part = (shcPart === name && ed)
+        ? "<div class='shc-part'><label>استلمت كام؟ <input inputmode='decimal' class='num' data-shcamt='" + esc(name) + "' placeholder='" + esc(money(bal)) + "'></label>" +
+          "<button class='tbtn primary' type='button' data-shcok='" + esc(name) + "'>سجّل</button>" +
+          "<span class='sub'>بيدخل الخزنة ويتحسب على الأوردرات الأقدم الأول</span></div>" : "";
+      var st = "<div class='shc-st'>" +
+        "<div><small>أوردرات</small><b class='num'>" + qty(L.length) + "</b></div>" +
+        "<div><small>اتسلّم</small><b class='num'>" + qty(dl) + "</b></div>" +
+        "<div><small>اترفض</small><b class='num" + (cc ? " v-due" : "") + "'>" + qty(cc) +
+          (L.length && cc ? " <span class='pct'>(" + Math.round(cc / L.length * 100) + "%)</span>" : "") + "</b></div>" +
+        "<div><small>مع المندوب</small><b class='num" + (withC ? " w" : "") + "'>" + qty(withC) + "</b></div>" +
+        "<div><small>متوسط الشحن</small><b class='num'>" + esc(qty(Math.round(avg * 100) / 100)) + "</b></div></div>";
+      var secHead = function(k, t, sm){
+        return "<button type='button' class='shc-sec" + (sec === k ? " on" : "") + "' data-shcsec='" + esc(name) + "|" + k + "'>" +
+          "<b>" + esc(t) + "</b><small>" + esc(sm) + "</small><span aria-hidden='true'>" + (sec === k ? "▴" : "▾") + "</span></button>";
+      };
+      var body = "";
+      if(sec === "orders"){
+        body = pend.length ? pend.map(function(x){
+          var got = isCancelled(x) ? shipIn(x) : (Number(x.paid)||0), fee = shipCounts(x) ? shipOut(x) : 0;
+          var net = got - fee, pd = shipPend(x).left;
+          return "<div class='shc-row'><a href='#' class='ono' data-shcorder='" + esc(x.id) + "'>#" + esc(x.no || "—") + "</a>" +
+            "<span>" + esc(partyName(x.partyId)) + "<span class='sub'>" + (isCancelled(x) ? "رفض · دفع الشحن " : "العميل دفع ") +
+              esc(qty(got)) + (fee ? " − شحنها " + esc(qty(fee)) : "") +
+              (net - pd > 0.009 ? " · اتحسب منها " + esc(qty(Math.round((net - pd) * 100) / 100)) + " من اللي استلمته" : "") + "</span></span>" +
+            "<span class='sub num'>" + esc(dShort(x.deliveredAt || x.date)) + "</span>" +
+            "<b class='num'>" + esc(money(pd)) + "</b></div>";
+        }).join("") : "<p class='sub' style='margin:0'>مفيش أوردرات فلوسها لسه عندها.</p>";
+      } else if(sec === "held"){
+        body = hl.length ? hl.map(function(h){
+          var vl = vLabel(vColor(h.l), vSize(h.l));
+          return "<div class='shc-row'><a href='#' class='ono' data-shcorder='" + esc(h.s.id) + "'>#" + esc(h.s.no || "—") + "</a>" +
+            "<span>" + esc(itemName(h.l.itemId)) + (vl ? " (" + esc(vl) + ")" : "") + " × " + qty(h.n) +
+              "<span class='sub'>" + esc(partyName(h.s.partyId)) + " · " + (isCancelled(h.s) ? "رفض كله" : "خد جزء") + "</span></span>" +
+            "<span></span>" +
+            (ed && !saleLocked(h.s) ? "<button class='tbtn' type='button' data-heldback='" + esc(h.s.id) + "|" + h.i + "'>وصلني</button>" : "<span></span>") + "</div>";
+        }).join("") : "<p class='sub' style='margin:0'>مفيش مرتجع عندها.</p>";
+      } else if(sec === "stmt"){
+        var ev = shipStmtEvents(name), run = 0;
+        var rows = ev.map(function(x){ run += x.in - x.out; return { x:x, run:run }; }).reverse();
+        body = rows.length ? rows.map(function(r){
+          var x = r.x;
+          return "<div class='shc-row st'><span class='sub num'>" + esc(dShort(x.d) || "—") + "</span>" +
+            "<span>" + (x.id ? "<a href='#' class='ono' data-shcorder='" + esc(x.id) + "'>" + esc(x.k) + "</a>" : esc(x.k)) +
+              "<span class='sub'>" + esc(x.t) + "</span></span>" +
+            "<b class='num " + (x.in ? "v-gain" : "v-due") + "'>" + (x.in ? "+" + esc(money(x.in)) : "−" + esc(money(x.out))) + "</b>" +
+            "<span class='sub num'>الرصيد " + esc(money(r.run)) + "</span></div>";
+        }).join("") : "<p class='sub' style='margin:0'>مفيش حركات للشركة دي لسه.</p>";
+      }
+      return "<div class='shc'>" + head + part + st +
+        secHead("orders", "الأوردرات اللي فلوسها عندها", pend.length ? plural(pend.length, "أوردر واحد", "أوردرين", "أوردرات") + " · " + money(pend.reduce(function(a, x){ return a + shipPend(x).left; }, 0)) : "مفيش") +
+        (sec === "orders" ? "<div class='shc-b'>" + body + "</div>" : "") +
+        secHead("held", "مرتجع عندها", hq ? qty(hq) + " قطعة" : "مفيش") +
+        (sec === "held" ? "<div class='shc-b'>" + body + "</div>" : "") +
+        secHead("stmt", "كشف الحساب", "كل حركة داخلة وخارجة من محفظتها") +
+        (sec === "stmt" ? "<div class='shc-b'>" + body + "</div>" : "") +
+        "</div>";
+    }).join("");
+  }
+  document.getElementById("shc-cards").addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-shcsec]"))){
+      var q = t.dataset.shcsec.split("|");
+      var cur = shcOpen[q[0]];
+      // القسم المفتوح لوحده أول مرة (الأوردرات) لازم يتقفل برضه من أول دوسة
+      if(cur === undefined && q[1] === "orders" && t.classList.contains("on")) shcOpen[q[0]] = "none";
+      else shcOpen[q[0]] = cur === q[1] ? "none" : q[1];
+      renderShipCards(); return;
+    }
+    if((t = e.target.closest("[data-shcorder]"))){ e.preventDefault(); goTab("sales"); sgOpenRow(t.dataset.shcorder); return; }
+    if((t = e.target.closest("[data-shcall]"))){
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      shcPart = null; settleCo(t.dataset.shcall, walletOf(t.dataset.shcall)); return;
+    }
+    if((t = e.target.closest("[data-shcpart]"))){
+      shcPart = shcPart === t.dataset.shcpart ? null : t.dataset.shcpart; renderShipCards();
+      var inp = document.querySelector("[data-shcamt='" + t.dataset.shcpart + "']");
+      if(inp) inp.focus();
+      return;
+    }
+    if((t = e.target.closest("[data-shcok]"))){
+      var nm = t.dataset.shcok, box = document.querySelector("[data-shcamt='" + nm + "']");
+      var v = Number(toEn(box ? box.value : ""))||0;
+      if(settleCo(nm, v)) shcPart = null; else if(box) box.focus();
+      return;
+    }
+  });
+  document.getElementById("shc-cards").addEventListener("keydown", function(e){
+    if(e.key !== "Enter") return;
+    var a = e.target.closest("[data-shcamt]"); if(!a) return;
+    e.preventDefault();
+    var b = document.querySelector("[data-shcok='" + a.dataset.shcamt + "']"); if(b) b.click();
+  });
+
   function renderShip(){
     // الترقية بتتحفظ مرة واحدة بدل ما تتعاد مع كل فتحة، وعشان
     // الأسعار توصل باقي الأجهزة بالمزامنة
-    renderShipCos(); renderHeld();
+    renderShipCards(); renderShipCos(); renderHeld();
   }
 
   /* ---------- فلاتر الخزنة ---------- */
@@ -9957,7 +10230,205 @@
     table("t-offers", ["الكمية","سعر القطعة","إجمالي العرض","مكسب العميل",""], rows, "");
   }
 
+  /* ================= العملاء والموردين: كارت لكل واحد =================
+     كشف الحساب جوه الكارت بيتبني بنفس قواعد partyBalance سطر سطر —
+     فرصيد آخر سطر = رصيد الجهة في كل مكان تاني بالظبط. أوردر الشركة
+     بيبان سطرين: الأوردر، وتحته «دفع للمندوب» — والرصيد بيرجع صفر. */
+  var ptTab = "customer", ptOnly = "all", ptOpen = null;
+  var PT_FLAG = 2;                        // من كام رفضة تظهر العلامة الحمرا
+  function refusalsOf(partyId){
+    return live("sales").filter(function(x){ return x.partyId === partyId && isCancelled(x); }).length;
+  }
+  function refusalFlag(partyId){
+    var n = refusalsOf(partyId);
+    if(n < PT_FLAG) return "";
+    var all = live("sales").filter(function(x){ return x.partyId === partyId; }).length;
+    return "<span class='pt-flag' title='العميل ده رفض أوردرات قبل كده'>رفض " + qty(n) + " من " + qty(all) + "</span>";
+  }
+  function partyLines(p){
+    var L = [];
+    live("sales").forEach(function(x){
+      if(x.partyId !== p.id) return;
+      var pd = Number(x.paid)||0, no = x.no ? "#" + x.no : "";
+      if(isDelivered(x)){
+        L.push({ d:x.date, at:x.at||0, o:x.id, no:no, t:itemsLabel(x) + (shipIn(x) ? " + شحن" : ""), v:saleTotal(x) + shipIn(x) });
+        // الدفع عمره ما يسبق الأوردر نفسه في الكشف (حتى لو تاريخ التسليم متسجّل قبله)
+        var pdD = (x.deliveredAt && x.deliveredAt > (x.date || "")) ? x.deliveredAt : x.date;
+        if(pd > 0.009) L.push({ d:pdD, at:(x.at||0) + 0.5, o:x.id, no:no,
+          t: viaShip(x) ? "دفع للمندوب (" + (squish(x.shipCo) || "شركة الشحن") + ")" : "دفع (تحصيل مباشر)", v:-pd });
+      } else if(!isCancelled(x) && pd > 0.009){
+        L.push({ d:x.date, at:x.at||0, o:x.id, no:no, t:"عربون على أوردر لسه ما اتسلّمش", v:-pd });
+      }
+    });
+    var inv = {}, order = [];
+    live("purchases").forEach(function(x){
+      if(x.opening || x.partyId !== p.id) return;
+      var k = x.batchId || ("solo:" + x.id);
+      if(!inv[k]){ inv[k] = { d:x.date, at:x.at||0, pno:x.pno, goods:0, paid:0, items:{} }; order.push(k); }
+      var g = inv[k];
+      g.goods += goodsTotal(x); g.paid += Number(x.paid)||0; g.items[itemName(x.itemId)] = 1;
+      if((x.date||"") < (g.d||"")) g.d = x.date;
+    });
+    order.forEach(function(k){
+      var g = inv[k], what = Object.keys(g.items).slice(0, 2).join(" · ");
+      var lbl = (g.pno ? "فاتورة #" + g.pno : "فاتورة") + " · " + what;
+      if(Math.abs(g.goods) > 0.009) L.push({ d:g.d, at:g.at, t:(g.goods < 0 ? "مرتجع · " : "") + lbl, v:-g.goods });
+      if(Math.abs(g.paid) > 0.009) L.push({ d:g.d, at:g.at + 0.5, t:(g.paid < 0 ? "استرداد على " : "دفعت على ") + lbl, v:g.paid });
+    });
+    live("cash").forEach(function(c){
+      if(c.partyId !== p.id || isCapType(c.type)) return;
+      var a = Number(c.amount)||0, note = squish(c.note || "");
+      if(c.type === "opening_party") L.push({ d:c.date, at:c.at||0, t:"رصيد افتتاحي", v:a });
+      if(c.type === "in")  L.push({ d:c.date, at:c.at||0, t:"تحصيل نقدي" + (note ? " · " + note : ""), v:-a });
+      if(c.type === "out") L.push({ d:c.date, at:c.at||0, t:"دفع نقدي" + (note ? " · " + note : ""), v:a });
+    });
+    L.sort(function(a, b){ return (a.d||"") !== (b.d||"") ? ((a.d||"") < (b.d||"") ? -1 : 1) : a.at - b.at; });
+    var run = 0;
+    L.forEach(function(l){ run += l.v; l.run = run; });
+    return L;
+  }
+  function balTxt(b){
+    return Math.abs(b) < 0.009 ? "متسوّي" : (b > 0 ? "ليك " : "عليك ") + money(Math.abs(b));
+  }
+  function partyStats(p){
+    var S = live("sales").filter(function(x){ return x.partyId === p.id; });
+    var dl = S.filter(isDelivered);
+    var P = live("purchases").filter(function(x){ return !x.opening && x.partyId === p.id; });
+    var inv = {}; P.forEach(function(x){ inv[x.batchId || x.id] = 1; });
+    var last = function(arr){ return arr.map(function(x){ return x.date || ""; }).sort().pop() || ""; };
+    return {
+      orders:S.length, deliv:dl.length, canc:S.filter(isCancelled).length,
+      bought:dl.reduce(function(a, x){ return a + saleTotal(x); }, 0), lastSale:last(S),
+      invoices:Object.keys(inv).length,
+      goods:P.reduce(function(a, x){ return a + goodsTotal(x); }, 0),
+      paid:P.reduce(function(a, x){ return a + (Number(x.paid)||0); }, 0), lastBuy:last(P)
+    };
+  }
+  function renderPartyCards(){
+    var box = document.getElementById("pt-cards");
+    if(!box) return;
+    var all = live("parties").filter(function(p){ return !isPartner(p); });
+    var nC = all.filter(function(p){ return p.type !== "supplier"; }).length, nS = all.length - nC;
+    document.getElementById("pt-tabs").innerHTML =
+      [["customer", "العملاء", nC], ["supplier", "الموردين", nS]].map(function(t){
+        return "<button type='button' role='tab' data-pttab='" + t[0] + "' aria-selected='" + (ptTab === t[0]) + "'" +
+          (ptTab === t[0] ? " class='on'" : "") + ">" + t[1] + " <b>" + qty(t[2]) + "</b></button>";
+      }).join("");
+    var mine = all.filter(function(p){ return ptTab === "supplier" ? p.type === "supplier" : p.type !== "supplier"; });
+    var bal = {}; mine.forEach(function(p){ bal[p.id] = partyBalance(p.id); });
+    var CH = ptTab === "supplier"
+      ? [["all", "الكل"], ["owe", "عليك له"], ["even", "متسوّي"]]
+      : [["all", "الكل"], ["due", "ليك عنده"], ["owe", "عليك له"], ["flag", "بيرفض كتير"]];
+    var test = {
+      all:function(){ return true; }, due:function(p){ return bal[p.id] > 0.009; },
+      owe:function(p){ return bal[p.id] < -0.009; }, even:function(p){ return Math.abs(bal[p.id]) < 0.009; },
+      flag:function(p){ return refusalsOf(p.id) >= PT_FLAG; }
+    };
+    if(!CH.some(function(c){ return c[0] === ptOnly; })) ptOnly = "all";
+    document.getElementById("pt-chips").innerHTML = CH.map(function(c){
+      return "<button type='button' data-ptonly='" + c[0] + "'" + (ptOnly === c[0] ? " class='on'" : "") + ">" +
+        c[1] + " <b>" + qty(mine.filter(test[c[0]]).length) + "</b></button>";
+    }).join("");
+    var q = (document.getElementById("pt-q").value || "").trim().toLowerCase();
+    var list = mine.filter(test[ptOnly]).filter(function(p){
+      if(!q) return true;
+      return [p.name, p.phone, p.gov, p.address, p.fb].join(" ").toLowerCase().indexOf(q) >= 0;
+    });
+    // اللي فيه فلوس معلّقة فوق، وبعده الأحدث تعامل
+    list.sort(function(a, b){
+      var da = Math.abs(bal[a.id]) > 0.009 ? 1 : 0, dbb = Math.abs(bal[b.id]) > 0.009 ? 1 : 0;
+      if(da !== dbb) return dbb - da;
+      return (a.name || "").localeCompare(b.name || "", "ar");
+    });
+    if(!list.length){
+      box.innerHTML = "<p class='cd-empty'>" + (mine.length ? "مفيش حد بالمواصفات دي." :
+        (ptTab === "supplier" ? "مفيش موردين لسه — ضيفهم من الزرار فوق أو وإنت بتسجّل فاتورة شراء."
+                              : "مفيش عملاء لسه — ضيفهم من الزرار فوق أو وإنت بتسجّل الأوردر.")) + "</p>";
+      return;
+    }
+    var ed = canEdit();
+    box.innerHTML = list.map(function(p){
+      var b = bal[p.id], st = partyStats(p), sup = p.type === "supplier", open = ptOpen === p.id;
+      var stats = sup
+        ? [["فواتير", qty(st.invoices)], ["اشتريت بـ", qty(Math.round(st.goods))], ["دفعت", qty(Math.round(st.paid))],
+           ["آخر فاتورة", dShort(st.lastBuy) || "—"]]
+        : [["أوردرات", qty(st.orders)], ["اتسلّم", qty(st.deliv)], ["رفض", qty(st.canc), st.canc >= PT_FLAG ? "r" : ""],
+           ["اشترى بـ", st.bought ? qty(Math.round(st.bought)) : "—"]];
+      var balLbl = Math.abs(b) < 0.009 ? "الحساب" : (b > 0 ? (sup ? "دفعتله زيادة" : "ليك عنده") : "عليك له");
+      var wa = !sup && waLink(p.phone);
+      var html = "<div class='pc" + (open ? " open" : "") + "'>" +
+        "<div class='pc-h'><span class='av' aria-hidden='true'>" + esc(String(p.name || "?").charAt(0)) + "</span>" +
+          "<span class='pc-n'><b>" + esc(p.name) + "</b>" + (sup ? "" : refusalFlag(p.id)) +
+            "<span class='sub'>" + esc([p.gov, p.address, p.phone].filter(Boolean).join(" · ") || (sup ? "مورد" : "—")) + "</span></span>" +
+          "<span class='pc-st'>" + stats.map(function(x){
+            return "<span><small>" + esc(x[0]) + "</small><b class='num" + (x[2] ? " " + x[2] : "") + "'>" + esc(x[1]) + "</b></span>"; }).join("") + "</span>" +
+          "<span class='pc-bal'><small>" + esc(balLbl) + "</small><b class='num" + (Math.abs(b) < 0.009 ? " muted" : (b > 0 && !sup ? " v-due" : (b < 0 ? " v-due" : " v-gain"))) + "'>" +
+            (Math.abs(b) < 0.009 ? "متسوّي" : esc(money(Math.abs(b)))) + "</b></span></div>" +
+        "<div class='pc-a'>" +
+          (wa ? "<a class='tbtn' href='" + esc(wa) + "' target='_blank' rel='noopener'>واتساب</a>" : "") +
+          (sup && b < -0.009 && ed ? "<button class='tbtn primary' type='button' data-ptpay='" + esc(p.id) + "'>ادفع له</button>" : "") +
+          "<span class='sp'></span>" +
+          "<button class='tbtn" + (open ? " primary" : "") + "' type='button' data-ptstmt='" + esc(p.id) + "' aria-expanded='" + open + "'>كشف الحساب " + (open ? "▴" : "▾") + "</button>" +
+          (ed ? "<button class='tbtn' type='button' data-edit='parties|" + esc(p.id) + "'>تعديل</button>" +
+                "<details class='dd-more'><summary class='tbtn' aria-label='حاجات تانية'>⋯</summary>" +
+                "<div><button class='tbtn' type='button' data-del='parties' data-id='" + esc(p.id) + "'>حذف</button></div></details>" : "") +
+        "</div>";
+      if(open){
+        var L = partyLines(p);
+        html += "<div class='pc-stmt'><h4><span>كشف الحساب</span><span class='muted'>" +
+          (L.length ? plural(L.length, "حركة واحدة", "حركتين", "حركات") : "") + "</span></h4>" +
+          (L.length ? L.slice().reverse().map(function(l){
+            return "<div class='sr'><span class='d num'>" + esc(dShort(l.d) || "—") + "</span>" +
+              "<span>" + (l.o ? "<a href='#' class='ono' data-ptorder='" + esc(l.o) + "'>أوردر " + esc(l.no || "") + "</a> · " : "") + esc(l.t) + "</span>" +
+              "<span class='n num" + (l.v < 0 ? " v-gain" : "") + "'>" + (l.v < 0 ? "−" : "+") + esc(money(Math.abs(l.v))) + "</span>" +
+              "<span class='run num'>" + esc(balTxt(l.run)) + "</span></div>";
+          }).join("") : "<p class='muted' style='margin:0'>مفيش حركات على الحساب ده لسه.</p>") +
+          "<p class='pc-note'>الأحدث فوق · «+» = اتسجّل عليه · «−» = دفع أو اتحسب له</p></div>";
+      }
+      return html + "</div>";
+    }).join("");
+  }
+  document.getElementById("pt-tabs").addEventListener("click", function(e){
+    var b = e.target.closest("[data-pttab]"); if(!b) return;
+    ptTab = b.dataset.pttab; ptOnly = "all"; ptOpen = null; renderPartyCards();
+  });
+  document.getElementById("pt-chips").addEventListener("click", function(e){
+    var b = e.target.closest("[data-ptonly]"); if(!b) return;
+    ptOnly = b.dataset.ptonly; renderPartyCards();
+  });
+  document.getElementById("pt-q").addEventListener("input", renderPartyCards);
+  document.getElementById("pt-cards").addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-ptstmt]"))){ ptOpen = ptOpen === t.dataset.ptstmt ? null : t.dataset.ptstmt; renderPartyCards(); return; }
+    if((t = e.target.closest("[data-ptorder]"))){
+      // رقم الأوردر في الكشف بيوديك على الأوردر نفسه مفتوح
+      e.preventDefault(); goTab("sales"); sgOpenRow(t.dataset.ptorder); return;
+    }
+    if((t = e.target.closest("[data-ptpay]"))){
+      // «ادفع له» = نفس «دفع لمورد» في الخزنة والمورد متحدّد
+      var pid = t.dataset.ptpay;
+      goTab("cash"); openEntry("cash");
+      var ty = document.getElementById("c-type");
+      if(ty){ ty.value = "out"; ty.dispatchEvent(new Event("change", { bubbles:true })); }
+      var ps = document.getElementById("c-party"); if(ps) ps.value = pid;
+      var am = document.getElementById("c-amount");
+      if(am){ am.value = String(Math.round(-partyBalance(pid) * 100) / 100); setTimeout(function(){ try{ am.focus(); am.select(); }catch(err){} }, 60); }
+      return;
+    }
+  });
+  // يفتح كارت جهة من مكان تاني (الرئيسية مثلًا)
+  function openPartyCard(id){
+    var p = db.parties.find(function(x){ return x.id === id; });
+    if(!p) return;
+    ptTab = p.type === "supplier" ? "supplier" : "customer"; ptOnly = "all"; ptOpen = id;
+    var q = document.getElementById("pt-q"); if(q) q.value = "";
+    goTab("parties"); renderPartyCards();
+    var btn = document.querySelector("#pt-cards [data-ptstmt='" + id + "']");
+    if(btn) btn.scrollIntoView({ block:"center" });
+  }
+
   function renderParties(){
+    renderPartyCards();
     // الشركاء ليهم شاشتهم في «رأس المال» — مبيظهروش هنا عشان الجدول ده
     // للعملاء والموردين بس، ورصيد الشريك حاجة تانية خالص (حقوق ملكية)
     var rows = live("parties").filter(function(p){ return !isPartner(p); }).map(function(p){
@@ -13923,15 +14394,16 @@
     var box = document.getElementById("sh-draw-amt");
     var dt  = document.getElementById("sh-draw-date");
     if(dt && !dt.value) dt.value = today();
-    if(box){
-      box.value = String(Math.round(Math.max(v, 0) * 100) / 100);
-      setTimeout(function(){
-        var w = document.getElementById("shstmt-draw");
-        if(w) w.scrollIntoView({ block:"center" });
-        try{ box.focus(); box.select(); }catch(err){}
-      }, 80);
+    var val = String(Math.round(Math.max(v, 0) * 100) / 100);
+    if(box) box.value = val;                           // الكشف القديم (مطوي تحت)
+    // كارت الشركة: «استلم جزء» مفتوح والمبلغ مكتوب
+    shcPart = squish(co); renderShipCards();
+    var inp = document.querySelector("[data-shcamt='" + squish(co) + "']");
+    if(inp){
+      inp.value = val;
+      setTimeout(function(){ inp.scrollIntoView({ block:"center" }); try{ inp.focus(); inp.select(); }catch(err){} }, 80);
     }
-    toast("المبلغ مكتوب — دوس «سجّل الاستلام»، أو غيّره لو استلمت جزء", 4200);
+    toast("المبلغ مكتوب — دوس «سجّل»، أو غيّره لو استلمت جزء", 4200);
   }
 
   /* استلام فلوس من الشركة = حركة خزنة نوعها settle. بتخصم من محفظتها
