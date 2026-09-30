@@ -400,6 +400,98 @@
     .hm-ti{padding:12px var(--sp-3);gap:10px}
   }
 
+  /* ================= المخزون: كارت لكل صنف ================= */
+  #inv-quick button b{font-weight:700;margin-inline-start:4px}
+  .iv{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .iv-h{display:grid;grid-template-columns:52px minmax(0,1.3fr) minmax(0,2fr) 18px;gap:var(--sp-3);align-items:center;width:100%;
+    padding:var(--sp-3) var(--sp-4);border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .iv-h:hover{background:var(--teal-soft)}
+  .iv-h .thumb,.iv-h .dd-noimg{width:52px;height:52px;margin:0}
+  .iv-n b{font-size:var(--fs-4);font-weight:700}
+  .iv-n .sub{display:block}
+  .iv-pill{display:inline-block;font-size:10px;font-weight:600;padding:1px 8px;border-radius:var(--r-pill);margin-inline-start:6px;vertical-align:middle}
+  .iv-pill.w{background:#F7EEDB;color:var(--warn)} .iv-pill.r{background:#F6E3E8;color:var(--due)}
+  .iv-cs{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+  .iv-cs small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .iv-cs b{font-size:var(--fs-4)}
+  .iv-cs b.w{color:var(--warn)} .iv-cs b.r{color:var(--due)}
+  .iv-chev{color:var(--ink-soft)}
+  .iv-b{padding:0 var(--sp-4) var(--sp-4)}
+  .iv-b h4{margin:0 0 var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
+  .iv-b h4 small{font-weight:400;margin-inline-start:6px}
+  .iv-wrap{overflow-x:auto}
+  table.iv-mx{border-collapse:separate;border-spacing:4px;width:auto;margin:0}
+  table.iv-mx th{font-size:var(--fs-2);color:var(--ink-soft);font-weight:600;padding:4px 10px;text-align:center;background:none;border:0}
+  table.iv-mx th.rh{text-align:start}
+  table.iv-mx td{min-width:66px;padding:0;border:0;border-radius:var(--r-sm);text-align:center}
+  table.iv-mx td button{width:100%;border:0;background:none;font:inherit;color:inherit;cursor:pointer;padding:6px 8px;border-radius:var(--r-sm)}
+  table.iv-mx td button:hover{outline:2px solid var(--teal)}
+  table.iv-mx td b{display:block;font-size:var(--fs-4)}
+  table.iv-mx td small{display:block;font-size:10px;color:var(--ink-soft)}
+  table.iv-mx td.ok{background:#E3F1EA;color:var(--gain)}
+  table.iv-mx td.low{background:#F7EEDB;color:var(--warn)}
+  table.iv-mx td.out{background:#F6E3E8;color:var(--due)}
+  table.iv-mx td.none{background:var(--paper);color:var(--ink-soft);padding:10px 8px}
+  [data-theme="dark"] table.iv-mx td.ok,[data-theme="dark"] table.iv-mx td.low,[data-theme="dark"] table.iv-mx td.out{background:var(--teal-soft)}
+  .iv-lg{display:flex;gap:var(--sp-3);font-size:var(--fs-1);color:var(--ink-soft);margin-top:var(--sp-2);flex-wrap:wrap}
+  .iv-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle;border:1px solid var(--line)}
+  .iv-lg i.ok{background:#E3F1EA} .iv-lg i.low{background:#F7EEDB} .iv-lg i.out{background:#F6E3E8} .iv-lg i.none{background:var(--paper)}
+  @media (max-width:760px){
+    .iv-h{grid-template-columns:52px minmax(0,1fr) 18px;gap:6px var(--sp-3);padding:var(--sp-3)}
+    .iv-chev{grid-row:1;grid-column:3}
+    .iv-cs{grid-column:1 / -1;gap:4px}
+    .iv-cs > span{background:var(--paper);border-radius:var(--r-sm);padding:4px 2px;text-align:center}
+    .iv-cs b{font-size:var(--fs-3)}
+    .iv-b{padding:0 var(--sp-3) var(--sp-3)}
+    #inv-quick{flex-wrap:nowrap;overflow-x:auto}
+    #inv-quick button{flex:0 0 auto}
+    /* جدول اللون × المقاس يفضل جدول — مش كروت زي باقي الجداول على الموبايل */
+    table.iv-mx thead{display:table-header-group}
+    table.iv-mx tbody tr{display:table-row;background:none;border:0;border-radius:0;margin:0;padding:0}
+    table.iv-mx th,table.iv-mx tbody td{display:table-cell;border:0;padding:0}
+    table.iv-mx tbody td::before{content:none}
+    table.iv-mx td.none{padding:10px 8px}
+    table.iv-mx td{min-width:58px}
+    /* الأرقام اللي فوق: اتنين جنب بعض بدل عمود طويل */
+    #inv-top,#cash-stats{display:grid;grid-template-columns:1fr 1fr}
+    #inv-top > div:last-child:nth-child(odd),#cash-stats > div:last-child:nth-child(odd){grid-column:1 / -1}
+  }
+
+  /* ================= الخزنة بالأيام ================= */
+  .cq{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:var(--sp-2);margin:var(--sp-3) 0 var(--sp-4)}
+  .cq .tbtn{padding:12px 14px;justify-content:center;gap:8px;font-size:var(--fs-3)}
+  .cq .tbtn .ic{font-size:18px;line-height:1}
+  .cash-kinds{margin-bottom:var(--sp-3)}
+  .cash-kinds button b{font-weight:700;margin-inline-start:4px}
+  .cd-empty{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-5);text-align:center;color:var(--ink-soft)}
+  .cd-day{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .cd-h{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);flex-wrap:wrap;
+    padding:10px var(--sp-4);background:var(--teal-soft);font-size:var(--fs-2);color:var(--ink-soft)}
+  .cd-h > b{font-size:var(--fs-3);color:var(--ink)}
+  .cd-mv{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:var(--sp-3);align-items:center;
+    padding:10px var(--sp-4);border-top:1px solid var(--line)}
+  .cd-h + .cd-mv{border-top:0}
+  .cd-mv .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:var(--teal-soft)}
+  .cd-mv.in .ic{background:#E3F1EA} .cd-mv.out .ic{background:#F6E3E8}
+  [data-theme="dark"] .cd-mv.in .ic,[data-theme="dark"] .cd-mv.out .ic{background:var(--teal-soft)}
+  .cd-t b{display:block;font-weight:600}
+  .cd-t .sub{display:block}
+  .cd-tag{font-size:10px;font-weight:400;color:var(--ink-soft);border:1px solid var(--line);border-radius:var(--r-pill);padding:0 6px;margin-inline-start:6px}
+  .cd-a{font-weight:700;white-space:nowrap}
+  .cd-mv.in .cd-a{color:var(--gain)} .cd-mv.out .cd-a{color:var(--due)}
+  .cd-x{display:flex;gap:4px;white-space:nowrap}
+  @media (max-width:760px){
+    .cq{grid-template-columns:1fr 1fr 1fr}
+    .cq .tbtn{flex-direction:column;gap:2px;padding:10px 4px;font-size:var(--fs-2)}
+    .cq .tbtn[data-openentry]{grid-column:1 / -1;flex-direction:row}
+    .cash-kinds{flex-wrap:nowrap;overflow-x:auto}
+    .cash-kinds button{flex:0 0 auto}
+    .cd-h{flex-direction:column;align-items:flex-start;gap:0;padding:8px var(--sp-3)}
+    .cd-mv{grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;padding:10px var(--sp-3)}
+    .cd-x{grid-column:2 / -1}
+    .cd-x:empty{display:none}
+  }
+
   /* ================= تفاصيل الأوردر ================= */
   .dd{display:grid;gap:var(--sp-4)}
   .dd h5{margin:0 0 var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
@@ -1520,9 +1612,16 @@
 <!-- الخزنة -->
 <section id="tab-cash" hidden>
   <h2>الخزنة</h2>
-  <p class="hint">دفتر الفلوس كامل. كل حركة من الأوردرات والمشتريات بتنزل هنا لوحدها، والزرار ده للحركات اليدوية بس (تحصيل متأخر، دفع لمورد، مصروف، سحب من شركة شحن). مرتّب من الأقدم للأحدث عشان عمود «الرصيد بعدها» يبقى مقروء — وده الرصيد الحقيقي دايماً حتى لو فلترت.</p>
 
   <div class="stats" id="cash-stats"></div>
+
+  <!-- أكتر ٣ حركات بتتعمل في الخزنة — دوسة واحدة -->
+  <div class="cq" id="cash-quick">
+    <button class="tbtn primary" type="button" data-cashq="expense"><span class="ic" aria-hidden="true">🧾</span>مصروف</button>
+    <button class="tbtn" type="button" data-cashq="out"><span class="ic" aria-hidden="true">🏭</span>دفع لمورد</button>
+    <button class="tbtn" type="button" data-cashq="settle"><span class="ic" aria-hidden="true">🚚</span>استلام من شركة شحن</button>
+    <button class="tbtn" type="button" data-openentry="cash">+ حركة تانية</button>
+  </div>
 
   <div class="toolbar">
     <div class="s-search">
@@ -1534,7 +1633,6 @@
     <button class="tbtn" type="button" id="b-cfilters" aria-expanded="false" aria-controls="cash-filters">
       فلاتر <span class="fcount" id="cf-count" hidden>0</span>
     </button>
-    <button class="tbtn primary" type="button" data-openentry="cash">+ حركة نقدية</button>
     <button class="tbtn" type="button" id="b-cash-img">نزّل صورة للموبايل</button>
   </div>
 
@@ -1566,6 +1664,7 @@
   </div>
 
   <div class="chips" id="cf-chips"></div>
+  <div class="quick cash-kinds" id="cash-kinds" role="group" aria-label="نوع الحركة"></div>
 
   <div class="panel" id="entry-cash" hidden>
     <div class="dhead">
@@ -1610,6 +1709,12 @@
     </form>
     </div>
   </div>
+  <!-- الدفتر بالأيام: الأحدث فوق، وكل يوم صافيه والرصيد في آخره -->
+  <div id="cash-days"></div>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="cash" hidden></button></p>
+
+  <details class="hm-more" id="cash-table-more">
+  <summary>الدفتر كجدول · ومحافظ شركات الشحن</summary>
   <div class="panel" id="wallet-panel" hidden>
     <h3>محافظ شركات الشحن</h3>
     <p class="hint" style="margin-bottom:12px">الفلوس اللي شركة الشحن حصّلتها من العملاء ولسه ما وصلتكش. لما تستلمها سجّلها كـ<strong>سحب من شركة شحن</strong> فوق، فتتنقل للخزنة.</p>
@@ -1617,7 +1722,7 @@
   </div>
 
   <div class="tbl-wrap"><table id="t-cash"></table></div>
-  <p class="more-wrap"><button class="tbtn" type="button" data-more="cash" hidden></button></p>
+  </details>
 </section>
 
 <!-- الأصناف -->
@@ -1909,7 +2014,7 @@
 
 <section id="tab-inv" hidden>
   <h2>المخزون</h2>
-  <p class="hint">كل سطر هنا = <strong>لون ومقاس معيّن</strong> من صنف (زي «شبشب · بني · 38»)، لأن ده اللي بتبيعه وبتجرده فعلاً. بتظهر بس الألوان والمقاسات اللي اشتريتها. الأرصدة تراكمية، والمشترى والمباع والمرتجع بيتبعوا الفترة المختارة. اضغط على أي سطر تشوف حركته بالتفصيل.</p>
+  <div class="stats" id="inv-top"></div>
 
   <div class="toolbar">
     <div class="s-search">
@@ -1928,6 +2033,7 @@
     <button type="button" data-invonly="instock">فيه رصيد</button>
     <button type="button" data-invonly="low">قرب يخلص</button>
     <button type="button" data-invonly="out">خلصان</button>
+    <button type="button" data-invonly="rsv">محجوز</button>
   </div>
 
   <div class="filters" id="inv-filters" hidden>
@@ -1948,6 +2054,16 @@
 
   <div class="chips" id="inv-chips"></div>
 
+  <!-- كل صنف كارت، ودوسة بتفتح جدول الألوان في المقاسات -->
+  <div id="inv-cards"></div>
+
+  <div class="panel" id="move-panel" hidden>
+    <h3 id="move-title"></h3>
+    <div class="tbl-wrap"><table id="t-move"></table></div>
+  </div>
+
+  <details class="hm-more" id="inv-more">
+  <summary>الجدول الكامل بالتفصيل · وكل الأرقام</summary>
   <div class="panel">
     <h3>الرصيد بكل لون ومقاس</h3>
     <div class="tbl-wrap"><table id="t-inv"></table></div>
@@ -1965,11 +2081,7 @@
       <div class="tbl-wrap"><table id="t-invkpi"></table></div>
     </div>
   </div>
-
-  <div class="panel" id="move-panel" hidden>
-    <h3 id="move-title"></h3>
-    <div class="tbl-wrap"><table id="t-move"></table></div>
-  </div>
+  </details>
 </section>
 
 <!-- التقارير -->
@@ -2454,8 +2566,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "86";
+  var VERSION = "87";
   var CHANGELOG = [
+    { v:"87", d:"2026-09-30", items:[
+      "الخزنة: ٣ أرقام (الرصيد · داخل · خارج من أول يوم) و٣ زراير كبيرة: مصروف · دفع لمورد · استلام من شركة شحن — النوع بيتحدّد لوحده",
+      "الخزنة: الدفتر بقى بالأيام والأحدث فوق — كل يوم صافيه والرصيد في آخره، وكل حركة سطرين",
+      "الخزنة: زراير نوع الحركة بعدّاد (مصاريف · موردين · شركات شحن · تحصيل · رأس مال)",
+      "الخزنة: الدفتر كجدول ومحافظ شركات الشحن موجودين مطويين تحت",
+      "المخزون: ٤ أرقام بدل ١١، وكل صنف كارت فيه المتاح والمحجوز واللي عند الشركات وقيمته",
+      "المخزون: دوسة على الصنف بتفتح جدول الألوان في المقاسات — أخضر فيه · أصفر قرب يخلص · أحمر خلص — ودوسة على الخانة بتوريك حركتها",
+      "المخزون: زرار «محجوز» جديد، وعدّاد على كل زرار",
+      "المخزون: الجدول الكامل وكل الأرقام القديمة موجودين مطويين تحت — ونفس الحسابات بالظبط"
+    ]},
     { v:"86", d:"2026-09-30", items:[
       "التنقل بقى ٥ أقسام بدل ١٣ زرار: الرئيسية · الأوردرات · البضاعة · الفلوس · المزيد — وكل قسم تحته شاشاته",
       "على الموبايل الأقسام شريط ثابت تحت الشاشة زي التطبيقات، وعلى «الأوردرات» رقم أحمر بعدد اللي محتاج منك حاجة",
@@ -6377,7 +6499,7 @@
   var ifilt = { item:"", color:"", size:"", only:"all", text:"" };
   var IF_LABEL = { item:"الصنف", color:"اللون", size:"المقاس", only:"اعرض", text:"بحث" };
   var IF_ID = { item:"inv-item", color:"inv-color", size:"inv-size", text:"inv-q" };
-  var ONLY_LABEL = { instock:"فيه رصيد", out:"خلصان", low:"قرب يخلص" };
+  var ONLY_LABEL = { instock:"فيه رصيد", out:"خلصان", low:"قرب يخلص", rsv:"محجوز" };
 
   function readInvFilters(){
     ["item","color","size","text"].forEach(function(k){
@@ -6410,6 +6532,118 @@
     if(k === "only") return ONLY_LABEL[ifilt.only] || ifilt.only;
     return ifilt[k];
   }
+  /* ---------- المخزون: ٤ أرقام + كارت لكل صنف + جدول لون × مقاس ----------
+     كل الأرقام من نفس صفوف invRows اللي الجدول الكامل مبني عليها،
+     فمجموع الكروت = الجدول بالظبط. */
+  function renderInvTop(src, units, value, retail, reserved, scope){
+    var el = document.getElementById("inv-top");
+    if(!el) return;
+    var sc = scope ? "حسب الفلتر" : "";
+    var held = heldOpenQty();
+    var cells = [
+      ["قطع في المخزن", qty(units), "", reserved ? "منهم " + qty(reserved) + " محجوزين لأوردرات" : (sc || "مفيش حاجة محجوزة"), 0],
+      ["قيمتها بالتكلفة", money(value), "", sc || "اللي دفعته فيها", 1],
+      ["لو اتباعت كلها", money(retail), "v-gain", "بسعر البيع", 0],
+      ["عند شركات الشحن", qty(held) + " قطعة", held ? "v-due" : "", held ? "مرتجع لسه ما رجعش" : "كله في مخزنك", 0]
+    ];
+    el.innerHTML = cells.map(function(c){
+      return "<div" + (c[4] ? " class='money-only'" : "") + "><span>" + esc(c[0]) + "</span>" +
+        "<strong class='num " + c[2] + "'>" + esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
+    }).join("");
+  }
+  // عدد الأصناف في كل زرار — بنفس شرط الفلتر بالظبط
+  function renderInvQuickCounts(all){
+    var test = {
+      all: function(){ return true; },
+      instock: function(x){ return x.stock > 0; },
+      low: isLow,
+      out: function(x){ return x.stock <= 0; },
+      rsv: function(x){ return x.rsv > 0; }
+    };
+    Array.prototype.forEach.call(document.querySelectorAll("#inv-quick button[data-invonly]"), function(b){
+      var k = b.dataset.invonly, f = test[k]; if(!f) return;
+      var ids = {};
+      all.forEach(function(x){ if(f(x)) ids[x.item.id] = 1; });
+      if(!b.dataset.lbl) b.dataset.lbl = b.textContent.replace(/\s*\d+$/, "").trim();
+      b.innerHTML = esc(b.dataset.lbl) + " <b>" + qty(Object.keys(ids).length) + "</b>";
+    });
+  }
+  function invAxis(list, key, declared){
+    var seen = {}, out = [];
+    String(declared || "").split(/[،,]/).map(function(v){ return v.trim(); }).forEach(function(v){
+      if(v && list.some(function(x){ return x[key] === v; }) && !seen[v]){ seen[v] = 1; out.push(v); }
+    });
+    list.forEach(function(x){ if(!seen[x[key]]){ seen[x[key]] = 1; out.push(x[key]); } });
+    return out;
+  }
+  function renderInvCards(byItem){
+    var box = document.getElementById("inv-cards");
+    if(!box) return;
+    if(!byItem.length){
+      box.innerHTML = "<p class='cd-empty'>" + (live("items").length ? "مفيش حاجة بالمواصفات دي — جرّب تمسح الفلاتر."
+        : "مفيش أصناف لسه — ضيف أصناف من «الأصناف» وسجّل شراءها.") + "</p>";
+      return;
+    }
+    var heldBy = {};
+    heldOpen().forEach(function(h){ heldBy[h.l.itemId] = (heldBy[h.l.itemId] || 0) + h.n; });
+    var autoOpen = !!(ifilt.color || ifilt.size || ifilt.text || ifilt.only !== "all");
+    box.innerHTML = byItem.map(function(g){
+      var it = g.item, id = it.id;
+      var stock = 0, rsv = 0, val = 0;
+      g.vars.forEach(function(x){ stock += x.stock; rsv += x.rsv; val += x.stock * x.cost; });
+      var lowN = g.vars.filter(isLow).length;
+      var outN = g.vars.filter(function(x){ return x.stock <= 0 && (x.bought || x.soldEver); }).length;
+      var colors = invAxis(g.vars, "color", it.colors), sizes = invAxis(g.vars, "size", it.sizes);
+      var cN = colors.filter(Boolean).length, zN = sizes.filter(Boolean).length;
+      var open = autoOpen || !!openInv[id];
+      var held = heldBy[id] || 0;
+      var sub = (cN ? plural(cN, "لون واحد", "لونين", "ألوان") : "من غير لون") + " · " +
+                (zN ? plural(zN, "مقاس واحد", "مقاسين", "مقاسات") : "من غير مقاس") +
+                ((Number(it.price)||0) ? " · سعره " + qty(Number(it.price)) : "");
+      var head = "<button type='button' class='iv-h' data-invcard='" + esc(id) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
+        (thumbHTML(id) || "<span class='dd-noimg' aria-hidden='true'>" + esc(String(it.name || "").charAt(0)) + "</span>") +
+        "<span class='iv-n'><b>" + esc(it.name) + "</b>" +
+          (lowN ? "<span class='iv-pill w'>" + qty(lowN) + " قرب يخلص</span>" : "") +
+          (outN ? "<span class='iv-pill r'>" + qty(outN) + " خلص</span>" : "") +
+          "<span class='sub'>" + esc(sub) + "</span></span>" +
+        "<span class='iv-cs'>" +
+          "<span><small>متاح</small><b class='num'>" + qty(stock - rsv) + "</b></span>" +
+          "<span><small>محجوز</small><b class='num" + (rsv ? " w" : "") + "'>" + (rsv ? qty(rsv) : "—") + "</b></span>" +
+          "<span><small>عند الشركات</small><b class='num" + (held ? " r" : "") + "'>" + (held ? qty(held) : "—") + "</b></span>" +
+          "<span class='money-only'><small>قيمته</small><b class='num'>" + esc(qty(Math.round(val * 100) / 100)) + "</b></span>" +
+        "</span><span class='iv-chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span></button>";
+      if(!open) return "<div class='iv'>" + head + "</div>";
+      var cell = {};
+      g.vars.forEach(function(x){ cell[x.color + "|" + x.size] = x; });
+      var mx = "<table class='iv-mx'><thead><tr><th></th>" + sizes.map(function(z){
+          return "<th>" + esc(z || "—") + "</th>"; }).join("") + "</tr></thead><tbody>" +
+        colors.map(function(c){
+          return "<tr><th class='rh'>" + esc(c || "—") + "</th>" + sizes.map(function(z){
+            var x = cell[c + "|" + z];
+            if(!x || (!x.bought && !x.stock && !x.soldEver && !x.rsv)) return "<td class='none'>—</td>";
+            var free = x.stock - x.rsv;
+            var cls = x.stock <= 0 ? "out" : (isLow(x) ? "low" : "ok");
+            return "<td class='" + cls + "'><button type='button' data-move='" + esc(x.key) + "' title='حركة " + esc(vLabel(c, z) || it.name) + "'>" +
+              "<b class='num'>" + qty(free) + "</b>" +
+              (x.rsv ? "<small>+" + qty(x.rsv) + " محجوز</small>" : (cls === "low" && Number(it.min) ? "<small>حد التنبيه " + qty(Number(it.min)) + "</small>" : "")) +
+              "</button></td>";
+          }).join("") + "</tr>";
+        }).join("") + "</tbody></table>";
+      return "<div class='iv open'>" + head + "<div class='iv-b'>" +
+        "<h4>المتاح بكل لون ومقاس <small>دوس على أي خانة تشوف حركتها</small></h4>" +
+        "<div class='iv-wrap'>" + mx + "</div>" +
+        "<div class='iv-lg'><span><i class='ok'></i>فيه</span><span><i class='low'></i>قرب يخلص</span>" +
+          "<span><i class='out'></i>خلص</span><span><i class='none'></i>ما اشتريتوش</span></div>" +
+        "</div></div>";
+    }).join("");
+  }
+  document.getElementById("inv-cards").addEventListener("click", function(e){
+    var h = e.target.closest("[data-invcard]"); if(!h) return;
+    var id = h.dataset.invcard;
+    if(openInv[id]) delete openInv[id]; else openInv[id] = 1;
+    renderInventory();
+  });
+
   function renderInvChips(){
     var keys = Object.keys(IF_LABEL).filter(function(k){
       return k === "only" ? ifilt.only !== "all" : !!ifilt[k]; });
@@ -6441,6 +6675,7 @@
       if(ifilt.only === "instock" && x.stock <= 0) return false;
       if(ifilt.only === "out" && x.stock > 0) return false;
       if(ifilt.only === "low" && !isLow(x)) return false;
+      if(ifilt.only === "rsv" && !(x.rsv > 0)) return false;
       if(q){
         var hay = [x.item.name, x.color, x.size,
                    vCode(x.item.id, x.color, x.size)].join(" ").toLowerCase();
@@ -6505,6 +6740,10 @@
     var sum = function(g, f){ return g.vars.reduce(function(a,x){ return a + (x[f]||0); }, 0); };
     var val = function(g){ return g.vars.reduce(function(a,x){ return a + x.stock * x.cost; }, 0); };
     byItem.sort(function(a,b){ return (sum(b,"sold") - sum(a,"sold")) || (sum(b,"stock") - sum(a,"stock")); });
+
+    renderInvTop(src, units, value, retail, reserved, scope);
+    renderInvQuickCounts(all);
+    renderInvCards(byItem);
 
     /* فلتر على لون أو مقاس أو بحث معناه إنك بتدوّر على تركيبة —
        فبنفتح الأصناف المطابقة لوحدها بدل ما تدوس عليهم واحد واحد */
@@ -9334,10 +9573,10 @@
       ["رصيد الخزنة", money(bal), bal >= 0 ? "" : "v-due",
         bal >= 0 ? "الفلوس اللي في إيدك دلوقتي" : "بالسالب — في حركة ناقصة أو صرف زيادة"],
       ["داخل", money(tin), tin ? "v-gain" : "", scope],
-      ["خارج", money(tout), tout ? "v-due" : "", scope],
-      ["في محافظ الشحن", money(wal), wal > 0.009 ? "v-due" : "",
-        wal > 0.009 ? "محصّلة ولسه ما وصلتكش" : "مفيش فلوس معلّقة"]
+      ["خارج", money(tout), tout ? "v-due" : "", scope]
     ];
+    // «في محافظ الشحن» اتشالت من هنا: موجودة في الرئيسية وشاشة شركات الشحن
+    void wal;
     el.innerHTML = cells.map(function(c){
       return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
         "<small>"+esc(c[3])+"</small></div>";
@@ -9374,7 +9613,95 @@
       L.length ? "مفيش حركات مطابقة للفلتر. امسح الفلاتر عشان تشوف الدفتر كامل."
                : "الخزنة فاضية. أول حركة في السيستم هي تسجيل رأس المال من تبويب «رأس المال» — وهو اللي بتشتري بيه بضاعة وتدفع منه المصاريف.");
     renderCashStats(shown, tin, tout);
+    renderCashKinds(L);
+    renderCashDays(L);
   }
+
+  /* ---------- الخزنة بالأيام ----------
+     نفس الدفتر ونفس الفلتر، بس الأحدث فوق ومتجمّع بالأيام. رصيد آخر
+     اليوم بيتحسب على الدفتر كامل (حتى الحركات المخفية بالفلتر) —
+     نفس «الرصيد بعدها» في الجدول، فرصيد آخر يوم = رصيد الخزنة. */
+  var CASH_KINDS = [["", "الكل"], ["مصروف", "مصاريف"], ["دفع", "موردين"], ["شحن", "شركات شحن"],
+                    ["تحصيل", "تحصيل"], ["رأس مال", "رأس مال"], ["افتتاحي", "افتتاحي"]];
+  var CASH_IC = { "تحصيل":"🤝", "دفع":"🏭", "مصروف":"🧾", "شحن":"🚚", "رأس مال":"👤", "افتتاحي":"📘" };
+  function renderCashKinds(L){
+    var box = document.getElementById("cash-kinds");
+    if(!box) return;
+    var n = {}; L.forEach(function(x){ n[x.kind] = (n[x.kind] || 0) + 1; });
+    box.innerHTML = CASH_KINDS.filter(function(k){ return !k[0] || n[k[0]] || cfilt.kind === k[0]; })
+      .map(function(k){
+        var c = k[0] ? (n[k[0]] || 0) : L.length, on = (cfilt.kind || "") === k[0];
+        return "<button type='button' data-cashkind='" + esc(k[0]) + "'" + (on ? " class='on' aria-pressed='true'" : " aria-pressed='false'") +
+               ">" + esc(k[1]) + " <b>" + qty(c) + "</b></button>";
+      }).join("");
+  }
+  function dayLabel(d){
+    try{
+      var t = new Date(d + "T00:00:00");
+      if(!isNaN(t)) return t.toLocaleDateString("ar-EG-u-nu-latn", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+    }catch(e){}
+    return d || "—";
+  }
+  function renderCashDays(L){
+    var box = document.getElementById("cash-days");
+    if(!box) return;
+    var run = 0, dayEnd = {}, items = [];
+    L.forEach(function(x){
+      run += x.inn - x.out;
+      dayEnd[x.d] = run;
+      if(cashMatch(x)) items.push(x);
+    });
+    items.reverse();                                   // الأحدث فوق
+    var page = pageRows("cash", items);
+    var filtered = Object.keys(CF_LABEL).some(function(k){ return cfilt[k]; });
+    var days = [], cur = null;
+    page.forEach(function(x){
+      if(!cur || cur.d !== x.d){ cur = { d:x.d, list:[], net:0 }; days.push(cur); }
+      cur.list.push(x); cur.net += x.inn - x.out;
+    });
+    if(!days.length){
+      box.innerHTML = "<p class='cd-empty'>" + esc(L.length ? "مفيش حركات مطابقة للفلتر — امسح الفلاتر عشان تشوف الدفتر كامل."
+        : "الخزنة فاضية. أول حركة هي تسجيل رأس المال من «رأس المال».") + "</p>";
+      return;
+    }
+    box.innerHTML = days.map(function(dy){
+      var bal = dayEnd[dy.d];
+      return "<div class='cd-day'><div class='cd-h'><b>" + esc(dayLabel(dy.d)) + "</b>" +
+        "<span>" + (filtered ? "صافي المعروض " : "صافي اليوم ") +
+          "<b class='num " + (dy.net >= 0 ? "v-gain" : "v-due") + "'>" + (dy.net >= 0 ? "+" : "−") + esc(money(Math.abs(dy.net))) + "</b>" +
+          " · الرصيد <b class='num" + (bal < 0 ? " v-due" : "") + "'>" + esc(money(bal)) + "</b></span></div>" +
+        dy.list.map(function(x){
+          var inn = x.inn > 0.009, who = (x.who && x.who !== "—") ? x.who : "";
+          var acts = x.id
+            ? (x.cap ? "<button class='del' style='color:var(--teal)' data-editcap='" + x.id + "'>تعديل</button>"
+                     : "<button class='del' style='color:var(--teal)' data-edit='cash|" + x.id + "'>تعديل</button>") +
+              "<button class='del' data-del='cash' data-id='" + x.id + "'>حذف</button>"
+            : "";
+          return "<div class='cd-mv " + (inn ? "in" : "out") + "'>" +
+            "<span class='ic' aria-hidden='true'>" + (CASH_IC[x.kind] || "•") + "</span>" +
+            "<span class='cd-t'><b>" + esc(x.t) + (who ? " · " + esc(who) : "") +
+              (x.id ? "<span class='cd-tag'>" + esc(x.src) + "</span>" : "") + "</b>" +
+              (x.note ? "<span class='sub'>" + esc(x.note) + "</span>" : "") + "</span>" +
+            "<span class='cd-a num'>" + (inn ? "+" + esc(money(x.inn)) : "−" + esc(money(x.out))) + "</span>" +
+            "<span class='cd-x'>" + acts + "</span></div>";
+        }).join("") + "</div>";
+    }).join("");
+  }
+  document.getElementById("cash-kinds").addEventListener("click", function(e){
+    var b = e.target.closest("[data-cashkind]"); if(!b) return;
+    var sel = document.getElementById("cf-kind");
+    if(sel) sel.value = b.dataset.cashkind;
+    readCashFilters(); resetPage("cash"); renderCash();
+  });
+  // الزراير السريعة: نفس درج «حركة نقدية» بس النوع متحدّد
+  document.getElementById("cash-quick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-cashq]"); if(!b) return;
+    openEntry("cash");
+    var t = document.getElementById("c-type");
+    if(t){ t.value = b.dataset.cashq; t.dispatchEvent(new Event("change", { bubbles:true })); }
+    var a = document.getElementById("c-amount");
+    if(a) setTimeout(function(){ try{ a.focus(); }catch(err){} }, 60);
+  });
 
 
   /* ---------- صورة الخزنة للموبايل ----------
