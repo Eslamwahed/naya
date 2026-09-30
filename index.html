@@ -453,7 +453,7 @@
     table.iv-mx td.none{padding:10px 8px}
     table.iv-mx td{min-width:58px}
     /* الأرقام اللي فوق: اتنين جنب بعض بدل عمود طويل */
-    #inv-top,#cash-stats{display:grid;grid-template-columns:1fr 1fr}
+    #inv-top,#cash-stats,#cap-stats,#pu-top{display:grid;grid-template-columns:1fr 1fr}
     #inv-top > div:last-child:nth-child(odd),#cash-stats > div:last-child:nth-child(odd){grid-column:1 / -1}
   }
 
@@ -548,6 +548,139 @@
     .shc-row > .sub.num{display:none}
     .shc-row.st{grid-template-columns:44px minmax(0,1fr) auto}
     .shc-row.st > .sub:last-child{grid-column:2 / -1;text-align:start}
+  }
+
+  /* ================= رأس المال: شارة الميزانية وكارت لكل شريك ================= */
+  .cap-recon{display:flex;align-items:center;gap:var(--sp-3);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-2);flex-wrap:wrap}
+  .cap-recon.ok{background:#E3F1EA;color:var(--gain)}
+  .cap-recon.bad{background:#F6E3E8;color:var(--due)}
+  [data-theme="dark"] .cap-recon.ok,[data-theme="dark"] .cap-recon.bad{background:var(--teal-soft)}
+  .cap-recon .ic{font-size:22px;font-weight:700;line-height:1}
+  .cap-recon .t{flex:1;min-width:200px}
+  .cap-recon .t b{font-size:var(--fs-4)}
+  .cap-recon .t small{display:block;color:var(--ink);opacity:.8;font-size:var(--fs-2)}
+  .cap-recon button{font:inherit;font-size:var(--fs-2);background:none;border:0;color:var(--teal);cursor:pointer;font-weight:600}
+  #cap-recon-more > summary{display:none}
+  #cap-recon-more:not([open]){display:none}
+  .cap-h{display:flex;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap;margin:var(--sp-4) 0 var(--sp-2)}
+  .cap-h small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)}
+  .cap-own{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-3)}
+  .cap-own:empty{display:none}
+  .cap-bar{display:flex;height:14px;border-radius:var(--r-pill);overflow:hidden;background:var(--line);margin-bottom:6px}
+  .cap-bar i{display:block;height:100%}
+  .cap-lg{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-2);color:var(--ink-soft)}
+  .cap-lg em{font-style:normal;display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px}
+  .cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-2)}
+  .cpc{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;align-self:start}
+  .cpc-h{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
+  .cpc-h .av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:var(--fs-4);color:#fff;flex:0 0 auto}
+  .cpc-h .nm{flex:1;min-width:0}
+  .cpc-h .nm b{font-size:var(--fs-4)}
+  .cpc-h .nm .sub{display:block}
+  .cpc-h .pcnt{text-align:end}
+  .cpc-h .pcnt b{font-size:var(--fs-6);display:block;line-height:1.1}
+  .cpc-h .pcnt small{font-size:var(--fs-1);color:var(--ink-soft)}
+  .cpc-st{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-2);padding:0 var(--sp-4) var(--sp-3)}
+  .cpc-st > div{background:var(--paper);border-radius:var(--r-sm);padding:6px 10px}
+  .cpc-st small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .cpc-st b{font-size:var(--fs-4);white-space:nowrap}
+  .cpc-a{display:flex;gap:6px;flex-wrap:wrap;padding:0 var(--sp-4) var(--sp-3)}
+  .cpc-a .tbtn{flex:1 1 auto;justify-content:center;padding:6px 10px;font-size:var(--fs-2);white-space:nowrap}
+  .cpc-a .tbtn[disabled]{opacity:.45;cursor:not-allowed}
+  .cpc-a .tbtn.lnk{flex:0 0 auto;border-color:transparent;background:none;color:var(--teal)}
+  .cpc-tl{border-top:1px solid var(--line);background:var(--paper);padding:var(--sp-2) var(--sp-4) var(--sp-3)}
+  .cpc-tl h4{margin:4px 0 6px;font-size:var(--fs-2);color:var(--ink-soft)}
+  .cpc-r{display:grid;grid-template-columns:48px minmax(0,1fr) auto auto;gap:var(--sp-2);padding:7px 0;border-top:1px dashed var(--line);font-size:var(--fs-2);align-items:center}
+  .cpc-tl h4 + .cpc-r{border-top:0}
+  .cpc-r .d{color:var(--ink-soft)}
+  .cpc-r .sub{display:block}
+  .cpc-r > b{white-space:nowrap;text-align:end}
+  .cpc-r .x{display:flex;gap:2px}
+  .cpc-r .x .del{font-size:var(--fs-1)}
+  .dsteps{display:flex;margin:0 0 var(--sp-3);counter-reset:ds}
+  .dsteps span{flex:1;text-align:center;font-size:var(--fs-2);color:var(--ink-soft);padding:8px 4px;border-bottom:3px solid var(--line)}
+  .dsteps span::before{counter-increment:ds;content:counter(ds);display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
+    background:var(--line);color:var(--ink);font-weight:700;font-size:var(--fs-1);margin-inline-end:6px}
+  .dsteps span.on{color:var(--teal);font-weight:700;border-bottom-color:var(--teal)}
+  .dsteps span.on::before{background:var(--teal);color:#fff}
+  .dsteps span.done{color:var(--gain);border-bottom-color:var(--gain)}
+  .dsteps span.done::before{content:"✓";background:var(--gain);color:#fff}
+  #dist-per{margin-bottom:var(--sp-2)}
+  .dist-fill{display:flex;gap:6px;align-items:flex-end}
+  @media (max-width:760px){
+    .cap-grid{grid-template-columns:1fr}
+    .cpc-h,.cpc-st,.cpc-a{padding-inline:var(--sp-3)}
+    .cpc-st{gap:4px}
+    .cpc-st b{font-size:var(--fs-3)}
+    .cpc-a .tbtn{flex:1 1 40%}
+    .cpc-tl{padding-inline:var(--sp-3)}
+    .cpc-r{grid-template-columns:44px minmax(0,1fr) auto}
+    .cpc-r .x{grid-column:2 / -1}
+    .dsteps span{font-size:var(--fs-1)}
+    .dsteps span::before{display:block;margin:0 auto 2px}
+    #dist-per{flex-wrap:nowrap;overflow-x:auto} #dist-per button{flex:0 0 auto}
+    .dist-fill .tbtn{flex:1;justify-content:center}
+  }
+
+  /* ================= المشتريات: كارت لكل فاتورة ================= */
+  .pu-owe:empty{display:none}
+  .pu-owe{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .pu-owe h3{margin:0;padding:var(--sp-3) var(--sp-4) 0;font-size:var(--fs-3)}
+  .pu-ow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:var(--sp-3);align-items:center;padding:10px var(--sp-4);border-top:1px dashed var(--line)}
+  .pu-owe h3 + .pu-ow{border-top:0}
+  .pu-ow .sub{display:block}
+  .pu-ow > b{font-size:var(--fs-4);color:var(--due);white-space:nowrap}
+  .pu-ow .a{display:flex;gap:6px}
+  #pu-only button b{font-weight:700;margin-inline-start:4px}
+  .pu-mo{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);margin:var(--sp-4) 2px var(--sp-2);font-weight:600}
+  .pu-mo b{color:var(--ink)}
+  .pv{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-2);overflow:hidden}
+  .pv.ret{border-inline-start:4px solid var(--due)}
+  .pv.fresh{box-shadow:0 0 0 2px var(--teal)}
+  .pv-h{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 140px 18px;gap:4px var(--sp-3);align-items:center;width:100%;
+    padding:var(--sp-3) var(--sp-4);border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .pv-h:hover{background:var(--teal-soft)}
+  .pv-h .t{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+  .pv-h .t b{font-size:var(--fs-3)}
+  .pv-h .ono{color:var(--teal);font-weight:700}
+  .pv-h .it{grid-column:1;grid-row:2}
+  .pv-h .pay{grid-row:1 / span 2;grid-column:2}
+  .pv-h .tot{grid-row:1 / span 2;grid-column:3;text-align:end}
+  .pv-h .tot b{font-size:var(--fs-4);white-space:nowrap;display:block}
+  .pv-h .tot small{font-size:var(--fs-1);color:var(--ink-soft)}
+  .pv-h .chev{grid-row:1 / span 2;grid-column:4;color:var(--ink-soft)}
+  .pv-h .pay{display:block;min-width:0}
+  .pv-bar{display:block;height:6px;border-radius:var(--r-pill);background:#F6E3E8;overflow:hidden;margin:2px 0 3px}
+  .pv-bar i{display:block;height:100%;background:var(--gain)}
+  .pv-pay{display:flex;justify-content:space-between;gap:6px;font-size:var(--fs-1);color:var(--ink-soft)}
+  .pv-pay .g{color:var(--gain);font-weight:600} .pv-pay .r{color:var(--due)}
+  .pv-b{border-top:1px solid var(--line);background:var(--paper);padding:var(--sp-2) var(--sp-4) var(--sp-3)}
+  .pv-ln{display:grid;grid-template-columns:minmax(0,1fr) 60px 120px 110px 100px;gap:var(--sp-2);padding:8px 0;border-top:1px dashed var(--line);font-size:var(--fs-2);align-items:center}
+  .pv-ln.hd{border-top:0;color:var(--ink-soft);font-size:var(--fs-1)}
+  .pv-ln .n{text-align:end;white-space:nowrap}
+  .pv-ln .sub{display:block}
+  .pv-ln .del{font-size:var(--fs-1)}
+  .pv-sum{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-2);padding:var(--sp-2) 0 0;border-top:2px solid var(--line);margin-top:4px}
+  .pv-f{display:flex;gap:6px;flex-wrap:wrap;margin-top:var(--sp-2)}
+  @media (max-width:760px){
+    .pu-owe h3{padding:var(--sp-3) var(--sp-3) 0}
+    .pu-ow{grid-template-columns:minmax(0,1fr) auto;padding:10px var(--sp-3)}
+    .pu-ow .a{grid-column:1 / -1} .pu-ow .a .tbtn{flex:1;justify-content:center}
+    #pu-only{flex-wrap:nowrap;overflow-x:auto} #pu-only button{flex:0 0 auto}
+    .pv-h{grid-template-columns:minmax(0,1fr) auto;padding:var(--sp-3);gap:6px var(--sp-2)}
+    .pv-h .t{grid-column:1;grid-row:1}
+    .pv-h .tot{grid-column:2;grid-row:1}
+    .pv-h .it{grid-column:1 / -1;grid-row:2}
+    .pv-h .pay{grid-column:1 / -1;grid-row:3}
+    .pv-h .chev{display:none}
+    .pv-b{padding-inline:var(--sp-3)}
+    .pv-ln{grid-template-columns:minmax(0,1fr) auto auto}
+    .pv-ln.hd{display:none}
+    .pv-ln .q{grid-column:2;grid-row:1}
+    .pv-ln .tt{grid-column:3;grid-row:1}
+    .pv-ln .c{grid-column:1 / 3;text-align:start}
+    .pv-ln .x{grid-column:3;text-align:end}
+    .pv-f .tbtn{flex:1;justify-content:center}
   }
 
   /* ================= الخزنة بالأيام ================= */
@@ -1571,6 +1704,9 @@
   <p class="hint">الشيت بيفتح في إكسل عادي. املا رأس الفاتورة فوق وسطر لكل لون ومقاس تحت، واحفظه <strong>CSV</strong> زي ما هو، وبعدين ارفعه — هيتفتح قدامك في فورم الشراء تراجعه وتحفظه.</p>
   <p class="note" id="pu-msg" hidden></p>
 
+  <div class="stats" id="pu-top"></div>
+  <div class="pu-owe money-only" id="pu-owe"></div>
+
   <div class="panel" id="entry-purchases" hidden>
     <div class="dhead">
       <h3 id="title-purchases">شراء جديد</h3>
@@ -1702,9 +1838,14 @@
     <div><label for="pu-to">لـ تاريخ</label><input type="date" id="pu-to"></div>
   </div>
   <div class="chips" id="pu-chips"></div>
-
-  <div class="tbl-wrap"><table id="t-purch"></table></div>
+  <div class="quick" id="pu-only" role="group" aria-label="فلتر الفواتير"></div>
+  <div id="pu-cards"></div>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="purch" hidden></button></p>
+
+  <details class="hm-more" id="pu-more">
+    <summary>كل الفواتير في جدول</summary>
+    <div class="tbl-wrap"><table id="t-purch"></table></div>
+  </details>
 </section>
 
 <!-- الخزنة -->
@@ -1948,65 +2089,58 @@
 
 <!-- المخزون -->
 <section id="tab-capital" hidden>
-  <h2>رأس المال والشركاء</h2>
-  <p class="hint">فلوس الشريك نوعين: <strong>رأس ماله</strong> (اللي حطّه، وبيحدّد نسبته) و<strong>أرباح مستحقة له</strong> (أرباح بقت ملكه ولسه ما أخدهاش، ومابتأثّرش على نسبته). لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي دفع فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
+  <div class="pt-head"><h2>رأس المال والشركاء</h2><button class="tbtn primary" type="button" data-openentry="capital">+ حركة رأس مال</button></div>
 
-  <details class="explain">
-    <summary>إزاي بيتحسب نصيب الشريك؟</summary>
-    <div class="xbody">
-
-      <p><strong>فلوس الشريك نوعين، والفرق بينهم مهم:</strong></p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th></th><th>رأس ماله</th><th>أرباح مستحقة له</th></tr></thead>
-        <tbody>
-          <tr><td class="wide">إيه ده</td><td>الفلوس اللي حطّها</td><td>أرباح بقت ملكه ولسه ما أخدهاش</td></tr>
-          <tr><td class="wide">بيتحدّد إزاي</td><td>هو اللي بيدفعه</td><td>بيتحسب لما توزّع أرباح</td></tr>
-          <tr><td class="wide">بيأثّر على نسبته</td><td><span class="v-gain">أيوه</span></td><td><span class="v-due">لأ</span></td></tr>
-        </tbody>
-      </table></div>
-
-      <p><strong>الأربع حركات وأثر كل واحدة:</strong></p>
-      <div class="tbl-wrap"><table>
-        <thead><tr><th>الحركة</th><th>الخزنة</th><th>رأس ماله</th><th>أرباحه المستحقة</th><th>نسبته</th></tr></thead>
-        <tbody>
-          <tr><td class="wide">دفع رأس مال</td><td class="num v-gain">+</td><td class="num v-gain">+</td><td class="num">—</td><td>تزيد</td></tr>
-          <tr><td class="wide">سحب من رأس ماله</td><td class="num v-due">−</td><td class="num v-due">−</td><td class="num">—</td><td>تقل</td></tr>
-          <tr><td class="wide">صرف أرباح له</td><td class="num v-due">−</td><td class="num">—</td><td class="num v-due">−</td><td>ما تتغيّرش</td></tr>
-          <tr><td class="wide">ساب أرباحه رأس مال</td><td class="num">—</td><td class="num v-gain">+</td><td class="num v-due">−</td><td>تزيد</td></tr>
-        </tbody>
-      </table></div>
-      <p>خد بالك من الفرق بين <strong>سحب من رأس ماله</strong> و<strong>صرف أرباح له</strong>: الاتنين بيطلّعوا فلوس من الخزنة، بس الأول بيقلّل حصّته في الشركة والتاني لأ. القاعدة: بياخد من أرباحه؟ صرف أرباح. بيقلّل حصّته؟ سحب من رأس ماله.</p>
-
-      <p><strong>ليه النسبة مرجّحة بالزمن؟</strong></p>
-      <p>لأن النسب بتتغيّر. لو شريك كان ٢٠٪ من يناير لمايو وبعدين دفع فلوس فبقى ٣٣٪، مينفعش ياخد ٣٣٪ من أرباح السنة كلها — هو مكانش شريك بالنسبة دي في نص السنة الأولانية. السيستم بيقسّم الفترة عند كل تغيير وبيرجّح كل شريحة بعدد أيامها.</p>
-      <p>وقت التوزيع، اضغط <strong>«ليه النسب دي؟»</strong> تحت الجدول عشان تشوف الشرائح بتواريخك الحقيقية.</p>
-
-      <p><strong>الأرباح المحتجزة</strong> = كل الأرباح من البداية ناقص اللي اتوزّع. ودي السقف الأعلى للتوزيع. بس <strong>الصرف النقدي سقفه رصيد الخزنة</strong>، لأن جزء من الأرباح ممكن يكون محبوس في مخزون أو عند عملاء.</p>
-
-      <p><strong>رأس مال ≠ ربح.</strong> لو سجّلت رأس مال ١٥٠ ألف، الخزنة هتبقى ١٥٠ ألف بس الأرباح المحتجزة صفر — دي فلوس الشركاء نفسهم مش مكسب. الربح مبيظهرش غير لما تبيع بضاعة بأكتر من تكلفتها. عشان كده زرار «احسب الأنصبة» بيرفض أي مبلغ أكبر من الأرباح المحتجزة، مهما كان في الخزنة فلوس. لو شريك عايز يسترجع من فلوسه قبل ما يبقى في أرباح، ده <strong>«سحب من رأس ماله»</strong> مش توزيع أرباح — وبيقلّل نسبته.</p>
-
-    </div>
+  <div class="cap-recon" id="cap-recon"></div>
+  <details class="hm-more" id="cap-recon-more">
+    <summary>تفاصيل الميزانية</summary>
+    <p class="hint">صافي الأصول لازم يساوي حقوق الملكية. لو في فرق، يبقى في حاجة مش مسجّلة — غالباً أرصدة افتتاحية ما اتسجّلتش كرأس مال شركاء.</p>
+    <div class="tbl-wrap"><table id="t-recon"></table></div>
   </details>
 
-  <div class="stats" id="cap-stats"></div>
+<div class="stats" id="cap-stats"></div>
 
-  <div class="panel">
-    <h3>الشركاء</h3>
-    <p class="hint" style="margin-bottom:10px">«الاسم» بيغيّر اسم الشريك وتليفونه. «المبالغ» بتوديك لحركاته عشان تعدّل مبلغ أو تاريخ. والنسب بتتحسب لوحدها بعد أي تعديل.</p>
-    <div class="tbl-wrap"><table id="t-partners"></table></div>
-    <p class="hint" style="margin-top:10px">سجّل الشريك ورأس ماله من زرار <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة لو الشريك لسه مش مسجّل.</p>
+  <h3 class="cap-h">الشركاء <small>النسبة بتتحسب لوحدها من رأس مال كل واحد</small></h3>
+  <div class="cap-own" id="cap-own"></div>
+  <div class="cap-grid" id="cap-cards"></div>
+  <p class="hint" style="margin:0 0 var(--sp-3)">شريك جديد؟ من <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة.</p>
+
+  <div class="panel" id="dist-panel">
+    <h3>توزيع أرباح</h3>
+    <div class="dsteps" id="dist-steps"><span class="on">الفترة والمبلغ</span><span>الأنصبة</span><span>تأكيد</span></div>
+    <div class="quick" id="dist-per" role="group" aria-label="الفترة">
+      <button type="button" data-distper="month">الشهر ده</button>
+      <button type="button" data-distper="prev">الشهر اللي فات</button>
+      <button type="button" data-distper="all">من البداية</button>
+    </div>
+    <div class="grid">
+      <div><label for="dist-from">من تاريخ</label><input type="date" id="dist-from"></div>
+      <div><label for="dist-to">لتاريخ</label><input type="date" id="dist-to"></div>
+      <div><label for="dist-amount">المبلغ اللي هيتوزّع</label><input type="number" id="dist-amount" step="any" min="0" autocomplete="off"></div>
+      <div class="dist-fill"><button class="tbtn" type="button" data-distfill="all">كل المتاح</button><button class="tbtn" type="button" data-distfill="half">النص</button></div>
+      <div><button class="tbtn primary" type="button" id="b-dist-calc">احسب الأنصبة ←</button></div>
+    </div>
+    <p class="note" id="dist-limits" style="margin-top:10px"></p>
+
+    <div id="dist-box" hidden>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="t-dist"></table></div>
+      <details class="explain why" id="dist-why">
+        <summary>ليه النسب دي؟</summary>
+        <div class="xbody">
+          <p>الفترة بتتقسّم عند كل تاريخ اتغيّر فيه رأس مال أي شريك، وكل شريحة بتاخد وزن بعدد أيامها.</p>
+          <div class="tbl-wrap"><table id="t-why"></table></div>
+        </div>
+      </details>
+      <p class="note" id="dist-check" style="margin-top:10px"></p>
+      <div class="row-actions">
+        <button class="tbtn primary" type="button" id="b-dist-do">أكّد التوزيع ✓</button>
+        <button class="tbtn" type="button" id="b-dist-cancel">→ رجوع</button>
+      </div>
+    </div>
+    <p class="note ok" id="dist-done" hidden></p>
   </div>
 
-  <div class="panel">
-    <h3 id="caplog-title">سجل حركات رأس المال</h3>
-    <div class="tbl-wrap"><table id="t-cap-log"></table></div>
-  </div>
-
-  <div class="tbar">
-    <button class="tbtn primary" type="button" data-openentry="capital">+ حركة رأس مال</button>
-  </div>
-
-  <div class="panel" id="entry-capital" hidden>
+<div class="panel" id="entry-capital" hidden>
     <div class="dhead">
       <h3 id="title-capital">حركة رأس مال</h3>
       <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
@@ -2049,38 +2183,59 @@
     </div>
   </div>
 
-  <div class="panel">
-    <h3>توزيع أرباح</h3>
-    <div class="grid">
-      <div><label for="dist-from">من تاريخ</label><input type="date" id="dist-from"></div>
-      <div><label for="dist-to">لتاريخ</label><input type="date" id="dist-to"></div>
-      <div><label for="dist-amount">المبلغ اللي هيتوزّع</label><input type="number" id="dist-amount" step="any" min="0" autocomplete="off"></div>
-      <div><button class="tbtn" type="button" id="b-dist-calc">احسب الأنصبة</button></div>
-    </div>
-    <p class="note" id="dist-limits" style="margin-top:10px"></p>
+  <details class="hm-more" id="cap-more">
+    <summary>جدول الشركاء وسجل كل الحركات والشرح</summary>
+    <p class="hint">فلوس الشريك نوعين: <strong>رأس ماله</strong> (اللي حطّه، وبيحدّد نسبته) و<strong>أرباح مستحقة له</strong> (أرباح بقت ملكه ولسه ما أخدهاش، ومابتأثّرش على نسبته). لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي دفع فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
 
-    <div id="dist-box" hidden>
-      <div class="tbl-wrap" style="margin-top:12px"><table id="t-dist"></table></div>
-      <details class="explain why" id="dist-why">
-        <summary>ليه النسب دي؟</summary>
-        <div class="xbody">
-          <p>الفترة بتتقسّم عند كل تاريخ اتغيّر فيه رأس مال أي شريك، وكل شريحة بتاخد وزن بعدد أيامها.</p>
-          <div class="tbl-wrap"><table id="t-why"></table></div>
-        </div>
-      </details>
-      <p class="note" id="dist-check" style="margin-top:10px"></p>
-      <div class="row-actions">
-        <button class="tbtn primary" type="button" id="b-dist-do">أكّد التوزيع</button>
-        <button class="tbtn" type="button" id="b-dist-cancel">إلغاء</button>
-      </div>
+  <details class="explain">
+    <summary>إزاي بيتحسب نصيب الشريك؟</summary>
+    <div class="xbody">
+
+      <p><strong>فلوس الشريك نوعين، والفرق بينهم مهم:</strong></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th></th><th>رأس ماله</th><th>أرباح مستحقة له</th></tr></thead>
+        <tbody>
+          <tr><td class="wide">إيه ده</td><td>الفلوس اللي حطّها</td><td>أرباح بقت ملكه ولسه ما أخدهاش</td></tr>
+          <tr><td class="wide">بيتحدّد إزاي</td><td>هو اللي بيدفعه</td><td>بيتحسب لما توزّع أرباح</td></tr>
+          <tr><td class="wide">بيأثّر على نسبته</td><td><span class="v-gain">أيوه</span></td><td><span class="v-due">لأ</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <p><strong>الأربع حركات وأثر كل واحدة:</strong></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>الحركة</th><th>الخزنة</th><th>رأس ماله</th><th>أرباحه المستحقة</th><th>نسبته</th></tr></thead>
+        <tbody>
+          <tr><td class="wide">دفع رأس مال</td><td class="num v-gain">+</td><td class="num v-gain">+</td><td class="num">—</td><td>تزيد</td></tr>
+          <tr><td class="wide">سحب من رأس ماله</td><td class="num v-due">−</td><td class="num v-due">−</td><td class="num">—</td><td>تقل</td></tr>
+          <tr><td class="wide">صرف أرباح له</td><td class="num v-due">−</td><td class="num">—</td><td class="num v-due">−</td><td>ما تتغيّرش</td></tr>
+          <tr><td class="wide">ساب أرباحه رأس مال</td><td class="num">—</td><td class="num v-gain">+</td><td class="num v-due">−</td><td>تزيد</td></tr>
+        </tbody>
+      </table></div>
+      <p>خد بالك من الفرق بين <strong>سحب من رأس ماله</strong> و<strong>صرف أرباح له</strong>: الاتنين بيطلّعوا فلوس من الخزنة، بس الأول بيقلّل حصّته في الشركة والتاني لأ. القاعدة: بياخد من أرباحه؟ صرف أرباح. بيقلّل حصّته؟ سحب من رأس ماله.</p>
+
+      <p><strong>ليه النسبة مرجّحة بالزمن؟</strong></p>
+      <p>لأن النسب بتتغيّر. لو شريك كان ٢٠٪ من يناير لمايو وبعدين دفع فلوس فبقى ٣٣٪، مينفعش ياخد ٣٣٪ من أرباح السنة كلها — هو مكانش شريك بالنسبة دي في نص السنة الأولانية. السيستم بيقسّم الفترة عند كل تغيير وبيرجّح كل شريحة بعدد أيامها.</p>
+      <p>وقت التوزيع، اضغط <strong>«ليه النسب دي؟»</strong> تحت الجدول عشان تشوف الشرائح بتواريخك الحقيقية.</p>
+
+      <p><strong>الأرباح المحتجزة</strong> = كل الأرباح من البداية ناقص اللي اتوزّع. ودي السقف الأعلى للتوزيع. بس <strong>الصرف النقدي سقفه رصيد الخزنة</strong>، لأن جزء من الأرباح ممكن يكون محبوس في مخزون أو عند عملاء.</p>
+
+      <p><strong>رأس مال ≠ ربح.</strong> لو سجّلت رأس مال ١٥٠ ألف، الخزنة هتبقى ١٥٠ ألف بس الأرباح المحتجزة صفر — دي فلوس الشركاء نفسهم مش مكسب. الربح مبيظهرش غير لما تبيع بضاعة بأكتر من تكلفتها. عشان كده زرار «احسب الأنصبة» بيرفض أي مبلغ أكبر من الأرباح المحتجزة، مهما كان في الخزنة فلوس. لو شريك عايز يسترجع من فلوسه قبل ما يبقى في أرباح، ده <strong>«سحب من رأس ماله»</strong> مش توزيع أرباح — وبيقلّل نسبته.</p>
+
     </div>
+  </details>
+
+  <div class="panel">
+    <h3>الشركاء</h3>
+    <p class="hint" style="margin-bottom:10px">«الاسم» بيغيّر اسم الشريك وتليفونه. «المبالغ» بتوديك لحركاته عشان تعدّل مبلغ أو تاريخ. والنسب بتتحسب لوحدها بعد أي تعديل.</p>
+    <div class="tbl-wrap"><table id="t-partners"></table></div>
+    <p class="hint" style="margin-top:10px">سجّل الشريك ورأس ماله من زرار <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة لو الشريك لسه مش مسجّل.</p>
   </div>
 
   <div class="panel">
-    <h3>توفيق الميزانية</h3>
-    <p class="hint">صافي الأصول لازم يساوي حقوق الملكية. لو في فرق، يبقى في حاجة مش مسجّلة — غالباً أرصدة افتتاحية ما اتسجّلتش كرأس مال شركاء.</p>
-    <div class="tbl-wrap"><table id="t-recon"></table></div>
+    <h3 id="caplog-title">سجل حركات رأس المال</h3>
+    <div class="tbl-wrap"><table id="t-cap-log"></table></div>
   </div>
+  </details>
 
 </section>
 
@@ -2679,8 +2834,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "88";
+  var VERSION = "89";
   var CHANGELOG = [
+    { v:"89", d:"2026-09-30", items:[
+      "رأس المال: شارة فوق — خضرا «✓ الميزانية مظبوطة» أو حمرا بالفرق، و«وريني التفاصيل» بتفتح جدول التوفيق",
+      "شريط بنسبة كل شريك، وكارت لكل شريك: نسبته · رأس ماله · أرباح ليه لسه ما أخدهاش · إجمالي حقه",
+      "في الكارت: «+ دفع رأس مال» · «سحب من رأس ماله» · «صرف أرباحه» بتفتح الدرج والشريك والنوع متحدّدين — و«حركاته» بتتفتح جوّاه بالتعديل والحذف",
+      "توزيع الأرباح ٣ خطوات: الفترة (الشهر ده · اللي فات · من البداية) والمبلغ («كل المتاح» · «النص») ← الأنصبة ← تأكيد وملخص باللي اتعمل",
+      "المشتريات: ٤ أرقام (اشتريت الشهر ده · عليك للموردين · النقل · المرتجع)، و«عليك للموردين» بتظهر بس لو في مورد ليه فلوس — بـ«ادفع له» و«كشف حسابه»",
+      "كارت لكل فاتورة متجمّعة بالشهر: خالصة ✓ أو دفعت/باقي بشريط، وبتتفتح على الأصناف وتكلفة القطعة شامل النقل و«رجّعه للمورد» والتعديل",
+      "فلاتر الفواتير بعدّاد: الكل · عليها فلوس · خالصة · مرتجعات",
+      "الجداول القديمة والشرح موجودين مطويين تحت الشاشتين"
+    ]},
     { v:"88", d:"2026-09-30", items:[
       "العملاء والموردين: تبويبين بعدّاد · بحث بالاسم والتليفون والمحافظة · فلاتر (ليك عنده · عليك له · بيرفض كتير)",
       "كارت لكل عميل: أوردراته · اتسلّم · رفض · اشترى بكام · رصيده، وكشف الحساب بيتفتح جوّاه — ورقم الأوردر فيه بيفتح الأوردر نفسه",
@@ -8934,8 +9099,186 @@
     return m + 1;
   }
 
+  /* ---------- المشتريات: أرقام فوق + «عليك للموردين» + كارت لكل فاتورة ----------
+     الكروت بتاخد نفس الفواتير اللي الجدول القديم بياخدها (نفس الفلاتر ونفس
+     الصفحة)، ونفس الحسابات: goodsTotal / pFreight / paid. */
+  var puOnly = "all";
+  function puSum(g){
+    var o = { goods:0, fr:0, paid:0, pieces:0 };
+    g.rows.forEach(function(x){
+      o.goods += goodsTotal(x); o.fr += pFreight(x);
+      o.paid += Number(x.paid)||0; o.pieces += Number(x.qty)||0;
+    });
+    o.rest = o.goods - o.paid;
+    return o;
+  }
+  function puKind(g){
+    if(isPRet(g.head)) return "ret";
+    return puSum(g).rest > 0.009 ? "due" : "paid";
+  }
+  function puGroupsAll(){
+    var groups = [], byBatch = {};
+    live("purchases").slice().sort(byDate).forEach(function(p){
+      var k = p.batchId || ("solo:" + p.id);
+      if(!byBatch[k]){ byBatch[k] = { key:k, rows:[], head:p }; groups.push(byBatch[k]); }
+      byBatch[k].rows.push(p);
+    });
+    return groups;
+  }
+  function nInv(n){ return n === 1 ? "فاتورة واحدة" : plural(n, "فاتورة", "فاتورتين", "فواتير"); }
+  function nDays(n){ return n === 0 ? "النهارده" : plural(n, "يوم", "يومين", "أيام"); }
+  function monthLabel(d){
+    try{
+      var t = new Date((d || "").slice(0,7) + "-01T00:00:00");
+      if(!isNaN(t)) return t.toLocaleDateString("ar-EG-u-nu-latn", { month:"long", year:"numeric" });
+    }catch(e){}
+    return (d || "").slice(0,7) || "—";
+  }
+  function renderPuOnly(cnt){
+    var el = document.getElementById("pu-only");
+    if(!el) return;
+    el.innerHTML = [["all","الكل"],["due","عليها فلوس"],["paid","خالصة"],["ret","مرتجعات"]].map(function(c){
+      return "<button type='button' data-puonly='" + c[0] + "'" + (puOnly === c[0] ? " class='on'" : "") + ">" +
+        c[1] + " <b>" + qty(cnt[c[0]] || 0) + "</b></button>";
+    }).join("");
+  }
+  // المورد اللي عليك له = رصيده سالب في كشف حسابه (partyBalance)
+  function suppliersOwed(){
+    return live("parties").filter(function(p){ return p.type === "supplier"; })
+      .map(function(p){ return { p:p, owe:-partyBalance(p.id) }; })
+      .filter(function(x){ return x.owe > 0.009; })
+      .sort(function(a, b){ return b.owe - a.owe; });
+  }
+  function renderPuTop(){
+    var el = document.getElementById("pu-top");
+    if(!el) return;
+    var m = monthRange(0), buy = 0, n = 0, pcs = 0, fr = 0, ret = 0, nr = 0;
+    puGroupsAll().forEach(function(g){
+      var d = g.head.date || "";
+      if(d < m.from || d > m.to) return;
+      var t = puSum(g);
+      if(isPRet(g.head)){ ret += -t.goods; nr++; return; }
+      buy += t.goods; fr += t.fr; pcs += t.pieces; n++;
+    });
+    var ow = suppliersOwed(), owe = ow.reduce(function(a, x){ return a + x.owe; }, 0);
+    var cells = [
+      ["اشتريت الشهر ده", money(buy), "", nInv(n) + " · " + qty(pcs) + " قطعة", true],
+      ["عليك للموردين", money(owe), owe > 0.009 ? "v-due" : "", owe > 0.009 ? "عند " + qty(ow.length) + " مورد" : "كله خالص", true],
+      ["نقل الشهر ده", money(fr), "", "متوزّع على تكلفة القطع", true],
+      ["مرتجع للموردين", money(ret), "", nr ? plural(nr, "مرتجع واحد", "مرتجعين", "مرتجعات") + " الشهر ده" : "مفيش مرتجعات الشهر ده", true]
+    ];
+    el.innerHTML = cells.map(function(c){
+      return "<div" + (c[4] ? " class='money-only'" : "") + "><span>" + esc(c[0]) + "</span><strong class='num " + c[2] + "'>" +
+        esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
+    }).join("");
+
+    var box = document.getElementById("pu-owe");
+    if(!box) return;
+    if(!ow.length){ box.innerHTML = ""; return; }
+    var groups = puGroupsAll();
+    box.innerHTML = "<h3>عليك للموردين</h3>" + ow.map(function(x){
+      var open = groups.filter(function(g){ return g.head.partyId === x.p.id && puKind(g) === "due"; });
+      var oldest = open.reduce(function(a, g){ return !a || (g.head.date||"") < a ? (g.head.date||"") : a; }, "");
+      var sub = open.length
+        ? plural(open.length, "فاتورة واحدة", "فاتورتين", "فواتير") + " مش خالصة" +
+          (oldest ? " · أقدم واحدة من " + nDays(Math.max(0, daysSince(oldest))) : "")
+        : "من كشف حسابه";
+      return "<div class='pu-ow'><span><b>" + esc(x.p.name) + "</b><span class='sub'>" + esc(sub) + "</span></span>" +
+        "<b class='num'>" + esc(money(x.owe)) + "</b>" +
+        "<span class='a'><button class='tbtn primary' type='button' data-ptpay='" + esc(x.p.id) + "'>ادفع له</button>" +
+        "<button class='tbtn' type='button' data-puparty='" + esc(x.p.id) + "'>كشف حسابه</button></span></div>";
+    }).join("");
+  }
+
+  function renderPurchCards(groups, all){
+    var box = document.getElementById("pu-cards");
+    if(!box) return;
+    if(!groups.length){
+      box.innerHTML = "<div class='cd-empty'>" + (all
+        ? "مفيش فاتورة مطابقة للفلتر — امسح الفلاتر وشوف تاني."
+        : "مفيش مشتريات لسه. سجّل أول فاتورة عشان يبقى عندك مخزون تبيع منه.") + "</div>";
+      return;
+    }
+    // عنوان الشهر: عدد الفواتير وقيمة البضاعة (من غير المرتجعات) للي ظاهر في الشهر ده
+    var months = {};
+    groups.forEach(function(g){
+      var k = (g.head.date || "").slice(0,7);
+      if(!months[k]) months[k] = { n:0, goods:0 };
+      months[k].n++;
+      if(!isPRet(g.head)) months[k].goods += puSum(g).goods;
+    });
+    var lastM = null, html = "";
+    groups.forEach(function(g){
+      var h = g.head, k = (h.date || "").slice(0,7);
+      if(k !== lastM){
+        lastM = k;
+        html += "<div class='pu-mo'><span>" + esc(monthLabel(h.date)) + " · <b>" + nInv(months[k].n) + "</b></span>" +
+          "<span class='money-only'>بضاعة <b class='num'>" + esc(money(months[k].goods)) + "</b></span></div>";
+      }
+      var t = puSum(g), isRet = isPRet(h), open = !!openPurch[g.key];
+      var names = Object.keys(g.rows.reduce(function(a, x){ a[itemName(x.itemId)] = 1; return a; }, {}));
+      var vl = g.rows.length === 1 ? vLabel(vColor(h), vSize(h)) : "";
+      var it = names.slice(0,2).join(" · ") + (names.length > 2 ? " وغيرهم" : "") +
+        (g.rows.length > 1 ? " — " + qty(g.rows.length) + " لون ومقاس" : (vl ? " — " + vl : ""));
+      var isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
+      var pay;
+      if(isRet){
+        pay = "<span class='pv-pay'><span>" + (t.paid < -0.009 ? "الفلوس رجعت كاش" : "اتخصمت من حسابه") + "</span></span>";
+      } else if(t.rest > 0.009){
+        var pc = t.goods > 0 ? Math.max(0, Math.min(100, t.paid / t.goods * 100)) : 0;
+        pay = "<span class='pv-bar'><i style='width:" + pc.toFixed(1) + "%'></i></span>" +
+          "<span class='pv-pay'><span>دفعت <b class='num'>" + esc(money(t.paid)) + "</b></span>" +
+          "<span class='r'>باقي <b class='num'>" + esc(money(t.rest)) + "</b></span></span>";
+      } else {
+        pay = "<span class='pv-pay'><span class='g'>✓ خالصة</span>" +
+          (t.fr > 0.009 ? "<span>نقل <b class='num'>" + esc(money(t.fr)) + "</b></span>" : "") + "</span>";
+      }
+      html += "<div class='pv" + (isRet ? " ret" : "") + (isFresh ? " fresh" : "") + "' data-pv='" + esc(g.key) + "'>" +
+        "<button class='pv-h' type='button' data-pvopen='" + esc(g.key) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
+          "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
+            (isRet ? "<span class='pt-flag'>مرتجع</span>" : "") +
+            "<span class='sub'>" + esc(dShort(h.date)) + (h.inv ? " · فاتورة " + esc(h.inv) : "") +
+            (isRet && h.note ? " · " + esc(h.note) : "") + "</span></span>" +
+          "<span class='it sub'>" + esc(it) + "</span>" +
+          "<span class='pay money-only'>" + pay + "</span>" +
+          "<span class='tot'><b class='num money-only" + (isRet ? " v-due" : "") + "'>" + esc(money(t.goods)) + "</b>" +
+            "<small>" + qty(Math.abs(t.pieces)) + " قطعة</small></span>" +
+          "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
+        "</button>";
+      if(open){
+        html += "<div class='pv-b'>" +
+          "<div class='pv-ln hd'><span>الصنف · اللون · المقاس</span><span class='n'>القطع</span>" +
+            "<span class='n money-only'>تكلفة القطعة</span><span class='n money-only'>قيمة البضاعة</span><span></span></div>" +
+          g.rows.map(function(x){
+            var v = vLabel(vColor(x), vSize(x));
+            var pq = pPackQty(x), packs = pPacks(x), pn = pPackName(x) || "قطعة";
+            var sub = pq > 1 ? qty(packs) + " " + esc(pn) + " × " + qty(pq) + " قطعة" : "";
+            return "<div class='pv-ln'><span>" + esc(itemName(x.itemId)) +
+                (v ? " <span class='pill'>" + esc(v) + "</span>" : "") +
+                (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</span>" +
+              "<span class='n num q" + (isRet ? " v-due" : "") + "'>× " + qty(Math.abs(Number(x.qty)||0)) + "</span>" +
+              "<span class='n num c money-only'>" + esc(money(x.cost)) +
+                (pFreight(x) ? "<span class='sub'>شامل نقل " + esc(money(pFreight(x) / (Number(x.qty)||1))) + "</span>" : "") + "</span>" +
+              "<span class='n num tt money-only'>" + esc(money(goodsTotal(x))) + "</span>" +
+              "<span class='x'>" + (isRet ? "" :
+                "<button class='del' type='button' style='color:var(--due)' data-pret='" + x.id + "'>رجّعه للمورد</button>") + "</span></div>";
+          }).join("") +
+          "<div class='pv-sum money-only'><span>بضاعة <b class='num'>" + esc(money(t.goods)) + "</b></span>" +
+            (t.fr > 0.009 ? "<span>نقل <b class='num'>" + esc(money(t.fr)) + "</b> <span class='sub' style='display:inline'>(من الخزنة، مش على المورد)</span></span>" : "") +
+            (isRet ? "" : "<span>دفعت للمورد <b class='num'>" + esc(money(t.paid)) + "</b></span>") + "</div>" +
+          "<div class='pv-f'>" +
+            (isRet ? "" : "<button class='tbtn' type='button' data-edit='purchases|" + h.id + "'>تعديل الفاتورة</button>") +
+            "<button class='tbtn' type='button' style='color:var(--due)' data-del='purchases' data-id='" + h.id + "'>حذف " + (isRet ? "المرتجع" : "الفاتورة") + "</button>" +
+          "</div></div>";
+      }
+      html += "</div>";
+    });
+    box.innerHTML = html;
+  }
+
   function renderPurch(){
     backfillPurchNos();
+    renderPuTop();
     readPuFilters();
     fillPuSelects();
     renderPuChips();
@@ -8970,8 +9313,14 @@
     });
 
     var shown = groups.length, all = live("purchases").length;
+    // «الكل / عليها فلوس / خالصة / مرتجعات» — بعد باقي الفلاتر، والعدّاد على اللي فاضل منها
+    var cnt = { all:groups.length, due:0, paid:0, ret:0 };
+    groups.forEach(function(g){ cnt[puKind(g)]++; });
+    renderPuOnly(cnt);
+    if(puOnly !== "all") groups = groups.filter(function(g){ return puKind(g) === puOnly; });
     var rows = [];
     groups = pageRows("purch", groups);
+    renderPurchCards(groups, all);
     groups.forEach(function(g){
       var n = g.rows.length, h = g.head;
       var isRet = isPRet(h);
@@ -10404,18 +10753,17 @@
       // رقم الأوردر في الكشف بيوديك على الأوردر نفسه مفتوح
       e.preventDefault(); goTab("sales"); sgOpenRow(t.dataset.ptorder); return;
     }
-    if((t = e.target.closest("[data-ptpay]"))){
-      // «ادفع له» = نفس «دفع لمورد» في الخزنة والمورد متحدّد
-      var pid = t.dataset.ptpay;
-      goTab("cash"); openEntry("cash");
-      var ty = document.getElementById("c-type");
-      if(ty){ ty.value = "out"; ty.dispatchEvent(new Event("change", { bubbles:true })); }
-      var ps = document.getElementById("c-party"); if(ps) ps.value = pid;
-      var am = document.getElementById("c-amount");
-      if(am){ am.value = String(Math.round(-partyBalance(pid) * 100) / 100); setTimeout(function(){ try{ am.focus(); am.select(); }catch(err){} }, 60); }
-      return;
-    }
+    if((t = e.target.closest("[data-ptpay]"))){ payParty(t.dataset.ptpay); return; }
   });
+  // «ادفع له» = نفس «دفع لمورد» في الخزنة والمورد متحدّد والمبلغ = اللي عليك له
+  function payParty(pid){
+    goTab("cash"); openEntry("cash");
+    var ty = document.getElementById("c-type");
+    if(ty){ ty.value = "out"; ty.dispatchEvent(new Event("change", { bubbles:true })); }
+    var ps = document.getElementById("c-party"); if(ps) ps.value = pid;
+    var am = document.getElementById("c-amount");
+    if(am){ am.value = String(Math.round(-partyBalance(pid) * 100) / 100); setTimeout(function(){ try{ am.focus(); am.select(); }catch(err){} }, 60); }
+  }
   // يفتح كارت جهة من مكان تاني (الرئيسية مثلًا)
   function openPartyCard(id){
     var p = db.parties.find(function(x){ return x.id === id; });
@@ -12355,6 +12703,26 @@
     reader.readAsText(f, "utf-8");
   });
 
+  /* ---------- كروت الفواتير ---------- */
+  document.getElementById("pu-only").addEventListener("click", function(e){
+    var b = e.target.closest("[data-puonly]"); if(!b) return;
+    puOnly = b.dataset.puonly; resetPage("purch"); renderPurch();
+  });
+  document.getElementById("pu-cards").addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-pret]"))){ e.stopPropagation(); openPRet(t.dataset.pret); return; }
+    if((t = e.target.closest("[data-pvopen]"))){
+      var k = t.dataset.pvopen;
+      if(openPurch[k]) delete openPurch[k]; else openPurch[k] = 1;
+      renderPurch(); return;
+    }
+  });
+  document.getElementById("pu-owe").addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-ptpay]"))){ payParty(t.dataset.ptpay); return; }
+    if((t = e.target.closest("[data-puparty]"))){ openPartyCard(t.dataset.puparty); return; }
+  });
+
   /* ---------- أحداث أسطر الفاتورة ---------- */
   document.getElementById("t-purch").addEventListener("click", function(e){
     var b = e.target.closest("[data-pret]");
@@ -13376,6 +13744,124 @@
     }).join("");
   }
 
+  /* ---------- شارة الميزانية وكارت لكل شريك ----------
+     الجدول القديم والسجل والشرح لسه موجودين تحت في «جدول الشركاء وسجل كل
+     الحركات». الكروت بتقرا من نفس الدوال (capitalOf/currentOf/ratioOf)،
+     فالأرقام هي هي. */
+  var CAP_CLR = ["#4A2545","#B07AA1","#7FA68F","#C8963E","#5B7DB1","#9A1333"];
+  function capClr(i){ return CAP_CLR[i % CAP_CLR.length]; }
+  var capOpen = null;       // الشريك المفتوح حركاته في الكارت
+  function capPct(r){ return (r*100).toFixed(2).replace(/\.?0+$/, "") + "%"; }
+  // أثر كل نوع حركة: علامة ولون والرصيد اللي اتأثّر
+  var CAP_FX = {
+    cap_in:       ["+", "v-gain", "رأس ماله"],
+    cap_out:      ["−", "v-due",  "رأس ماله"],
+    cap_share:    ["+", "v-gain", "أرباح ليه"],
+    cap_payout:   ["−", "v-due",  "أرباحه · خدها كاش"],
+    cap_reinvest: ["+", "v-gain", "رأس ماله · من أرباحه"]
+  };
+
+  function renderCapRecon(){
+    var el = document.getElementById("cap-recon");
+    if(!el) return;
+    var det = document.getElementById("cap-recon-more");
+    var a = netAssets(), e = totalEquity(), d = a - e, ok = Math.abs(d) < 0.01;
+    el.className = "cap-recon " + (ok ? "ok" : "bad");
+    el.innerHTML = "<span class='ic' aria-hidden='true'>" + (ok ? "✓" : "⚠") + "</span><span class='t'>" +
+      (ok ? "<b>الميزانية مظبوطة</b><small>كل اللي عندك (خزنة + بضاعة + فلوس عند شركات الشحن والعملاء) = " +
+              "<span class='num'>" + esc(money(a)) + "</span> = فلوس الشركاء + الأرباح</small>"
+          : "<b>في فرق <span class='num'>" + esc(money(Math.abs(d))) + "</span></b>" +
+            "<small>في حاجة مش متسجّلة صح — غالباً رصيد افتتاحي أو حركة نوعها غلط. افتح التفاصيل وشوف البنود.</small>") +
+      "</span><button type='button' data-capreconx>" +
+      (det && det.open ? "اقفل التفاصيل ▴" : "وريني التفاصيل ▾") + "</button>";
+  }
+
+  function capMoveRow(c){
+    var fx = CAP_FX[c.type], a = Number(c.amount)||0;
+    var note = c.note && c.note !== CAP[c.type].label ? c.note : "";
+    return "<div class='cpc-r'><span class='d num'>" + esc(dShort(c.date)) + "</span>" +
+      "<span>" + esc(CAP[c.type].label) + "<span class='sub'>" + esc(fx[2]) + (note ? " · " + esc(note) : "") + "</span></span>" +
+      "<b class='num " + fx[1] + "'>" + fx[0] + esc(money(a)) + "</b>" +
+      "<span class='x'>" + (c.distId
+        ? "<span class='sub'>من توزيع</span>"
+        : "<button class='del' type='button' style='color:var(--teal)' data-editcap='" + c.id + "'>تعديل</button>") +
+        "<button class='del' type='button' data-del='cash' data-id='" + c.id + "'>حذف</button></span></div>";
+  }
+
+  function renderCapCards(){
+    var box = document.getElementById("cap-cards"), own = document.getElementById("cap-own");
+    if(!box || !own) return;
+    var ps = partners(), tot = totalCapital();
+    if(!ps.length){
+      own.innerHTML = "";
+      box.innerHTML = "<div class='cd-empty' style='grid-column:1 / -1'>مفيش شركاء لسه — اضغط «+ حركة رأس مال» فوق، وجوه الدرج هتلاقي «+ شريك».</div>";
+      return;
+    }
+    own.innerHTML = tot > 0.009
+      ? "<div class='cap-bar'>" + ps.map(function(p, i){
+          var r = ratioOf(p.id);
+          return r > 0 ? "<i style='width:" + (r*100) + "%;background:" + capClr(i) + "'></i>" : "";
+        }).join("") + "</div><div class='cap-lg'>" + ps.map(function(p, i){
+          return "<span><em style='background:" + capClr(i) + "'></em>" + esc(p.name) + " " + capPct(ratioOf(p.id)) + "</span>";
+        }).join("") + "</div>"
+      : "";
+    if(capOpen && !ps.some(function(p){ return p.id === capOpen; })) capOpen = null;
+    box.innerHTML = ps.map(function(p, i){
+      var cap = capitalOf(p.id), cur = currentOf(p.id), r = ratioOf(p.id);
+      var mv = capMoves(p.id).slice().sort(function(a, b){
+        if((a.date||"") !== (b.date||"")) return (a.date||"") < (b.date||"") ? 1 : -1;
+        return (b.at||0) - (a.at||0);
+      });
+      var st = capStartOf(p.id), open = capOpen === p.id && mv.length;
+      var sub = (st ? "شريك من " + dShort(st) : "لسه ما دفعش رأس مال") +
+        (mv.length ? " · " + nMoves(mv.length) : "") + (p.phone ? " · " + p.phone : "");
+      return "<div class='cpc' data-cpc='" + p.id + "'>" +
+        "<div class='cpc-h'><span class='av' style='background:" + capClr(i) + "'>" + esc((p.name||"؟").charAt(0)) + "</span>" +
+          "<span class='nm'><b>" + esc(p.name) + "</b><span class='sub'>" + esc(sub) + "</span></span>" +
+          "<span class='pcnt'><b class='num'>" + capPct(r) + "</b><small>نسبته دلوقتي</small></span></div>" +
+        "<div class='cpc-st'>" +
+          "<div><small>رأس ماله</small><b class='num'>" + esc(money(cap)) + "</b></div>" +
+          "<div><small>أرباح ليه لسه ما أخدهاش</small><b class='num" + (cur > 0.009 ? " v-gain" : "") + "'>" + esc(money(cur)) + "</b></div>" +
+          "<div><small>إجمالي حقه</small><b class='num'>" + esc(money(cap + cur)) + "</b></div></div>" +
+        "<div class='cpc-a'>" +
+          "<button class='tbtn' type='button' data-capdo='cap_in|" + p.id + "'>+ دفع رأس مال</button>" +
+          "<button class='tbtn' type='button' data-capdo='cap_out|" + p.id + "'" + (cap > 0.009 ? "" : " disabled") + ">سحب من رأس ماله</button>" +
+          "<button class='tbtn' type='button' data-capdo='cap_payout|" + p.id + "'" + (cur > 0.009 ? "" : " disabled title='مفيش أرباح ليه لسه ما أخدهاش'") + ">صرف أرباحه</button>" +
+          "<button class='tbtn lnk' type='button' data-editpartner='" + p.id + "'>الاسم</button>" +
+          (mv.length
+            ? "<button class='tbtn lnk' type='button' data-capopen='" + p.id + "' aria-expanded='" + (open ? "true" : "false") + "'>حركاته " + (open ? "▴" : "▾") + "</button>"
+            : "<button class='tbtn lnk' type='button' style='color:var(--due)' data-delpartner='" + p.id + "'>حذف</button>") +
+        "</div>" +
+        (open ? "<div class='cpc-tl'><h4>حركات " + esc(p.name) + "</h4>" + mv.map(capMoveRow).join("") + "</div>" : "") +
+      "</div>";
+    }).join("");
+  }
+
+  /* ---------- خطوات التوزيع ---------- */
+  function setDistStep(n){
+    var sp = document.querySelectorAll("#dist-steps span");
+    sp.forEach(function(x, i){
+      x.className = (n >= 3 || i < n - 1) ? "done" : (i === n - 1 ? "on" : "");
+    });
+    if(n < 3){ var dn = document.getElementById("dist-done"); if(dn) dn.hidden = true; }
+  }
+  function distPerRange(k){
+    if(k === "month") return monthRange(0);
+    if(k === "prev")  return monthRange(-1);
+    return { from: earliestDate(), to: today() };
+  }
+  // الزرار يبان متعلّم لو التاريخين مطابقين له بالظبط
+  function distPerSync(){
+    var f = document.getElementById("dist-from").value, t = document.getElementById("dist-to").value;
+    var hit = false;
+    document.querySelectorAll("#dist-per [data-distper]").forEach(function(b){
+      var r = distPerRange(b.dataset.distper);
+      var on = !hit && r.from === f && r.to === t;   // أول زرار مطابق بس
+      if(on) hit = true;
+      b.classList.toggle("on", on);
+    });
+  }
+
   function capMoves(pid){
     return live("cash").filter(function(c){ return isCapType(c.type) && c.partyId === pid; });
   }
@@ -13489,8 +13975,10 @@
 
   function renderCapital(){
     renderCapStats(); renderPartners(); renderRecon(); renderCapLog(); renderCapHint();
+    renderCapRecon(); renderCapCards();
     var df = document.getElementById("dist-from"), dt = document.getElementById("dist-to");
     if(df && !df.value){ var m = monthRange(0); df.value = m.from; dt.value = m.to; }
+    distPerSync();
     var cd = document.getElementById("cp-date");
     if(cd && !cd.value) cd.value = firstOpenDate();
   }
@@ -13676,28 +14164,63 @@
       return;
     }
     var dl = e.target.closest("[data-delpartner]");
-    if(dl){
-      var id = dl.dataset.delpartner;
-      if(capMoves(id).length){
-        toast("الشريك ده عليه " + nMoves(capMoves(id).length) + " — احذفها الأول"); return; }
-      if(dl.dataset.armed !== "1"){
-        dl.dataset.armed = "1"; dl.textContent = "متأكد؟";
-        setTimeout(function(){
-          if(dl.dataset.armed === "1"){ dl.dataset.armed = ""; dl.textContent = "حذف"; }
-        }, 4000);
-        return;
-      }
-      var rec = db.parties.find(function(x){ return x.id===id; });
-      if(rec){ rec.deleted = true; rec.at = Date.now(); }
-      saveSoon("parties"); renderAll(); toast("اتحذف الشريك");
-      return;
-    }
+    if(dl){ delPartnerClick(dl); return; }
     // الضغط على أي مكان تاني في السطر بيفتح سجل حركات الشريك
     var tr = e.target.closest("[data-caplog]");
     if(!tr) return;
     capLogFor = (capLogFor === tr.dataset.caplog) ? null : tr.dataset.caplog;
     renderCapLog();
     document.getElementById("t-cap-log").scrollIntoView({block:"nearest"});
+  });
+
+  // حذف شريك مالوش حركات — بتأكيد من خطوتين. مشترك بين الجدول والكارت
+  function delPartnerClick(dl){
+    var id = dl.dataset.delpartner;
+    if(capMoves(id).length){
+      toast("الشريك ده عليه " + nMoves(capMoves(id).length) + " — احذفها الأول"); return; }
+    if(dl.dataset.armed !== "1"){
+      dl.dataset.armed = "1"; dl.textContent = "متأكد؟";
+      setTimeout(function(){
+        if(dl.dataset.armed === "1"){ dl.dataset.armed = ""; dl.textContent = "حذف"; }
+      }, 4000);
+      return;
+    }
+    var rec = db.parties.find(function(x){ return x.id===id; });
+    if(rec){ rec.deleted = true; rec.at = Date.now(); }
+    saveSoon("parties"); renderAll(); toast("اتحذف الشريك");
+    return;
+  }
+
+  document.getElementById("cap-cards").addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-capdo]"))){
+      // «دفع رأس مال» / «سحب» / «صرف أرباحه» = نفس درج «حركة رأس مال» والشريك والنوع متحدّدين
+      var q = t.dataset.capdo.split("|");
+      if(editingCap) cancelEditCap();
+      closePartnerBox();
+      openEntry("capital");
+      document.getElementById("cp-partner").value = q[1];
+      document.getElementById("cp-type").value = q[0];
+      var am = document.getElementById("cp-amount");
+      am.value = q[0] === "cap_payout" ? String(Math.round(currentOf(q[1]) * 100) / 100) : "";
+      renderCapHint(); updateImpact("capital");
+      setTimeout(function(){ try{ am.focus(); am.select(); }catch(err){} }, 90);
+      return;
+    }
+    if((t = e.target.closest("[data-capopen]"))){
+      capOpen = capOpen === t.dataset.capopen ? null : t.dataset.capopen;
+      renderCapCards(); return;
+    }
+    if((t = e.target.closest("[data-editcap]"))){ startEditCap(t.dataset.editcap); return; }
+    if((t = e.target.closest("[data-editpartner]"))){ openPartnerBox(t.dataset.editpartner); openEntry("capital"); return; }
+    if((t = e.target.closest("[data-delpartner]"))){ delPartnerClick(t); return; }
+  });
+  document.getElementById("cap-recon").addEventListener("click", function(e){
+    if(!e.target.closest("[data-capreconx]")) return;
+    var det = document.getElementById("cap-recon-more");
+    det.open = !det.open;
+    renderCapRecon();
+    if(det.open) det.scrollIntoView({ block:"nearest" });
   });
 
   ["cp-partner","cp-type"].forEach(function(id){
@@ -13726,6 +14249,32 @@
         "استخدمه من «حركة رأس مال» ← «سحب من رأس ماله»." : "");
     el.className = "note";
   }
+
+  document.getElementById("dist-per").addEventListener("click", function(e){
+    var b = e.target.closest("[data-distper]"); if(!b) return;
+    var r = distPerRange(b.dataset.distper);
+    document.getElementById("dist-from").value = r.from;
+    document.getElementById("dist-to").value = r.to;
+    distPerSync(); distReset();
+  });
+  document.getElementById("dist-panel").addEventListener("click", function(e){
+    var b = e.target.closest("[data-distfill]"); if(!b) return;
+    var ret = retainedEarnings();
+    if(ret <= 0.009){ renderDistLimits(); toast("لسه مفيش أرباح تتوزّع"); return; }
+    // لتحت لأقرب قرش — عشان المبلغ مايعدّيش المتاح بكسر
+    var v = b.dataset.distfill === "half" ? Math.floor(ret * 50) / 100 : Math.floor(ret * 100) / 100;
+    document.getElementById("dist-amount").value = String(v);
+    distReset();
+  });
+  // أي تغيير في الفترة أو المبلغ بعد الحساب بيرجّعك للخطوة الأولى
+  function distReset(){
+    if(distDraft){ distDraft = null; document.getElementById("dist-box").hidden = true; }
+    setDistStep(1);
+  }
+  ["dist-from","dist-to"].forEach(function(id){
+    document.getElementById(id).addEventListener("change", function(){ distPerSync(); distReset(); });
+  });
+  document.getElementById("dist-amount").addEventListener("input", distReset);
 
   document.getElementById("b-dist-calc").addEventListener("click", function(){
     var from = document.getElementById("dist-from").value;
@@ -13756,6 +14305,7 @@
     renderDistLimits();
     renderDist();
     document.getElementById("dist-box").hidden = false;
+    setDistStep(2);
   });
 
   // بتقسّم الفترة لشرائح عند كل تغيير في رأس المال — نفس اللي weightedRatio بتعمله
@@ -13845,6 +14395,7 @@
   document.getElementById("b-dist-cancel").addEventListener("click", function(){
     distDraft = null;
     document.getElementById("dist-box").hidden = true;
+    setDistStep(1);
   });
 
   document.getElementById("b-dist-do").addEventListener("click", function(){
@@ -13866,10 +14417,18 @@
         type: distDraft.mode[r.id]==="cash" ? "cap_payout" : "cap_reinvest",
         partyId:r.id, amount:r.share, shipCo:"", note:note, distId:distId }));
     });
+    // ملخص اللي اتعمل يفضل ظاهر تحت الخطوات لحد ما تبدأ توزيع جديد
+    var doneTxt = distDraft.rows.filter(function(r){ return r.share > 0; }).map(function(r){
+      return esc(r.name) + " " + esc(money(r.share)) + " (" +
+        (distDraft.mode[r.id] === "cash" ? "خدها كاش" : "اتضافت لرأس ماله") + ")";
+    }).join(" · ");
     distDraft = null;
     document.getElementById("dist-box").hidden = true;
     document.getElementById("dist-amount").value = "";
     saveSoon("cash"); renderAll();
+    setDistStep(3);
+    var dn = document.getElementById("dist-done");
+    if(dn){ dn.innerHTML = "✓ التوزيع اتسجّل: " + doneTxt; dn.hidden = false; }
     toast("التوزيع اتسجّل");
   });
 
