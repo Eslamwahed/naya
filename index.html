@@ -683,6 +683,43 @@
     .pv-f .tbtn{flex:1;justify-content:center}
   }
 
+  /* ================= استبدال مع المورد ================= */
+  .fset.xg-out{border-inline-start:4px solid var(--due)}
+  .fset.xg-in{border-inline-start:4px solid var(--gain)}
+  .fset h3 small{font-weight:400;font-size:var(--fs-1);color:var(--ink-soft);margin-inline-start:6px}
+  .xl-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) 80px 90px 90px 28px;gap:6px;align-items:end;
+    padding:6px 0;border-top:1px dashed var(--line)}
+  .xl-row:first-child{border-top:0}
+  .xl-row label{font-size:var(--fs-1)}
+  .xl-row .tt{text-align:end;font-weight:700;padding-bottom:8px;white-space:nowrap}
+  .xl-row .rm{border:0;background:none;color:var(--due);font-size:18px;cursor:pointer;padding-bottom:6px}
+  .xg-diff{background:#ECE8F7;border-radius:var(--r-md);padding:var(--sp-3);margin:var(--sp-3) 0}
+  [data-theme="dark"] .xg-diff{background:var(--teal-soft)}
+  .xg-diff .eq{font-size:var(--fs-2);color:var(--ink-soft)}
+  .xg-diff .big{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);margin-top:4px;flex-wrap:wrap}
+  .xg-diff .big b{font-size:var(--fs-6);color:#5B4A9A}
+  [data-theme="dark"] .xg-diff .big b{color:var(--teal)}
+  .xg-pay{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+  .xg-pay:empty{display:none}
+  .pill.xg,.pt-flag.xg{background:#ECE8F7;color:#5B4A9A}
+  [data-theme="dark"] .pill.xg,[data-theme="dark"] .pt-flag.xg{background:var(--teal-soft);color:var(--teal)}
+  .pv.xg{border-inline-start:4px solid #5B4A9A}
+  .pv-flow{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--sp-3);align-items:center;padding:0 var(--sp-4) var(--sp-3)}
+  .pv-flow .side{background:var(--paper);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-2)}
+  .pv-flow .side small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .pv-flow .side b{font-size:var(--fs-4);display:block}
+  .pv-flow .arr{font-size:22px;color:#5B4A9A}
+  .pv-ln .xgd{display:block;font-size:var(--fs-1);color:#5B4A9A}
+  @media (max-width:760px){
+    .xl-row{grid-template-columns:1fr 1fr 1fr;row-gap:4px}
+    .xl-row > :first-child{grid-column:1 / -1}
+    .xl-row .tt{grid-column:1 / 3;text-align:start;padding:0}
+    .xl-row .rm{grid-column:3;text-align:end;padding:0}
+    .xg-pay{grid-template-columns:1fr}
+    .pv-flow{grid-template-columns:1fr;padding:0 var(--sp-3) var(--sp-3)}
+    .pv-flow .arr{text-align:center;transform:rotate(-90deg)}
+  }
+
   /* ================= الخزنة بالأيام ================= */
   .cq{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:var(--sp-2);margin:var(--sp-3) 0 var(--sp-4)}
   .cq .tbtn{padding:12px 14px;justify-content:center;gap:8px;font-size:var(--fs-3)}
@@ -1697,6 +1734,7 @@
   <p class="hint">الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
   <div class="tbar">
     <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
+    <button class="tbtn" type="button" id="b-xchg-open">⇄ استبدال مع مورد</button>
     <button class="tbtn" type="button" id="b-pu-tpl">نزّل شيت الفاتورة</button>
     <button class="tbtn" type="button" id="b-pu-up">ارفع الشيت بعد ما تملاه</button>
     <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
@@ -1815,6 +1853,60 @@
         <div><button class="act" type="button" id="b-pret">سجّل المرتجع</button>
           <button class="act ghost" type="button" data-closeentry>إلغاء</button></div>
       </form>
+    </div>
+  </div>
+
+  <div class="panel" id="entry-xchg" hidden>
+    <div class="dhead">
+      <h3 id="title-xchg">⇄ استبدال مع مورد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hintline" style="margin-top:0">بضاعة ما اتباعتش؟ رجّعها لنفس المورد وخد بدالها بضاعة تانية وادفع الفرق — المخزون والخزنة وحساب المورد بيتظبطوا لوحدهم.</p>
+      <div class="grid">
+        <div><label for="x-date">التاريخ</label><input type="date" id="x-date"></div>
+        <div><label for="x-party">المورد</label><select id="x-party"></select></div>
+        <div><label for="x-note">ملاحظة</label><input id="x-note" autocomplete="off" placeholder="الموديل ما اتباعش"></div>
+      </div>
+
+      <div class="fset xg-out">
+        <h3>↩ اللي هترجّعه <small>بيخرج من المخزون</small></h3>
+        <div><label for="x-src">الصنف (من اللي اشتريته من المورد ده)</label><select id="x-src"></select></div>
+        <div class="ptot" id="x-srcinfo" hidden></div>
+        <div class="grid">
+          <div><label for="x-qty">هترجّع كام قطعة</label><input type="number" id="x-qty" step="any" min="0" autocomplete="off"></div>
+          <div><label for="x-unit">المورد هيحسبلك القطعة بكام</label><input type="number" id="x-unit" step="any" min="0" autocomplete="off"></div>
+        </div>
+        <p class="hintline" id="x-loss"></p>
+      </div>
+
+      <div class="fset xg-in">
+        <h3>↪ اللي هتاخده بداله <small>بيدخل المخزون</small></h3>
+        <div id="x-lines"></div>
+        <button class="addline" type="button" id="b-xaddline">+ صنف تاني</button>
+      </div>
+
+      <div class="xg-diff" id="x-diff"></div>
+      <div class="xg-pay" id="x-paybox">
+        <div id="x-paywrap"><label for="x-paid" id="x-paid-lbl">المدفوع للمورد دلوقتي</label>
+          <input type="number" id="x-paid" step="any" min="0" autocomplete="off">
+          <p class="hintline" id="x-paid-hint"></p></div>
+        <div id="x-modewrap" hidden><label for="x-mode">الفرق اللي ليك</label>
+          <select id="x-mode">
+            <option value="cash">رجّعهولي كاش دلوقتي</option>
+            <option value="credit">يفضل رصيد عنده (أخصمه بعدين)</option>
+          </select></div>
+      </div>
+      <div class="ptot" id="x-eff"></div>
+      <div id="x-over" hidden>
+        <p class="note bad" id="x-over-msg" style="margin-top:0"></p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-2);cursor:pointer;margin-top:6px">
+          <input type="checkbox" id="x-force" style="width:auto;margin:0"><span>أنا متأكد — سجّله برضه</span></label>
+      </div>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-xchg">حفظ الاستبدال</button>
+        <button class="act ghost" type="button" data-closeentry>إلغاء</button>
+      </div>
     </div>
   </div>
 
@@ -2835,8 +2927,17 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "91";
+  var VERSION = "92";
   var CHANGELOG = [
+    { v:"92", d:"2026-10-01", items:[
+      "جديد: استبدال مع المورد — ترجّع بضاعة ما اتباعتش وتاخد بدالها بضاعة تانية وتدفع الفرق، في خطوة واحدة",
+      "بتبدأ من «⇄ بدّله» على أي صنف في كارت الفاتورة، أو «⇄ استبدال مع مورد» فوق في المشتريات",
+      "الدرج بيوريك عندك كام واتباع منه كام، والفرق بيتحسب لوحده والمدفوع بيتملي بيه — ولو الفرق ليك: كاش أو يفضل رصيد عند المورد",
+      "المخزون بيتظبط لوحده (القديم بيخرج بتكلفته والجديد بيدخل بسعره)، والخزنة سطر واحد «فرق استبدال»، وحساب المورد بيتسوّى",
+      "لو المورد حسب القطعة بأقل من تكلفتها عندك، الفرق بيتسجّل «خسارة استبدال» في المصاريف (من غير ما يلمس الخزنة)",
+      "في المشتريات: كارت واحد للاستبدال «رجّعت ← خدت» وفلتر «استبدال»، والفاتورة الأصلية مكتوب عليها «اتبدّل منها»",
+      "كشف حساب المورد: رجّعت · خدت · دفعت الفرق — وحركة الصنف في المخزون مكتوب عليها «استبدال»"
+    ]},
     { v:"91", d:"2026-09-30", items:[
       "تصحيح الكلام في فاتورة الشراء: «باقي للمورد» بدل «باقي على المورد»، و«مش بيتحسب دَين للمورد» في ملاحظة النقل"
     ]},
@@ -4470,6 +4571,8 @@
       // (openingStock)، فلو اتحسبت كمان مديونية تبقى اتعدّت مرتين
       if(p.opening) return;
       if(p.partyId===id) bal -= goodsTotal(p) - (Number(p.paid)||0);
+      // استبدال: المورد حسب القطعة بأقل من تكلفتها — الفرق بيقلّل اللي ليك عنده
+      if(p.partyId===id && p.xloss) bal -= Number(p.xloss)||0;
     });
     live("cash").forEach(function(c){
       if(c.partyId!==id) return;
@@ -4786,7 +4889,13 @@
     return live("cash").filter(function(c){
       if(c.type !== "expense" || !inRange(c.date, r)) return false;
       return !kind || costKindOf(c) === kind;
-    }).reduce(function(a,c){ return a + (Number(c.amount)||0); },0);
+    }).reduce(function(a,c){ return a + (Number(c.amount)||0); },0) +
+      (!kind || kind === "var" ? xLossIn(r) : 0);
+  }
+  // خسارة (أو مكسب) الاستبدال مع المورد — مصروف متغيّر من غير خزنة
+  function xLossIn(r){
+    return live("purchases").reduce(function(a, p){
+      return a + (p.xloss && inRange(p.date, r) ? (Number(p.xloss)||0) : 0); }, 0);
   }
 
   // ملخص أرقام الفترة
@@ -5134,6 +5243,9 @@
     },
     exp: function(cur, r){
       var rows = live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r); })
+        .concat(live("purchases").filter(function(p){ return p.xloss && inRange(p.date, r); })
+          .map(function(p){ return { date:p.date, at:p.at, partyId:p.partyId, amount:p.xloss,
+            note:(p.xloss > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
         .sort(byDate).map(function(c){
         return "<tr><td class='num'>" + esc(c.date||"—") + "</td>" +
           "<td class='wide'>" + (esc(squish(c.note)) || "بدون بيان") + "</td>" +
@@ -7125,8 +7237,10 @@
     var L = [];
     live("purchases").forEach(function(p){
       if(keyOf(p)!==moveFor) return;
-      L.push({d:p.date, at:p.at, t:"شراء", who:partyName(p.partyId),
-        note:"بسعر "+money(p.cost), inn:Number(p.qty)||0, out:0});
+      var xl = p.xchg ? "استبدال" + (p.pno ? " #" + p.pno : "") : "";
+      L.push({d:p.date, at:p.at, t: xl || (isPRet(p) ? "مرتجع للمورد" : "شراء"), who:partyName(p.partyId),
+        note: xl ? (isPRet(p) ? "رجع للمورد" : "دخل بـ" + money(p.cost)) : "بسعر "+money(p.cost),
+        inn:Number(p.qty)||0, out:0});
     });
     live("sales").forEach(function(x){
       var st = stOf(x);
@@ -9050,6 +9164,308 @@
       (mode === "cash" ? " دخلت الخزنة" : " اتخصمت من حساب المورد"));
   });
 
+  /* ---------- استبدال مع المورد ----------
+     بضاعة ما اتباعتش بترجع لنفس المورد وبتاخد بدالها بضاعة تانية وبتدفع الفرق.
+     بيتخزّن سجلات شراء عادية بنفس batchId وعليها xchg:
+       - سجل مرتجع (qty بالسالب) بتكلفة القطعة عندك (المتوسط) — فالمخزون بيخرج
+         بقيمته الحقيقية ومتوسط اللي فاضل ما بيتغيّرش.
+       - credit = اللي المورد حسبه للقطعة. لو أقل من التكلفة، الفرق xloss:
+         مصروف «خسارة استبدال» (من غير خزنة) وبيقلّل اللي ليك عند المورد.
+       - سجلات شراء للبضاعة الجديدة، والمدفوع عليها = الفرق اللي دفعته.
+     كده partyBalance والخزنة والمخزون والأرباح بيطلعوا صح من غير أي حالة خاصة. */
+  var xd = null;            // مسودة الاستبدال المفتوحة
+  function xNewLine(){ return { itemId:"", color:"", size:"", qty:"", price:"" }; }
+  function xRecs(xid){ return live("purchases").filter(function(p){ return p.xchg === xid; }); }
+  // بيحسب كأن الاستبدال اللي بنعدّله مش موجود — عشان الرصيد والمتوسط يطلعوا صح
+  function withoutX(xid, fn){
+    var rs = xid ? xRecs(xid) : [];
+    if(!rs.length) return fn();
+    rs.forEach(function(r){ r.deleted = true; }); clearStockIdx();
+    try { return fn(); } finally { rs.forEach(function(r){ delete r.deleted; }); clearStockIdx(); }
+  }
+  function xSrcRec(){ return xd && xd.srcId ? db.purchases.find(function(p){ return p.id === xd.srcId; }) : null; }
+  // الأصناف اللي اشتريتها من المورد ده ولسه عندك منها — تركيبة واحدة لكل لون/مقاس (آخر فاتورة)
+  function xSrcOptions(partyId){
+    if(!partyId) return [];
+    return withoutX(xd && xd.editId, function(){
+      var byK = {}, out = [];
+      live("purchases").forEach(function(p){
+        if(p.partyId !== partyId || p.opening || isPRet(p)) return;
+        var k = keyOf(p);
+        if(!byK[k] || (p.date||"") > (byK[k].date||"") || ((p.date||"") === (byK[k].date||"") && (p.at||0) > (byK[k].at||0))) byK[k] = p;
+      });
+      Object.keys(byK).forEach(function(k){
+        var p = byK[k], c = vColor(p), z = vSize(p);
+        var free = freeOfV(p.itemId, c, z);
+        if(free <= 0 && !(xd && xd.srcId === p.id)) return;
+        out.push({ id:p.id, free:free, label:itemName(p.itemId) + (vLabel(c, z) ? " · " + vLabel(c, z) : "") + " — عندك " + qty(free) });
+      });
+      return out.sort(function(a, b){ return a.label < b.label ? -1 : 1; });
+    });
+  }
+  // تكلفة القطعة عندك دلوقتي (المتوسط شامل النقل) واللي اتباع منها
+  function xSrcFacts(){
+    var rec = xSrcRec();
+    if(!rec) return null;
+    return withoutX(xd.editId, function(){
+      var c = vColor(rec), z = vSize(rec), k = keyOf(rec), sold = 0;
+      live("sales").forEach(function(x){
+        if(!isDelivered(x)) return;
+        SL(x).forEach(function(l){ if(keyOf(l) === k) sold += lineSold(l, x); });
+      });
+      return { rec:rec, cost:avgCostV(rec.itemId, c, z), stock:stockOfV(rec.itemId, c, z),
+               free:freeOfV(rec.itemId, c, z), sold:sold, price:pPackCost(rec) / pPackQty(rec) };
+    });
+  }
+  function xCalc(){
+    var f = xSrcFacts(), q = Number(xd.qty)||0;
+    var u = xd.uAuto && f ? f.price : (Number(xd.unit)||0);
+    var cost = f ? f.cost : 0;
+    var lines = xd.lines.filter(function(l){ return l.itemId && (Number(l.qty)||0) > 0; });
+    var G = lines.reduce(function(a, l){ return a + (Number(l.qty)||0) * (Number(l.price)||0); }, 0);
+    var credit = q * u, loss = q * (cost - u), D = G - credit;
+    return { f:f, q:q, u:u, cost:cost, lines:lines, G:G, credit:credit, loss:loss, D:D };
+  }
+
+  function openXchg(opt){
+    opt = opt || {};
+    xd = { editId:null, date:firstOpenDate(), partyId:"", srcId:"", qty:"", unit:"", uAuto:true, note:"",
+           lines:[xNewLine()], paid:0, paidAuto:true, mode:"cash" };
+    if(opt.editId){
+      var rs = xRecs(opt.editId);
+      var ret = rs.find(isPRet);
+      if(!ret){ toast("الاستبدال ده مش كامل — احذفه وسجّله من جديد"); return; }
+      if(isLocked(ret.date)){ toast("الاستبدال ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+      var ins = rs.filter(function(r){ return !isPRet(r); });
+      var paidIn = ins.reduce(function(a, r){ return a + (Number(r.paid)||0); }, 0);
+      xd.editId = opt.editId; xd.date = ret.date; xd.partyId = ret.partyId; xd.srcId = ret.srcId;
+      xd.qty = -(Number(ret.qty)||0); xd.unit = ret.credit != null ? ret.credit : ret.cost; xd.uAuto = false;
+      xd.note = ret.note || "";
+      xd.lines = ins.map(function(r){ return { itemId:r.itemId, color:vColor(r), size:vSize(r), qty:Number(r.qty)||0, price:Number(r.cost)||0 }; });
+      if(!xd.lines.length) xd.lines = [xNewLine()];
+      var G0 = xd.lines.reduce(function(a, l){ return a + l.qty * l.price; }, 0);
+      var D0 = G0 - xd.qty * xd.unit;
+      if(D0 >= 0){ xd.paid = paidIn; xd.paidAuto = Math.abs(paidIn - D0) < 0.01; }
+      else { xd.mode = (Number(ret.paid)||0) < -0.009 ? "cash" : "credit"; }
+    } else if(opt.srcId){
+      var src = db.purchases.find(function(p){ return p.id === opt.srcId; });
+      if(src){ xd.partyId = src.partyId; xd.srcId = src.id; }
+    }
+    var ps = document.getElementById("x-party");
+    ps.innerHTML = "<option value=''>اختار المورد…</option>" + suppliersLive().map(function(p){
+      return "<option value='" + esc(p.id) + "'>" + esc(p.name) + "</option>"; }).join("");
+    document.getElementById("x-date").value = xd.date;
+    ps.value = xd.partyId;
+    document.getElementById("x-note").value = xd.note;
+    var fz = document.getElementById("x-force"); if(fz) fz.checked = false;
+    document.getElementById("x-over").hidden = true;
+    goTab("purch"); openEntry("xchg");
+    document.getElementById("title-xchg").textContent = xd.editId ? "⇄ تعديل استبدال" : "⇄ استبدال مع مورد";
+    xFillSrc(); xRenderLines(); xRender();
+    if(xd.srcId) setTimeout(function(){ try{ document.getElementById("x-qty").focus(); }catch(e){} }, 90);
+  }
+
+  function xFillSrc(){
+    var el = document.getElementById("x-src");
+    var opts = xSrcOptions(xd.partyId);
+    if(xd.srcId && !opts.some(function(o){ return o.id === xd.srcId; })){
+      // نفس اللون والمقاس من فاتورة تانية؟ نختار الموجود في القايمة
+      var cur = xSrcRec(), k = cur ? keyOf(cur) : "";
+      var same = opts.find(function(o){ var r = db.purchases.find(function(p){ return p.id === o.id; }); return r && keyOf(r) === k; });
+      xd.srcId = same ? same.id : "";
+    }
+    el.innerHTML = "<option value=''>" + (xd.partyId ? (opts.length ? "اختار الصنف…" : "مفيش بضاعة من المورد ده لسه عندك") : "اختار المورد الأول") + "</option>" +
+      opts.map(function(o){ return "<option value='" + esc(o.id) + "'>" + esc(o.label) + "</option>"; }).join("");
+    el.value = xd.srcId || "";
+    el.disabled = !xd.partyId;
+    document.getElementById("x-qty").value = xd.qty === "" ? "" : xd.qty;
+  }
+
+  function xRenderLines(){
+    var box = document.getElementById("x-lines");
+    var items = live("items").slice().sort(function(a, b){ return (a.name||"") < (b.name||"") ? -1 : 1; });
+    box.innerHTML = xd.lines.map(function(l, i){
+      var it = l.itemId ? db.items.find(function(x){ return x.id === l.itemId; }) : null;
+      var dl = function(id, list){ return "<datalist id='" + id + "'>" + list.map(function(v){ return "<option value='" + esc(v) + "'></option>"; }).join("") + "</datalist>"; };
+      return "<div class='xl-row' data-xli='" + i + "'>" +
+        "<div><label>الصنف</label><select data-xf='itemId'><option value=''>اختار…</option>" +
+          items.map(function(x){ return "<option value='" + esc(x.id) + "'" + (x.id === l.itemId ? " selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") + "</select></div>" +
+        "<div><label>اللون</label><input data-xf='color' list='xdl-c-" + i + "' autocomplete='off' value='" + esc(l.color) + "'>" + dl("xdl-c-" + i, listOf(it, "colors")) + "</div>" +
+        "<div><label>المقاس</label><input data-xf='size' list='xdl-z-" + i + "' autocomplete='off' value='" + esc(l.size) + "'>" + dl("xdl-z-" + i, listOf(it, "sizes")) + "</div>" +
+        "<div><label>قطع</label><input type='number' step='any' min='0' data-xf='qty' value='" + esc(l.qty) + "'></div>" +
+        "<div><label>سعر القطعة</label><input type='number' step='any' min='0' data-xf='price' value='" + esc(l.price) + "'></div>" +
+        "<span class='tt num' data-xtt='" + i + "'></span>" +
+        "<button type='button' class='rm' data-xrm='" + i + "' aria-label='شيل السطر'" + (xd.lines.length > 1 ? "" : " hidden") + ">&times;</button>" +
+      "</div>";
+    }).join("");
+  }
+
+  function xRender(){
+    if(!xd) return;
+    var k = xCalc(), f = k.f;
+    // اللي هترجّعه
+    var info = document.getElementById("x-srcinfo");
+    if(f){
+      info.hidden = false;
+      info.innerHTML =
+        "<div><span>من فاتورة</span><b>#" + esc(f.rec.pno || "—") + " · " + esc(dShort(f.rec.date)) + " · بـ" + esc(money(f.price)) + " للقطعة</b></div>" +
+        "<div><span>عندك دلوقتي</span><b>" + esc(qty(f.stock)) + " قطعة" + (f.free !== f.stock ? " (متاح " + esc(qty(f.free)) + ")" : "") + "</b></div>" +
+        "<div><span>اتباع منه</span><b class='" + (f.sold ? "" : "v-due") + "'>" + (f.sold ? esc(qty(f.sold)) + " قطعة" : "ولا قطعة") + "</b></div>" +
+        "<div><span>تكلفة القطعة عندك</span><b>" + esc(money(f.cost)) + "</b></div>";
+    } else info.hidden = true;
+    var ue = document.getElementById("x-unit");
+    if(xd.uAuto && document.activeElement !== ue) ue.value = f ? String(Math.round(f.price * 100) / 100) : "";
+    var lossEl = document.getElementById("x-loss");
+    if(f && k.q > 0 && Math.abs(k.loss) >= 0.01){
+      lossEl.className = "hintline" + (k.loss > 0 ? " bad" : "");
+      lossEl.innerHTML = k.loss > 0
+        ? "⚠ تكلفة القطعة عندك " + esc(money(k.cost)) + (k.cost > f.price + 0.005 ? " (شامل نقل الشحنة)" : "") + " والمورد هيحسبها " + esc(money(k.u)) +
+          " — الفرق <b>" + esc(money(k.loss)) + "</b> هيتسجّل <b>خسارة استبدال</b> (مصروف من غير خزنة)."
+        : "المورد هيحسبها " + esc(money(k.u)) + " وتكلفتها عندك " + esc(money(k.cost)) + " — الفرق <b>" + esc(money(-k.loss)) + "</b> مكسب ليك وبيقلّل المصاريف.";
+    } else { lossEl.className = "hintline"; lossEl.innerHTML = ""; }
+
+    // إجمالي كل سطر
+    xd.lines.forEach(function(l, i){
+      var t = document.querySelector("#x-lines [data-xtt='" + i + "']");
+      var v = (Number(l.qty)||0) * (Number(l.price)||0);
+      if(t) t.textContent = v ? money(v) : "";
+    });
+
+    // الفرق والدفع
+    var diff = document.getElementById("x-diff");
+    diff.innerHTML = "<div class='eq'>اللي هتاخده <b class='num'>" + esc(money(k.G)) + "</b> − اللي رجّعته <b class='num'>" + esc(money(k.credit)) + "</b></div>" +
+      "<div class='big'><span>" + (k.D > 0.009 ? "هتدفع للمورد الفرق" : (k.D < -0.009 ? "المورد هيرجّعلك الفرق" : "مفيش فرق")) +
+      "</span><b class='num'>" + esc(money(Math.abs(k.D))) + "</b></div>";
+    var pay = document.getElementById("x-paywrap"), mode = document.getElementById("x-modewrap");
+    pay.hidden = !(k.D > 0.009); mode.hidden = !(k.D < -0.009);
+    document.getElementById("x-mode").value = xd.mode;
+    var pin = document.getElementById("x-paid"), ph = document.getElementById("x-paid-hint");
+    if(k.D > 0.009){
+      if(xd.paidAuto){ xd.paid = k.D; if(document.activeElement !== pin) pin.value = String(Math.round(k.D * 100) / 100); }
+      var html = xd.paidAuto ? "✓ بيتملي لوحده بالفرق — غيّره لو هتدفع جزء بس."
+        : (Math.abs(xd.paid - k.D) > 0.009 ? "إنت كاتبه بإيدك. <button class='rowact' type='button' id='b-xpaid-all'>ادفع الفرق كله (" + esc(money(k.D)) + ")</button>" : "");
+      if(ph.dataset.h !== html){ ph.dataset.h = html; ph.innerHTML = html; }
+    }
+
+    // اللي هيحصل
+    var P = k.D > 0.009 ? (Number(xd.paid)||0) : 0;
+    var back = k.D < -0.009 && xd.mode === "cash" ? -k.D : 0;
+    var bal = k.D > 0.009 ? P - k.D : (xd.mode === "cash" ? 0 : -k.D);   // موجب = ليك عنده
+    var eff = [];
+    if(f && k.q > 0) eff.push(["المخزون: " + itemName(f.rec.itemId) + (vLabel(vColor(f.rec), vSize(f.rec)) ? " " + vLabel(vColor(f.rec), vSize(f.rec)) : ""),
+      qty(f.stock) + " ← " + qty(f.stock - k.q), ""]);
+    k.lines.forEach(function(l){
+      eff.push(["المخزون: " + itemName(l.itemId) + (vLabel(squish(l.color), squish(l.size)) ? " " + vLabel(squish(l.color), squish(l.size)) : ""), "+" + qty(Number(l.qty)||0), "v-gain"]);
+    });
+    eff.push(["الخزنة", P > 0.009 ? "− " + money(P) : (back > 0.009 ? "+ " + money(back) : "مفيش حركة"), P > 0.009 ? "v-due" : (back > 0.009 ? "v-gain" : "")]);
+    if(Math.abs(k.loss) >= 0.01) eff.push([k.loss > 0 ? "خسارة استبدال (مصروف)" : "مكسب استبدال", money(Math.abs(k.loss)), k.loss > 0 ? "v-due" : "v-gain"]);
+    eff.push(["حساب " + (partyName(xd.partyId) || "المورد"), Math.abs(bal) < 0.01 ? "متسوّي ✓" : (bal > 0 ? "ليك عنده " + money(bal) : "باقي للمورد " + money(-bal)), Math.abs(bal) < 0.01 ? "v-gain" : ""]);
+    document.getElementById("x-eff").innerHTML = "<div><span><b>اللي هيحصل لما تحفظ</b></span><b></b></div>" + eff.map(function(e){
+      return "<div><span>" + esc(e[0]) + "</span><b class='num " + e[2] + "'>" + esc(e[1]) + "</b></div>"; }).join("");
+  }
+
+  document.getElementById("b-xchg-open").addEventListener("click", function(){ openXchg(); });
+  document.getElementById("x-party").addEventListener("change", function(){
+    xd.partyId = this.value; xd.srcId = ""; xd.uAuto = true; xFillSrc(); xRender();
+  });
+  document.getElementById("x-src").addEventListener("change", function(){
+    xd.srcId = this.value; xd.uAuto = true; xRender();
+  });
+  document.getElementById("x-date").addEventListener("change", function(){ xd.date = this.value || today(); });
+  document.getElementById("x-note").addEventListener("input", function(){ xd.note = this.value; });
+  document.getElementById("x-qty").addEventListener("input", function(){ xd.qty = this.value; xRender(); });
+  document.getElementById("x-unit").addEventListener("input", function(){ xd.unit = this.value; xd.uAuto = false; xRender(); });
+  document.getElementById("x-paid").addEventListener("input", function(){ xd.paid = Number(this.value)||0; xd.paidAuto = false; xRender(); });
+  document.getElementById("x-mode").addEventListener("change", function(){ xd.mode = this.value; xRender(); });
+  document.getElementById("x-paid-hint").addEventListener("click", function(e){
+    if(!e.target.closest("#b-xpaid-all") || !xd) return;
+    xd.paidAuto = true; xRender();
+  });
+  document.getElementById("b-xaddline").addEventListener("click", function(){
+    xd.lines.push(xNewLine()); xRenderLines(); xRender();
+  });
+  var xLineEdit = function(e){
+    var row = e.target.closest("[data-xli]"), fld = e.target.dataset.xf;
+    if(!row || !fld || !xd) return;
+    var l = xd.lines[Number(row.dataset.xli)]; if(!l) return;
+    l[fld] = e.target.value;
+    if(fld === "itemId"){
+      // صنف جديد: نقترح سعر آخر شراء ليه، والألوان والمقاسات بتاعته
+      var last = live("purchases").filter(function(p){ return p.itemId === l.itemId && !isPRet(p); })
+        .sort(function(a, b){ return (a.date||"") < (b.date||"") ? 1 : -1; })[0];
+      if(last && !Number(l.price)) l.price = Math.round(pPackCost(last) / pPackQty(last) * 100) / 100;
+      xRenderLines();
+    }
+    xRender();
+  };
+  document.getElementById("x-lines").addEventListener("input", xLineEdit);
+  document.getElementById("x-lines").addEventListener("change", xLineEdit);
+  document.getElementById("x-lines").addEventListener("click", function(e){
+    var b = e.target.closest("[data-xrm]"); if(!b || !xd) return;
+    xd.lines.splice(Number(b.dataset.xrm), 1);
+    if(!xd.lines.length) xd.lines = [xNewLine()];
+    xRenderLines(); xRender();
+  });
+
+  document.getElementById("b-xchg").addEventListener("click", function(){
+    if(!xd) return;
+    var k = xCalc(), f = k.f;
+    var date = document.getElementById("x-date").value || today();
+    if(!guardLock(date, "الاستبدال")) return;
+    if(!xd.partyId){ toast("اختار المورد"); return; }
+    if(!f){ toast("اختار الصنف اللي هترجّعه"); return; }
+    if(!(k.q > 0)){ toast("اكتب هترجّع كام قطعة"); return; }
+    if(k.q > f.free + 0.0001){ toast("المتاح " + qty(f.free) + " قطعة بس"); return; }
+    if(!(k.u >= 0)){ toast("اكتب المورد هيحسبلك القطعة بكام"); return; }
+    var bad = xd.lines.find(function(l){ return (l.itemId && !((Number(l.qty)||0) > 0)) || (!l.itemId && (Number(l.qty)||0) > 0); });
+    if(bad){ toast("كمّل سطر البضاعة الجديدة: الصنف وعدد القطع"); return; }
+    if(!k.lines.length){ toast("اختار البضاعة اللي هتاخدها بداله"); return; }
+    if(k.lines.some(function(l){ return !(Number(l.price) >= 0) || l.price === ""; })){ toast("اكتب سعر القطعة للبضاعة الجديدة"); return; }
+    var P = k.D > 0.009 ? Math.max(0, Number(xd.paid)||0) : 0;
+    if(k.D > 0.009 && P > k.D + 0.009){ toast("المدفوع أكبر من الفرق (" + money(k.D) + ")"); return; }
+    var back = k.D < -0.009 && xd.mode === "cash" ? -k.D : 0;
+    // الخزنة: من غير الاستبدال القديم لو بنعدّل
+    var cashNow = withoutX(xd.editId, cashBox);
+    var force = document.getElementById("x-force");
+    if(P > cashNow + 0.009 && !(force && force.checked)){
+      document.getElementById("x-over-msg").innerHTML = "الخزنة فيها " + esc(money(cashNow)) + " بس، والفرق اللي هتدفعه " + esc(money(P)) +
+        ". لو دفعته من برّه الخزنة سجّل المدفوع 0 (هيفضل باقي للمورد)، أو علّم «أنا متأكد».";
+      document.getElementById("x-over").hidden = false; return;
+    }
+
+    var xid = xd.editId || uid(), pno = 0;
+    if(xd.editId){
+      var old = xRecs(xd.editId), now = Date.now();
+      pno = (old[0] && old[0].pno) || 0;
+      old.forEach(function(r){ r.deleted = true; r.at = now; });
+    }
+    var note = squish(document.getElementById("x-note").value || "");
+    var src = f.rec, recs = [];
+    var ret = stamp({ date:date, partyId:xd.partyId, inv:"", itemId:src.itemId, color:vColor(src), size:vSize(src),
+      packName:"قطعة", packs:-k.q, packQty:1, packCost:k.cost, qty:-k.q, cost:k.cost, freight:0,
+      paid: back ? -back : 0, isReturn:true, srcId:src.id, batchId:xid, xchg:xid, credit:k.u,
+      xloss: Math.abs(k.loss) >= 0.005 ? k.loss : 0, note: note || "استبدال مع المورد" });
+    recs.push(ret);
+    // المدفوع بيتوزّع على البضاعة الجديدة بنسبة قيمتها، والباقي على آخر سطر
+    var left = P;
+    k.lines.forEach(function(l, i){
+      var v = (Number(l.qty)||0) * (Number(l.price)||0);
+      var share = i === k.lines.length - 1 ? left : (k.G > 0 ? Math.round(P * v / k.G * 100) / 100 : 0);
+      left -= share;
+      recs.push(stamp({ date:date, partyId:xd.partyId, inv:"", itemId:l.itemId, color:squish(l.color), size:squish(l.size),
+        packName:"قطعة", packs:Number(l.qty)||0, packQty:1, packCost:Number(l.price)||0, qty:Number(l.qty)||0,
+        cost:Number(l.price)||0, freight:0, paid:share, batchId:xid, lineId:uid(), xchg:xid, note: note || "استبدال مع المورد" }));
+    });
+    recs.forEach(function(r){ if(pno) r.pno = pno; db.purchases.push(r); });
+    saveSoon("purchases");
+    var wasEdit = !!xd.editId;
+    xd = null;
+    freshBatch = xid;
+    closeEntry();
+    renderAll();
+    toast(wasEdit ? "اتعدّل الاستبدال" : "اتسجّل الاستبدال" + (P ? " · دفعت " + money(P) : (back ? " · رجعلك " + money(back) : "")));
+  });
+
   /* ---------- المشتريات: فاتورة في سطر واحد بيتفتح ----------
      كانت كل تركيبة لون/مقاس سطر كامل في الجدول. فاتورة فيها ١٥ لون
      ومقاس = ١٥ سطر، وشاشة كاملة لفاتورة واحدة. بقت سطر واحد بالرقم
@@ -9149,6 +9565,7 @@
     return o;
   }
   function puKind(g){
+    if(g.rows.some(function(r){ return r.xchg; })) return "xchg";
     if(isPRet(g.head)) return "ret";
     return puSum(g).rest > 0.009 ? "due" : "paid";
   }
@@ -9173,7 +9590,9 @@
   function renderPuOnly(cnt){
     var el = document.getElementById("pu-only");
     if(!el) return;
-    el.innerHTML = [["all","الكل"],["due","عليها فلوس"],["paid","خالصة"],["ret","مرتجعات"]].map(function(c){
+    var kinds = [["all","الكل"],["due","عليها فلوس"],["paid","خالصة"],["ret","مرتجعات"]];
+    if(cnt.xchg || puOnly === "xchg") kinds.push(["xchg","استبدال"]);
+    el.innerHTML = kinds.map(function(c){
       return "<button type='button' data-puonly='" + c[0] + "'" + (puOnly === c[0] ? " class='on'" : "") + ">" +
         c[1] + " <b>" + qty(cnt[c[0]] || 0) + "</b></button>";
     }).join("");
@@ -9192,6 +9611,7 @@
     puGroupsAll().forEach(function(g){
       var d = g.head.date || "";
       if(d < m.from || d > m.to) return;
+      if(puKind(g) === "xchg") return;      // الاستبدال مش شراء جديد ولا مرتجع
       var t = puSum(g);
       if(isPRet(g.head)){ ret += -t.goods; nr++; return; }
       buy += t.goods; fr += t.fr; pcs += t.pieces; n++;
@@ -9226,6 +9646,48 @@
     }).join("");
   }
 
+  // كارت الاستبدال: رجّعت ← خدت، والفرق اتدفع ولا لأ
+  function xchgCard(g){
+    var h = g.head, open = !!openPurch[g.key];
+    var outs = g.rows.filter(isPRet), ins = g.rows.filter(function(r){ return !isPRet(r); });
+    var r0 = outs[0] || h;
+    var credit = outs.reduce(function(a, r){ return a + (-goodsTotal(r) - (Number(r.xloss)||0)); }, 0);
+    var take = ins.reduce(function(a, r){ return a + goodsTotal(r); }, 0);
+    var paid = ins.reduce(function(a, r){ return a + (Number(r.paid)||0); }, 0);
+    var back = -outs.reduce(function(a, r){ return a + Math.min(0, Number(r.paid)||0); }, 0);
+    var loss = outs.reduce(function(a, r){ return a + (Number(r.xloss)||0); }, 0);
+    var D = take - credit, isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
+    var lbl = function(r){ var v = vLabel(vColor(r), vSize(r)); return itemName(r.itemId) + (v ? " · " + v : "") + " × " + qty(Math.abs(Number(r.qty)||0)); };
+    var st;
+    if(D > 0.009) st = paid >= D - 0.009 ? "<span class='pill ok'>✓ دفعت الفرق " + esc(money(paid)) + "</span>"
+      : "<span class='pill due'>باقي للمورد " + esc(money(D - paid)) + "</span>";
+    else if(D < -0.009) st = back > 0.009 ? "<span class='pill ok'>✓ رجعلك " + esc(money(back)) + " كاش</span>"
+      : "<span class='pill'>ليك عنده " + esc(money(-D)) + "</span>";
+    else st = "<span class='pill ok'>✓ مفيش فرق</span>";
+    return "<div class='pv xg" + (isFresh ? " fresh" : "") + "' data-pv='" + esc(g.key) + "'>" +
+      "<button class='pv-h' type='button' data-pvopen='" + esc(g.key) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
+        "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
+          "<span class='pt-flag xg'>⇄ استبدال</span><span class='sub'>" + esc(dShort(h.date)) +
+          (r0.note && r0.note !== "استبدال مع المورد" ? " · " + esc(r0.note) : "") + "</span></span>" +
+        "<span class='it sub'>" + esc(outs.map(lbl).join(" · ")) + " ← " + esc(ins.map(lbl).join(" · ")) + "</span>" +
+        "<span class='pay money-only'>" + st + "</span>" +
+        "<span class='tot'><b class='num money-only'>" + esc(money(Math.abs(D))) + "</b><small>" + (D >= 0 ? "الفرق" : "الفرق ليك") + "</small></span>" +
+        "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
+      "</button>" +
+      (open ? "<div class='pv-flow'>" +
+          "<div class='side'><small>↩ رجّعت</small>" + esc(outs.map(lbl).join(" · ")) + "<b class='num v-due money-only'>− " + esc(money(credit)) + "</b></div>" +
+          "<div class='arr' aria-hidden='true'>⇠</div>" +
+          "<div class='side'><small>↪ خدت</small>" + esc(ins.map(lbl).join(" · ")) + "<b class='num v-gain money-only'>+ " + esc(money(take)) + "</b></div>" +
+        "</div><div class='pv-b'>" +
+          (Math.abs(loss) >= 0.01 ? "<p class='hintline' style='margin:0 0 6px'>" + (loss > 0 ? "خسارة استبدال (مصروف): " : "مكسب استبدال: ") +
+            "<b class='num money-only'>" + esc(money(Math.abs(loss))) + "</b> — المورد حسب القطعة بـ" + esc(money(Number(r0.credit)||0)) +
+            " وتكلفتها عندك " + esc(money(Number(r0.cost)||0)) + "</p>" : "") +
+          "<div class='pv-f'><button class='tbtn' type='button' data-edit='purchases|" + h.id + "'>تعديل الاستبدال</button>" +
+          "<button class='tbtn' type='button' style='color:var(--due)' data-del='purchases' data-id='" + h.id + "'>حذف الاستبدال كله</button></div>" +
+        "</div>" : "") +
+    "</div>";
+  }
+
   function renderPurchCards(groups, all){
     var box = document.getElementById("pu-cards");
     if(!box) return;
@@ -9241,8 +9703,11 @@
       var k = (g.head.date || "").slice(0,7);
       if(!months[k]) months[k] = { n:0, goods:0 };
       months[k].n++;
-      if(!isPRet(g.head)) months[k].goods += puSum(g).goods;
+      if(!isPRet(g.head) && puKind(g) !== "xchg") months[k].goods += puSum(g).goods;
     });
+    // كام قطعة اتبدّلت من كل سطر فاتورة
+    var xOut = {};
+    live("purchases").forEach(function(p){ if(p.xchg && isPRet(p) && p.srcId) xOut[p.srcId] = (xOut[p.srcId]||0) - (Number(p.qty)||0); });
     var lastM = null, html = "";
     groups.forEach(function(g){
       var h = g.head, k = (h.date || "").slice(0,7);
@@ -9251,6 +9716,7 @@
         html += "<div class='pu-mo'><span>" + esc(monthLabel(h.date)) + " · <b>" + nInv(months[k].n) + "</b></span>" +
           "<span class='money-only'>بضاعة <b class='num'>" + esc(money(months[k].goods)) + "</b></span></div>";
       }
+      if(puKind(g) === "xchg"){ html += xchgCard(g); return; }
       var t = puSum(g), isRet = isPRet(h), open = !!openPurch[g.key];
       var names = Object.keys(g.rows.reduce(function(a, x){ a[itemName(x.itemId)] = 1; return a; }, {}));
       var vl = g.rows.length === 1 ? vLabel(vColor(h), vSize(h)) : "";
@@ -9297,7 +9763,9 @@
                 (pFreight(x) ? "<span class='sub'>شامل نقل " + esc(money(pFreight(x) / (Number(x.qty)||1))) + "</span>" : "") + "</span>" +
               "<span class='n num tt money-only'>" + esc(money(goodsTotal(x))) + "</span>" +
               "<span class='x'>" + (isRet ? "" :
-                "<button class='del' type='button' style='color:var(--due)' data-pret='" + x.id + "'>رجّعه للمورد</button>") + "</span></div>";
+                "<button class='del' type='button' style='color:var(--due)' data-pret='" + x.id + "'>رجّعه للمورد</button>" +
+                "<button class='del' type='button' style='color:#5B4A9A' data-xsrc='" + x.id + "'>⇄ بدّله</button>") +
+                (xOut[x.id] ? "<span class='xgd'>⇄ اتبدّل منها " + qty(xOut[x.id]) + "</span>" : "") + "</span></div>";
           }).join("") +
           "<div class='pv-sum money-only'><span>بضاعة <b class='num'>" + esc(money(t.goods)) + "</b></span>" +
             (t.fr > 0.009 ? "<span>نقل <b class='num'>" + esc(money(t.fr)) + "</b> <span class='sub' style='display:inline'>(من الخزنة، مش للمورد)</span></span>" : "") +
@@ -9350,7 +9818,7 @@
 
     var shown = groups.length, all = live("purchases").length;
     // «الكل / عليها فلوس / خالصة / مرتجعات» — بعد باقي الفلاتر، والعدّاد على اللي فاضل منها
-    var cnt = { all:groups.length, due:0, paid:0, ret:0 };
+    var cnt = { all:groups.length, due:0, paid:0, ret:0, xchg:0 };
     groups.forEach(function(g){ cnt[puKind(g)]++; });
     renderPuOnly(cnt);
     if(puOnly !== "all") groups = groups.filter(function(g){ return puKind(g) === puOnly; });
@@ -9359,7 +9827,7 @@
     renderPurchCards(groups, all);
     groups.forEach(function(g){
       var n = g.rows.length, h = g.head;
-      var isRet = isPRet(h);
+      var isRet = isPRet(h) && puKind(g) !== "xchg";
       var isOpen = !!openPurch[g.key];
       var nItems = Object.keys(g.rows.reduce(function(a,x){ a[x.itemId]=1; return a; }, {})).length;
       var pieces = g.rows.reduce(function(a,x){ return a + (Number(x.qty)||0); }, 0);
@@ -9376,7 +9844,7 @@
         "' data-prow='" + esc(g.key) + "' tabindex='0'>" +
         "<td class='num'><span class='ono'>#" + esc(h.pno || "—") + "</span></td>" +
         "<td class='num'>" + esc(h.date) +
-          (isRet ? " <span class='pill due'>مرتجع</span>" : "") +
+          (puKind(g) === "xchg" ? " <span class='pill xg'>⇄ استبدال</span>" : (isRet ? " <span class='pill due'>مرتجع</span>" : "")) +
           (h.inv ? "<span class='sub'>فاتورة " + esc(h.inv) + "</span>" : "") + "</td>" +
         "<td class='wide'>" + esc(partyName(h.partyId)) +
           (isRet && h.note ? "<span class='sub'>" + esc(h.note) + "</span>" : "") + "</td>" +
@@ -9477,13 +9945,14 @@
     live("purchases").forEach(function(p){
       var k = p.batchId || ("solo:" + p.id);
       if(!pSeen[k]){
-        pSeen[k] = { head:p, out:0, back:0, fr:0, items:{}, note:"" };
+        pSeen[k] = { head:p, out:0, back:0, fr:0, items:{}, note:"", x:false, xo:{}, xi:{} };
         pBatch.push(pSeen[k]);
       }
       var g = pSeen[k], pd = Number(p.paid)||0;
       if(pd > 0) g.out += pd; else if(pd < 0) g.back += -pd;
       g.fr += pFreight(p);
       g.items[itemName(p.itemId)] = 1;
+      if(p.xchg){ g.x = true; (isPRet(p) ? g.xo : g.xi)[itemName(p.itemId)] = 1; }
       if(!g.note && p.note) g.note = p.note;
       // أقدم تاريخ ووقت في الفاتورة هو اللي بيحدّد ترتيبها في الدفتر
       if((p.date||"") < (g.head.date||"")) g.head = p;
@@ -9493,6 +9962,16 @@
       var what = Object.keys(g.items).slice(0,2).join(" · ") +
                  (Object.keys(g.items).length > 2 ? " وغيرهم" : "");
       var inv = h.pno ? "فاتورة #" + h.pno + " · " : "";
+      if(g.x){
+        // الاستبدال: سطر واحد بالفرق — «جزمه ← فستان»
+        var xw = "فرق استبدال" + (h.pno ? " #" + h.pno : "") + ": " +
+          Object.keys(g.xo).join(" · ") + " ← " + Object.keys(g.xi).slice(0,2).join(" · ");
+        if(g.out > 0.009) L.push({d:h.date, at:h.at, t:"دفع لمورد", who:partyName(h.partyId), kind:"دفع",
+          note:xw, inn:0, out:g.out, src:"شراء"});
+        if(g.back > 0.009) L.push({d:h.date, at:h.at, t:"استرداد من مورد", who:partyName(h.partyId), kind:"تحصيل",
+          note:xw, inn:g.back, out:0, src:"مرتجع"});
+        return;
+      }
       if(g.out > 0.009)
         L.push({d:h.date, at:h.at, t:"دفع لمورد", who:partyName(h.partyId), kind:"دفع",
           note:inv + "شراء " + what, inn:0, out:g.out, src:"شراء"});
@@ -10649,13 +11128,26 @@
     live("purchases").forEach(function(x){
       if(x.opening || x.partyId !== p.id) return;
       var k = x.batchId || ("solo:" + x.id);
-      if(!inv[k]){ inv[k] = { d:x.date, at:x.at||0, pno:x.pno, goods:0, paid:0, items:{} }; order.push(k); }
+      if(!inv[k]){ inv[k] = { d:x.date, at:x.at||0, pno:x.pno, goods:0, paid:0, items:{}, x:false, ret:0, take:0 }; order.push(k); }
       var g = inv[k];
       g.goods += goodsTotal(x); g.paid += Number(x.paid)||0; g.items[itemName(x.itemId)] = 1;
+      if(x.xchg){
+        g.x = true;
+        if(isPRet(x)) g.ret += -goodsTotal(x) - (Number(x.xloss)||0);   // اللي المورد حسبه فعلاً
+        else g.take += goodsTotal(x);
+      }
       if((x.date||"") < (g.d||"")) g.d = x.date;
     });
     order.forEach(function(k){
       var g = inv[k], what = Object.keys(g.items).slice(0, 2).join(" · ");
+      if(g.x){
+        // الاستبدال: رجّعت (ليك) · خدت (عليك) · ودفعت أو استرديت الفرق
+        var xl = "استبدال" + (g.pno ? " #" + g.pno : "");
+        if(g.ret > 0.009)  L.push({ d:g.d, at:g.at,       t:"رجّعت في " + xl, v:g.ret });
+        if(g.take > 0.009) L.push({ d:g.d, at:g.at + 0.2, t:"خدت في " + xl + " · " + what, v:-g.take });
+        if(Math.abs(g.paid) > 0.009) L.push({ d:g.d, at:g.at + 0.5, t:(g.paid < 0 ? "استرديت فرق " : "دفعت فرق ") + xl, v:g.paid });
+        return;
+      }
       var lbl = (g.pno ? "فاتورة #" + g.pno : "فاتورة") + " · " + what;
       if(Math.abs(g.goods) > 0.009) L.push({ d:g.d, at:g.at, t:(g.goods < 0 ? "مرتجع · " : "") + lbl, v:-g.goods });
       if(Math.abs(g.paid) > 0.009) L.push({ d:g.d, at:g.at + 0.5, t:(g.paid < 0 ? "استرداد على " : "دفعت على ") + lbl, v:g.paid });
@@ -10850,6 +11342,7 @@
         dr:saleTotal(s)+shipIn(s), cr:Number(s.paid)||0});
     });
     live("purchases").forEach(function(x){ if(x.partyId===p.id) lines.push({d:x.date,t:"شراء "+itemName(x.itemId),dr:Number(x.paid)||0,cr:goodsTotal(x)}); });
+    live("purchases").forEach(function(x){ if(x.partyId===p.id && x.xloss) lines.push({d:x.date,t:(x.xloss > 0 ? "خسارة استبدال " : "مكسب استبدال ")+itemName(x.itemId),dr:0,cr:Number(x.xloss)||0}); });
     live("cash").forEach(function(c){
       if(c.partyId!==p.id) return;
       if(c.type==="in") lines.push({d:c.date,t:"تحصيل نقدي",dr:0,cr:Number(c.amount)||0});
@@ -10914,7 +11407,7 @@
       var h = g.head, names = Object.keys(g.items);
       var isRet = isPRet(h);
       all.push({ at:h.at, by:h.by, edited:h.editedBy,
-        t:(isRet ? "مرتجع للمورد" : "شراء") + (h.pno ? " #" + h.pno : ""),
+        t:(h.xchg ? "استبدال مع مورد" : (isRet ? "مرتجع للمورد" : "شراء")) + (h.pno ? " #" + h.pno : ""),
         d: partyName(h.partyId) + " · " + names.slice(0,2).join(" · ") +
            (names.length > 2 ? " وغيرهم" : ""),
         v: Math.abs(g.v) });
@@ -11392,6 +11885,8 @@
     if(list === "sales"){ startEditSale(id); return; }
     var rec = db[list].find(function(x){ return x.id===id; });
     if(!rec) return;
+    // الاستبدال ليه درجه — مش فورم الشراء
+    if(list === "purchases" && rec.xchg){ openXchg({ editId:rec.xchg }); return; }
     editing[list] = id;
     markEditBase(list, rec);
     var g = function(i){ return document.getElementById(i); };
@@ -12752,6 +13247,7 @@
   document.getElementById("pu-cards").addEventListener("click", function(e){
     var t;
     if((t = e.target.closest("[data-pret]"))){ e.stopPropagation(); openPRet(t.dataset.pret); return; }
+    if((t = e.target.closest("[data-xsrc]"))){ openXchg({ srcId:t.dataset.xsrc }); return; }
     if((t = e.target.closest("[data-pvopen]"))){
       var k = t.dataset.pvopen;
       if(openPurch[k]) delete openPurch[k]; else openPurch[k] = 1;
@@ -14483,7 +14979,8 @@
     items:     { panel:"entry-items",     title:"صنف جديد",   edit:"تعديل صنف",   focus:"i-name"  },
     parties:   { panel:"entry-parties",   title:"جهة جديدة",  edit:"تعديل جهة",   focus:"pt-name" },
     capital:   { panel:"entry-capital",   title:"حركة رأس مال", edit:"حركة رأس مال", focus:"cp-partner" },
-    pret:      { panel:"entry-pret",      title:"مرتجع للمورد", edit:"مرتجع للمورد", focus:"pr-qty"   }
+    pret:      { panel:"entry-pret",      title:"مرتجع للمورد", edit:"مرتجع للمورد", focus:"pr-qty"   },
+    xchg:      { panel:"entry-xchg",      title:"⇄ استبدال مع مورد", edit:"⇄ تعديل استبدال", focus:"x-party" }
   };
   var openEntryKey = null;
 
