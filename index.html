@@ -2943,8 +2943,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "93";
+  var VERSION = "94";
   var CHANGELOG = [
+    { v:"94", d:"2026-10-01", items:[
+      "«خلص — الشهر ده» بقت بيوم ما الأوردر خلص فعلاً مش يوم تسجيله: التسليم أو التحصيل، ويوم ما فلوسه وصلتك من شركة الشحن، ويوم ما المرتجع رجع المخزن — الأحدث فوق، ومكتوب جنب كل أوردر «خلص يوم كذا»",
+      "التحصيل من العميل بعد التسليم («حصّل» / «العميل دفع الكل») بيتسجّل في الخزنة يوم ما اتحصّل فعلاً، مش يوم الأوردر"
+    ]},
     { v:"93", d:"2026-10-01", items:[
       "جديد: أوردر بتوصّله بنفسك أو مع مندوبك — في الأوردر «مين هيوصّله؟»: شركة شحن أو «🛵 أنا / مندوبي»",
       "التوصيل بنفسك مش محتاج شركة ولا كود بوليصة، والتحصيل بيبقى مباشر ليك لوحده، وبتكتب اسم اللي هيوصّله",
@@ -4338,9 +4342,10 @@
       var net = (isCancelled(s) ? shipIn(s) : (Number(s.paid)||0)) - (shipCounts(s) ? shipOut(s) : 0);
       (by[co] = by[co] || []).push({ s:s, net:Math.round(net * 100) / 100 });
     });
-    var drawn = {};
+    var drawn = {}, credits = {};
     live("cash").forEach(function(c){
-      if(c.type === "settle"){ var n = squish(c.shipCo); drawn[n] = (drawn[n]||0) + (Number(c.amount)||0); }
+      if(c.type === "settle"){ var n = squish(c.shipCo); drawn[n] = (drawn[n]||0) + (Number(c.amount)||0);
+        (credits[n] = credits[n] || []).push({ d:c.date || "", a:Number(c.amount)||0 }); }
     });
     Object.keys(by).forEach(function(co){
       /* الأقدم الأول — بتاريخ ما الفلوس وصلت الشركة (التسليم أو الرفض)،
@@ -4362,12 +4367,36 @@
         run += left;
         out[x.s.id] = { left:left, upto:Math.round(run * 100) / 100 };
       });
+      /* يوم ما فلوس كل أوردر اكتملت: نفس ترتيب الأقدم الأول، بس الاستلامات
+         بتتعدّ بتاريخها — الأوردر بيخلص يوم الاستلام اللي غطّى آخر قرش فيه
+         (ومش قبل يوم ما الفلوس وصلت الشركة). */
+      var cr = (credits[co] || []).slice();
+      L.forEach(function(x){ if(x.net < 0) cr.push({ d:moneyDate(x.s), a:-x.net }); });
+      cr.sort(function(a, b){ return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0); });
+      var ci = 0, have = 0, need = 0, lastD = "";
+      L.forEach(function(x){
+        var md = moneyDate(x.s);
+        if(x.net <= 0.009){ out[x.s.id].closedAt = md; return; }
+        need += x.net;
+        while(have < need - 0.009 && ci < cr.length){ have += cr[ci].a; lastD = cr[ci].d; ci++; }
+        out[x.s.id].closedAt = have >= need - 0.009 ? (lastD > md ? lastD : md) : "";
+      });
     });
     pendCache = out;
     setTimeout(function(){ pendCache = null; }, 0);
     return out;
   }
   function shipPend(s){ return shipPendMap()[s.id] || { left:0, upto:0 }; }
+  /* يوم ما الأوردر خلص فعلاً: آخر حاجة حصلت فيه — التسليم/الرفض، والتحصيل
+     (توصيل بنفسك)، وفلوسه من الشركة، والمرتجع لما رجع المخزن. */
+  function doneDate(s){
+    var d = s.deliveredAt || s.cancelledAt || s.date || "";
+    var mx = function(x){ if(x && x > d) d = x; };
+    mx(s.paidAt);
+    if(viaShip(s)) mx(shipPend(s).closedAt);
+    if(heldShipped(s)) SL(s).forEach(function(l){ if(lineHeld(l, s) > 0) mx(lineBack(l, s)); });
+    return d;
+  }
 
   // القطع الراجعة اللي لسه ما رجعتش المخزن
   function heldLeft(s){
@@ -8437,11 +8466,11 @@
       if(viaShip(s) && shipCounts(s) && !(isDelivered(s) && shipPaidGap(s)) && shipPend(s).left > 0.009) st[3].push(s);
       if(!viaShip(s) && (sp.k === "collect" || sp.k === "refund")) direct.push(s);
       if(heldShipped(s) && heldLeft(s) > 0) st[4].push(s);
-      if(sp.done && (s.date || "").slice(0, 7) === month) st[5].push(s);
+      if(sp.done && doneDate(s).slice(0, 7) === month) st[5].push(s);
     });
     var asc = function(a, b){ return -byDate(a, b); };     // الأقدم فوق: ده اللي مستني من زمان
     st[1].sort(asc); st[2].sort(asc); st[3].sort(asc); st[4].sort(asc); direct.sort(asc);
-    st[5].sort(byDate);
+    st[5].sort(function(a, b){ var x = doneDate(a), y = doneDate(b); return x !== y ? (x < y ? 1 : -1) : byDate(a, b); });
     return { st:st, direct:direct };
   }
   function sgPickDefault(g){
@@ -8667,7 +8696,7 @@
 
     "5": function(g){
       var rows = g.st[5].map(function(s){
-        return "<div class='sg-row done'><span>" + sgNo(s) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
+        return "<div class='sg-row done'><span>" + sgNo(s) + "<span class='sg-sub num'>خلص " + esc(dShort(doneDate(s)) || "—") + "</span></span>" +
           "<span>" + esc(partyName(s.partyId)) + "</span>" +
           "<span class='items'>" + esc(itemsLabel(s)) + (retQty(s) ? "<span class='sg-sub'>رجّع " + qty(retQty(s)) + "</span>" : "") + "</span>" +
           "<span class='sg-amt num'>" + sgNum(saleTotal(s) + (isCancelled(s) ? 0 : shipIn(s))) + "</span>" +
@@ -9999,7 +10028,7 @@
         var later = s.paidAt ? Math.max(0, Math.min(pd, pd - (Number(s.dep)||0))) : 0;
         var via2 = s.selfDel && s.courier ? " · مع " + s.courier : "";
         if(pd - later > 0.009) L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
-          note:(later ? "عربون · " : "") + "أوردر "+saleStateTxt(s)+via2+" · "+what, inn:pd - later, out:0, src:"أوردر"});
+          note:(later ? (s.selfDel ? "عربون · " : "دفعة أولى · ") : "") + "أوردر "+saleStateTxt(s)+via2+" · "+what, inn:pd - later, out:0, src:"أوردر"});
         if(later > 0.009) L.push({d:s.paidAt, at:s.at + 1, t:"تحصيل من عميل", who:who, kind:"تحصيل",
           note:"أوردر "+saleStateTxt(s)+via2+" · "+what, inn:later, out:0, src:"أوردر"});
       }
@@ -12580,7 +12609,10 @@
     var add = all ? due : Number(toEn(box ? box.value : ""))||0;
     if(!(add > 0)){ toast("اكتب المبلغ اللي اتحصّل"); if(box) box.focus(); return; }
     if(add > due + 0.009){ toast("المبلغ أكبر من الباقي (" + money(due) + ")"); return; }
+    // يوم التحصيل: الخزنة بتسجّله يومها، و«خلص» بتعدّ الأوردر يوم ما اتحصّل آخر قرش
+    if(!rec.paidAt) rec.dep = Number(rec.paid)||0;
     rec.paid = (Number(rec.paid)||0) + add;
+    rec.paidAt = today();
     rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll();
     var left = due - add;
