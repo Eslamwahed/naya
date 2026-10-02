@@ -752,15 +752,23 @@
   #t-sales td.items{max-width:320px}
   #t-sales tbody td{padding-top:var(--sp-2);padding-bottom:var(--sp-2)}
   #t-sales .dtag{font-size:11px;color:var(--ink-soft);margin-top:2px}
-  #t-sales td.rowacts{white-space:normal;text-align:end}
-  #t-sales .rownext{display:block;margin:0 0 4px auto;padding:5px 10px;font-size:var(--fs-2);white-space:normal;max-width:130px;line-height:1.3}
+  #t-sales td.rowacts{text-align:end}
+  #t-sales .rownext{display:inline-block;vertical-align:middle;margin:0;padding:4px 10px;font-size:var(--fs-2);white-space:normal;max-width:130px;line-height:1.3}
+  /* v102: الحالة في سطر واحد — الشارة وبعدها الخطوة وبعدها مين بيوصّل */
+  #t-sales td.stat select.rowst{vertical-align:baseline}
+  #t-sales td.stat .stepline{display:inline;margin:0 0 0 0;margin-inline-start:6px}
+  #t-sales td.stat .dtag{display:inline;margin:0;margin-inline-start:6px}
+  #t-sales td.stat .dtag::before{content:"· "}
+  #t-sales td.rowacts{white-space:nowrap}
   .dd-nav{display:inline-flex;gap:4px}
   .dd-x{display:none}
   /* الملخص فوق: سطر واحد، وكل رقم بيفتح تفاصيله زي ما هو */
-  #s-stats{display:flex;flex-wrap:wrap;gap:0;margin-bottom:var(--sp-3)}
-  #s-stats > .kpi{display:flex;align-items:baseline;gap:6px;padding:8px 14px;flex:0 1 auto;min-width:0}
-  #s-stats > .kpi > span:first-child{margin:0;font-size:var(--fs-2)}
-  #s-stats > .kpi > strong{font-size:var(--fs-4);margin:0}
+  /* v102: سطر نص صغير بدل صف كروت — وكل رقم لسه بيفتح تفاصيله */
+  #s-stats{display:flex;flex-wrap:wrap;gap:2px 4px;margin:0 0 var(--sp-2);background:none;border:0;border-radius:0}
+  #s-stats > .kpi{display:flex;align-items:baseline;gap:5px;padding:2px 8px;flex:0 1 auto;min-width:0;
+    background:none;box-shadow:none;border-radius:var(--r-sm)}
+  #s-stats > .kpi > span:first-child{margin:0;font-size:var(--fs-1)}
+  #s-stats > .kpi > strong{font-size:var(--fs-3);margin:0}
   #s-stats > .kpi > .sub,#s-stats > .kpi > .kpi-go{display:none}
   /* شريط الاختيار: سطر رفيع لازق تحت */
   #s-bulk{position:sticky;bottom:12px;z-index:15;padding:8px 12px;margin-top:var(--sp-2);box-shadow:0 6px 24px rgba(0,0,0,.18)}
@@ -794,8 +802,13 @@
     #t-sales tr.detail .ostep-ph > div + div{border-inline-start:0;padding-inline-start:0}
   }
   @media (max-width:760px){
-    #s-stats > .kpi{flex:1 1 45%;padding:8px 10px;flex-direction:column;align-items:flex-start;gap:0}
+    #s-stats > .kpi{padding:1px 4px}
     #s-stats > .kpi > strong{white-space:nowrap}
+    /* البحث والفلاتر و«+ أوردر» في صف واحد */
+    .s-search{min-width:0}
+    #b-newsale .lg{display:none}
+    .s-head h2{margin-bottom:var(--sp-2)}
+
     #s-bulk{bottom:78px}
     #t-sales td.items{max-width:none}
     #t-sales td.rowacts{display:flex;gap:4px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
@@ -992,10 +1005,35 @@
   }
 
   /* ================= مراحل الأوردر ================= */
-  .sg-phase{display:grid;grid-template-columns:2fr 2fr 1fr;gap:var(--sp-2);font-size:var(--fs-1);color:var(--ink-soft);margin-bottom:4px}
-  .sg-phase div{border-top:2px solid var(--line);padding-top:2px}
-  .sg-phase .ph-cu{border-color:var(--teal)} .sg-phase .ph-co{border-color:var(--warn)}
-  .sg-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);margin-bottom:var(--sp-4)}
+  /* v102: شريط واحد رفيع — «الكل» + المراحل الخمسة، بدل ٥ كروت كبار وصف مراحل فوقهم */
+  .sg-strip{display:flex;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    overflow:hidden;margin-bottom:var(--sp-3)}
+  .sg-strip .sg-bar{display:flex;flex:1;min-width:0}
+  .sg-strip .sg-card{flex:1 1 0;border:0;border-radius:0;border-inline-start:1px solid var(--line);padding:6px 12px;
+    display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"n t" "c s";column-gap:6px;align-items:baseline}
+  .sg-strip .sg-all{flex:0 0 auto;border-inline-start:0;min-width:72px;grid-template-areas:"t" "c";grid-template-columns:auto}
+  .sg-strip .sg-card .n{grid-area:n;width:16px;height:16px;font-size:10px;margin:0;align-self:center}
+  .sg-strip .sg-card .t{grid-area:t;font-size:var(--fs-1);font-weight:500;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sg-strip .sg-card .c{grid-area:c;font-size:var(--fs-4);margin:0;white-space:nowrap}
+  .sg-strip .sg-card .s{grid-area:s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sg-strip .sg-card:hover{background:var(--teal-soft)}
+  .sg-strip .sg-card.on{background:var(--teal-soft);box-shadow:inset 0 -2px 0 var(--teal)}
+  .sg-strip .sg-card.on .t{color:var(--teal);font-weight:700}
+  /* الموبايل: المراحل شرايط صغيرة «الاسم الرقم» بتتسحب بالعرض */
+  @media (max-width:760px){
+    .sg-strip{overflow-x:auto;scrollbar-width:none}
+    .sg-strip::-webkit-scrollbar{display:none}
+    .sg-strip .sg-bar{flex:0 0 auto}
+    .sg-strip .sg-card,.sg-strip .sg-all{flex:0 0 auto;min-width:0;grid-template-areas:"t c";grid-template-columns:auto auto;
+      padding:8px 12px;column-gap:6px}
+    .sg-strip .sg-card .n,.sg-strip .sg-card .s{display:none}
+    .sg-strip .sg-card .t{font-size:var(--fs-2);overflow:visible}
+    .sg-strip .sg-card .c{font-size:var(--fs-3)}
+    #t-sales td.stat select.rowst{min-height:30px;padding:1px var(--sp-2)}
+    #t-sales .rownext{min-height:34px;padding:4px 12px}
+    #t-sales td.stat .stepline{font-size:var(--fs-1)}
+    #t-sales td.stat .dtag{white-space:nowrap}
+  }
   .sg-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
     padding:var(--sp-3);cursor:pointer;text-align:start;font:inherit;color:inherit;min-width:0}
   .sg-card:hover{border-color:var(--teal)}
@@ -1008,7 +1046,18 @@
   .sg-card.on{border-color:var(--teal);box-shadow:inset 0 -3px 0 var(--teal)}
   .sg-card.on .n{background:var(--teal);color:var(--card)}
   .sg-card.alert .c{color:var(--due)}
-  #b-sall.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
+  /* راس الشاشة: العنوان والبحث والأزرار في سطر واحد على الكمبيوتر */
+  @media (min-width:761px){
+    .s-head{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+    .s-head h2{margin:0;white-space:nowrap}
+    .s-head .toolbar{flex:1;margin:0}
+  }
+  #filters-panel .stabs{grid-column:1 / -1;margin:0}
+  .sel-tip{display:none}
+  @media (max-width:760px){
+    #tab-sales .sel-tip{display:block;font-size:var(--fs-1);color:var(--ink-soft);text-align:center;margin:var(--sp-2) 0 0}
+    #tab-sales:has(#t-sales.sel-mode) .sel-tip{display:none}
+  }
   .sg-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4)}
   .sg-ph{margin-bottom:var(--sp-3)}
   .sg-ph h3{margin:0;font-size:var(--fs-4)}
@@ -1051,11 +1100,6 @@
   .sg-co-f input{width:130px;padding:7px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font:inherit;background:var(--card);color:var(--ink)}
   .sg-panel .sg-row.done{grid-template-columns:90px 1.2fr 1.4fr 110px auto}
   @media (max-width:760px){
-    .sg-phase{display:none}
-    .sg-bar{display:flex;overflow-x:auto;gap:6px;margin:0 0 var(--sp-3);padding:0 0 4px;
-      scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-    .sg-card{flex:0 0 136px;scroll-snap-align:start;padding:10px}
-    .sg-card .c{font-size:var(--fs-5)}
     .sg-panel{padding:var(--sp-3)}
     .sg-row,.sg-co-b .sg-row,.sg-co-b .sg-row.ret,.sg-panel .sg-row.done{grid-template-columns:1fr auto;gap:6px var(--sp-2)}
     .sg-row .items,.sg-row .sg-inl,.sg-row .sg-acts{grid-column:1 / -1}
@@ -1498,29 +1542,46 @@
   @media (max-width:760px){
     .s-wrap{overflow:visible;max-height:none;border:none;background:none}
     #t-sales thead{display:none}
+    /* v102: كارت الأوردر ٣ سطور — (الرقم والعميل والمبلغ) / (الأصناف) / (الحالة وزرار الخطوة الجاية).
+       الحافة الملوّنة على الجنب بتقول الحالة من بعيد. */
     #t-sales tbody tr.order{
-      display:grid;grid-template-columns:minmax(0,1fr) minmax(min-content,48%);gap:var(--sp-1) var(--sp-2);
-      background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
-      margin-bottom:var(--sp-2);padding:var(--sp-3) var(--sp-3);align-items:center;
+      display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+      grid-template-areas:"lead cust total" "items items items" "stat stat acts";
+      gap:2px var(--sp-2);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+      border-inline-start:3px solid var(--line);
+      margin-bottom:var(--sp-2);padding:var(--sp-2) var(--sp-3);align-items:center;
+      -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
     }
-    #t-sales tbody tr.order td{border:none;padding:var(--sp-1) 0;background:none!important;min-width:0}
+    #t-sales td.cust .secondary{-webkit-user-select:text;user-select:text}
+    #t-sales tr.order[data-st="delivered"]{border-inline-start-color:var(--gain)}
+    #t-sales tr.order[data-st="progress"]{border-inline-start-color:var(--warn)}
+    #t-sales tr.order[data-st="cancelled"]{border-inline-start-color:var(--due)}
+    #t-sales tr.order.sel{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+    #t-sales tbody tr.order td{border:none;padding:0;background:none!important;min-width:0}
     #t-sales{width:100%;table-layout:fixed}
-    #t-sales td.lead{border-inline-start:none;grid-column:1;grid-row:1}
-    #t-sales td.cust{grid-column:1;grid-row:2}
-    #t-sales td.items{grid-column:1/-1;grid-row:3;margin-top:var(--sp-2);padding-top:8px!important;
-      border-top:1px dashed var(--line)!important}
-    #t-sales td.total{grid-column:1;grid-row:4;padding-top:8px!important}
-    #t-sales td.stat{grid-column:2;grid-row:1;text-align:left}
+    #t-sales td.selcell{display:none!important}
+    #t-sales.sel-mode tbody tr.order{grid-template-columns:auto auto minmax(0,1fr) auto;
+      grid-template-areas:"sel lead cust total" "sel items items items" "sel stat stat acts"}
+    #t-sales.sel-mode td.selcell{display:block!important;grid-area:sel;align-self:center}
+    #t-sales td.lead{border-inline-start:none;grid-area:lead;align-self:start}
+    #t-sales td.lead .secondary{display:none}
+    #t-sales td.cust{grid-area:cust;align-self:start}
+    #t-sales td.cust .primary{font-weight:700}
+    #t-sales td.items{grid-area:items;margin:2px 0 4px}
+    #t-sales td.items .goods .thumb,#t-sales td.items .goods .dd-noimg{display:none}
+    #t-sales td.total{grid-area:total;align-self:start;text-align:end}
+    #t-sales td.stat{grid-area:stat}
     /* كارت الأوردر على الموبايل: من غير تسمية قبل كل خانة (الكارت
        واضح لوحده)، والحالة ما تتقصّش، والمبلغ ما يتكسرش على سطرين */
     #t-sales tbody tr.order td{display:block}
     #t-sales tbody tr.order td::before{content:none}
-    #t-sales td.stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:start}
+    #t-sales td.stat{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;text-align:start}
     #t-sales td.stat select.rowst{flex:0 0 auto;max-width:100%}
-    #t-sales td.stat .stepline{text-align:end}
+    #t-sales td.stat .stepline,#t-sales td.stat .dtag{margin:0}
     #t-sales td.total .pill,#t-sales td.total .primary{white-space:nowrap}
     #t-sales td.cust .primary{display:block}
-    #t-sales td.rowacts{grid-column:2;grid-row:4;text-align:left;align-self:end}
+    #t-sales td.rowacts{grid-area:acts;text-align:left;align-self:center}
+    #t-sales td.rowacts .chev{display:none}
     #t-sales tr.detail td{background:none;border:none}
     .detail-in{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
       margin:-4px 0 10px;padding:var(--sp-3)}
@@ -1783,6 +1844,7 @@
 
 <!-- مبيعات -->
 <section id="tab-sales" hidden>
+  <div class="s-head">
   <h2>الأوردرات</h2>
 
   <div class="toolbar">
@@ -1792,25 +1854,28 @@
         <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
       </svg>
     </div>
-    <button class="tbtn" type="button" id="b-sall" aria-pressed="false">الكل</button>
     <button class="tbtn" type="button" id="b-filters" aria-expanded="false" aria-controls="filters-panel">
       فلاتر <span class="fcount" id="flt-count" hidden>0</span>
     </button>
-    <button class="tbtn primary" type="button" id="b-newsale">+ أوردر جديد</button>
+    <button class="tbtn primary" type="button" id="b-newsale">+ أوردر<span class="lg"> جديد</span></button>
+  </div>
   </div>
 
-  <!-- مراحل الأوردر: كل مرحلة ليها بانل فيها الحاجة اللي تخصها بس -->
+  <!-- مراحل الأوردر: شريط واحد — «الكل» وبعدها المراحل الخمسة، وكل مرحلة ليها بانل فيها الحاجة اللي تخصها بس -->
   <div id="s-stagebox">
-    <div class="sg-phase" aria-hidden="true"><div class="ph-cu">مع العميل</div><div class="ph-co">مع شركة الشحن</div><div>أرشيف</div></div>
-    <div class="sg-bar" id="s-stages" role="group" aria-label="مراحل الأوردر"></div>
+    <div class="sg-strip">
+      <button class="sg-card sg-all" type="button" id="b-sall" aria-pressed="false"><span class="t">الكل</span><span class="c num" id="sall-n"></span></button>
+      <div class="sg-bar" id="s-stages" role="group" aria-label="مراحل الأوردر"></div>
+    </div>
     <div class="sg-panel" id="s-stage-panel"></div>
   </div>
 
   <div id="s-allview">
-  <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
   <input type="hidden" id="flt-status" value="">
 
+  <!-- فلتر الحالة (جاري/مسلّم/مرتجع/ملغي) بقى جوه «فلاتر» — ولو شغال بيبان chip تحت -->
   <div class="filters" id="filters-panel" hidden>
+    <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
     <div><label for="flt-party">العميل</label><select id="flt-party"></select></div>
     <div><label for="flt-item">الصنف</label><select id="flt-item"></select></div>
     <div><label for="flt-ship">شركة الشحن</label><select id="flt-ship"></select></div>
@@ -1835,6 +1900,7 @@
 
 
   <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
+  <p class="sel-tip">دوسة طويلة على أوردر بتختاره — وتقدر تختار كذا واحد وتغيّرهم مع بعض.</p>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
   <div class="bulkbar" id="s-bulk" hidden>
     <span class="bcount" id="s-bcount">0</span>
@@ -3158,8 +3224,16 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "101";
+  var VERSION = "102";
   var CHANGELOG = [
+    { v:"102", d:"2026-10-02", items:[
+      "الأوردرات: العنوان والبحث والفلاتر و«+ أوردر جديد» في سطر واحد",
+      "المراحل الخمسة بقت شريط واحد رفيع و«الكل» أوله — كل خانة لسه بتفتح مرحلتها",
+      "فلتر الحالة (محتاج مني حاجة/جاري/مسلّم/مرتجع/ملغي) بقى جوه «فلاتر»، ولو شغال بيبان تحت «الحالة: …» وبيتعدّ على زرار الفلاتر",
+      "الملخص بقى سطر نص صغير، وكل أوردر سطر واحد: الحالة والخطوة ومين بيوصّل جنب بعض، والتاريخ مختصر",
+      "الموبايل: كارت الأوردر ٣ سطور (الرقم والعميل والمبلغ / الأصناف / الحالة وزرار الخطوة)، والمراحل شرايط بتتسحب، والبحث والفلاتر و«+ أوردر» في صف واحد",
+      "الموبايل: مربع الاختيار بيبان بس لما تدوس دوسة طويلة على أوردر — وبعدها كل دوسة بتضيف أو تشيل أوردر"
+    ]},
     { v:"101", d:"2026-10-02", items:[
       "الشريط اللي فوق بقى صف واحد: الاسم والأقسام وحالة الحفظ — بدل ٣ صفوف قبل ما الشغل يبان",
       "اسمك والوضع الليلي والتحديث ورقم الإصدار جوه زرار «اسمك ▾»، و«محفوظ» بقت نقطة: أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ",
@@ -8398,7 +8472,7 @@
       "<td class='selcell'><input type='checkbox' data-sel='" + s.id + "'" +
         (selSales[s.id] ? " checked" : "") + " aria-label='اختار أوردر " + esc(s.no||"") + "'></td>" +
       "<td class='lead'><span class='ono'>" + (s.no ? "#"+esc(s.no) : "—") + "</span>" +
-        "<span class='secondary num'>" + esc(s.date||"—") + "</span></td>" +
+        "<span class='secondary num' title='" + esc(s.date||"") + "'>" + esc(dShort(s.date) || "—") + "</span></td>" +
       "<td class='cust'><span class='primary' style='font-size:var(--fs-3)'>" + esc(partyName(s.partyId)) + "</span>" +
         (p.gov||p.phone ? "<span class='secondary'>" + esc([p.gov,p.phone].filter(Boolean).join(" · ")) + "</span>" : "") + "</td>" +
       "<td class='items'>" + (goods || "—") + "</td>" +
@@ -8701,13 +8775,13 @@
   }
 
   /* ---------- الفلاتر: chips + عدّاد ---------- */
-  // الحالة مش هنا — ليها شرايط فوق الجدول، فما تتعدّش في الـchips ولا في عدّاد الفلاتر
-  var FLT_LABEL = { party:"العميل", item:"الصنف", ship:"شركة الشحن",
+  // الحالة بقت جوه «فلاتر» — فلازم تبان chip وتتعدّ، وإلا تفضل شغالة وإنت مش شايفها
+  var FLT_LABEL = { status:"الحالة", party:"العميل", item:"الصنف", ship:"شركة الشحن",
                     owner:"المسؤول", from:"من", to:"لـ", text:"بحث" };
 
   function chipText(k){
     var v = filt[k];
-    if(k === "status") return ST_LABEL[v] || v;
+    if(k === "status"){ var t = STAB.find(function(x){ return x[0] === v; }); return t ? t[1] : (ST_LABEL[v] || v); }
     if(k === "party")  return partyName(v);
     if(k === "item")   return itemName(v);
     return v;
@@ -9036,6 +9110,7 @@
     if(bf) bf.hidden = !all;
     var ba = document.getElementById("b-sall");
     if(ba){ ba.classList.toggle("on", all); ba.setAttribute("aria-pressed", all ? "true" : "false"); }
+    var an = document.getElementById("sall-n"); if(an) an.textContent = qty(live("sales").length);
 
     var left3 = g.st[3].reduce(function(a, s){ return a + shipPend(s).left; }, 0);
     var due3 = g.direct.reduce(function(a, s){ return a + Math.max(0, sDue(s)); }, 0);
@@ -9434,6 +9509,8 @@
 
   function renderBulkBar(){
     var n = selIds().length, bar = document.getElementById("s-bulk");
+    // الموبايل: مربعات الاختيار بتبان بس وإنت بتختار (بعد دوسة طويلة)
+    var tb = document.getElementById("t-sales"); if(tb) tb.classList.toggle("sel-mode", n > 0);
     if(!bar) return;
     bar.hidden = !n;
     document.getElementById("s-bcount").textContent = qty(n);
@@ -13023,6 +13100,48 @@
     var r = e.target.closest("[data-ret]"); if(!r) return;
     e.preventDefault(); e.stopPropagation(); r.blur();
   });
+
+  /* الموبايل: دوسة طويلة على أوردر بتختاره، ووإنت بتختار الدوسة العادية
+     بتضيف/تشيل بدل ما تفتح التفاصيل. على الكمبيوتر المربعات ظاهرة زي ما هي. */
+  (function(){
+    var mq = window.matchMedia ? window.matchMedia("(max-width:760px)") : null;
+    var lpT = null, lpPend = false, lpFired = false, sx = 0, sy = 0;
+    function selToggle(tr){
+      var id = tr.dataset.row; if(!id) return;
+      if(selSales[id]) delete selSales[id]; else selSales[id] = 1;
+      var cb = tr.querySelector("[data-sel]"); if(cb) cb.checked = !!selSales[id];
+      tr.classList.toggle("sel", !!selSales[id]);
+      renderBulkBar();
+    }
+    function skip(t){ return !!t.closest("button, select, input, a, label, .detail-in"); }
+    TSALES.addEventListener("touchstart", function(e){
+      var tr = e.target.closest("tr.order");
+      lpFired = false; clearTimeout(lpT);
+      if(!tr || skip(e.target) || e.touches.length !== 1) return;
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      lpPend = true;
+      lpT = setTimeout(function(){
+        lpPend = false; lpFired = true; selToggle(tr);
+        if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(_){} }
+      }, 500);
+    }, { passive:true });
+    TSALES.addEventListener("touchmove", function(e){
+      var t = e.touches[0];
+      if(Math.abs(t.clientX - sx) > 10 || Math.abs(t.clientY - sy) > 10){ clearTimeout(lpT); lpPend = false; }
+    }, { passive:true });
+    TSALES.addEventListener("touchend", function(){ clearTimeout(lpT); lpPend = false; }, { passive:true });
+    TSALES.addEventListener("touchcancel", function(){ clearTimeout(lpT); lpPend = false; }, { passive:true });
+    // أندرويد بيفتح قايمته هو مع الضغطة الطويلة — نمنعها وإحنا بنعدّ أو بعد ما اخترنا
+    TSALES.addEventListener("contextmenu", function(e){ if(lpPend || lpFired) e.preventDefault(); });
+    // capture: قبل ما دوسة السطر تفتح التفاصيل
+    TSALES.addEventListener("click", function(e){
+      if(lpFired){ lpFired = false; e.stopPropagation(); e.preventDefault(); return; }
+      if(!(mq && mq.matches) || !TSALES.classList.contains("sel-mode")) return;
+      var tr = e.target.closest("tr.order");
+      if(!tr || skip(e.target)) return;
+      e.stopPropagation(); e.preventDefault(); selToggle(tr);
+    }, true);
+  })();
 
   // مربعات الاختيار + شريط الإجراء
   TSALES.addEventListener("change", function(e){
