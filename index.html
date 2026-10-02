@@ -759,6 +759,37 @@
     body:has(#tab-sales:not([hidden]) #t-sales tr.detail) .nav-groups{display:none}
   }
 
+  #prc-tabs{margin-bottom:var(--sp-3)}
+  .pcalc{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--sp-3);align-items:start}
+  .pcalc .panel{margin:0}
+  .pc-ln{display:grid;grid-template-columns:minmax(0,1.6fr) 96px 64px 84px 96px 24px;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed var(--line)}
+  .pc-ln.hd{border-top:0;padding:0;font-size:var(--fs-1);color:var(--ink-soft)}
+  .pc-ln input,.pc-ln select{width:100%;padding:6px 8px;font-size:var(--fs-2)}
+  .pc-ln .pc-c{text-align:center;font-size:var(--fs-2);white-space:nowrap}
+  .pc-ln .pc-c small,.pc-ln .pc-p small{display:block;font-size:11px;color:var(--ink-soft)}
+  .pc-ln .pc-p{text-align:end;white-space:nowrap}
+  .pc-ln .pc-tier{display:block;font-size:11px;color:var(--warn);text-align:center}
+  .pc-ln .rm{border:0;background:none;color:var(--due);font-size:18px;cursor:pointer}
+  .pc-ship{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .pc-res .big{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:2px 0}
+  .pc-res .big b{font-size:var(--fs-6)}
+  .pc-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;margin:10px 0 4px;background:var(--line)}
+  .pc-bar i{display:block;height:100%}
+  .pc-lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--ink-soft)}
+  .pc-lg em{display:inline-block;width:9px;height:9px;border-radius:2px;margin-inline-end:4px}
+  .pc-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:var(--fs-2);border-top:1px dashed var(--line)}
+  .pc-row.t{font-weight:700;border-top:1px solid var(--line);font-size:var(--fs-3)}
+  .pc-floor{margin-top:10px;background:var(--teal-soft);border-radius:var(--r-sm);padding:8px 10px;font-size:var(--fs-2)}
+  .pc-btns{display:flex;gap:6px;margin-top:10px} .pc-btns .tbtn{flex:1;justify-content:center}
+  @media (max-width:900px){
+    .pcalc{grid-template-columns:1fr}
+    .pc-ln{grid-template-columns:minmax(0,1fr) 56px 76px 24px}
+    .pc-ln.hd{display:none}
+    .pc-ln .pc-c{grid-column:1;grid-row:2;text-align:start}
+    .pc-ln .pc-p{grid-column:2 / 4;grid-row:2}
+    .pc-ln .pc-sel{grid-column:1;grid-row:1}
+    .pc-ship{grid-template-columns:1fr 1fr}
+  }
   #t-price input.prin{width:76px}
   #t-price input.prx{width:62px}
   #t-price th,#t-price td{padding-inline:8px}
@@ -2422,6 +2453,30 @@
   <h2>التسعير</h2>
   <p class="hint">الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
 
+  <div class="quick" id="prc-tabs" role="tablist" aria-label="التسعير">
+    <button type="button" data-prctab="list" class="on">أسعار الأصناف</button>
+    <button type="button" data-prctab="calc">🧮 احسب أوردر</button>
+  </div>
+
+  <div id="prc-calc" hidden>
+    <div class="pcalc">
+      <div class="panel pc-in">
+        <h3 style="margin-top:0">🧮 احسب أوردر — من غير ما يتسجّل حاجة</h3>
+        <p class="hint" style="margin-top:0">اختار الأصناف والكميات، والسعر بيتملي لوحده من سعر الصنف (أو سعر الجملة لو الكمية توصله) — وغيّره لو هتعمل سعر خاص. التكلفة = تكلفة القطعة الواصلة + «المصاريف الإضافية» اللي في جدول الأسعار.</p>
+        <div id="pc-lines"></div>
+        <button class="addline" type="button" id="b-pc-add">+ صنف تاني</button>
+        <div class="pc-ship">
+          <div><label for="pc-disc">خصم على الأوردر</label><input id="pc-disc" inputmode="decimal" placeholder="0"></div>
+          <div><label for="pc-sin">شحن على العميل</label><input id="pc-sin" inputmode="decimal" placeholder="0"></div>
+          <div><label for="pc-sout">شحن هتدفعه للشركة</label><input id="pc-sout" inputmode="decimal" placeholder="0"></div>
+        </div>
+        <p class="hintline" style="margin-bottom:0">الشحن بيتحسب مرة على الأوردر كله، مش على كل قطعة.</p>
+      </div>
+      <div class="panel pc-res" id="pc-res"></div>
+    </div>
+  </div>
+
+  <div id="prc-listview">
   <div class="band" id="prc-kpis"></div>
   <p class="note" id="prc-note"></p>
 
@@ -2456,6 +2511,7 @@
   </div>
 
   <div class="tbl-wrap"><table id="t-price"></table></div>
+  </div>
 </section>
 
 <section id="tab-inv" hidden>
@@ -3020,8 +3076,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "97";
+  var VERSION = "98";
   var CHANGELOG = [
+    { v:"98", d:"2026-10-02", items:[
+      "التسعير: تبويب جديد «🧮 احسب أوردر» — اختار أصناف وكميات وشوف هتكسب كام، من غير ما يتسجّل أي حاجة",
+      "كل سطر: التكلفة في عمود لوحدها (تكلفة القطعة + المصاريف الإضافية)، والسعر بيتملي من سعر الصنف أو سعر الجملة، وربح السطر وهامشه",
+      "على الأوردر: خصم وشحن على العميل وشحن للشركة (مرة على الأوردر) — والنتيجة: صافي الربح والهامش وشريط بيوضح الفلوس رايحة فين، وأقصى خصم من غير خسارة",
+      "«اعمل منه أوردر ←» بيفتح درج أوردر جديد بنفس الأصناف والأسعار والشحن — ومش بيتسجّل غير لما تحفظ — والحاسبة بتفتكر آخر حسبة على الجهاز"
+    ]},
     { v:"97", d:"2026-10-02", items:[
       "التسعير: عمودين بتكتبهم بإيدك لكل صنف — «مصاريف إضافية» و«مصاريف شحن» للقطعة — وعمود «التكلفة الكلية» = تكلفة القطعة + المصاريف + الشحن",
       "الزيادة % وربح القطعة والهامش وربح كل المخزون و«السعر أقل من التكلفة» والتسعير بالجملة بقوا كلهم على التكلفة الكلية",
@@ -6124,6 +6186,7 @@
                   "زيادة على التكلفة %","ربح القطعة","الهامش %","ربح كل المخزون"];
 
   function renderPricing(){
+    if(pcTab === "calc") renderPcalc();     // القوايم كمان — صنف اتضاف أو اتغيّر اسمه من مكان تاني
     renderPrcKpis();
     var ed = canEdit();
     var rows = prcList().map(function(r){
@@ -6287,6 +6350,161 @@
     toast(hit ? ("اتسعّر " + qty(hit) + " صنف" +
                  (skip ? " · " + qty(skip) + " من غير تكلفة اتساب زي ما هو" : ""))
               : "مفيش صنف له تكلفة شراء في اللي ظاهر");
+  });
+
+  /* ---------- 🧮 احسب أوردر ----------
+     حسبة بس — مفيش حاجة بتتسجّل في الدفاتر. بتاخد من كل صنف تكلفة القطعة الواصلة
+     (avgCost) + «المصاريف الإضافية» اللي في جدول الأسعار، والشحن مرة على الأوردر.
+     آخر حسبة بتتفتكر على الجهاز ده بس (naya:calc). */
+  var pcTab = "list";
+  var pc = (function(){
+    try{ var o = JSON.parse(LS && LS.getItem("naya:calc") || "null"); if(o && Array.isArray(o.lines)) return o; }catch(e){}
+    return null;
+  })() || { lines:[{ itemId:"", qty:1, price:"", manual:false }], disc:"", sin:"", sout:"" };
+  function pcSave(){ try{ if(LS) LS.setItem("naya:calc", JSON.stringify(pc)); }catch(e){} }
+  function pcItem(id){ return db.items.find(function(x){ return x.id === id && !x.deleted; }); }
+  function pcAutoPrice(l){
+    var it = pcItem(l.itemId); if(!it) return 0;
+    return tierFor(it, Math.max(1, Number(l.qty)||1)).u;
+  }
+  function pcCalc(){
+    var goods = 0, cogs = 0, extra = 0, pcs = 0, rows = [];
+    pc.lines.forEach(function(l){
+      var it = pcItem(l.itemId), q = Math.max(0, Number(toEn(l.qty))||0);
+      var price = l.manual ? (Number(toEn(l.price))||0) : pcAutoPrice(l);
+      var buy = it ? avgCost(it.id) : 0, x = it ? prcExtra(it) : 0;
+      var r = { it:it, q:q, price:price, buy:buy, x:x, unit:price - buy - x };
+      r.profit = q * r.unit; r.mg = price > 0 ? r.unit / price : null;
+      r.noCost = !!it && q > 0 && !(buy > 0);
+      rows.push(r);
+      // صنف لسه ما اشتريتهوش: تكلفته مش معروفة — بره الحسبة بدل ما يطلع كله ربح
+      if(!it || !q || r.noCost) return;
+      goods += q * price; cogs += q * buy; extra += q * x; pcs += q;
+    });
+    var noCost = rows.filter(function(r){ return r.noCost; });
+    var disc = Math.max(0, Number(toEn(pc.disc))||0), sin = Math.max(0, Number(toEn(pc.sin))||0), sout = Math.max(0, Number(toEn(pc.sout))||0);
+    var pays = goods - disc + sin, profit = goods - disc - cogs - extra + sin - sout;
+    return { rows:rows, noCost:noCost, goods:goods, cogs:cogs, extra:extra, pcs:pcs, disc:disc, sin:sin, sout:sout, pays:pays, profit:profit,
+             mg: goods - disc > 0 ? profit / (goods - disc) : null, floor: profit + disc };
+  }
+  function renderPcLines(){
+    var box = document.getElementById("pc-lines"); if(!box) return;
+    pc.lines.forEach(function(l){ if(l.itemId && !pcItem(l.itemId)){ l.itemId = ""; l.manual = false; l.price = ""; } });
+    var items = live("items").slice().sort(function(a, b){ return (a.name||"") < (b.name||"") ? -1 : 1; });
+    box.innerHTML = "<div class='pc-ln hd'><span>الصنف</span><span style='text-align:center'>التكلفة</span><span>العدد</span><span>سعر القطعة</span><span style='text-align:end'>ربح السطر</span><span></span></div>" +
+      pc.lines.map(function(l, i){
+        return "<div class='pc-ln' data-pci='" + i + "'>" +
+          "<div class='pc-sel'><select data-pcf='itemId' aria-label='الصنف'><option value=''>اختار صنف…</option>" +
+            items.map(function(x){ return "<option value='" + esc(x.id) + "'" + (x.id === l.itemId ? " selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") +
+          "</select></div>" +
+          "<span class='pc-c num' data-pcc='" + i + "'></span>" +
+          "<input data-pcf='qty' inputmode='decimal' value='" + esc(l.qty) + "' aria-label='العدد'>" +
+          "<div><input data-pcf='price' inputmode='decimal' value='" + esc(l.manual ? l.price : "") + "' aria-label='سعر القطعة'><span class='pc-tier' data-pct='" + i + "'></span></div>" +
+          "<span class='pc-p num' data-pcp='" + i + "'></span>" +
+          "<button type='button' class='rm' data-pcrm='" + i + "' aria-label='شيل السطر'" + (pc.lines.length > 1 ? "" : " hidden") + ">&times;</button>" +
+        "</div>";
+      }).join("");
+    ["pc-disc","pc-sin","pc-sout"].forEach(function(id){
+      var el = document.getElementById(id), k = id.slice(3);
+      if(el && document.activeElement !== el) el.value = pc[k] || "";
+    });
+  }
+  function renderPcRes(){
+    var c = pcCalc();
+    c.rows.forEach(function(r, i){
+      var ce = document.querySelector("[data-pcc='" + i + "']"), pe = document.querySelector("[data-pcp='" + i + "']");
+      var te = document.querySelector("[data-pct='" + i + "']"), pin = document.querySelector("[data-pci='" + i + "'] [data-pcf='price']");
+      if(ce) ce.innerHTML = r.it ? (r.buy > 0 ? esc(money(r.buy + r.x)) + (r.x > 0 ? "<small>" + esc(qty(r.buy)) + " + " + esc(qty(r.x)) + " مصاريف</small>" : "")
+                                              : "<span class='v-due'>لسه ما اشتريتش</span>") : "—";
+      if(pin && !pc.lines[i].manual) pin.placeholder = r.it ? String(Math.round(r.price * 100) / 100) : "0";
+      if(te){ var it = r.it, base = it ? Number(it.price)||0 : 0;
+        te.textContent = (!pc.lines[i].manual && it && r.price < base - 0.009) ? "سعر جملة" : ""; }
+      if(pe) pe.innerHTML = r.noCost ? "<small class='v-due'>التكلفة مش معروفة — بره الحسبة</small>" : r.it && r.q ? "<b class='" + (r.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(r.profit)) + "</b>" +
+        (r.mg !== null ? "<small>" + (r.mg * 100).toFixed(1) + "% هامش</small>" : "") : "—";
+    });
+    var el = document.getElementById("pc-res"); if(!el) return;
+    var ncw = c.noCost.length ? "<p class='hintline bad' style='margin:0 0 8px'>⚠ " + c.noCost.map(function(r){ return esc(r.it.name); }).join(" · ") +
+      " لسه ما اشتريتهوش — تكلفته مش معروفة فمش داخل في الحسبة.</p>" : "";
+    if(!c.pcs){ el.innerHTML = ncw + "<p class='hint' style='margin:0'>اختار صنف واكتب العدد — والربح هيظهر هنا.</p>"; return; }
+    var pos = Math.max(0, c.profit), tot = c.cogs + c.extra + c.sout + pos;
+    var seg = function(v, col){ return tot > 0 && v > 0 ? "<i style='width:" + (v / tot * 100).toFixed(2) + "%;background:" + col + "'></i>" : ""; };
+    var R = function(t, v, cls, sign){ return "<div class='pc-row" + (cls === "t" ? " t" : "") + "'><span>" + esc(t) + "</span><b class='num" + (cls && cls !== "t" ? " " + cls : "") + "'>" + (sign || "") + esc(money(v)) + "</b></div>"; };
+    el.innerHTML = ncw + "<div class='hint' style='margin:0'>صافي ربح الأوردر</div>" +
+      "<div class='big'><span class='hint' style='margin:0'>" + (c.mg !== null ? "هامش " + (c.mg * 100).toFixed(1) + "%" : "") + "</span>" +
+        "<b class='num " + (c.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(c.profit)) + "</b></div>" +
+      "<div class='pc-bar'>" + seg(c.cogs, "#7E5A78") + seg(c.extra, "#C8963E") + seg(c.sout, "#9A1333") + seg(pos, "#5E9E78") + "</div>" +
+      "<div class='pc-lg'><span><em style='background:#7E5A78'></em>البضاعة</span><span><em style='background:#C8963E'></em>مصاريف</span>" +
+        "<span><em style='background:#9A1333'></em>شحن</span><span><em style='background:#5E9E78'></em>ربحك</span></div>" +
+      "<div style='margin-top:10px'>" +
+        R("البضاعة (" + qty(c.pcs) + " قطعة)", c.goods) +
+        (c.disc ? R("− خصم", c.disc, "v-due") : "") +
+        (c.sin ? R("+ شحن على العميل", c.sin) : "") +
+        R("العميل هيدفع", c.pays, "t") +
+        R("− تكلفة البضاعة", c.cogs, "v-due") +
+        (c.extra ? R("− مصاريف إضافية", c.extra, "v-due") : "") +
+        (c.sout ? R("− شحن للشركة", c.sout, "v-due") : "") +
+        "<div class='pc-row t'><span>صافي ربحك</span><b class='num " + (c.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(c.profit)) + "</b></div>" +
+      "</div>" +
+      "<div class='pc-floor'>" + (c.floor > 0.009
+        ? "أقصى خصم من غير خسارة: <b class='num'>" + esc(money(c.floor)) + "</b> — يعني العميل يدفع <b class='num'>" + esc(money(c.pays + c.disc - c.floor)) + "</b> بس."
+        : "<span class='v-due'>الأوردر ده خسران حتى من غير خصم — ارفع السعر أو قلّل الشحن اللي بتدفعه.</span>") + "</div>" +
+      "<div class='pc-btns'><button class='tbtn' type='button' id='b-pc-clear'>فضّي الحاسبة</button>" +
+        "<button class='tbtn primary' type='button' id='b-pc-order'>اعمل منه أوردر ←</button></div>" +
+      "<p class='hintline' style='margin:6px 0 0'>«اعمل منه أوردر» بيفتح درج أوردر جديد بالأصناف والأسعار دي — ومش بيتسجّل غير لما تدوس حفظ هناك.</p>";
+  }
+  function renderPcalc(){ renderPcLines(); renderPcRes(); }
+  function setPrcTab(t){
+    pcTab = t;
+    document.querySelectorAll("#prc-tabs [data-prctab]").forEach(function(b){ b.classList.toggle("on", b.dataset.prctab === t); });
+    document.getElementById("prc-calc").hidden = t !== "calc";
+    document.getElementById("prc-listview").hidden = t === "calc";
+    if(t === "calc") renderPcalc();
+  }
+  document.getElementById("prc-tabs").addEventListener("click", function(e){
+    var b = e.target.closest("[data-prctab]"); if(b) setPrcTab(b.dataset.prctab);
+  });
+  var pcEdit = function(e){
+    var row = e.target.closest("[data-pci]"), f = e.target.dataset.pcf;
+    if(!row || !f) return;
+    var l = pc.lines[Number(row.dataset.pci)]; if(!l) return;
+    if(f === "price"){ l.price = e.target.value; l.manual = e.target.value.trim() !== ""; }
+    else l[f] = e.target.value;
+    if(f === "itemId"){ l.manual = false; l.price = ""; if(!(Number(l.qty) > 0)) l.qty = 1; pcSave(); renderPcalc(); return; }
+    pcSave(); renderPcRes();
+  };
+  document.getElementById("pc-lines").addEventListener("input", pcEdit);
+  document.getElementById("pc-lines").addEventListener("change", pcEdit);
+  document.getElementById("pc-lines").addEventListener("click", function(e){
+    var b = e.target.closest("[data-pcrm]"); if(!b) return;
+    pc.lines.splice(Number(b.dataset.pcrm), 1);
+    if(!pc.lines.length) pc.lines = [{ itemId:"", qty:1, price:"", manual:false }];
+    pcSave(); renderPcalc();
+  });
+  document.getElementById("b-pc-add").addEventListener("click", function(){
+    pc.lines.push({ itemId:"", qty:1, price:"", manual:false }); pcSave(); renderPcalc();
+    var s2 = document.querySelectorAll("#pc-lines [data-pcf='itemId']"); if(s2.length) s2[s2.length - 1].focus();
+  });
+  ["pc-disc","pc-sin","pc-sout"].forEach(function(id){
+    document.getElementById(id).addEventListener("input", function(){ pc[id.slice(3)] = this.value; pcSave(); renderPcRes(); });
+  });
+  document.getElementById("pc-res").addEventListener("click", function(e){
+    if(e.target.id === "b-pc-clear"){
+      pc = { lines:[{ itemId:"", qty:1, price:"", manual:false }], disc:"", sin:"", sout:"" };
+      pcSave(); renderPcalc(); return;
+    }
+    if(e.target.id === "b-pc-order"){
+      var c = pcCalc(), lines = [];
+      c.rows.forEach(function(r){ if(r.it && r.q) lines.push({ itemId:r.it.id, color:"", size:"", qty:r.q,
+        price:Math.round(r.price * 100) / 100, ret:"", manual:true }); });
+      if(!lines.length){ toast("اختار صنف الأول"); return; }
+      if(!canEdit()){ toast("مالكش صلاحية تضيف أوردرات"); return; }
+      editing.sales = null; clearEditBase("sales");
+      draft = newDraft(draft);
+      draft.lines = lines; draft.shipIn = c.sin || ""; draft.shipOut = c.sout || "";
+      goTab("sales"); openDrawer();
+      toast(c.disc ? "الأوردر اتفتح — الأوردر مالوش خانة خصم، فنزّل الـ" + money(c.disc) + " من أسعار القطع، واختار اللون والمقاس واحفظ"
+                   : "الأوردر اتفتح بالأصناف دي — اختار العميل واللون والمقاس واحفظ", 5200);
+    }
   });
 
   /* ---------- تقييم الأداء ---------- */
