@@ -691,6 +691,72 @@
   .sg-pill.self{background:var(--teal-soft);color:var(--teal)}
   .sg-pill.self,.sg-inl [data-sgout]{white-space:nowrap}
 
+  /* ================= قايمة الأوردرات: سطر ثابت + لوحة تفاصيل ================= */
+  #t-sales .goods{margin:0}
+  #t-sales .goods .thumb,#t-sales .goods .dd-noimg{width:34px;height:34px}
+  #t-sales .g1{min-width:0}
+  /* سطر واحد بـ«…» من غير ما يوسّع العمود (nowrap كان بيفرض عرض الجملة كلها على الجدول) */
+  #t-sales .g1 .nm,#t-sales .g1 .secondary,#t-sales .dtag{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;word-break:break-word}
+  #t-sales .g1 .secondary{margin-top:2px}
+  #t-sales .g1 .more{display:inline;margin:0}
+  #t-sales td.items{max-width:320px}
+  #t-sales tbody td{padding-top:var(--sp-2);padding-bottom:var(--sp-2)}
+  #t-sales .dtag{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  #t-sales td.rowacts{white-space:normal;text-align:end}
+  #t-sales .rownext{display:block;margin:0 0 4px auto;padding:5px 10px;font-size:var(--fs-2);white-space:normal;max-width:130px;line-height:1.3}
+  .dd-nav{display:inline-flex;gap:4px}
+  .dd-x{display:none}
+  /* الملخص فوق: سطر واحد، وكل رقم بيفتح تفاصيله زي ما هو */
+  #s-stats{display:flex;flex-wrap:wrap;gap:0;margin-bottom:var(--sp-3)}
+  #s-stats > .kpi{display:flex;align-items:baseline;gap:6px;padding:8px 14px;flex:0 1 auto;min-width:0}
+  #s-stats > .kpi > span:first-child{margin:0;font-size:var(--fs-2)}
+  #s-stats > .kpi > strong{font-size:var(--fs-4);margin:0}
+  #s-stats > .kpi > .sub,#s-stats > .kpi > .kpi-go{display:none}
+  /* شريط الاختيار: سطر رفيع لازق تحت */
+  #s-bulk{position:sticky;bottom:12px;z-index:15;padding:8px 12px;margin-top:var(--sp-2);box-shadow:0 6px 24px rgba(0,0,0,.18)}
+  #s-bulk select{width:auto}
+  /* الشاشة الواسعة: التفاصيل لوحة جنب القايمة، والصفحة بتاخد عرض الشاشة كله وهي مفتوحة */
+  @media (min-width:1366px){
+    main:has(#tab-sales:not([hidden]) #s-allview.side-on){max-width:1680px}
+    #s-allview.side-on .s-wrap{margin-inline-end:414px}
+    #s-allview.side-on .more-wrap,#s-allview.side-on #s-bulk{margin-inline-end:414px}
+    #s-allview.side-on #t-sales .goods .thumb,#s-allview.side-on #t-sales .goods .dd-noimg{display:none}
+    #s-allview.side-on #t-sales td.items{max-width:200px}
+    #s-allview.side-on #t-sales td.cust .secondary,#s-allview.side-on #t-sales .stepline{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+    #s-allview.side-on #t-sales td.rowacts .chev{display:none}
+    #s-allview.side-on #t-sales tbody td{padding-inline:8px}
+    #t-sales tr.detail td{padding:0;border:0;height:0}
+    #t-sales tr.detail .detail-in{position:fixed;width:400px;z-index:25;overflow:auto;margin:0;padding:var(--sp-3);
+      background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 10px 32px rgba(0,0,0,.18)}
+    #t-sales tr.detail .dd-x{display:inline-flex}
+    /* جوّه اللوحة: عمود واحد زي الموبايل */
+    #t-sales tr.detail .dd-cards{grid-template-columns:1fr}
+    #t-sales tr.detail .dd-step{grid-template-columns:1fr}
+    #t-sales tr.detail .dd-step .dd-step-b{justify-content:stretch}
+    #t-sales tr.detail .dd-step .dd-step-b .tbtn{flex:1;justify-content:center}
+    #t-sales tr.detail .dd-it{grid-template-columns:44px 1fr auto;gap:4px var(--sp-2)}
+    #t-sales tr.detail .dd-it > span:nth-child(3){grid-column:2 / 3}
+    #t-sales tr.detail .dd-it > span:nth-child(4){grid-column:3 / 4;grid-row:1 / 3;align-self:start}
+    #t-sales tr.detail .dd-it .dd-ia{grid-column:1 / -1;justify-content:space-between}
+    #t-sales tr.detail .ostep-ph{grid-template-columns:1fr;gap:6px}
+    #t-sales tr.detail .ostep-ph > div + div{border-inline-start:0;padding-inline-start:0}
+  }
+  @media (max-width:760px){
+    #s-stats > .kpi{flex:1 1 45%;padding:8px 10px;flex-direction:column;align-items:flex-start;gap:0}
+    #s-stats > .kpi > strong{white-space:nowrap}
+    #s-bulk{bottom:78px}
+    #t-sales td.items{max-width:none}
+    #t-sales td.rowacts{display:flex;gap:4px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+    /* التفاصيل على الموبايل بتاخد الشاشة كلها، و«✕» بيرجّعك للقايمة */
+    /* فوق المحتوى بس تحت الدرج (40/41) والرسايل (50) والصورة (60) وشاشة القفل (200) */
+    #t-sales tr.detail .detail-in{position:fixed;inset:0;z-index:40;margin:0;border-radius:0;overflow:auto;padding:var(--sp-3);
+      background:var(--paper)}
+    #t-sales tr.detail .dd-x{display:inline-flex;order:-1}
+    /* من الحالة الظاهرة نفسها مش من كلاس يتنسي: بيتشال لوحده لما تسيب شاشة الأوردرات */
+    body:has(#tab-sales:not([hidden]) #t-sales tr.detail){overflow:hidden}
+    body:has(#tab-sales:not([hidden]) #t-sales tr.detail) .nav-groups{display:none}
+  }
+
   /* ================= استبدال مع المورد ================= */
   .fset.xg-out{border-inline-start:4px solid var(--due)}
   .fset.xg-in{border-inline-start:4px solid var(--gain)}
@@ -1655,6 +1721,9 @@
     </div>
   </div>
 
+
+  <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
   <div class="bulkbar" id="s-bulk" hidden>
     <span class="bcount" id="s-bcount">0</span>
     <!-- أوردرات الشركة: «استلموا» = دفعوا للمندوب، فالزرارين واحد. الفرق في التحصيل المباشر بس. -->
@@ -1671,9 +1740,6 @@
     <button class="tbtn ghostx" type="button" id="b-bulk-clear">شيل الاختيار</button>
   </div>
   <p class="note" id="s-bulk-res" hidden></p>
-
-  <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
-  <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
   </div>
   <datalist id="ship-list"></datalist>
   <datalist id="owner-list"></datalist>
@@ -2943,8 +3009,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "94";
+  var VERSION = "95";
   var CHANGELOG = [
+    { v:"95", d:"2026-10-02", items:[
+      "قايمة الأوردرات: كل أوردر في سطر ثابت — الأصناف في سطر واحد (الاسم × العدد والألوان تحت)، ومين بيوصّله جنب الحالة",
+      "زرار الخطوة الجاية في السطر نفسه: خرج للتوصيل · خد كله / استلم ودفع · حصّل · المرتجع وصل…",
+      "التفاصيل بقت لوحة جنب القايمة على الكمبيوتر (القايمة ما بتتحركش)، والأسهم ← → بتنقلك للأوردر اللي بعده أو قبله، وEsc أو ✕ بيقفلها — وعلى الموبايل بتاخد الشاشة كلها",
+      "الملخص فوق بقى سطر واحد، وكل رقم لسه بيفتح تفاصيله — وشريط الاختيار بقى سطر رفيع تحت",
+      "إصلاح: أوردر «توصيل بنفسك» كان زرار خطوته في التفاصيل «اكتب الشركة والكود» — بقى «خرج للتوصيل»"
+    ]},
     { v:"94", d:"2026-10-01", items:[
       "«خلص — الشهر ده» بقت بيوم ما الأوردر خلص فعلاً مش يوم تسجيله: التسليم أو التحصيل، ويوم ما فلوسه وصلتك من شركة الشحن، ويوم ما المرتجع رجع المخزن — الأحدث فوق، ومكتوب جنب كل أوردر «خلص يوم كذا»",
       "التحصيل من العميل بعد التسليم («حصّل» / «العميل دفع الكل») بيتسجّل في الخزنة يوم ما اتحصّل فعلاً، مش يوم الأوردر"
@@ -7848,17 +7921,23 @@
     var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
     var isOpen = !!openRows[s.id];
 
-    // أول صنفين بس — عشان ارتفاع السطر ما يرقصش مع عدد الأصناف
-    var goods = lines.slice(0,2).map(function(l){
-      var back = canc ? (Number(l.qty)||0) : lineRet(l);
-      var vl = vLabel(vColor(l), vSize(l));
-      return "<div class='goods'>" + thumbHTML(l.itemId) +
-        "<span><span class='nm'>" + esc(itemName(l.itemId)) +
-          (vl ? " <span class='pill'>"+esc(vl)+"</span>" : "") + "</span>" +
-        "<span class='secondary'>" + qty(Number(l.qty)||0) + " × " + money(l.price) +
-          (back ? " · مرتجع " + qty(back) : "") + "</span></span></div>";
-    }).join("");
-    if(lines.length > 2) goods += "<span class='more'>و" + qty(lines.length - 2) + " صنف تاني</span>";
+    /* الأصناف في سطر واحد: كل صنف باسمه وعدد قطعه، والألوان والمقاسات تحت —
+       كده ارتفاع السطر ثابت مهما كان عدد الأصناف. التفصيل الكامل بسعره في اللوحة. */
+    var grp = [], byI = {}, backN = 0, pcs = 0;
+    lines.forEach(function(l){
+      var q = Number(l.qty)||0, k = l.itemId || "?";
+      if(!byI[k]){ byI[k] = { id:l.itemId, q:0, v:[] }; grp.push(byI[k]); }
+      byI[k].q += q; pcs += q;
+      var vl = vLabel(vColor(l), vSize(l)); if(vl && byI[k].v.indexOf(vl) < 0) byI[k].v.push(vl);
+      backN += canc ? q : lineRet(l);
+    });
+    var goods = grp.length ? "<div class='goods'>" + thumbHTML(grp[0].id) +
+      "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){
+          return esc(itemName(g.id)) + " <b class='num'>×" + qty(g.q) + "</b>"; }).join(" · ") +
+        (grp.length > 2 ? " <span class='more'>و" + qty(grp.length - 2) + " صنف تاني</span>" : "") + "</span>" +
+      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : qty(pcs) + " قطعة") +
+        (shipIn(s) ? " · شحن " + qty(shipIn(s)) : "") +
+        (backN ? " · <span class='v-due'>مرتجع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
 
     var collected = canc ? shipIn(s) : (Number(s.paid)||0);
     // الملغي إجماليه صفر فعلاً، بس عرض 0.00 لوحده بيضلّل —
@@ -7910,13 +7989,47 @@
       "</select>" + (function(){
         var sp = orderStep(s);
         return "<span class='stepline" + (sp.done ? " done" : "") + "'>" + esc(stepTxt(sp)) + "</span>";
-      })() + "</td>" +
-      "<td class='rowacts'>" +
-        "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل'>تعديل</button>" +
+      })() + delTag(s) + "</td>" +
+      "<td class='rowacts'>" + rowNextBtn(s) +
+        "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل' aria-label='تعديل'>✎</button>" +
         "<span class='chev' aria-hidden='true'>▾</span></td></tr>";
 
     if(!isOpen) return row;
     return row + detailRowHTML(s);
+  }
+
+  // مين بيوصّل الأوردر — بيبان في السطر جنب الحالة
+  function delTag(s){
+    if(s.selfDel) return "<span class='dtag'>🛵 " + esc(squish(s.courier) || "توصيل بنفسك") + "</span>";
+    var co = squish(s.shipCo), cd = squish(s.shipCode);
+    return co || cd ? "<span class='dtag'>" + esc([co, cd].filter(Boolean).join(" · ")) + "</span>" : "";
+  }
+  /* زرار الخطوة الجاية في السطر نفسه — الخطوات اللي بدوسة واحدة بس.
+     اللي محتاجة كتابة (الكود، الاستلام الجزئي…) بتتعمل من اللوحة أو الدرج. */
+  function rowNextBtn(s){
+    if(!canEdit() || saleLocked(s)) return "";
+    var sp = orderStep(s), co = squish(s.shipCo) || "الشركة", b = function(a, t, cls){
+      return "<button class='tbtn rownext" + (cls ? " " + cls : "") + "' type='button' " + a + ">" + esc(t) + "</button>"; };
+    if(sp.k === "ship")
+      return s.selfDel ? b("data-rowout='" + s.id + "'", "خرج للتوصيل", "primary")
+                       : b("data-stepship='" + s.id + "'", squish(s.shipCo) ? "اكتب الكود" : "اكتب الشركة والكود");
+    if(sp.k === "inspect")
+      return b("data-stepgo='" + s.id + "|all'", s.selfDel ? "✓ استلم ودفع " + qty(sgFull(s)) : "خد كله", "primary");
+    if(sp.k === "collect") return b("data-qpayall='" + s.id + "'", "حصّل " + qty(saleMoney(s).due), "primary");
+    if(sp.k === "custpaid") return b("data-fixpaid='" + s.id + "'", "العميل دفع لـ" + co, "primary");
+    if(sp.k === "draw") return b("data-stepdraw='" + s.id + "'", "استلم من " + co);
+    if(sp.k === "back") return b("data-allback='" + s.id + "'", "المرتجع وصل");
+    return "";
+  }
+  // «خرج للتوصيل» من السطر أو اللوحة — نفس اللي في بانل «جديد»
+  function markOut(id){
+    var r = db.sales.find(function(x){ return x.id === id; });
+    if(!r) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(saleLocked(r)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+    r.shippedAt = today(); r.editedBy = me || "غير محدد"; r.at = Date.now();
+    saveSoon("sales"); renderAll();
+    toast("#" + (r.no || "") + " خرج للتوصيل" + (r.courier ? " مع " + r.courier : ""));
   }
 
   // بلوك واحد في جدول الفلوس: اسم · رقم · (علامة)
@@ -7964,17 +8077,22 @@
           ? "<button type='button' class='dd-code num' data-copy='" + esc(squish(s.shipCode)) +
             "' title='دوس تنسخ الكود'>" + esc(squish(s.shipCode)) + " ⧉</button>" : "") +
       "</div><div class='dd-acts'>" +
+        "<span class='dd-nav'><button class='tbtn' type='button' data-snav='prev' title='الأوردر اللي فوقه' aria-label='اللي فوقه'>→</button>" +
+        "<button class='tbtn' type='button' data-snav='next' title='الأوردر اللي تحته' aria-label='اللي تحته'>←</button></span>" +
         "<button class='tbtn' type='button' data-edit='sales|" + s.id + "'>✎ تعديل</button>" +
         "<button class='tbtn' type='button' data-repeat='" + s.id + "'>كرّر</button>" +
         "<button class='tbtn' type='button' data-label='" + s.id + "'>بوليصة</button>" +
         "<details class='dd-more'><summary class='tbtn' aria-label='حاجات تانية'>⋯</summary>" +
           "<div><button class='tbtn' type='button' data-del='sales' data-id='" + s.id + "'>حذف الأوردر</button></div></details>" +
+        "<button class='tbtn dd-x' type='button' data-sclose='1' aria-label='اقفل التفاصيل'>✕</button>" +
       "</div></div>";
 
     /* ---- ٢ الخطوة الجاية ---- */
     var sp = orderStep(s), btns = "";
     if(ed && sp.k === "ship")
-      btns = "<button class='tbtn primary' type='button' data-stepship='" + s.id + "'>اكتب الشركة والكود</button>";
+      btns = s.selfDel
+        ? "<button class='tbtn primary' type='button' data-rowout='" + s.id + "'>خرج للتوصيل" + (s.courier ? " مع " + esc(s.courier) : "") + "</button>"
+        : "<button class='tbtn primary' type='button' data-stepship='" + s.id + "'>اكتب الشركة والكود</button>";
     if(ed && sp.k === "inspect")
       btns = "<button class='tbtn primary' type='button' data-stepgo='" + s.id + "|all'>خد كله</button>" +
              "<button class='tbtn' type='button' data-stepgo='" + s.id + "|part'>خد جزء ورجّع جزء</button>" +
@@ -8244,7 +8362,7 @@
     ];
     document.getElementById("s-stats").innerHTML = cells.map(function(c){
       return "<div class='kpi" + (sKpiOpen === c[0] ? " on" : "") + (c[5] ? " money-only" : "") +
-        "' data-skpi='" + c[0] + "' tabindex='0' role='button'><span>" + esc(c[1]) + "</span>" +
+        "' data-skpi='" + c[0] + "' tabindex='0' role='button' title='" + esc(c[4]) + " — دوس تشوف التفاصيل'><span>" + esc(c[1]) + "</span>" +
         "<strong class='num " + c[3] + "'>" + esc(c[2]) + "</strong>" +
         "<span class='sub'>" + esc(c[4]) + "</span>" +
         "<span class='kpi-go' aria-hidden='true'>التفاصيل ›</span></div>";
@@ -8415,6 +8533,7 @@
         esc(live("sales").length ? "مفيش أوردرات بالمواصفات دي." : "مفيش أوردرات لسه — ابدأ بزرار «أوردر جديد» فوق.") +
         "</td></tr>") + "</tbody>";
 
+    setTimeout(placeSide, 0);
     // على الموبايل كل خانة بتعرض اسم عمودها جنبها
     Array.prototype.forEach.call(t.querySelectorAll("tbody tr.order"), function(tr){
       Array.prototype.forEach.call(tr.children, function(td, i){
@@ -12510,12 +12629,57 @@
   });
 
   // فتح وقفل سطر التفاصيل
+  // أوردر واحد مفتوح في المرة — تفاصيله في اللوحة جنب القايمة
   function toggleDetail(id){
-    if(openRows[id]) delete openRows[id]; else openRows[id] = 1;
+    var was = !!openRows[id];
+    openRows = {}; if(!was) openRows[id] = 1;
     renderSales();
     var tr = document.querySelector("#t-sales tr[data-row='"+id+"']");
-    if(tr) tr.focus();
+    if(tr) tr.focus({ preventScroll:true });
   }
+  function closeDetail(){ if(!Object.keys(openRows).length) return; openRows = {}; renderSales(); }
+  // الأسهم: الأوردر اللي فوقه/تحته في القايمة من غير ما تقفل اللوحة
+  function navDetail(dir){
+    var ids = Array.prototype.map.call(document.querySelectorAll("#t-sales tr.order"), function(tr){ return tr.dataset.row; });
+    var cur = Object.keys(openRows)[0], i = ids.indexOf(cur);
+    var j = i + (dir === "next" ? 1 : -1);
+    if(i < 0 || j < 0 || j >= ids.length){ toast(dir === "next" ? "ده آخر أوردر في القايمة" : "ده أول أوردر في القايمة"); return; }
+    openRows = {}; openRows[ids[j]] = 1;
+    renderSales();
+    var tr = document.querySelector("#t-sales tr[data-row='" + ids[j] + "']");
+    if(tr) tr.scrollIntoView({ block:"nearest" });
+  }
+  TSALES.addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-snav]"))){ e.stopPropagation(); navDetail(t.dataset.snav); return; }
+    if(e.target.closest("[data-sclose]")){ e.stopPropagation(); closeDetail(); return; }
+    if((t = e.target.closest("[data-rowout]"))){ e.stopPropagation(); markOut(t.dataset.rowout); return; }
+  }, true);
+  /* capture: بيتشاف قبل معالج الدرج — لو الدرج أو الصورة المكبّرة مفتوحين، Esc بتاعهم هما
+     (من غيرها الدرج بيتقفل الأول وبعدين ده بيلاقي مفيش درج فبيقفل اللوحة كمان) */
+  window.addEventListener("keydown", function(e){
+    if(e.key !== "Escape" || activeTab !== "sales" || !Object.keys(openRows).length) return;
+    if(document.querySelector(".drawer.on, .as-drawer.on, #sale-drawer.on")) return;
+    var z = document.getElementById("img-zoom"); if(z && !z.hidden) return;
+    var lk = document.getElementById("lock"); if(lk && !lk.hidden) return;
+    closeDetail();
+  }, true);
+  // مكان اللوحة: جنب الجدول على الشاشة الواسعة، وبتمشي معاه وانت بتسكرول
+  function placeSide(){
+    var on = !!document.querySelector("#t-sales tr.detail");
+    var av = document.getElementById("s-allview");
+    if(!av) return;
+    av.classList.toggle("side-on", on);
+    var pan = document.querySelector("#t-sales tr.detail .detail-in"), wrap = av.querySelector(".s-wrap");
+    if(!pan || !wrap || window.innerWidth < 1366){ if(pan){ pan.style.left = ""; pan.style.top = ""; pan.style.maxHeight = ""; } return; }
+    var r = wrap.getBoundingClientRect(), box = av.getBoundingClientRect();
+    var top = Math.max(12, r.top);
+    pan.style.left = Math.round(box.left) + "px";
+    pan.style.top = Math.round(top) + "px";
+    pan.style.maxHeight = Math.round(window.innerHeight - top - 12) + "px";
+  }
+  window.addEventListener("scroll", function(){ if(activeTab === "sales") placeSide(); }, { passive:true });
+  window.addEventListener("resize", function(){ if(activeTab === "sales") placeSide(); });
   TSALES.addEventListener("click", function(e){
     // الأزرار جوه السطر ليها معالجاتها الخاصة
     if(e.target.closest("button,select,input,a,[data-zoom]")) return;
