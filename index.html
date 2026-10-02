@@ -1032,6 +1032,7 @@
   .paybox .pl b{font-weight:600}
   .paybox .pl.tot{border-top:1px solid var(--line);margin-top:var(--sp-1);padding-top:5px}
   .paybox .pn{margin:7px 0 0;font-size:var(--fs-2);line-height:1.6}
+  .paybox .pprof{border-top:1px dashed var(--line);margin-top:var(--sp-2);padding-top:var(--sp-2)}
 
   /* شريط الإجراء الجماعي */
   .bulkbar{
@@ -3032,7 +3033,7 @@
     <div class="sums">
       <div>العميل عليه<strong class="num" id="e-goods">—</strong></div>
       <div id="e-due-wrap" hidden>باقي عليه<strong class="num" id="e-due">—</strong></div>
-      <div id="e-profit-wrap" class="money-only" hidden>صافي ربح الأوردر<strong class="num" id="e-profit">—</strong></div>
+      <div id="e-profit-wrap" class="money-only" hidden><span id="e-profit-lab">صافي ربح الأوردر</span><strong class="num" id="e-profit">—</strong></div>
     </div>
     <button class="tbtn" type="button" id="b-canceldraft">تفريغ</button>
     <button class="tbtn primary" type="button" id="b-savedraft">حفظ الأوردر</button>
@@ -3076,8 +3077,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "98";
+  var VERSION = "99";
   var CHANGELOG = [
+    { v:"99", d:"2026-10-02", items:[
+      "درج الأوردر: «صافي الربح المتوقع» بيظهر تحت وانت بتجهّز الأوردر (جاري/مقترح) — مش بعد التسليم بس",
+      "الحسبة: البضاعة − تكلفتها بمتوسط الشراء + شحن على العميل − شحن للشركة، والهامش — والرقم بيتحدّث مع كل تغيير في الأصناف والأسعار والشحن",
+      "صنف لسه ما اتشراش بيطلع بتنبيه وبره حسبة الربح، ولو عندك مصاريف إضافية في التسعير بيقولك الربح بعدها (للتخطيط بس)"
+    ]},
     { v:"98", d:"2026-10-02", items:[
       "التسعير: تبويب جديد «🧮 احسب أوردر» — اختار أصناف وكميات وشوف هتكسب كام، من غير ما يتسجّل أي حاجة",
       "كل سطر: التكلفة في عمود لوحدها (تكلفة القطعة + المصاريف الإضافية)، والسعر بيتملي من سعر الصنف أو سعر الجملة، وربح السطر وهامشه",
@@ -8063,12 +8069,22 @@
   function updateEntryCalc(){
     if(SD.hidden) return;
     var st = draft.status, goods = 0, needs = {}, problems = [], cost = 0;
+    /* الربح المتوقع وانت بتجهّز الأوردر (جاري/مقترح): نفس حسبة التسليم بالظبط
+       بس بمتوسط التكلفة النهارده. صنف لسه ما اتشراش تكلفته مش معروفة —
+       بيطلع بره الحسبة بدل ما سعره كله يتحسب ربح. */
+    var est = (st === "progress" || st === "proposed"), pgoods = 0, noCost = [], xtra = 0, ucMemo = {};
     draft.lines.forEach(function(l, i){
       var q = Number(l.qty)||0, pr = Number(l.price)||0;
       var ret = st === "delivered" ? Math.min(Number(l.ret)||0, q) : 0;
       var sold = st === "cancelled" ? 0 : Math.max(q - ret, 0);
       goods += sold * pr;
-      if(st === "delivered") cost += lineCost(l) * sold;
+      if(st === "delivered"){ cost += lineCost(l) * sold; pgoods += sold * pr; }
+      else if(est && l.itemId && sold > 0){
+        var pinned = l.unitCost != null && l.unitCost !== "", ck = vKey(l.itemId, l.color, l.size);
+        var uc = pinned ? lineCost(l) : (ck in ucMemo ? ucMemo[ck] : (ucMemo[ck] = lineCost(l)));
+        if(uc > 0 || pinned){ cost += uc * sold; pgoods += sold * pr; xtra += prcExtra(pcItem(l.itemId)) * sold; }
+        else if(noCost.indexOf(itemName(l.itemId)) < 0) noCost.push(itemName(l.itemId));
+      }
       var tot = document.querySelector("#e-lines .ltot[data-li='"+i+"']");
       if(tot){
         var free = l.itemId ? comboAvail(l.itemId, l.color, l.size) : null;
@@ -8109,9 +8125,13 @@
 
     var net = null;
     if(!hasItem) net = null;                       // لسه ما دخلش بضاعة — مفيش ربح يتقال
-    else if(st === "delivered") net = (goods - cost) + sin - sout;
+    else if(est && !(pgoods > 0)) net = null;        // ولا صنف تكلفته معروفة — الشحن لوحده مش ربح
+    else if(st === "delivered" || est) net = (pgoods - cost) + sin - sout;
     else if(st === "cancelled") net = sin - sout;
     var pw = document.getElementById("e-profit-wrap"), pf = document.getElementById("e-profit");
+    var plab = document.getElementById("e-profit-lab");
+    var plabel = est ? "صافي الربح المتوقع" : "صافي ربح الأوردر";
+    if(plab) plab.textContent = plabel;
     if(pw && pf){
       pw.hidden = (net === null);
       if(net !== null){
@@ -8164,6 +8184,22 @@
               ? "شحن من جيبك " + esc(money(pocket)) + " — حمّلت العميل " + esc(money(sin)) +
                 " وهتدفع للشركة " + esc(money(sout))
               : "كسبت من الشحن " + esc(money(-pocket))) + "</p>";
+        // حسبة الربح — للي شايف الفلوس بس
+        var ph = "";
+        if(net !== null && st !== "cancelled"){
+          ph = L("تكلفة البضاعة" + (est ? " (بمتوسط الشراء)" : ""), cost) +
+            "<div class='pl tot'><span>" + plabel +
+            "</span><b class='num " + (net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(net)) + "</b></div>";
+          if(est && pgoods > 0.009)
+            ph += "<p class='pn'>هامش " + esc(String(Math.round(net / pgoods * 1000) / 10)) +
+              "% — البضاعة − التكلفة + شحن على العميل − شحن للشركة.</p>";
+          if(xtra > 0.009)
+            ph += "<p class='pn'>ولو خصمت المصاريف الإضافية اللي في التسعير (" + esc(money(xtra)) +
+              ") يبقى " + esc(money(net - xtra)) + " — دي للتخطيط بس ومش بتتسجّل.</p>";
+        }
+        if(noCost.length)
+          ph += "<p class='pn v-due'>⚠ " + esc(noCost.join(" · ")) + ": لسه ما اتشراش — تكلفته مش معروفة فهو بره حسبة الربح.</p>";
+        if(ph) html += "<div class='money-only pprof'>" + ph + "</div>";
         pb.innerHTML = html; pb.hidden = false;
       }
     }
