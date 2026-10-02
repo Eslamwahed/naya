@@ -683,6 +683,14 @@
     .pv-f .tbtn{flex:1;justify-content:center}
   }
 
+  /* ================= توصيل بنفسك ================= */
+  .delmode{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;margin-bottom:var(--sp-3)}
+  .delmode button{font:inherit;font-size:var(--fs-2);border:0;background:var(--card);color:var(--ink);padding:9px;cursor:pointer}
+  .delmode button.on{background:var(--teal);color:var(--card);font-weight:700}
+  [data-theme="dark"] .delmode button.on{color:var(--paper)}
+  .sg-pill.self{background:var(--teal-soft);color:var(--teal)}
+  .sg-pill.self,.sg-inl [data-sgout]{white-space:nowrap}
+
   /* ================= استبدال مع المورد ================= */
   .fset.xg-out{border-inline-start:4px solid var(--due)}
   .fset.xg-in{border-inline-start:4px solid var(--gain)}
@@ -2844,16 +2852,24 @@
 
     <div class="fset">
       <h3>الشحن</h3>
+      <div class="delmode" id="e-delmode" role="group" aria-label="مين هيوصّله">
+        <button type="button" data-delmode="ship">شركة شحن</button>
+        <button type="button" data-delmode="self">🛵 أنا / مندوبي</button>
+      </div>
       <div class="fgrid">
-        <div><label for="e-shipco">شركة الشحن</label>
+        <div id="e-shipco-wrap"><label for="e-shipco">شركة الشحن</label>
           <input id="e-shipco" list="ship-list" data-f="shipCo" autocomplete="off"></div>
-        <div><label for="e-shipcode">كود البوليصة</label>
+        <div id="e-shipcode-wrap"><label for="e-shipcode">كود البوليصة</label>
           <input id="e-shipcode" data-f="shipCode" autocomplete="off" placeholder="بتكتبه لما تحجز الشحنة"></div>
+        <div id="e-courier-wrap" hidden><label for="e-courier">مين هيوصّله</label>
+          <input id="e-courier" list="courier-list" data-f="courier" autocomplete="off" placeholder="مثلاً احمد">
+          <datalist id="courier-list"></datalist></div>
         <div><label for="e-shipin">شحن على العميل</label>
           <input id="e-shipin" type="number" step="any" min="0" data-f="shipIn"></div>
-        <div><label for="e-shipout">شحن هتدفعه للشركة</label>
+        <div><label for="e-shipout" id="e-shipout-lab">شحن هتدفعه للشركة</label>
           <input id="e-shipout" type="number" step="any" min="0" data-f="shipOut"></div>
       </div>
+      <p class="hintline" id="e-selfnote" hidden></p>
       <p class="hintline" id="e-shipnote" hidden></p>
       <p class="hintline" id="e-pocket" hidden></p>
 
@@ -2927,8 +2943,19 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "92";
+  var VERSION = "94";
   var CHANGELOG = [
+    { v:"94", d:"2026-10-01", items:[
+      "«خلص — الشهر ده» بقت بيوم ما الأوردر خلص فعلاً مش يوم تسجيله: التسليم أو التحصيل، ويوم ما فلوسه وصلتك من شركة الشحن، ويوم ما المرتجع رجع المخزن — الأحدث فوق، ومكتوب جنب كل أوردر «خلص يوم كذا»",
+      "التحصيل من العميل بعد التسليم («حصّل» / «العميل دفع الكل») بيتسجّل في الخزنة يوم ما اتحصّل فعلاً، مش يوم الأوردر"
+    ]},
+    { v:"93", d:"2026-10-01", items:[
+      "جديد: أوردر بتوصّله بنفسك أو مع مندوبك — في الأوردر «مين هيوصّله؟»: شركة شحن أو «🛵 أنا / مندوبي»",
+      "التوصيل بنفسك مش محتاج شركة ولا كود بوليصة، والتحصيل بيبقى مباشر ليك لوحده، وبتكتب اسم اللي هيوصّله",
+      "في «جديد»: زرار «خرج للتوصيل» بس ← «مع المندوب» فيها «✓ استلم ودفع» · «خد جزء» · «رفض»",
+      "«استلم ودفع» = اتسلّم + اتحصّل (تمن اللي خده + الشحن) والفلوس تدخل الخزنة بتاريخ اليوم ده — والأوردر يروح «خلص» على طول",
+      "العربون (لو دفع قبل التسليم) بيفضل يوم الأوردر، والباقي يوم التسليم — والمرتجع بيرجع المخزن مع اللي وصّله"
+    ]},
     { v:"92", d:"2026-10-01", items:[
       "جديد: استبدال مع المورد — ترجّع بضاعة ما اتباعتش وتاخد بدالها بضاعة تانية وتدفع الفرق، في خطوة واحدة",
       "بتبدأ من «⇄ بدّله» على أي صنف في كارت الفاتورة، أو «⇄ استبدال مع مورد» فوق في المشتريات",
@@ -4030,6 +4057,11 @@
      القديمة ما عندهاش التاريخ ده، فالمشوار بيعرض تاريخ الأوردر مكانه. */
   function stampShipped(rec){
     if(!rec) return;
+    // توصيل بنفسك: «خرج للتوصيل» هو اللي بيحط التاريخ، ولو اتسلّم من غيرها ياخد يوم التسليم
+    if(rec.selfDel){
+      if(!rec.shippedAt && (isDelivered(rec) || isCancelled(rec))) rec.shippedAt = rec.deliveredAt || rec.cancelledAt || today();
+      return;
+    }
     if(squish(rec.shipCo) && squish(rec.shipCode)){ if(!rec.shippedAt) rec.shippedAt = today(); }
     else delete rec.shippedAt;
   }
@@ -4265,6 +4297,7 @@
   var STEP_N = 5;
   function stepBlock(rec, next){
     var st = next || stOf(rec);
+    if(rec && rec.selfDel) return null;    // بتوصّله بنفسك — مفيش شركة ولا بوليصة
     if(st === "delivered" || st === "cancelled"){
       var miss = [];
       if(!squish(rec.shipCo))   miss.push("اسم شركة الشحن");
@@ -4309,9 +4342,10 @@
       var net = (isCancelled(s) ? shipIn(s) : (Number(s.paid)||0)) - (shipCounts(s) ? shipOut(s) : 0);
       (by[co] = by[co] || []).push({ s:s, net:Math.round(net * 100) / 100 });
     });
-    var drawn = {};
+    var drawn = {}, credits = {};
     live("cash").forEach(function(c){
-      if(c.type === "settle"){ var n = squish(c.shipCo); drawn[n] = (drawn[n]||0) + (Number(c.amount)||0); }
+      if(c.type === "settle"){ var n = squish(c.shipCo); drawn[n] = (drawn[n]||0) + (Number(c.amount)||0);
+        (credits[n] = credits[n] || []).push({ d:c.date || "", a:Number(c.amount)||0 }); }
     });
     Object.keys(by).forEach(function(co){
       /* الأقدم الأول — بتاريخ ما الفلوس وصلت الشركة (التسليم أو الرفض)،
@@ -4333,20 +4367,52 @@
         run += left;
         out[x.s.id] = { left:left, upto:Math.round(run * 100) / 100 };
       });
+      /* يوم ما فلوس كل أوردر اكتملت: نفس ترتيب الأقدم الأول، بس الاستلامات
+         بتتعدّ بتاريخها — الأوردر بيخلص يوم الاستلام اللي غطّى آخر قرش فيه
+         (ومش قبل يوم ما الفلوس وصلت الشركة). */
+      var cr = (credits[co] || []).slice();
+      L.forEach(function(x){ if(x.net < 0) cr.push({ d:moneyDate(x.s), a:-x.net }); });
+      cr.sort(function(a, b){ return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0); });
+      var ci = 0, have = 0, need = 0, lastD = "";
+      L.forEach(function(x){
+        var md = moneyDate(x.s);
+        if(x.net <= 0.009){ out[x.s.id].closedAt = md; return; }
+        need += x.net;
+        while(have < need - 0.009 && ci < cr.length){ have += cr[ci].a; lastD = cr[ci].d; ci++; }
+        out[x.s.id].closedAt = have >= need - 0.009 ? (lastD > md ? lastD : md) : "";
+      });
     });
     pendCache = out;
     setTimeout(function(){ pendCache = null; }, 0);
     return out;
   }
   function shipPend(s){ return shipPendMap()[s.id] || { left:0, upto:0 }; }
+  /* يوم ما الأوردر خلص فعلاً: آخر حاجة حصلت فيه — التسليم/الرفض، والتحصيل
+     (توصيل بنفسك)، وفلوسه من الشركة، والمرتجع لما رجع المخزن. */
+  function doneDate(s){
+    var d = s.deliveredAt || s.cancelledAt || s.date || "";
+    var mx = function(x){ if(x && x > d) d = x; };
+    mx(s.paidAt);
+    if(viaShip(s)) mx(shipPend(s).closedAt);
+    if(heldShipped(s)) SL(s).forEach(function(l){ if(lineHeld(l, s) > 0) mx(lineBack(l, s)); });
+    return d;
+  }
 
   // القطع الراجعة اللي لسه ما رجعتش المخزن
   function heldLeft(s){
+    if(s && s.selfDel) return 0;           // المرتجع بيرجع مع اللي وصّله في نفس اليوم
     return SL(s).reduce(function(a, l){
       return a + (lineHeld(l, s) > 0 && !lineBack(l, s) ? lineHeld(l, s) : 0); }, 0);
   }
   function orderStep(s){
     var st = stOf(s), co = squish(s.shipCo) || "شركة الشحن", via = viaShip(s);
+    if((st === "progress" || st === "proposed") && s.selfDel){
+      var who = squish(s.courier) || "المندوب";
+      if(!s.shippedAt) return { n:2, k:"ship", t:"اطلع بيه للعميل",
+        hint:"بتوصّله بنفسك — اكتب مين هيوصّله ودوس «خرج للتوصيل»." };
+      return { n:3, k:"inspect", t:"العميل استلم ودفع لـ" + who + "؟",
+        hint:"خد كله · خد جزء ورجّع جزء · رفض كله. اللي بيخده بيدفع تمنه + الشحن، والفلوس بتدخل الخزنة النهارده." };
+    }
     if(st === "progress" || st === "proposed"){
       var miss = [];
       if(!squish(s.shipCo))   miss.push("اسم شركة الشحن");
@@ -7368,6 +7434,8 @@
   function newDraft(keep){
     return { date: firstOpenDate(), status:"progress", partyId:"", owner: me || "",
              shipCo: keep ? keep.shipCo : "", shipCode:"",
+             // توصيل بنفسك: الاختيار والاسم بيفضلوا للأوردر اللي بعده زي شركة الشحن
+             selfDel: keep ? !!keep.selfDel : false, courier: keep ? (keep.courier || "") : "",
              shipIn:"", shipOut:"", payVia: keep ? keep.payVia : "ship",
              paid:"", note:"", lines:[ blankLine() ] };
   }
@@ -7404,6 +7472,7 @@
   function draftFrom(rec){
     return { date: rec.date || today(), status: stOf(rec), partyId: rec.partyId || "",
              owner: rec.owner || "", shipCo: rec.shipCo || "", shipCode: rec.shipCode || "",
+             selfDel: !!rec.selfDel, courier: rec.courier || "",
              shipIn: rec.shipIn || "", shipOut: rec.shipOut || "", payVia: payVia(rec),
              paid: rec.paid || "", note: rec.note || "",
              lines: SL(rec).map(function(l){
@@ -7576,9 +7645,10 @@
 
     [["e-date","date"],["e-status","status"],["e-owner","owner"],["e-shipco","shipCo"],
      ["e-shipcode","shipCode"],["e-shipin","shipIn"],["e-shipout","shipOut"],
-     ["e-payvia","payVia"],["e-paid","paid"],["e-note","note"]].forEach(function(pair){
+     ["e-payvia","payVia"],["e-paid","paid"],["e-note","note"],["e-courier","courier"]].forEach(function(pair){
       document.getElementById(pair[0]).value = draft[pair[1]] == null ? "" : draft[pair[1]];
     });
+    syncDelMode();
 
     document.getElementById("newcust-box").hidden = true;
     var sn = document.getElementById("e-shipnote");
@@ -7696,7 +7766,8 @@
        الاسم لازم يقول مين اللي ماسك الفلوس دلوقتي، وإلا الأرقام بتتقري غلط. */
     var via = viaShip(draft), co = squish(draft.shipCo);
     var lab = document.getElementById("e-paid-lab");
-    if(lab) lab.textContent = via ? "العميل دفع لـ " + (co || "شركة الشحن") + " (بيتحسب لوحده)" : "المحصّل من العميل";
+    if(lab) lab.textContent = via ? "العميل دفع لـ " + (co || "شركة الشحن") + " (بيتحسب لوحده)"
+      : (draft.selfDel ? "عربون (لو دفع قبل التسليم)" : "المحصّل من العميل");
     /* أوردر الشركة: العميل بيدفع للمندوب تمن اللي خده وقت الاستلام —
        الرقم ده نتيجة، مش خانة تتكتب. لو اتساب يتكتب، أول مرتجع بعده
        بيسيب المحفظة على رقم قديم. */
@@ -7924,7 +7995,7 @@
     if(ed && sp.k !== "back" && !sp.done && sp.n >= 4 && heldLeft(s))
       btns += "<button class='tbtn' type='button' data-allback='" + s.id + "'>المرتجع وصلني (" +
               qty(heldLeft(s)) + " قطعة)</button>";
-    var DOTS = ["اتسجّل", "اتبعت", via ? "استلم ودفع" : "العميل استلم",
+    var DOTS = ["اتسجّل", s.selfDel ? "خرج للتوصيل" : "اتبعت", via || s.selfDel ? "استلم ودفع" : "العميل استلم",
                 via ? "فلوسك" : "فلوسك من العميل", "المرتجع"];
     var dot = function(i){
       return "<li class='" + (sp.done || i < sp.n ? "ok" : (i === sp.n ? "now" : "")) + "'><i></i>" +
@@ -8019,14 +8090,18 @@
     /* ---- ٣ج مشوار الأوردر ---- */
     var TL = [], add = function(ok, t, d){ TL.push([ok, t, d || ""]); };
     add(true, "اتسجّل", dShort(s.date));
-    if(co && squish(s.shipCode)) add(true, "اتبعت مع " + esc(co), dShort(s.shippedAt || s.date));
+    if(s.selfDel){
+      if(s.shippedAt) add(true, "خرج للتوصيل" + (s.courier ? " مع " + esc(s.courier) : ""), dShort(s.shippedAt));
+      else add(false, "لسه ما خرجش للتوصيل", "مستني");
+    }
+    else if(co && squish(s.shipCode)) add(true, "اتبعت مع " + esc(co), dShort(s.shippedAt || s.date));
     else add(false, "لسه ما اتبعتش", "مستني");
     var retN = retQty(s);
     if(deliv)
       add(true, (via ? "العميل استلم ودفع " + esc(money(m.paid)) : "العميل استلم") +
                 (retN ? " — رجّع " + qty(retN) + " قطعة" : ""), dShort(s.deliveredAt));
     else if(canc) add(true, "العميل رفض الأوردر", dShort(s.cancelledAt));
-    else if(co && squish(s.shipCode)) add(false, "العميل لسه ما استلمش", "مستني");
+    else if((co && squish(s.shipCode)) || (s.selfDel && s.shippedAt)) add(false, "العميل لسه ما استلمش", "مستني");
     if(deliv || canc){
       if(via){
         var net = (canc ? shipIn(s) : (Number(s.paid)||0)) - shipOut(s);
@@ -8391,11 +8466,11 @@
       if(viaShip(s) && shipCounts(s) && !(isDelivered(s) && shipPaidGap(s)) && shipPend(s).left > 0.009) st[3].push(s);
       if(!viaShip(s) && (sp.k === "collect" || sp.k === "refund")) direct.push(s);
       if(heldShipped(s) && heldLeft(s) > 0) st[4].push(s);
-      if(sp.done && (s.date || "").slice(0, 7) === month) st[5].push(s);
+      if(sp.done && doneDate(s).slice(0, 7) === month) st[5].push(s);
     });
     var asc = function(a, b){ return -byDate(a, b); };     // الأقدم فوق: ده اللي مستني من زمان
     st[1].sort(asc); st[2].sort(asc); st[3].sort(asc); st[4].sort(asc); direct.sort(asc);
-    st[5].sort(byDate);
+    st[5].sort(function(a, b){ var x = doneDate(a), y = doneDate(b); return x !== y ? (x < y ? 1 : -1) : byDate(a, b); });
     return { st:st, direct:direct };
   }
   function sgPickDefault(g){
@@ -8476,7 +8551,10 @@
           // عميل رفض قبل كده؟ تشوفها قبل ما تشحن
           "<span>" + sgCust(s) + refusalFlag(s.partyId) + "</span>" + sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" +
-          (ed ? "<span class='sg-inl'>" +
+          (ed && s.selfDel ? "<span class='sg-inl'><span class='sg-pill self'>🛵 توصيل بنفسك</span>" +
+                "<input list='courier-list' data-sgcour='" + esc(s.id) + "' placeholder='مين هيوصّله' value='" + esc(squish(s.courier)) + "' aria-label='مين هيوصّله'>" +
+                "<button class='tbtn primary' type='button' data-sgout='" + esc(s.id) + "'>خرج للتوصيل</button></span>"
+          : ed ? "<span class='sg-inl'>" +
                 "<input list='ship-list' data-sgco='" + esc(s.id) + "' placeholder='الشركة' value='" + esc(squish(s.shipCo)) + "' aria-label='شركة الشحن'>" +
                 "<input data-sgcode='" + esc(s.id) + "' placeholder='كود البوليصة' value='" + esc(squish(s.shipCode)) + "' aria-label='كود البوليصة'>" +
                 "<button class='tbtn primary' type='button' data-sgship='" + esc(s.id) + "'>اتبعت</button></span>"
@@ -8484,7 +8562,7 @@
           "</div>";
       });
       return sgHead("١ · جديد — ابعته مع شركة الشحن",
-               "اكتب الشركة وكود البوليصة هنا على طول، والأوردر بينقل لوحده لـ«مع المندوب».") +
+               "اكتب الشركة وكود البوليصة هنا على طول، والأوردر بينقل لوحده لـ«مع المندوب». والأوردر اللي بتوصّله بنفسك: «خرج للتوصيل» بس.") +
         (rows.length ? "<div class='sg-rows'>" + rows.join("") + "</div>" : sgEmpty("مفيش أوردرات مستنية شحن."));
     },
 
@@ -8501,7 +8579,8 @@
                  esc(sgNum(shipPaidOf(s))) + " لـ " + esc(co) + "</button></span>";
         else
           acts = "<span class='sg-acts'>" +
-            "<button class='tbtn primary' type='button' data-sggo='" + esc(s.id) + "|all'>خد كله</button>" +
+            "<button class='tbtn primary' type='button' data-sggo='" + esc(s.id) + "|all'>" +
+              (s.selfDel ? "✓ استلم ودفع " + esc(sgNum(sgFull(s))) : "خد كله") + "</button>" +
             "<button class='tbtn' type='button' data-sggo='" + esc(s.id) + "|part'>خد جزء</button>" +
             "<button class='tbtn' type='button' data-sggo='" + esc(s.id) + "|none'>رفض</button></span>";
         var part = "";
@@ -8522,7 +8601,8 @@
               ? "<label class='sg-ck'><input type='checkbox' data-sgsel='" + esc(s.id) + "'" + (sgSel[s.id] ? " checked" : "") +
                 " aria-label='اختار أوردر " + esc(s.no || "") + "'>" + sgNo(s) + "</label>"
               : sgNo(s)) +
-            "<span class='sg-sub num'>" + esc(co) + (squish(s.shipCode) ? " · " + esc(squish(s.shipCode)) : "") + "</span></span>" +
+            "<span class='sg-sub num'>" + (s.selfDel ? "🛵 مع " + esc(squish(s.courier) || "المندوب")
+              : esc(co) + (squish(s.shipCode) ? " · " + esc(squish(s.shipCode)) : "")) + "</span></span>" +
           "<span>" + sgCust(s) + (d >= SG_STALE ? " <span class='sg-pill bad'>بقاله " + qty(d) + " يوم</span>" : "") + "</span>" +
           sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" + acts + part + "</div>";
@@ -8616,7 +8696,7 @@
 
     "5": function(g){
       var rows = g.st[5].map(function(s){
-        return "<div class='sg-row done'><span>" + sgNo(s) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
+        return "<div class='sg-row done'><span>" + sgNo(s) + "<span class='sg-sub num'>خلص " + esc(dShort(doneDate(s)) || "—") + "</span></span>" +
           "<span>" + esc(partyName(s.partyId)) + "</span>" +
           "<span class='items'>" + esc(itemsLabel(s)) + (retQty(s) ? "<span class='sg-sub'>رجّع " + qty(retQty(s)) + "</span>" : "") + "</span>" +
           "<span class='sg-amt num'>" + sgNum(saleTotal(s) + (isCancelled(s) ? 0 : shipIn(s))) + "</span>" +
@@ -8706,6 +8786,20 @@
       rec.editedBy = me || "غير محدد"; rec.at = Date.now();
       saveSoon("sales"); renderAll();
       toast("#" + (rec.no || "") + " اتبعت مع " + co + " — بقى في «مع المندوب»");
+      return;
+    }
+
+    if((t = e.target.closest("[data-sgout]"))){
+      var oid = t.dataset.sgout, ro = db.sales.find(function(x){ return x.id === oid; });
+      if(!ro) return;
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      if(saleLocked(ro)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+      var cEl = SGP.querySelector("[data-sgcour='" + oid + "']");
+      ro.courier = squish(cEl ? cEl.value : "") || ro.courier || "";
+      ro.shippedAt = today();
+      ro.editedBy = me || "غير محدد"; ro.at = Date.now();
+      saveSoon("sales"); renderAll();
+      toast("#" + (ro.no || "") + " خرج للتوصيل" + (ro.courier ? " مع " + ro.courier : "") + " — بقى في «مع المندوب»");
       return;
     }
 
@@ -9928,11 +10022,18 @@
         if(shipIn(s)) L.push({d:s.date, at:s.at, t:"شحن من عميل", who:who, kind:"شحن",
           note:"أوردر ملغي · "+what, inn:shipIn(s), out:0, src:"أوردر"});
       } else if(Number(s.paid)||0){
-        L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
-          note:"أوردر "+saleStateTxt(s)+" · "+what, inn:Number(s.paid)||0, out:0, src:"أوردر"});
+        var pd = Number(s.paid)||0;
+        /* توصيل بنفسك: اللي اتحصّل وقت التسليم بيتسجّل يوم ما دخل فعلاً (paidAt)،
+           والعربون (لو كان فيه) بيفضل يوم الأوردر */
+        var later = s.paidAt ? Math.max(0, Math.min(pd, pd - (Number(s.dep)||0))) : 0;
+        var via2 = s.selfDel && s.courier ? " · مع " + s.courier : "";
+        if(pd - later > 0.009) L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
+          note:(later ? (s.selfDel ? "عربون · " : "دفعة أولى · ") : "") + "أوردر "+saleStateTxt(s)+via2+" · "+what, inn:pd - later, out:0, src:"أوردر"});
+        if(later > 0.009) L.push({d:s.paidAt, at:s.at + 1, t:"تحصيل من عميل", who:who, kind:"تحصيل",
+          note:"أوردر "+saleStateTxt(s)+via2+" · "+what, inn:later, out:0, src:"أوردر"});
       }
       if(shipCounts(s) && shipOut(s))
-        L.push({d:s.date, at:s.at, t:"شحن مدفوع", who:(s.shipCo||"شركة شحن"), kind:"شحن",
+        L.push({d:s.date, at:s.at, t:s.selfDel ? "توصيل" : "شحن مدفوع", who:(s.selfDel ? (s.courier || "مندوب") : (s.shipCo||"شركة شحن")), kind:"شحن",
           note:"أوردر "+who+" · "+what, inn:0, out:shipOut(s), src:"أوردر"});
     });
     /* الفاتورة الواحدة كذا سجل — سجل لكل لون ومقاس. لو عملنا سطر خزنة
@@ -10119,6 +10220,7 @@
   }
   // شحنت فعلاً؟ من غير شركة شحن البضاعة ما راحتش لحد
   function heldShipped(s){
+    if(s.selfDel) return false;
     return !!(squish(s.shipCo) || shipOut(s) || shipIn(s) || viaShip(s));
   }
   // سطر لكل صنف راجع — مش سطر لكل فاتورة، عشان الصنف بيرجع لوحده
@@ -12222,7 +12324,52 @@
      بتتنفّذ مرتين: الأولى بتملا وبتكتب السطر، والتانية بتلاقي الخانات
      مليانة فتمسحه. بنعمل الاقتراح مرة واحدة لكل عميل. */
   var suggestFor = null;
+  /* ---------- توصيل بنفسك (أو مع مندوبك) ----------
+     مفيش شركة شحن ولا بوليصة، والتحصيل مباشر ليك. العميل بيدفع للي وصّله
+     تمن اللي خده + الشحن، والفلوس بتدخل الخزنة نفس اليوم. */
+  function syncSelfPaid(rec, before){
+    if(!rec || !rec.selfDel || !isDelivered(rec)) return;
+    var full = Math.round((saleTotal(rec) + shipIn(rec)) * 100) / 100;
+    if(!rec.paidAt && full - (Number(before)||0) > 0.009){
+      rec.dep = Number(before)||0;                 // العربون اللي اتدفع قبل التسليم
+      rec.paidAt = rec.deliveredAt || today();     // يوم ما الفلوس دخلت فعلاً
+    }
+    rec.paid = full;
+  }
+  function syncDelMode(){
+    var self = !!draft.selfDel;
+    document.querySelectorAll("#e-delmode [data-delmode]").forEach(function(b){
+      b.classList.toggle("on", (b.dataset.delmode === "self") === self);
+      b.setAttribute("aria-pressed", (b.dataset.delmode === "self") === self ? "true" : "false");
+    });
+    var g = function(id){ return document.getElementById(id); };
+    g("e-shipco-wrap").hidden = self; g("e-shipcode-wrap").hidden = self;
+    g("e-courier-wrap").hidden = !self;
+    g("e-shipout-lab").textContent = self ? "هتدفع للي هيوصّله" : "شحن هتدفعه للشركة";
+    var pv = g("e-payvia");
+    if(pv){ pv.disabled = self; if(self){ pv.value = "direct"; draft.payVia = "direct"; } }
+    var dl = g("courier-list");
+    if(dl){
+      var seen = {};
+      live("sales").forEach(function(x){ var c = squish(x.courier); if(c) seen[c] = 1; });
+      dl.innerHTML = Object.keys(seen).map(function(c){ return "<option value='" + esc(c) + "'></option>"; }).join("");
+    }
+    var n = g("e-selfnote");
+    if(n){
+      n.hidden = !self;
+      n.textContent = self ? "شركة الشحن وكود البوليصة مش مطلوبين، والتحصيل مباشر ليك. سيب العربون فاضي — لما يتسلّم دوس «استلم ودفع» والفلوس تدخل الخزنة نفس اليوم." : "";
+    }
+  }
+  document.getElementById("e-delmode").addEventListener("click", function(e){
+    var b = e.target.closest("[data-delmode]"); if(!b) return;
+    draft.selfDel = b.dataset.delmode === "self";
+    if(draft.selfDel){ draft.payVia = "direct"; draft.shipOut = draft.shipOut || ""; }
+    else if(payVia(draft) === "direct" && !(Number(draft.paid)||0)) draft.payVia = "ship";
+    syncDelMode(); shipHint(); syncMore(); updateEntryCalc();
+  });
+
   function suggestShipping(){
+    if(draft.selfDel) return;              // بتوصّله بنفسك — مفيش شركة تتقترح
     if(suggestFor === draft.partyId) return;
     suggestFor = draft.partyId;
     var note = document.getElementById("e-shipnote");
@@ -12462,7 +12609,10 @@
     var add = all ? due : Number(toEn(box ? box.value : ""))||0;
     if(!(add > 0)){ toast("اكتب المبلغ اللي اتحصّل"); if(box) box.focus(); return; }
     if(add > due + 0.009){ toast("المبلغ أكبر من الباقي (" + money(due) + ")"); return; }
+    // يوم التحصيل: الخزنة بتسجّله يومها، و«خلص» بتعدّ الأوردر يوم ما اتحصّل آخر قرش
+    if(!rec.paidAt) rec.dep = Number(rec.paid)||0;
     rec.paid = (Number(rec.paid)||0) + add;
+    rec.paidAt = today();
     rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll();
     var left = due - add;
@@ -12678,7 +12828,7 @@
       return;
     }
     var why = stepBlock({ shipCo:draft.shipCo, shipCode:draft.shipCode, payVia:draft.payVia,
-                          paid:draft.paid, status:status }, status);
+                          paid:draft.paid, status:status, selfDel:draft.selfDel }, status);
     if(why){
       toast(why, 4200);
       var fid = !squish(draft.shipCo) ? "e-shipco" : (!squish(draft.shipCode) ? "e-shipcode" : "e-status");
@@ -12721,8 +12871,12 @@
     var fields = {
       date: draft.date || today(), partyId: draft.partyId, lines: lines, status: status,
       paid: paidV,
-      owner: (draft.owner||"").trim(), shipCo: (draft.shipCo||"").trim(),
-      shipCode: (draft.shipCode||"").trim(), payVia: draft.payVia,
+      owner: (draft.owner||"").trim(),
+      // توصيل بنفسك: مفيش شركة ولا بوليصة، والتحصيل مباشر ليك
+      shipCo: draft.selfDel ? "" : (draft.shipCo||"").trim(),
+      shipCode: draft.selfDel ? "" : (draft.shipCode||"").trim(),
+      payVia: draft.selfDel ? "direct" : draft.payVia,
+      selfDel: !!draft.selfDel, courier: draft.selfDel ? squish(draft.courier || "") : "",
       shipIn: Number(draft.shipIn)||0, shipOut: Number(draft.shipOut)||0,
       note: (draft.note||"").trim(),
       itemId:"", color:"", size:"", qty:0, price:0, ret:0
@@ -12731,9 +12885,11 @@
     if(editing.sales){
       var rec = db.sales.find(function(x){ return x.id === editing.sales; });
       if(rec){
+        var paid0 = Number(rec.paid)||0;
         Object.keys(fields).forEach(function(k){ rec[k] = fields[k]; });
         rec.editedBy = me || "غير محدد"; rec.at = Date.now();
         stampDelivery(rec);
+        syncSelfPaid(rec, paid0);
       }
       freshId = editing.sales; editing.sales = null; clearEditBase("sales");
       toast("اتعدّل الأوردر");
@@ -12741,6 +12897,7 @@
       fields.no = nextSaleNo();
       var rec2 = stamp(fields);
       stampDelivery(rec2);
+      syncSelfPaid(rec2, 0);
       db.sales.push(rec2);
       freshId = rec2.id;
       toast("اتسجّل أوردر #" + rec2.no);
@@ -13619,9 +13776,11 @@
       });
       if(short){ toast(short + " — سجّل شراء الأول"); return false; }
     }
+    var paidBefore = Number(rec.paid)||0;
     rec.status = next; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     stampDelivery(rec);
     syncShipPaid(rec);             // أوردر الشركة: استلم = دفع للمندوب
+    syncSelfPaid(rec, paidBefore); // توصيل بنفسك: استلم = دفع والفلوس دخلت الخزنة
     renderAll(); saveSoon("sales");
     var via = viaShip(rec), co = squish(rec.shipCo) || "شركة الشحن";
     // لما الملغي يرجع مسلّم، خانة المحصّل بتكون اتصفّرت وقت الإلغاء
@@ -13630,6 +13789,13 @@
     else if(via && next === "delivered")
       toast("العميل استلم ودفع " + money(Number(rec.paid)||0) + " لـ " + co +
             " — مش عليه حاجة خلاص · الفلوس دلوقتي عند " + co, 4200);
+    else if(rec.selfDel && next === "delivered")
+      toast("العميل استلم ودفع " + money(Number(rec.paid)||0) + (rec.courier ? " لـ" + rec.courier : "") +
+            " — الفلوس دخلت الخزنة النهارده", 4200);
+    else if(rec.selfDel && next === "cancelled")
+      toast("العميل رفض الأوردر" + (shipIn(rec) ? " — الشحن " + money(shipIn(rec)) + " اتحسب إنه دفعه" +
+            (rec.courier ? " لـ" + rec.courier : "") + "، لو ما دفعوش عدّل «شحن على العميل» لـ0" : "") +
+            " · البضاعة رجعت المخزن", 5200);
     else if(via && next === "cancelled")
       toast("العميل رفض الأوردر" + (shipIn(rec) ? " ودفع الشحن " + money(shipIn(rec)) + " لـ " + co : "") +
             " — البضاعة لسه عند " + co + " لحد ما ترجعلك", 4200);
