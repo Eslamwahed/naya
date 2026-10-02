@@ -6,7 +6,7 @@
 <title>Lora Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     /* برقوقي البوتيك — أساس التصميم */
@@ -30,22 +30,23 @@
     /* ═══ سلّم الخطوط ═══
        كان في ٣١ قيمة خط مختلفة في الـCSS و١٣ مقاس ظاهر على الشاشة
        الواحدة. ده اللي بيخلي الشكل «مش مظبوط» من غير ما حد يعرف ليه.
-       بقى ٦ درجات، وكل حاجة بتاخد من هنا. */
-    --fs-1:12px;   /* تسميات وأكواد */
-    --fs-2:13px;   /* نص مساعد وتلميحات */
-    --fs-3:14px;   /* النص العادي والأزرار */
-    --fs-4:16px;   /* خانات الإدخال وعناوين اللوحات */
-    --fs-5:20px;   /* عناوين الشاشات */
-    --fs-6:24px;   /* أرقام الكروت */
-    --fs-7:32px;   /* الرقم البطل — اللي بتشوفه الأول */
+       بقى ٦ درجات، وكل حاجة بتاخد من هنا.
+       v100: السلّم كله نزل درجة (السيستم كان باين زحمة) */
+    --fs-1:11px;   /* تسميات وأكواد */
+    --fs-2:12px;   /* نص مساعد وتلميحات */
+    --fs-3:13px;   /* النص العادي والأزرار */
+    --fs-4:15px;   /* خانات الإدخال وعناوين اللوحات */
+    --fs-5:18px;   /* عناوين الشاشات */
+    --fs-6:21px;   /* أرقام الكروت */
+    --fs-7:28px;   /* الرقم البطل — اللي بتشوفه الأول */
 
-    /* ═══ سلّم المسافات ═══ شبكة ٤: كانت ١٩ قيمة حشو مختلفة */
-    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+    /* ═══ سلّم المسافات ═══ كانت ١٩ قيمة حشو مختلفة — v100: أضيق شوية */
+    --sp-1:4px; --sp-2:8px; --sp-3:10px; --sp-4:14px; --sp-5:20px; --sp-6:26px;
 
     /* ═══ أنصاف الأقطار ═══ */
     --r-sm:8px; --r-md:12px; --r-pill:999px;
     --radius:var(--r-md);
-    font-size:16px;
+    font-size:15px;
   }
   /* الوضع الليلي — للجلسات الطويلة */
   [data-theme="dark"]{
@@ -69,8 +70,10 @@
   body{
     background:var(--paper);
     color:var(--ink);
-    font-family:"Alexandria","Segoe UI",Tahoma,sans-serif;
-    line-height:1.55;
+    /* IBM Plex Sans Arabic بدل Alexandria: أخف وأضيق وأرقامه أوضح وهي صغيرة —
+       نفس الشاشة بتشيل كلام أكتر من غير ما تبان زحمة */
+    font-family:"IBM Plex Sans Arabic","Alexandria","Segoe UI",Tahoma,sans-serif;
+    line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
   .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
@@ -96,7 +99,7 @@
   /* ٥ أقسام فوق، وتحتها شاشات القسم المفتوح */
   .nav-groups{display:flex;justify-content:center;gap:var(--sp-1);padding:0 var(--sp-3);overflow-x:auto}
   .nav-groups button{display:flex;align-items:center;gap:8px;padding:var(--sp-3) var(--sp-4)}
-  .nav-groups button .ic{font-size:17px;line-height:1}
+  .nav-groups button .ic{font-size:15px;line-height:1}
   .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
   .nav-groups .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
     background:var(--due);color:#fff;font-size:10px;font-weight:700;line-height:1}
@@ -117,7 +120,7 @@
   [data-theme="dark"] nav{background:var(--card)}
   nav button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
 
-  main{max-width:1120px;margin:0 auto;padding:var(--sp-5) var(--sp-4) 80px}
+  main{max-width:1280px;margin:0 auto;padding:var(--sp-5) var(--sp-4) 80px}
   section[hidden]{display:none}
   h2{font-size:var(--fs-5);font-weight:600;margin:0 0 4px}
   .hint{color:var(--ink-soft);font-size:var(--fs-3);margin:0 0 18px}
@@ -1545,7 +1548,9 @@
     .quickpay input,
     .lmix-row input,.lmix-row select,
     #t-lines input,#t-lines select,
-    .s-search input{ font-size:var(--fs-4);min-height:44px }
+    .s-search input{ font-size:16px;min-height:44px }   /* أقل من 16 الآيفون بيعمل زوم وانت بتكتب */
+    /* شارة الحالة select برضه — من غير ده كانت بتطلع دايرة كبيرة في كارت الأوردر */
+    select.rowst{ font-size:var(--fs-2);min-height:34px;padding:2px var(--sp-3) }
     /* مربّعات الاختيار مش خانات كتابة — الارتفاع بيوسّعها بدون داعي */
     input[type="checkbox"]{ min-height:0;width:auto }
     td.selcell input,th.selcell input,.allow input{ width:22px;height:22px }
@@ -1570,7 +1575,7 @@
     .lmix-row > :nth-child(3){ grid-area:q }
     .lmix-row > .rm{ grid-area:x;align-self:center }
 
-    /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 13px */
+    /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 12px */
     .hintline,.mnote,.lmix-empty,.lmix-head,.lmix-sum,.fset > h3,
     .fgrid label,.filters label,.stabs b,.lrow .lcost,.lrow-foot .ltot em,
     tbody td::before,.fgroup .glabel,.band span,.mbox h4,.rowact,
@@ -3077,8 +3082,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "99";
+  var VERSION = "100";
   var CHANGELOG = [
+    { v:"100", d:"2026-10-02", items:[
+      "شكل أهدى وأقل زحمة: خط جديد (IBM Plex Sans Arabic) أخف وأضيق وأرقامه أوضح",
+      "كل الخطوط نزلت درجة (النص 13 بدل 14 والعناوين 18 بدل 20) والمسافات أضيق شوية",
+      "على الشاشات الكبيرة المحتوى بقى أعرض (1280 بدل 1120) بدل الفراغ اللي على الجنبين",
+      "الموبايل: خانات الكتابة فاضلة 16 عشان الآيفون ما يعملش زوم، وشارة الحالة في كارت الأوردر رجعت شارة صغيرة بدل الدايرة الكبيرة"
+    ]},
     { v:"99", d:"2026-10-02", items:[
       "درج الأوردر: «صافي الربح المتوقع» بيظهر تحت وانت بتجهّز الأوردر (جاري/مقترح) — مش بعد التسليم بس",
       "الحسبة: البضاعة − تكلفتها بمتوسط الشراء + شحن على العميل − شحن للشركة، والهامش — والرقم بيتحدّث مع كل تغيير في الأصناف والأسعار والشحن",
@@ -11396,7 +11407,7 @@
     bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
     brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
   };
-  function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
+  function ciFont(w, px){ return w + " " + px + "px 'IBM Plex Sans Arabic', Alexandria, system-ui, sans-serif"; }
   function ciRound(ctx, x, y, w, h, r){
     ctx.beginPath();
     ctx.moveTo(x+r, y);
