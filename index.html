@@ -6,7 +6,7 @@
 <title>Lora Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     /* برقوقي البوتيك — أساس التصميم */
@@ -70,9 +70,9 @@
   body{
     background:var(--paper);
     color:var(--ink);
-    /* IBM Plex Sans Arabic بدل Alexandria: أخف وأضيق وأرقامه أوضح وهي صغيرة —
-       نفس الشاشة بتشيل كلام أكتر من غير ما تبان زحمة */
-    font-family:"IBM Plex Sans Arabic","Alexandria","Segoe UI",Tahoma,sans-serif;
+    /* v104: رجعنا لـ Alexandria — جرّبنا IBM Plex Sans Arabic في v100 وما عجبش.
+       المقاسات الأصغر من v100 فاضلة زي ما هي. */
+    font-family:"Alexandria","Segoe UI",Tahoma,sans-serif;
     line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
@@ -3236,8 +3236,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "103";
+  var VERSION = "104";
   var CHANGELOG = [
+    { v:"104", d:"2026-10-03", items:[
+      "الخط رجع Alexandria زي الأول (بدل IBM Plex Sans Arabic) — والمقاسات الأصغر والمسافات فاضلة زي ما هي"
+    ]},
     { v:"103", d:"2026-10-02", items:[
       "الرئيسية: الأرقام المهمة (صافي الربح · لازم تبيع بكام · الخزنة · المخزون · لك عند الشركات) بقت فوق",
       "«محتاج منك النهارده» بقت كروت صغيرة جنب بعض بدل سطر عريض لكل حاجة — ٤ في الصف على الكمبيوتر و٢ على الموبايل",
@@ -11605,7 +11608,7 @@
     bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
     brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
   };
-  function ciFont(w, px){ return w + " " + px + "px 'IBM Plex Sans Arabic', Alexandria, system-ui, sans-serif"; }
+  function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
   function ciRound(ctx, x, y, w, h, r){
     ctx.beginPath();
     ctx.moveTo(x+r, y);
