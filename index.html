@@ -170,6 +170,7 @@
   .tmore-row .tbar{margin:0 0 var(--sp-2)}
   .fold-h{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
   .fold-h h3{margin:0}
+  .fold-h .quick{margin:0}
   .fold-h h3 small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft);margin-inline-start:var(--sp-2)}
   .fold-h + [data-fold]{margin-top:var(--sp-3)}
   [data-fold][hidden]{display:none}
@@ -1821,11 +1822,6 @@
     </div>
   </div>
 
-  <div class="panel" id="dash-partners" hidden>
-    <h3>نصيب الشركاء من ربح الفترة</h3>
-    <p class="hint" id="dp-note"></p>
-    <div class="tbl-wrap"><table id="t-dash-partners"></table></div>
-  </div>
   <p class="hint" style="margin:-8px 0 18px">المخزون وأرصدة العملاء والموردين والخزنة أرقام تراكمية دايمًا — الفترة بتأثر على المبيعات والأرباح والمصاريف والشحن بس.</p>
 
   <div class="panel" id="low-panel" hidden>
@@ -2469,6 +2465,18 @@
   <div class="cap-own" id="cap-own"></div>
   <div class="cap-grid" id="cap-cards"></div>
   <p class="hint" style="margin:0 0 var(--sp-3)">شريك جديد؟ من <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة.</p>
+
+  <!-- نصيب كل شريك من ربح الفترة — للفرجة، والتوزيع الفعلي من «وزّع أرباح» تحته -->
+  <div class="panel" id="cap-share-panel">
+    <div class="fold-h"><h3>نصيب الشركاء من ربح الفترة</h3>
+      <div class="quick" id="cs-per" role="group" aria-label="الفترة">
+        <button type="button" data-csper="month" aria-pressed="false">الشهر ده</button>
+        <button type="button" data-csper="prev" aria-pressed="false">الشهر اللي فات</button>
+        <button type="button" data-csper="all" aria-pressed="true" class="on">من البداية</button>
+      </div></div>
+    <p class="hint" id="cs-note"></p>
+    <div class="tbl-wrap"><table id="t-cap-share"></table></div>
+  </div>
 
   <div class="panel" id="dist-panel">
     <div class="fold-h"><h3>توزيع أرباح</h3>
@@ -3238,8 +3246,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "105";
+  var VERSION = "107";
   var CHANGELOG = [
+    { v:"107", d:"2026-10-03", items:[
+      "رأس المال: جدول «نصيب الشركاء من ربح الفترة» رجع هنا تحت كروت الشركاء — بفترة تختارها (الشهر ده · اللي فات · من البداية)",
+      "نفس الحسبة اللي كانت في الرئيسية بالظبط (مرجّحة بالأيام) — للفرجة بس، والتوزيع الفعلي من «وزّع أرباح» تحته"
+    ]},
+    { v:"106", d:"2026-10-03", items:[
+      "الرئيسية: جدول «نصيب الشركاء من ربح الفترة» اتشال — توزيع الأرباح والنسب في شاشة رأس المال زي ما هي"
+    ]},
     { v:"105", d:"2026-10-03", items:[
       "رقم الإصدار رجع فوق على اليمين جنب «Lora Collection» زي الأول"
     ]},
@@ -5091,6 +5106,7 @@
     });
     return d;
   }
+
   // كام يوم من الفترة فلوسه كانت شغّالة فيها
   function capDaysIn(id, from, to){
     var st = capStartOf(id);
@@ -5919,36 +5935,42 @@
     return { q:q, rev:rev, pr:pr, ret:ret };
   }
 
-  // نصيب كل شريك من ربح الفترة المختارة — بيتحدّث مع كل حركة
-  function renderDashPartners(){
-    var box = document.getElementById("dash-partners");
+  /* نصيب كل شريك من ربح الفترة — في شاشة رأس المال (كان في الرئيسية لحد v105).
+     للفرجة بس: مفيش حاجة بتتسجّل — التوزيع الفعلي من «وزّع أرباح» تحته. */
+  var csPer = "all";
+  function renderCapShare(){
+    var box = document.getElementById("cap-share-panel");
     if(!box) return;
     var ps = partners();
     box.hidden = false;
     // بدل ما اللوحة تختفي خالص والمستخدم يدوّر عليها، بتفضل باينة وبتقول المطلوب
     if(!ps.length){
-      document.getElementById("dp-note").innerHTML =
+      document.getElementById("cs-note").innerHTML =
         "لسه مفيش شركاء مسجّلين. سجّلهم من تبويب <strong>العملاء والموردين</strong> بنوع «شريك»، " +
         "وبعدين سجّل رأس مال كل واحد من تبويب <strong>رأس المال</strong> — " +
         "وساعتها اللوحة دي هتوريك نصيب كل واحد من الربح لحظة بلحظة.";
-      document.getElementById("dp-note").className = "hint";
-      table("t-dash-partners", ["الشريك"], [], "");
+      document.getElementById("cs-note").className = "hint";
+      table("t-cap-share", ["الشريك"], [], "");
       return;
     }
 
-    var r = periodRange();
+    var r = csPer === "all" ? null : distPerRange(csPer);
+    Array.prototype.forEach.call(document.querySelectorAll("#cs-per [data-csper]"), function(x){
+      x.classList.toggle("on", x.dataset.csper === csPer);
+      x.setAttribute("aria-pressed", x.dataset.csper === csPer ? "true" : "false");
+    });
     // «كل الفترات» مالهاش حدود، فبنبدأ من أول حركة مسجّلة لحد النهاردة
     var from = r ? r.from : earliestDate();
     var to   = r ? r.to   : today();
     var net  = periodStats(r).net;
     var cap  = totalCapital();
 
-    var note = document.getElementById("dp-note");
+    var note = document.getElementById("cs-note");
     if(!cap){
       note.innerHTML = "الشركاء مسجّلين بس مفيش رأس مال متسجّل ليهم. " +
         "سجّل رأس مال كل واحد من تبويب <strong>رأس المال</strong> عشان النسب تتحسب.";
       note.className = "hint";
-      table("t-dash-partners", ["الشريك"], [], "");
+      table("t-cap-share", ["الشريك"], [], "");
       return;
     }
     // اللي اتوزّع بالفعل من ربح الفترة دي — من غيره الرقم بيوهم إن كله لسه متاح
@@ -5962,7 +5984,7 @@
       (paidOut > 0.009
         ? "<strong>اتوزّع منه " + esc(money(paidOut)) + " بالفعل، فاضل " + esc(money(left)) + ".</strong> "
         : "") +
-      "التوزيع الفعلي بيتم من تبويب رأس المال." +
+      "التوزيع الفعلي من «وزّع أرباح» تحت." +
       (ps.some(function(x){
           var d = capDaysIn(x.id, from, to);
           return d !== null && d < daysBetween(from, to) + 1;
@@ -6020,7 +6042,7 @@
         "<td></td><td></td></tr>";
     }
 
-    var t = document.getElementById("t-dash-partners");
+    var t = document.getElementById("t-cap-share");
     t.innerHTML = "<thead><tr>" +
       ["الشريك","نسبته المرجّحة","نصيبه من ربح الفترة","أرباح مستحقة له","إجمالي حقه"]
         .map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("") +
@@ -12325,7 +12347,7 @@
      لـ١٨ ثانية للحركة الواحدة. دلوقتي بنرسم الشاشة المفتوحة بس،
      والباقي بيتعلّم "محتاج رسم" وبيترسم أول ما تفتحه. */
   var TAB_RENDER = {
-    dash:    function(){ syncPeriodUI(); renderHome(); renderKPIs(); renderDashPartners(); renderStock();
+    dash:    function(){ syncPeriodUI(); renderHome(); renderKPIs(); renderStock();
                          renderLowStock(); renderShipping(); renderBalances(); },
     capital: function(){ renderCapital(); renderDistLimits(); },
     cash:    function(){ renderWallets(); renderCash(); },
@@ -15495,7 +15517,7 @@
 
   function renderCapital(){
     renderCapStats(); renderPartners(); renderRecon(); renderCapLog(); renderCapHint();
-    renderCapRecon(); renderCapCards();
+    renderCapRecon(); renderCapCards(); renderCapShare();
     var df = document.getElementById("dist-from"), dt = document.getElementById("dist-to");
     if(df && !df.value){ var m = monthRange(0); df.value = m.from; dt.value = m.to; }
     distPerSync();
@@ -15770,6 +15792,10 @@
     el.className = "note";
   }
 
+  document.getElementById("cs-per").addEventListener("click", function(e){
+    var cs = e.target.closest("[data-csper]"); if(!cs) return;
+    csPer = cs.dataset.csper; renderCapShare();
+  });
   document.getElementById("dist-per").addEventListener("click", function(e){
     var b = e.target.closest("[data-distper]"); if(!b) return;
     var r = distPerRange(b.dataset.distper);
