@@ -6,7 +6,7 @@
 <title>Lora Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     /* برقوقي البوتيك — أساس التصميم */
@@ -30,22 +30,23 @@
     /* ═══ سلّم الخطوط ═══
        كان في ٣١ قيمة خط مختلفة في الـCSS و١٣ مقاس ظاهر على الشاشة
        الواحدة. ده اللي بيخلي الشكل «مش مظبوط» من غير ما حد يعرف ليه.
-       بقى ٦ درجات، وكل حاجة بتاخد من هنا. */
-    --fs-1:12px;   /* تسميات وأكواد */
-    --fs-2:13px;   /* نص مساعد وتلميحات */
-    --fs-3:14px;   /* النص العادي والأزرار */
-    --fs-4:16px;   /* خانات الإدخال وعناوين اللوحات */
-    --fs-5:20px;   /* عناوين الشاشات */
-    --fs-6:24px;   /* أرقام الكروت */
-    --fs-7:32px;   /* الرقم البطل — اللي بتشوفه الأول */
+       بقى ٦ درجات، وكل حاجة بتاخد من هنا.
+       v100: السلّم كله نزل درجة (السيستم كان باين زحمة) */
+    --fs-1:11px;   /* تسميات وأكواد */
+    --fs-2:12px;   /* نص مساعد وتلميحات */
+    --fs-3:13px;   /* النص العادي والأزرار */
+    --fs-4:15px;   /* خانات الإدخال وعناوين اللوحات */
+    --fs-5:18px;   /* عناوين الشاشات */
+    --fs-6:21px;   /* أرقام الكروت */
+    --fs-7:28px;   /* الرقم البطل — اللي بتشوفه الأول */
 
-    /* ═══ سلّم المسافات ═══ شبكة ٤: كانت ١٩ قيمة حشو مختلفة */
-    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px; --sp-6:32px;
+    /* ═══ سلّم المسافات ═══ كانت ١٩ قيمة حشو مختلفة — v100: أضيق شوية */
+    --sp-1:4px; --sp-2:8px; --sp-3:10px; --sp-4:14px; --sp-5:20px; --sp-6:26px;
 
     /* ═══ أنصاف الأقطار ═══ */
     --r-sm:8px; --r-md:12px; --r-pill:999px;
     --radius:var(--r-md);
-    font-size:16px;
+    font-size:15px;
   }
   /* الوضع الليلي — للجلسات الطويلة */
   [data-theme="dark"]{
@@ -69,42 +70,79 @@
   body{
     background:var(--paper);
     color:var(--ink);
-    font-family:"Alexandria","Segoe UI",Tahoma,sans-serif;
-    line-height:1.55;
+    /* IBM Plex Sans Arabic بدل Alexandria: أخف وأضيق وأرقامه أوضح وهي صغيرة —
+       نفس الشاشة بتشيل كلام أكتر من غير ما تبان زحمة */
+    font-family:"IBM Plex Sans Arabic","Alexandria","Segoe UI",Tahoma,sans-serif;
+    line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
   .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 
   header.top{
     background:var(--teal-deep);color:#fff;
-    padding:var(--sp-3) var(--sp-4);
-    display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;
+    padding:0 var(--sp-4);min-height:50px;
+    display:flex;align-items:center;gap:var(--sp-3);
   }
   [data-theme="dark"] header.top{ background:#120F14;border-bottom:1px solid var(--line) }
   [data-theme="dark"] header.top h1{ color:var(--teal-deep) }
-  header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr}
-  header.top .who{margin-inline-start:auto;display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-3);opacity:.95}
-  header.top input{
-    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);
-    color:#fff;border-radius:var(--r-sm);padding:var(--sp-1) var(--sp-2);font:inherit;font-size:var(--fs-3);width:110px;
-  }
-  header.top input::placeholder{color:rgba(255,255,255,.6)}
+  header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr;white-space:nowrap}
+  header.top .who{margin-inline-start:auto;display:flex;align-items:center;gap:var(--sp-3);font-size:var(--fs-2)}
+  /* حالة الحفظ: نقطة ملوّنة بدل شارة — أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ */
+  .savep{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;opacity:.85}
+  .savep::before{content:"";width:8px;height:8px;border-radius:50%;background:#78BF92;flex:0 0 auto}
+  .savep.warn::before{background:#D4A93F}
+  .savep.bad{opacity:1;font-weight:700}
+  .savep.bad::before{background:#E5484D}
+  /* قايمة «اسمك ▾»: الاسم والوضع الليلي والتحديث */
+  .me-wrap{position:relative}
+  #b-me{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--r-pill);
+    padding:3px 12px;font:inherit;font-size:var(--fs-2);cursor:pointer;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+  [data-theme="dark"] #b-me{background:var(--card);border-color:var(--line);color:var(--ink)}
+  #b-me:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .me-menu{position:absolute;left:0;top:calc(100% + 6px);z-index:45;width:230px;background:var(--card);color:var(--ink);
+    border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-2);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .me-menu[hidden]{display:none}
+  .me-hd{font-size:var(--fs-1);color:var(--ink-soft);padding:2px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:var(--sp-2)}
+  .me-menu label{display:block;font-size:var(--fs-1);color:var(--ink-soft);margin:0 6px 3px}
+  header.top .me-menu input{width:100%;background:var(--paper);border:1px solid var(--line);color:var(--ink);
+    border-radius:var(--r-sm);padding:6px 8px;font:inherit;font-size:var(--fs-3);margin-bottom:var(--sp-2)}
+  .me-it{display:block;width:100%;text-align:start;background:none;border:0;border-radius:var(--r-sm);padding:8px;
+    font:inherit;font-size:var(--fs-3);color:var(--ink);cursor:pointer}
+  .me-it:hover{background:var(--teal-soft)}
+  .me-it:disabled{opacity:.5;cursor:default}
 
   nav{
     display:block;background:var(--card);border-bottom:1px solid var(--line);
   }
+  nav:has(> .nav-sub.solo){border-bottom:0}
   /* ٥ أقسام فوق، وتحتها شاشات القسم المفتوح */
   .nav-groups{display:flex;justify-content:center;gap:var(--sp-1);padding:0 var(--sp-3);overflow-x:auto}
-  .nav-groups button{display:flex;align-items:center;gap:8px;padding:var(--sp-3) var(--sp-4)}
-  .nav-groups button .ic{font-size:17px;line-height:1}
+  /* الأقسام بقت جوه الهيدر — فقواعد «nav button» ما بقتش بتوصلها */
+  .nav-groups button{display:flex;align-items:center;gap:8px;padding:var(--sp-3) var(--sp-4);
+    background:none;border:none;border-bottom:3px solid transparent;font:inherit;font-size:var(--fs-3);
+    color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+  .nav-groups button:hover{color:var(--ink)}
+  .nav-groups button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  @media (min-width:761px){
+    header.top .nav-groups{flex:1;align-self:stretch;padding:0}
+    header.top .nav-groups button{align-self:stretch;padding:0 var(--sp-4);color:rgba(255,255,255,.72)}
+    header.top .nav-groups button:hover{color:#fff}
+    header.top .nav-groups button.on{color:#fff;border-bottom-color:#fff}
+    [data-theme="dark"] header.top .nav-groups button{color:var(--ink-soft)}
+    [data-theme="dark"] header.top .nav-groups button:hover{color:var(--ink)}
+    [data-theme="dark"] header.top .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal)}
+    header.top .nav-groups .badge{box-shadow:0 0 0 2px var(--teal-deep)}
+    [data-theme="dark"] header.top .nav-groups .badge{box-shadow:none}
+  }
+  .nav-groups button .ic{font-size:15px;line-height:1}
   .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
   .nav-groups .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
     background:var(--due);color:#fff;font-size:10px;font-weight:700;line-height:1}
   .nav-groups .badge[hidden]{display:none}
-  .nav-sub{display:flex;justify-content:center;gap:6px;padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--line);
+  .nav-sub{display:flex;justify-content:center;gap:6px;padding:6px var(--sp-3);
     overflow-x:auto;background:var(--paper)}
   .nav-sub.solo{display:none}
-  .nav-sub button{border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card);padding:6px 14px;font-size:var(--fs-2)}
+  .nav-sub button{border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card);padding:4px 13px;font-size:var(--fs-2)}
   .nav-sub button.grp-off{display:none}
   .nav-sub button[aria-current="true"]{background:var(--teal);border-color:var(--teal);color:var(--card);font-weight:600}
   nav button{
@@ -117,10 +155,22 @@
   [data-theme="dark"] nav{background:var(--card)}
   nav button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
 
-  main{max-width:1120px;margin:0 auto;padding:var(--sp-5) var(--sp-4) 80px}
+  main{max-width:1280px;margin:0 auto;padding:var(--sp-5) var(--sp-4) 80px}
   section[hidden]{display:none}
   h2{font-size:var(--fs-5);font-weight:600;margin:0 0 4px}
   .hint{color:var(--ink-soft);font-size:var(--fs-3);margin:0 0 18px}
+  /* الشرح تحت العنوان بقى ورا «ⓘ» — بيبان لما تحتاجه بس */
+  .info-b{border:0;background:none;color:var(--ink-soft);font:inherit;font-size:var(--fs-4);cursor:pointer;
+    padding:0 6px;vertical-align:middle;line-height:1}
+  .info-b:hover,.info-b[aria-expanded="true"]{color:var(--teal)}
+  .tmore-row{border:1px dashed var(--line);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);margin:0 0 var(--sp-3)}
+  .tmore-row[hidden]{display:none}
+  .tmore-row .tbar{margin:0 0 var(--sp-2)}
+  .fold-h{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
+  .fold-h h3{margin:0}
+  .fold-h h3 small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft);margin-inline-start:var(--sp-2)}
+  .fold-h + [data-fold]{margin-top:var(--sp-3)}
+  [data-fold][hidden]{display:none}
 
   /* الشريط الرقمي في لوحة المتابعة */
   /* الخط الفاصل بين الكروت بيتم بظل 1px حوالين كل كارت بدل حدود
@@ -352,15 +402,27 @@
   .hm-hello p{margin:0;color:var(--ink-soft);font-size:var(--fs-2)}
   .hm-per{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
   .hm-per select,.hm-per input{width:auto;border-radius:var(--r-pill);padding:6px 14px;font-size:var(--fs-2)}
-  .hm-todo{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;margin-bottom:var(--sp-4)}
-  .hm-todo h3{margin:0;padding:var(--sp-3) var(--sp-4);font-size:var(--fs-4);display:flex;justify-content:space-between;
-    align-items:center;border-bottom:1px solid var(--line)}
+  /* v103: «محتاج منك» كروت صغيرة جنب بعض (٤ في الصف على الشاشة العريضة، ٢ على الموبايل) */
+  .hm-todo{margin-bottom:var(--sp-4)}
+  .hm-todo h3{margin:0 0 var(--sp-2);font-size:var(--fs-4);display:flex;gap:var(--sp-2);align-items:baseline}
   .hm-todo h3 small{font-weight:400;color:var(--ink-soft);font-size:var(--fs-2)}
-  .hm-ti{display:grid;grid-template-columns:36px minmax(0,1fr) auto 14px;gap:var(--sp-3);align-items:center;width:100%;
-    padding:12px var(--sp-4);border:0;border-top:1px solid var(--line);background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
-  .hm-ti:first-of-type{border-top:0}
-  .hm-ti:hover{background:var(--teal-soft)}
-  .hm-ti .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:17px;background:var(--teal-soft)}
+  .hm-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--sp-2)}
+  .hm-ti{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:var(--sp-2);align-items:center;width:100%;
+    padding:var(--sp-2) var(--sp-3);border:1px solid var(--line);border-radius:var(--r-md);background:var(--card);
+    font:inherit;color:inherit;text-align:start;cursor:pointer;min-width:0}
+  .hm-ti:hover{border-color:var(--teal);background:var(--teal-soft)}
+  .hm-ti .tx{min-width:0}
+  .hm-ti b,.hm-ti .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hm-ti .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:var(--teal-soft)}
+  /* الموبايل: كارتين في الصف — الرقم فوق والكلام تحته، من غير الأيقونة عشان الكلام ياخد مكانها */
+  @media (max-width:760px){
+    .hm-tiles{grid-template-columns:1fr 1fr}
+    .hm-ti{grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "tx";gap:2px;align-content:start}
+    .hm-ti .ic{display:none}
+    .hm-ti .v{grid-area:v;font-size:var(--fs-4)}
+    .hm-ti .tx{grid-area:tx}
+    #hm-todo .hm-ti b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--fs-2);line-height:1.35}
+  }
   .hm-ti.bad .ic{background:#F6E3E8} .hm-ti.money .ic{background:#E3F1EA} .hm-ti.warn .ic{background:#F7EEDB}
   [data-theme="dark"] .hm-ti.bad .ic,[data-theme="dark"] .hm-ti.money .ic,[data-theme="dark"] .hm-ti.warn .ic{background:var(--teal-soft)}
   .hm-ti b{display:block;font-weight:600}
@@ -368,26 +430,24 @@
   .hm-ti .s.red{color:var(--due);font-weight:600}
   .hm-ti .v{font-weight:700;white-space:nowrap}
   .hm-ti.money .v{color:var(--gain)} .hm-ti.bad .v{color:var(--due)}
-  .hm-ti .go{color:var(--ink-soft)}
-  .hm-ok{margin:0;padding:var(--sp-4);text-align:center;color:var(--gain);font-weight:600}
+  .hm-ok{margin:0;padding:var(--sp-3);text-align:center;color:var(--gain);font-weight:600;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-md)}
   .hm-big{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-3);margin-bottom:var(--sp-4)}
-  .hm-k{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
+  .hm-k{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);
     cursor:pointer;font:inherit;color:inherit;text-align:start;min-width:0}
   .hm-k:hover{border-color:var(--teal)}
   .hm-k > span{font-size:var(--fs-2);color:var(--ink-soft)}
-  .hm-k strong{display:block;font-size:var(--fs-6);font-weight:700;margin:2px 0;white-space:nowrap}
+  .hm-k strong{display:block;font-size:var(--fs-5);font-weight:700;margin:2px 0;white-space:nowrap}
   .hm-k small{font-size:var(--fs-1);color:var(--ink-soft)}
   .hm-month{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-4)}
   .hm-month h3{margin:0 0 var(--sp-2);font-size:var(--fs-3);display:flex;justify-content:space-between;gap:var(--sp-2)}
   .hm-month h3 button{font:inherit;font-weight:400;font-size:var(--fs-2);color:var(--teal);background:none;border:0;cursor:pointer}
-  .hm-mrow{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2)}
-  .hm-mrow div{padding:4px 0}
-  .hm-mrow span{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
-  .hm-mrow b{font-size:var(--fs-4)}
+  .hm-mrow{display:flex;flex-wrap:wrap;gap:4px var(--sp-4);font-size:var(--fs-2);color:var(--ink-soft)}
+  .hm-mrow b{font-size:var(--fs-3);color:var(--ink);margin-inline-start:2px}
+  .hm-mrow b.v-due{color:var(--due)}
+  .hm-mrow em{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:5px}
   .hm-bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:var(--sp-2);display:flex}
   .hm-bar i{display:block;height:100%}
-  .hm-legend{display:flex;gap:var(--sp-3);font-size:var(--fs-1);color:var(--ink-soft);margin-top:4px;flex-wrap:wrap}
-  .hm-legend em{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:2px;margin-inline-end:4px}
   .hm-more{margin-top:var(--sp-2)}
   .hm-more > summary{cursor:pointer;color:var(--teal);font-weight:600;padding:var(--sp-2) 0;font-size:var(--fs-3)}
   @media (max-width:980px){ .hm-big{grid-template-columns:repeat(3,1fr)} }
@@ -702,15 +762,24 @@
   #t-sales td.items{max-width:320px}
   #t-sales tbody td{padding-top:var(--sp-2);padding-bottom:var(--sp-2)}
   #t-sales .dtag{font-size:11px;color:var(--ink-soft);margin-top:2px}
-  #t-sales td.rowacts{white-space:normal;text-align:end}
-  #t-sales .rownext{display:block;margin:0 0 4px auto;padding:5px 10px;font-size:var(--fs-2);white-space:normal;max-width:130px;line-height:1.3}
+  #t-sales td.rowacts{text-align:end}
+  #t-sales .rownext{display:inline-block;vertical-align:middle;margin:0;padding:4px 10px;font-size:var(--fs-2);white-space:normal;max-width:130px;line-height:1.3}
+  /* v102: الحالة في سطر واحد — الشارة وبعدها الخطوة وبعدها مين بيوصّل */
+  #t-sales td.stat{white-space:normal;min-width:180px}
+  #t-sales td.stat select.rowst{vertical-align:baseline}
+  #t-sales td.stat .stepline{display:inline;margin:0 0 0 0;margin-inline-start:6px}
+  #t-sales td.stat .dtag{display:inline;margin:0;margin-inline-start:6px}
+  #t-sales td.stat .dtag::before{content:"· "}
+  #t-sales td.rowacts{white-space:nowrap}
   .dd-nav{display:inline-flex;gap:4px}
   .dd-x{display:none}
   /* الملخص فوق: سطر واحد، وكل رقم بيفتح تفاصيله زي ما هو */
-  #s-stats{display:flex;flex-wrap:wrap;gap:0;margin-bottom:var(--sp-3)}
-  #s-stats > .kpi{display:flex;align-items:baseline;gap:6px;padding:8px 14px;flex:0 1 auto;min-width:0}
-  #s-stats > .kpi > span:first-child{margin:0;font-size:var(--fs-2)}
-  #s-stats > .kpi > strong{font-size:var(--fs-4);margin:0}
+  /* v102: سطر نص صغير بدل صف كروت — وكل رقم لسه بيفتح تفاصيله */
+  #s-stats{display:flex;flex-wrap:wrap;gap:2px 4px;margin:0 0 var(--sp-2);background:none;border:0;border-radius:0}
+  #s-stats > .kpi{display:flex;align-items:baseline;gap:5px;padding:2px 8px;flex:0 1 auto;min-width:0;
+    background:none;box-shadow:none;border-radius:var(--r-sm)}
+  #s-stats > .kpi > span:first-child{margin:0;font-size:var(--fs-1)}
+  #s-stats > .kpi > strong{font-size:var(--fs-3);margin:0}
   #s-stats > .kpi > .sub,#s-stats > .kpi > .kpi-go{display:none}
   /* شريط الاختيار: سطر رفيع لازق تحت */
   #s-bulk{position:sticky;bottom:12px;z-index:15;padding:8px 12px;margin-top:var(--sp-2);box-shadow:0 6px 24px rgba(0,0,0,.18)}
@@ -744,8 +813,13 @@
     #t-sales tr.detail .ostep-ph > div + div{border-inline-start:0;padding-inline-start:0}
   }
   @media (max-width:760px){
-    #s-stats > .kpi{flex:1 1 45%;padding:8px 10px;flex-direction:column;align-items:flex-start;gap:0}
+    #s-stats > .kpi{padding:1px 4px}
     #s-stats > .kpi > strong{white-space:nowrap}
+    /* البحث والفلاتر و«+ أوردر» في صف واحد */
+    .s-search{min-width:0}
+    #b-newsale .lg{display:none}
+    .s-head h2{margin-bottom:var(--sp-2)}
+
     #s-bulk{bottom:78px}
     #t-sales td.items{max-width:none}
     #t-sales td.rowacts{display:flex;gap:4px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
@@ -942,10 +1016,35 @@
   }
 
   /* ================= مراحل الأوردر ================= */
-  .sg-phase{display:grid;grid-template-columns:2fr 2fr 1fr;gap:var(--sp-2);font-size:var(--fs-1);color:var(--ink-soft);margin-bottom:4px}
-  .sg-phase div{border-top:2px solid var(--line);padding-top:2px}
-  .sg-phase .ph-cu{border-color:var(--teal)} .sg-phase .ph-co{border-color:var(--warn)}
-  .sg-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);margin-bottom:var(--sp-4)}
+  /* v102: شريط واحد رفيع — «الكل» + المراحل الخمسة، بدل ٥ كروت كبار وصف مراحل فوقهم */
+  .sg-strip{display:flex;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    overflow:hidden;margin-bottom:var(--sp-3)}
+  .sg-strip .sg-bar{display:flex;flex:1;min-width:0}
+  .sg-strip .sg-card{flex:1 1 0;border:0;border-radius:0;border-inline-start:1px solid var(--line);padding:6px 12px;
+    display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"n t" "c s";column-gap:6px;align-items:baseline}
+  .sg-strip .sg-all{flex:0 0 auto;border-inline-start:0;min-width:72px;grid-template-areas:"t" "c";grid-template-columns:auto}
+  .sg-strip .sg-card .n{grid-area:n;width:16px;height:16px;font-size:10px;margin:0;align-self:center}
+  .sg-strip .sg-card .t{grid-area:t;font-size:var(--fs-1);font-weight:500;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sg-strip .sg-card .c{grid-area:c;font-size:var(--fs-4);margin:0;white-space:nowrap}
+  .sg-strip .sg-card .s{grid-area:s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sg-strip .sg-card:hover{background:var(--teal-soft)}
+  .sg-strip .sg-card.on{background:var(--teal-soft);box-shadow:inset 0 -2px 0 var(--teal)}
+  .sg-strip .sg-card.on .t{color:var(--teal);font-weight:700}
+  /* الموبايل: المراحل شرايط صغيرة «الاسم الرقم» بتتسحب بالعرض */
+  @media (max-width:760px){
+    .sg-strip{overflow-x:auto;scrollbar-width:none}
+    .sg-strip::-webkit-scrollbar{display:none}
+    .sg-strip .sg-bar{flex:0 0 auto}
+    .sg-strip .sg-card,.sg-strip .sg-all{flex:0 0 auto;min-width:0;grid-template-areas:"t c";grid-template-columns:auto auto;
+      padding:8px 12px;column-gap:6px}
+    .sg-strip .sg-card .n,.sg-strip .sg-card .s{display:none}
+    .sg-strip .sg-card .t{font-size:var(--fs-2);overflow:visible}
+    .sg-strip .sg-card .c{font-size:var(--fs-3)}
+    #t-sales td.stat select.rowst{min-height:30px;padding:1px var(--sp-2)}
+    #t-sales .rownext{min-height:34px;padding:4px 12px}
+    #t-sales td.stat .stepline{font-size:var(--fs-1)}
+    #t-sales td.stat .dtag{white-space:nowrap}
+  }
   .sg-card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
     padding:var(--sp-3);cursor:pointer;text-align:start;font:inherit;color:inherit;min-width:0}
   .sg-card:hover{border-color:var(--teal)}
@@ -958,7 +1057,18 @@
   .sg-card.on{border-color:var(--teal);box-shadow:inset 0 -3px 0 var(--teal)}
   .sg-card.on .n{background:var(--teal);color:var(--card)}
   .sg-card.alert .c{color:var(--due)}
-  #b-sall.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
+  /* راس الشاشة: العنوان والبحث والأزرار في سطر واحد على الكمبيوتر */
+  @media (min-width:761px){
+    .s-head{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+    .s-head h2{margin:0;white-space:nowrap}
+    .s-head .toolbar{flex:1;margin:0}
+  }
+  #filters-panel .stabs{grid-column:1 / -1;margin:0}
+  .sel-tip{display:none}
+  @media (max-width:760px){
+    #tab-sales .sel-tip{display:block;font-size:var(--fs-1);color:var(--ink-soft);text-align:center;margin:var(--sp-2) 0 0}
+    #tab-sales:has(#t-sales.sel-mode) .sel-tip{display:none}
+  }
   .sg-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4)}
   .sg-ph{margin-bottom:var(--sp-3)}
   .sg-ph h3{margin:0;font-size:var(--fs-4)}
@@ -1001,11 +1111,6 @@
   .sg-co-f input{width:130px;padding:7px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font:inherit;background:var(--card);color:var(--ink)}
   .sg-panel .sg-row.done{grid-template-columns:90px 1.2fr 1.4fr 110px auto}
   @media (max-width:760px){
-    .sg-phase{display:none}
-    .sg-bar{display:flex;overflow-x:auto;gap:6px;margin:0 0 var(--sp-3);padding:0 0 4px;
-      scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-    .sg-card{flex:0 0 136px;scroll-snap-align:start;padding:10px}
-    .sg-card .c{font-size:var(--fs-5)}
     .sg-panel{padding:var(--sp-3)}
     .sg-row,.sg-co-b .sg-row,.sg-co-b .sg-row.ret,.sg-panel .sg-row.done{grid-template-columns:1fr auto;gap:6px var(--sp-2)}
     .sg-row .items,.sg-row .sg-inl,.sg-row .sg-acts{grid-column:1 / -1}
@@ -1184,6 +1289,15 @@
   .stats span{display:block;font-size:var(--fs-1);color:var(--ink-soft);margin-bottom:var(--sp-1)}
   .stats strong{font-size:var(--fs-5);font-weight:600;letter-spacing:-.2px;display:block}
   .stats small{font-size:var(--fs-1);color:var(--ink-soft);opacity:.8;display:block;margin-top:var(--sp-1)}
+  /* على الكمبيوتر: التسمية والرقم في سطر واحد، والسطر الصغير بيبان لما تقف على الكارت.
+     على التاتش مفيش «تقف عليه» — فبيفضل ظاهر. */
+  @media (hover:hover) and (min-width:761px){
+    .stats > div{display:flex;align-items:baseline;justify-content:space-between;gap:4px var(--sp-2);flex-wrap:wrap;
+      padding:var(--sp-2) var(--sp-3)}
+    .stats span{margin:0}
+    .stats small{display:none}
+    .stats > div[title]{cursor:help}
+  }
 
   /* الجدول: رأس ثابت + زيبرا + شريط حالة على الحافة */
   .s-wrap{overflow:auto;max-height:72vh}
@@ -1439,29 +1553,46 @@
   @media (max-width:760px){
     .s-wrap{overflow:visible;max-height:none;border:none;background:none}
     #t-sales thead{display:none}
+    /* v102: كارت الأوردر ٣ سطور — (الرقم والعميل والمبلغ) / (الأصناف) / (الحالة وزرار الخطوة الجاية).
+       الحافة الملوّنة على الجنب بتقول الحالة من بعيد. */
     #t-sales tbody tr.order{
-      display:grid;grid-template-columns:minmax(0,1fr) minmax(min-content,48%);gap:var(--sp-1) var(--sp-2);
-      background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
-      margin-bottom:var(--sp-2);padding:var(--sp-3) var(--sp-3);align-items:center;
+      display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+      grid-template-areas:"lead cust total" "items items items" "stat stat acts";
+      gap:2px var(--sp-2);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+      border-inline-start:3px solid var(--line);
+      margin-bottom:var(--sp-2);padding:var(--sp-2) var(--sp-3);align-items:center;
+      -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
     }
-    #t-sales tbody tr.order td{border:none;padding:var(--sp-1) 0;background:none!important;min-width:0}
+    #t-sales td.cust .secondary{-webkit-user-select:text;user-select:text}
+    #t-sales tr.order[data-st="delivered"]{border-inline-start-color:var(--gain)}
+    #t-sales tr.order[data-st="progress"]{border-inline-start-color:var(--warn)}
+    #t-sales tr.order[data-st="cancelled"]{border-inline-start-color:var(--due)}
+    #t-sales tr.order.sel{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+    #t-sales tbody tr.order td{border:none;padding:0;background:none!important;min-width:0}
     #t-sales{width:100%;table-layout:fixed}
-    #t-sales td.lead{border-inline-start:none;grid-column:1;grid-row:1}
-    #t-sales td.cust{grid-column:1;grid-row:2}
-    #t-sales td.items{grid-column:1/-1;grid-row:3;margin-top:var(--sp-2);padding-top:8px!important;
-      border-top:1px dashed var(--line)!important}
-    #t-sales td.total{grid-column:1;grid-row:4;padding-top:8px!important}
-    #t-sales td.stat{grid-column:2;grid-row:1;text-align:left}
+    #t-sales td.selcell{display:none!important}
+    #t-sales.sel-mode tbody tr.order{grid-template-columns:auto auto minmax(0,1fr) auto;
+      grid-template-areas:"sel lead cust total" "sel items items items" "sel stat stat acts"}
+    #t-sales.sel-mode td.selcell{display:block!important;grid-area:sel;align-self:center}
+    #t-sales td.lead{border-inline-start:none;grid-area:lead;align-self:start}
+    #t-sales td.lead .secondary{display:none}
+    #t-sales td.cust{grid-area:cust;align-self:start}
+    #t-sales td.cust .primary{font-weight:700}
+    #t-sales td.items{grid-area:items;margin:2px 0 4px}
+    #t-sales td.items .goods .thumb,#t-sales td.items .goods .dd-noimg{display:none}
+    #t-sales td.total{grid-area:total;align-self:start;text-align:end}
+    #t-sales td.stat{grid-area:stat}
     /* كارت الأوردر على الموبايل: من غير تسمية قبل كل خانة (الكارت
        واضح لوحده)، والحالة ما تتقصّش، والمبلغ ما يتكسرش على سطرين */
     #t-sales tbody tr.order td{display:block}
     #t-sales tbody tr.order td::before{content:none}
-    #t-sales td.stat{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:start}
+    #t-sales td.stat{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;text-align:start}
     #t-sales td.stat select.rowst{flex:0 0 auto;max-width:100%}
-    #t-sales td.stat .stepline{text-align:end}
+    #t-sales td.stat .stepline,#t-sales td.stat .dtag{margin:0}
     #t-sales td.total .pill,#t-sales td.total .primary{white-space:nowrap}
     #t-sales td.cust .primary{display:block}
-    #t-sales td.rowacts{grid-column:2;grid-row:4;text-align:left;align-self:end}
+    #t-sales td.rowacts{grid-area:acts;text-align:left;align-self:center}
+    #t-sales td.rowacts .chev{display:none}
     #t-sales tr.detail td{background:none;border:none}
     .detail-in{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
       margin:-4px 0 10px;padding:var(--sp-3)}
@@ -1474,9 +1605,8 @@
   /* الجداول بتتحول لكروت على الموبايل */
   @media (max-width:760px){
     main{padding:var(--sp-4) var(--sp-2) 70px}
-    header.top{padding:var(--sp-2) var(--sp-3);gap:var(--sp-2)}
+    header.top{padding:var(--sp-2) var(--sp-3);gap:var(--sp-2);min-height:0}
     header.top h1{font-size:var(--fs-4)}
-    header.top input{width:88px}
     /* الأقسام شريط ثابت تحت زي التطبيقات — صباعك بيوصله */
     .nav-groups{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--card);border-top:1px solid var(--line);
       display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
@@ -1545,7 +1675,9 @@
     .quickpay input,
     .lmix-row input,.lmix-row select,
     #t-lines input,#t-lines select,
-    .s-search input{ font-size:var(--fs-4);min-height:44px }
+    .s-search input{ font-size:16px;min-height:44px }   /* أقل من 16 الآيفون بيعمل زوم وانت بتكتب */
+    /* شارة الحالة select برضه — من غير ده كانت بتطلع دايرة كبيرة في كارت الأوردر */
+    select.rowst{ font-size:var(--fs-2);min-height:34px;padding:2px var(--sp-3) }
     /* مربّعات الاختيار مش خانات كتابة — الارتفاع بيوسّعها بدون داعي */
     input[type="checkbox"]{ min-height:0;width:auto }
     td.selcell input,th.selcell input,.allow input{ width:22px;height:22px }
@@ -1570,7 +1702,7 @@
     .lmix-row > :nth-child(3){ grid-area:q }
     .lmix-row > .rm{ grid-area:x;align-self:center }
 
-    /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 13px */
+    /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 12px */
     .hintline,.mnote,.lmix-empty,.lmix-head,.lmix-sum,.fset > h3,
     .fgrid label,.filters label,.stabs b,.lrow .lcost,.lrow-foot .ltot em,
     tbody td::before,.fgroup .glabel,.band span,.mbox h4,.rowact,
@@ -1583,14 +1715,30 @@
 </head>
 <body>
 
+<!-- صف واحد فوق: الاسم · الأقسام · حالة الحفظ وقايمة «اسمك ▾».
+     الأقسام كانت صف لوحدها تحت الهيدر، وخانة الاسم والوضع الليلي والتحديث
+     صف تاني — ٣ صفوف قبل ما الشغل يبان. على الموبايل الأقسام شريط تحت زي ما هي. -->
 <header class="top">
-  <h1>Lora Collection <span id="ver-badge" style="font-weight:400;font-size:var(--fs-1);opacity:.75;padding-inline-start:6px"></span></h1>
+  <h1>Lora Collection</h1>
+  <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
+    <button type="button" data-group="home"><span class="ic" aria-hidden="true">⌂</span><span class="lb">الرئيسية</span></button>
+    <button type="button" data-group="orders"><span class="ic" aria-hidden="true">📦</span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
+    <button type="button" data-group="goods"><span class="ic" aria-hidden="true">👗</span><span class="lb">البضاعة</span></button>
+    <button type="button" data-group="money"><span class="ic" aria-hidden="true">💰</span><span class="lb">الفلوس</span></button>
+    <button type="button" data-group="more"><span class="ic" aria-hidden="true">☰</span><span class="lb">المزيد</span></button>
+  </div>
   <div class="who">
-    <label for="me" style="margin:0;color:#fff;opacity:.8">المستخدم</label>
-    <input id="me" placeholder="اسمك" autocomplete="off">
-    <button id="b-theme" title="الوضع الليلي" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--r-sm);padding:var(--sp-1) 11px;font:inherit;font-size:var(--fs-3);cursor:pointer">ليلي</button>
-    <span id="save-pill" style="background:rgba(255,255,255,.18);border-radius:var(--r-pill);padding:var(--sp-1) 10px;font-size:var(--fs-2)">محفوظ</span>
-    <button id="b-refresh" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--r-sm);padding:var(--sp-1) 12px;font:inherit;font-size:var(--fs-3);cursor:pointer">تحديث</button>
+    <span id="save-pill" class="savep" role="status">محفوظ</span>
+    <div class="me-wrap">
+      <button type="button" id="b-me" aria-haspopup="true" aria-expanded="false" aria-controls="me-menu"><span id="me-lab">اسمك</span> ▾</button>
+      <div class="me-menu" id="me-menu" hidden>
+        <div class="me-hd">Lora Collection <span id="ver-badge"></span></div>
+        <label for="me">اسمك</label>
+        <input id="me" placeholder="اسمك" autocomplete="off">
+        <button type="button" class="me-it" id="b-theme" title="الوضع الليلي">ليلي</button>
+        <button type="button" class="me-it" id="b-refresh">تحديث</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -1599,13 +1747,6 @@
 </div>
 <!-- التنقل: ٥ أقسام، وكل قسم تحته شاشاته. على الموبايل الأقسام شريط ثابت تحت. -->
 <nav id="nav">
-  <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
-    <button type="button" data-group="home"><span class="ic" aria-hidden="true">⌂</span><span class="lb">الرئيسية</span></button>
-    <button type="button" data-group="orders"><span class="ic" aria-hidden="true">📦</span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
-    <button type="button" data-group="goods"><span class="ic" aria-hidden="true">👗</span><span class="lb">البضاعة</span></button>
-    <button type="button" data-group="money"><span class="ic" aria-hidden="true">💰</span><span class="lb">الفلوس</span></button>
-    <button type="button" data-group="more"><span class="ic" aria-hidden="true">☰</span><span class="lb">المزيد</span></button>
-  </div>
   <div class="nav-sub" id="nav-sub">
     <button data-tab="dash" data-grp="home" aria-current="true">الرئيسية</button>
     <button data-tab="sales" data-grp="orders">الأوردرات</button>
@@ -1642,8 +1783,9 @@
       <span class="per-cust" hidden><input type="date" id="per-to-home" class="per-to" aria-label="لـ"></span>
     </div>
   </div>
-  <section class="hm-todo" id="hm-todo"></section>
+  <!-- v103: الأرقام المهمة الأول، وبعدها «محتاج منك» كروت صغيرة جنب بعض -->
   <section class="hm-big" id="hm-big"></section>
+  <section class="hm-todo" id="hm-todo"></section>
   <section class="hm-month" id="hm-month"></section>
 
   <details class="hm-more" id="dash-more">
@@ -1714,6 +1856,7 @@
 
 <!-- مبيعات -->
 <section id="tab-sales" hidden>
+  <div class="s-head">
   <h2>الأوردرات</h2>
 
   <div class="toolbar">
@@ -1723,25 +1866,28 @@
         <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
       </svg>
     </div>
-    <button class="tbtn" type="button" id="b-sall" aria-pressed="false">الكل</button>
     <button class="tbtn" type="button" id="b-filters" aria-expanded="false" aria-controls="filters-panel">
       فلاتر <span class="fcount" id="flt-count" hidden>0</span>
     </button>
-    <button class="tbtn primary" type="button" id="b-newsale">+ أوردر جديد</button>
+    <button class="tbtn primary" type="button" id="b-newsale">+ أوردر<span class="lg"> جديد</span></button>
+  </div>
   </div>
 
-  <!-- مراحل الأوردر: كل مرحلة ليها بانل فيها الحاجة اللي تخصها بس -->
+  <!-- مراحل الأوردر: شريط واحد — «الكل» وبعدها المراحل الخمسة، وكل مرحلة ليها بانل فيها الحاجة اللي تخصها بس -->
   <div id="s-stagebox">
-    <div class="sg-phase" aria-hidden="true"><div class="ph-cu">مع العميل</div><div class="ph-co">مع شركة الشحن</div><div>أرشيف</div></div>
-    <div class="sg-bar" id="s-stages" role="group" aria-label="مراحل الأوردر"></div>
+    <div class="sg-strip">
+      <button class="sg-card sg-all" type="button" id="b-sall" aria-pressed="false"><span class="t">الكل</span><span class="c num" id="sall-n"></span></button>
+      <div class="sg-bar" id="s-stages" role="group" aria-label="مراحل الأوردر"></div>
+    </div>
     <div class="sg-panel" id="s-stage-panel"></div>
   </div>
 
   <div id="s-allview">
-  <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
   <input type="hidden" id="flt-status" value="">
 
+  <!-- فلتر الحالة (جاري/مسلّم/مرتجع/ملغي) بقى جوه «فلاتر» — ولو شغال بيبان chip تحت -->
   <div class="filters" id="filters-panel" hidden>
+    <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
     <div><label for="flt-party">العميل</label><select id="flt-party"></select></div>
     <div><label for="flt-item">الصنف</label><select id="flt-item"></select></div>
     <div><label for="flt-ship">شركة الشحن</label><select id="flt-ship"></select></div>
@@ -1766,6 +1912,7 @@
 
 
   <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
+  <p class="sel-tip">دوسة طويلة على أوردر بتختاره — وتقدر تختار كذا واحد وتغيّرهم مع بعض.</p>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
   <div class="bulkbar" id="s-bulk" hidden>
     <span class="bcount" id="s-bcount">0</span>
@@ -1847,16 +1994,22 @@
 
 <!-- مشتريات -->
 <section id="tab-purch" hidden>
-  <h2>مشتريات</h2>
-  <p class="hint">الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
+  <h2>مشتريات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
   <div class="tbar">
     <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
-    <button class="tbtn" type="button" id="b-xchg-open">⇄ استبدال مع مورد</button>
-    <button class="tbtn" type="button" id="b-pu-tpl">نزّل شيت الفاتورة</button>
-    <button class="tbtn" type="button" id="b-pu-up">ارفع الشيت بعد ما تملاه</button>
+    <button class="tbtn" type="button" data-foldbtn="pu-tools" aria-expanded="false" aria-controls="pu-tools">⋯ أكتر</button>
     <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
   </div>
-  <p class="hint">الشيت بيفتح في إكسل عادي. املا رأس الفاتورة فوق وسطر لكل لون ومقاس تحت، واحفظه <strong>CSV</strong> زي ما هو، وبعدين ارفعه — هيتفتح قدامك في فورم الشراء تراجعه وتحفظه.</p>
+  <!-- الحاجات اللي مش كل يوم: استبدال مع مورد وشيت الفاتورة — ورا «⋯ أكتر» -->
+  <div class="tmore-row" id="pu-tools" data-fold hidden>
+    <div class="tbar">
+      <button class="tbtn" type="button" id="b-xchg-open">⇄ استبدال مع مورد</button>
+      <button class="tbtn" type="button" id="b-pu-tpl">نزّل شيت الفاتورة</button>
+      <button class="tbtn" type="button" id="b-pu-up">ارفع الشيت بعد ما تملاه</button>
+    </div>
+    <p class="hint" style="margin:0">الشيت بيفتح في إكسل عادي. املا رأس الفاتورة فوق وسطر لكل لون ومقاس تحت، واحفظه <strong>CSV</strong> زي ما هو، وبعدين ارفعه — هيتفتح قدامك في فورم الشراء تراجعه وتحفظه.</p>
+  </div>
   <p class="note" id="pu-msg" hidden></p>
 
   <div class="stats" id="pu-top"></div>
@@ -2176,8 +2329,8 @@
 
 <!-- الأصناف -->
 <section id="tab-items" hidden>
-  <h2>الأصناف</h2>
-  <p class="hint">سعر البيع هنا بيتحط تلقائي في شاشة البيع، وتقدر تغيّره في أي عملية.</p>
+  <h2>الأصناف<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>سعر البيع هنا بيتحط تلقائي في شاشة البيع، وتقدر تغيّره في أي عملية.</p>
   <div class="tbar">
     <button class="tbtn primary" type="button" data-openentry="items">+ صنف جديد</button>
   </div>
@@ -2316,7 +2469,9 @@
   <p class="hint" style="margin:0 0 var(--sp-3)">شريك جديد؟ من <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة.</p>
 
   <div class="panel" id="dist-panel">
-    <h3>توزيع أرباح</h3>
+    <div class="fold-h"><h3>توزيع أرباح</h3>
+      <button class="tbtn" type="button" data-foldbtn="dist-body" aria-expanded="false" aria-controls="dist-body">وزّع أرباح ▾</button></div>
+    <div id="dist-body" data-fold hidden>
     <div class="dsteps" id="dist-steps"><span class="on">الفترة والمبلغ</span><span>الأنصبة</span><span>تأكيد</span></div>
     <div class="quick" id="dist-per" role="group" aria-label="الفترة">
       <button type="button" data-distper="month">الشهر ده</button>
@@ -2346,6 +2501,7 @@
         <button class="tbtn primary" type="button" id="b-dist-do">أكّد التوزيع ✓</button>
         <button class="tbtn" type="button" id="b-dist-cancel">→ رجوع</button>
       </div>
+    </div>
     </div>
     <p class="note ok" id="dist-done" hidden></p>
   </div>
@@ -2451,8 +2607,8 @@
 
 <!-- التسعير -->
 <section id="tab-price" hidden>
-  <h2>التسعير</h2>
-  <p class="hint">الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
+  <h2>التسعير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
 
   <div class="quick" id="prc-tabs" role="tablist" aria-label="التسعير">
     <button type="button" data-prctab="list" class="on">أسعار الأصناف</button>
@@ -2589,8 +2745,8 @@
 
 <!-- التقارير -->
 <section id="tab-rep" hidden>
-  <h2>تقارير</h2>
-  <p class="hint">كل الأرقام هنا بتتبع نفس فترة لوحة المتابعة.</p>
+  <h2>تقارير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>كل الأرقام هنا بتتبع نفس فترة لوحة المتابعة.</p>
   <div class="panel" style="padding:12px 14px">
     <div class="grid" style="align-items:end">
       <div><label for="per-rep">الفترة</label>
@@ -2611,7 +2767,9 @@
 
   <!-- السؤال الأهم: أبيع بكام؟ -->
   <div class="panel">
-    <h3>أبيع بكام؟</h3>
+    <div class="fold-h"><h3>أبيع بكام؟ <small id="rep-be-sum"></small></h3>
+      <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">التفاصيل ▾</button></div>
+    <div id="rep-be-body" data-fold hidden>
     <div class="money3" id="rep-be"></div>
     <div class="fset" style="margin-top:14px">
       <h3>وعشان أكسب مبلغ معيّن؟</h3>
@@ -2630,6 +2788,7 @@
         <strong>هامش المساهمة</strong> — وهو اللي بيغطّي الثابت، واللي يزيد بعده يبقى ربح.</p>
       <div class="tbl-wrap"><table id="t-rep-cost"></table></div>
     </details>
+    </div>
   </div>
 
   <!-- الأداء -->
@@ -2700,15 +2859,15 @@
 
 <!-- السجل -->
 <section id="tab-log" hidden>
-  <h2>سجل الحركات</h2>
-  <p class="hint">آخر ١٠٠ حركة، وكل واحدة مسجّل عليها اسم اللي أدخلها ووقتها.</p>
+  <h2>سجل الحركات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>آخر ١٠٠ حركة، وكل واحدة مسجّل عليها اسم اللي أدخلها ووقتها.</p>
   <div class="tbl-wrap"><table id="t-log"></table></div>
 </section>
 
 <!-- نسخة احتياطية -->
 <section id="tab-backup" hidden>
-  <h2>الإعدادات</h2>
-  <p class="hint">البيانات محفوظة ومشتركة بين كل من يفتح هذا الملف. خُد نسخة كل فترة.</p>
+  <h2>الإعدادات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>البيانات محفوظة ومشتركة بين كل من يفتح هذا الملف. خُد نسخة كل فترة.</p>
   <div class="panel">
     <h3>المزامنة بين الأجهزة</h3>
     <p class="note ok" id="sync-state"></p>
@@ -3077,8 +3236,36 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "99";
+  var VERSION = "103";
   var CHANGELOG = [
+    { v:"103", d:"2026-10-02", items:[
+      "الرئيسية: الأرقام المهمة (صافي الربح · لازم تبيع بكام · الخزنة · المخزون · لك عند الشركات) بقت فوق",
+      "«محتاج منك النهارده» بقت كروت صغيرة جنب بعض بدل سطر عريض لكل حاجة — ٤ في الصف على الكمبيوتر و٢ على الموبايل",
+      "الأصناف اللي قرّبت تخلص في كارت واحد بعددها وأسماء أول اتنين (واللي خلصت في كارت لوحدها) — بتوديك على فلترها في المخزون",
+      "ملخص الفترة سطر واحد بالألوان فوق الشريط بدل ٥ خانات ومفتاح ألوان",
+      "إصلاح: جدول الأوردرات على الشاشات المتوسطة كان بيتسحب بالعرض شوية لما تفتح أوردر"
+    ]},
+    { v:"102", d:"2026-10-02", items:[
+      "الأوردرات: العنوان والبحث والفلاتر و«+ أوردر جديد» في سطر واحد",
+      "المراحل الخمسة بقت شريط واحد رفيع و«الكل» أوله — كل خانة لسه بتفتح مرحلتها",
+      "فلتر الحالة (محتاج مني حاجة/جاري/مسلّم/مرتجع/ملغي) بقى جوه «فلاتر»، ولو شغال بيبان تحت «الحالة: …» وبيتعدّ على زرار الفلاتر",
+      "الملخص بقى سطر نص صغير، وكل أوردر سطر واحد: الحالة والخطوة ومين بيوصّل جنب بعض، والتاريخ مختصر",
+      "الموبايل: كارت الأوردر ٣ سطور (الرقم والعميل والمبلغ / الأصناف / الحالة وزرار الخطوة)، والمراحل شرايط بتتسحب، والبحث والفلاتر و«+ أوردر» في صف واحد",
+      "الموبايل: مربع الاختيار بيبان بس لما تدوس دوسة طويلة على أوردر — وبعدها كل دوسة بتضيف أو تشيل أوردر"
+    ]},
+    { v:"101", d:"2026-10-02", items:[
+      "الشريط اللي فوق بقى صف واحد: الاسم والأقسام وحالة الحفظ — بدل ٣ صفوف قبل ما الشغل يبان",
+      "اسمك والوضع الليلي والتحديث ورقم الإصدار جوه زرار «اسمك ▾»، و«محفوظ» بقت نقطة: أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ",
+      "الشرح اللي تحت عناوين الشاشات بقى ورا «ⓘ» جنب العنوان — بيبان لما تدوس عليه",
+      "المشتريات: استبدال مع مورد وشيت الفاتورة جوه «⋯ أكتر» · رأس المال: توزيع الأرباح ورا زرار «وزّع أرباح» · التقارير: «أبيع بكام؟» مطوية والرقم المهم في عنوانها",
+      "الكروت اللي فوق كل شاشة أقصر على الكمبيوتر: التسمية والرقم في سطر، والسطر الصغير بيبان لما تقف على الكارت"
+    ]},
+    { v:"100", d:"2026-10-02", items:[
+      "شكل أهدى وأقل زحمة: خط جديد (IBM Plex Sans Arabic) أخف وأضيق وأرقامه أوضح",
+      "كل الخطوط نزلت درجة (النص 13 بدل 14 والعناوين 18 بدل 20) والمسافات أضيق شوية",
+      "على الشاشات الكبيرة المحتوى بقى أعرض (1280 بدل 1120) بدل الفراغ اللي على الجنبين",
+      "الموبايل: خانات الكتابة فاضلة 16 عشان الآيفون ما يعملش زوم، وشارة الحالة في كارت الأوردر رجعت شارة صغيرة بدل الدايرة الكبيرة"
+    ]},
     { v:"99", d:"2026-10-02", items:[
       "درج الأوردر: «صافي الربح المتوقع» بيظهر تحت وانت بتجهّز الأوردر (جاري/مقترح) — مش بعد التسليم بس",
       "الحسبة: البضاعة − تكلفتها بمتوسط الشراء + شحن على العميل − شحن للشركة، والهامش — والرقم بيتحدّث مع كل تغيير في الأصناف والأسعار والشحن",
@@ -3817,7 +4004,10 @@
 
   }
 
+  // اسمك على زرار القايمة فوق
+  function meLab(){ var l = document.getElementById("me-lab"); if(l) l.textContent = me || "اسمك"; }
   function saveMe(){
+    meLab();
     if(LS){ try{ LS.setItem("naya:me", me); }catch(e){} }
     if(CLOUD){ try{ withTimeout(CLOUD.set("trade:me", me, false)).catch(function(){}); }catch(e){} }
   }
@@ -4050,10 +4240,10 @@
       if(sync.on){
         var okSync = sync.state === "متزامنة";
         pill.textContent = okSync ? "متزامن" : sync.state;
-        pill.style.background = okSync ? "#26694A" : "#8A6B12";
+        pill.className = "savep" + (okSync ? "" : " warn");
       } else {
         pill.textContent = safe ? "محفوظ" : "غير محفوظ";
-        pill.style.background = safe ? "rgba(255,255,255,.18)" : "#8C2F39";
+        pill.className = "savep" + (safe ? "" : " bad");
       }
     }
 
@@ -5292,12 +5482,25 @@
       });
     }
     if(canTab("inv")){
-      lowStockList().forEach(function(x){
-        var lb = vLabel(x.color, x.size);
-        line({ ic:"⚠", cls: x.free <= 0 ? "bad" : "warn",
-               t:x.name + (lb ? " · " + lb : "") + (x.free <= 0 ? " خلصت" : " قرّبت تخلص"),
-               s:"فاضل " + qty(x.free) + (x.min ? " — حد التنبيه " + qty(x.min) : ""), v:qty(x.free),
-               go:"inv|" + (x.free <= 0 ? "out" : "low") });
+      /* صنف واحد: سطره بتفاصيله زي ما هو. أكتر من صنف: كارت واحد بالعدد
+         وأسماء أول اتنين — كانوا سطر لكل لون ومقاس وبيزقّوا الباقي تحت. */
+      var lows = lowStockList(), lowG = { out:[], low:[] };
+      lows.forEach(function(x){ lowG[x.free <= 0 ? "out" : "low"].push(x); });
+      ["out", "low"].forEach(function(k){
+        var xs = lowG[k]; if(!xs.length) return;
+        var nm = function(x){ var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : ""); };
+        if(xs.length === 1){
+          var x = xs[0];
+          line({ ic:"⚠", cls: k === "out" ? "bad" : "warn",
+                 t:nm(x) + (k === "out" ? " خلصت" : " قرّبت تخلص"),
+                 s:"فاضل " + qty(x.free) + (x.min ? " — حد التنبيه " + qty(x.min) : ""), v:qty(x.free),
+                 go:"inv|" + k, n:1 });
+        } else {
+          line({ ic:"⚠", cls: k === "out" ? "bad" : "warn",
+                 t: k === "out" ? "أصناف خلصت" : "أصناف قرّبت تخلص",
+                 s:xs.slice(0, 2).map(nm).join(" · ") + (xs.length > 2 ? " و" + qty(xs.length - 2) + " تاني" : ""),
+                 v:qty(xs.length), go:"inv|" + k, n:xs.length });
+        }
       });
     }
     if(canTab("parties") && canMoney()){
@@ -5311,12 +5514,13 @@
     var todo = document.getElementById("hm-todo");
     if(todo) todo.innerHTML = "<h3>محتاج منك النهارده <small>" +
         (L.length ? plural(L.length, "حاجة واحدة", "حاجتين", "حاجات") : "") + "</small></h3>" +
-      (L.length ? L.map(function(o){
-        return "<button type='button' class='hm-ti" + (o.cls ? " " + o.cls : "") + "' data-hgo='" + esc(o.go) + "'>" +
+      (L.length ? "<div class='hm-tiles'>" + L.map(function(o){
+        return "<button type='button' class='hm-ti" + (o.cls ? " " + o.cls : "") + "' data-hgo='" + esc(o.go) + "'" +
+          (o.n ? " data-hn='" + o.n + "'" : "") + " title='" + esc(o.t + " — " + o.s) + "'>" +
           "<span class='ic' aria-hidden='true'>" + o.ic + "</span>" +
-          "<span><b>" + esc(o.t) + "</b><span class='s" + (o.red ? " red" : "") + "'>" + esc(o.s) + "</span></span>" +
-          "<span class='v num'>" + esc(o.v) + "</span><span class='go' aria-hidden='true'>‹</span></button>";
-      }).join("") : "<p class='hm-ok'>✓ مفيش حاجة مستنياك دلوقتي</p>");
+          "<span class='tx'><b>" + esc(o.t) + "</b><span class='s" + (o.red ? " red" : "") + "'>" + esc(o.s) + "</span></span>" +
+          "<span class='v num'>" + esc(o.v) + "</span></button>";
+      }).join("") + "</div>" : "<p class='hm-ok'>✓ مفيش حاجة مستنياك دلوقتي</p>");
 
     /* ---- الأرقام الأساسية — نفس أرقام «كل الأرقام بالتفصيل» تحت ---- */
     var cur = periodStats(periodRange());
@@ -5344,18 +5548,16 @@
     var mo = document.getElementById("hm-month");
     if(mo) mo.innerHTML = "<h3><span>" + esc(perTxt) + "</span>" +
         (canTab("rep") ? "<button type='button' data-hgo='rep'>التقارير ‹</button>" : "") + "</h3>" +
+      /* سطر واحد: المبيعات وعدد الأوردرات، والألوان نفسها بتشرح الشريط اللي تحته */
       "<div class='hm-mrow'>" +
-        "<div><span>مبيعات مسلّمة</span><b class='num'>" + esc(money(cur.revenue)) + "</b></div>" +
-        "<div><span>أوردرات</span><b class='num'>" + qty(n) + "</b></div>" +
-        "<div><span>اتسلّم</span><b class='num'>" + qty(dl) + "</b></div>" +
-        "<div><span>لسه ماشي</span><b class='num'>" + qty(op) + "</b></div>" +
-        "<div><span>اترفض</span><b class='num" + (cc ? " v-due" : "") + "'>" + qty(cc) + "</b></div>" +
+        "<span>مبيعات مسلّمة <b class='num'>" + esc(money(cur.revenue)) + "</b></span>" +
+        "<span>أوردرات <b class='num'>" + qty(n) + "</b></span>" +
+        "<span><em style='background:var(--gain)'></em>اتسلّم <b class='num'>" + qty(dl) + "</b></span>" +
+        "<span><em style='background:var(--warn)'></em>لسه ماشي <b class='num'>" + qty(op) + "</b></span>" +
+        "<span><em style='background:var(--due)'></em>اترفض <b class='num" + (cc ? " v-due" : "") + "'>" + qty(cc) + "</b></span>" +
       "</div>" +
       (n ? "<div class='hm-bar' aria-hidden='true'><i style='width:" + pct(dl) + ";background:var(--gain)'></i>" +
-           "<i style='width:" + pct(op) + ";background:var(--warn)'></i><i style='width:" + pct(cc) + ";background:var(--due)'></i></div>" +
-           "<div class='hm-legend'><span><em style='background:var(--gain)'></em>اتسلّم " + qty(dl) + "</span>" +
-           "<span><em style='background:var(--warn)'></em>لسه ماشي " + qty(op) + "</span>" +
-           "<span><em style='background:var(--due)'></em>اترفض " + qty(cc) + "</span></div>" : "");
+           "<i style='width:" + pct(op) + ";background:var(--warn)'></i><i style='width:" + pct(cc) + ";background:var(--due)'></i></div>" : "");
   }
 
   // دوسة على سطر في «محتاج منك» بتوديك مكانه على طول
@@ -6586,6 +6788,10 @@
     var be   = beOf(c);
     var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
 
+    var bs = document.getElementById("rep-be-sum");
+    if(bs) bs.textContent = be === null ? ""
+      : (c.fixedExp <= 0.009 ? "مفيش مصاريف ثابتة مسجّلة في الفترة"
+         : "لازم تبيع بـ " + money(be) + (days ? " (" + money(be/days) + " في اليوم)" : ""));
     document.getElementById("rep-be").innerHTML =
       beBox("تكاليفك الثابتة", [
         mRow("مصاريف ثابتة", c.fixedExp, "tot")
@@ -8297,7 +8503,7 @@
       "<td class='selcell'><input type='checkbox' data-sel='" + s.id + "'" +
         (selSales[s.id] ? " checked" : "") + " aria-label='اختار أوردر " + esc(s.no||"") + "'></td>" +
       "<td class='lead'><span class='ono'>" + (s.no ? "#"+esc(s.no) : "—") + "</span>" +
-        "<span class='secondary num'>" + esc(s.date||"—") + "</span></td>" +
+        "<span class='secondary num' title='" + esc(s.date||"") + "'>" + esc(dShort(s.date) || "—") + "</span></td>" +
       "<td class='cust'><span class='primary' style='font-size:var(--fs-3)'>" + esc(partyName(s.partyId)) + "</span>" +
         (p.gov||p.phone ? "<span class='secondary'>" + esc([p.gov,p.phone].filter(Boolean).join(" · ")) + "</span>" : "") + "</td>" +
       "<td class='items'>" + (goods || "—") + "</td>" +
@@ -8600,13 +8806,13 @@
   }
 
   /* ---------- الفلاتر: chips + عدّاد ---------- */
-  // الحالة مش هنا — ليها شرايط فوق الجدول، فما تتعدّش في الـchips ولا في عدّاد الفلاتر
-  var FLT_LABEL = { party:"العميل", item:"الصنف", ship:"شركة الشحن",
+  // الحالة بقت جوه «فلاتر» — فلازم تبان chip وتتعدّ، وإلا تفضل شغالة وإنت مش شايفها
+  var FLT_LABEL = { status:"الحالة", party:"العميل", item:"الصنف", ship:"شركة الشحن",
                     owner:"المسؤول", from:"من", to:"لـ", text:"بحث" };
 
   function chipText(k){
     var v = filt[k];
-    if(k === "status") return ST_LABEL[v] || v;
+    if(k === "status"){ var t = STAB.find(function(x){ return x[0] === v; }); return t ? t[1] : (ST_LABEL[v] || v); }
     if(k === "party")  return partyName(v);
     if(k === "item")   return itemName(v);
     return v;
@@ -8935,6 +9141,7 @@
     if(bf) bf.hidden = !all;
     var ba = document.getElementById("b-sall");
     if(ba){ ba.classList.toggle("on", all); ba.setAttribute("aria-pressed", all ? "true" : "false"); }
+    var an = document.getElementById("sall-n"); if(an) an.textContent = qty(live("sales").length);
 
     var left3 = g.st[3].reduce(function(a, s){ return a + shipPend(s).left; }, 0);
     var due3 = g.direct.reduce(function(a, s){ return a + Math.max(0, sDue(s)); }, 0);
@@ -9333,6 +9540,8 @@
 
   function renderBulkBar(){
     var n = selIds().length, bar = document.getElementById("s-bulk");
+    // الموبايل: مربعات الاختيار بتبان بس وإنت بتختار (بعد دوسة طويلة)
+    var tb = document.getElementById("t-sales"); if(tb) tb.classList.toggle("sel-mode", n > 0);
     if(!bar) return;
     bar.hidden = !n;
     document.getElementById("s-bcount").textContent = qty(n);
@@ -11396,7 +11605,7 @@
     bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
     brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
   };
-  function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
+  function ciFont(w, px){ return w + " " + px + "px 'IBM Plex Sans Arabic', Alexandria, system-ui, sans-serif"; }
   function ciRound(ctx, x, y, w, h, r){
     ctx.beginPath();
     ctx.moveTo(x+r, y);
@@ -12169,6 +12378,7 @@
     }
     var w = document.getElementById("me");
     if(w){ w.readOnly = lockOn(); w.title = lockOn() ? "الاسم بيتحدد من حسابك" : ""; }
+    meLab();
   }
 
   /* ---------- شاشة القفل ---------- */
@@ -12922,6 +13132,48 @@
     e.preventDefault(); e.stopPropagation(); r.blur();
   });
 
+  /* الموبايل: دوسة طويلة على أوردر بتختاره، ووإنت بتختار الدوسة العادية
+     بتضيف/تشيل بدل ما تفتح التفاصيل. على الكمبيوتر المربعات ظاهرة زي ما هي. */
+  (function(){
+    var mq = window.matchMedia ? window.matchMedia("(max-width:760px)") : null;
+    var lpT = null, lpPend = false, lpFired = false, sx = 0, sy = 0;
+    function selToggle(tr){
+      var id = tr.dataset.row; if(!id) return;
+      if(selSales[id]) delete selSales[id]; else selSales[id] = 1;
+      var cb = tr.querySelector("[data-sel]"); if(cb) cb.checked = !!selSales[id];
+      tr.classList.toggle("sel", !!selSales[id]);
+      renderBulkBar();
+    }
+    function skip(t){ return !!t.closest("button, select, input, a, label, .detail-in"); }
+    TSALES.addEventListener("touchstart", function(e){
+      var tr = e.target.closest("tr.order");
+      lpFired = false; clearTimeout(lpT);
+      if(!tr || skip(e.target) || e.touches.length !== 1) return;
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      lpPend = true;
+      lpT = setTimeout(function(){
+        lpPend = false; lpFired = true; selToggle(tr);
+        if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(_){} }
+      }, 500);
+    }, { passive:true });
+    TSALES.addEventListener("touchmove", function(e){
+      var t = e.touches[0];
+      if(Math.abs(t.clientX - sx) > 10 || Math.abs(t.clientY - sy) > 10){ clearTimeout(lpT); lpPend = false; }
+    }, { passive:true });
+    TSALES.addEventListener("touchend", function(){ clearTimeout(lpT); lpPend = false; }, { passive:true });
+    TSALES.addEventListener("touchcancel", function(){ clearTimeout(lpT); lpPend = false; }, { passive:true });
+    // أندرويد بيفتح قايمته هو مع الضغطة الطويلة — نمنعها وإحنا بنعدّ أو بعد ما اخترنا
+    TSALES.addEventListener("contextmenu", function(e){ if(lpPend || lpFired) e.preventDefault(); });
+    // capture: قبل ما دوسة السطر تفتح التفاصيل
+    TSALES.addEventListener("click", function(e){
+      if(lpFired){ lpFired = false; e.stopPropagation(); e.preventDefault(); return; }
+      if(!(mq && mq.matches) || !TSALES.classList.contains("sel-mode")) return;
+      var tr = e.target.closest("tr.order");
+      if(!tr || skip(e.target)) return;
+      e.stopPropagation(); e.preventDefault(); selToggle(tr);
+    }, true);
+  })();
+
   // مربعات الاختيار + شريط الإجراء
   TSALES.addEventListener("change", function(e){
     var cb = e.target.closest("[data-sel]");
@@ -12984,6 +13236,7 @@
   window.addEventListener("keydown", function(e){
     if(e.key !== "Escape" || activeTab !== "sales" || !Object.keys(openRows).length) return;
     if(document.querySelector(".drawer.on, .as-drawer.on, #sale-drawer.on")) return;
+    var mm = document.getElementById("me-menu"); if(mm && !mm.hidden) return;
     var z = document.getElementById("img-zoom"); if(z && !z.hidden) return;
     var lk = document.getElementById("lock"); if(lk && !lk.hidden) return;
     closeDetail();
@@ -14433,7 +14686,74 @@
     applyTheme(now);
   });
 
+  /* ---------- قايمة «اسمك ▾» ---------- */
+  function meMenu(on){
+    var m = document.getElementById("me-menu"), b = document.getElementById("b-me");
+    if(!m || !b) return;
+    m.hidden = !on; b.setAttribute("aria-expanded", on ? "true" : "false");
+  }
+  document.getElementById("b-me").addEventListener("click", function(){
+    meMenu(document.getElementById("me-menu").hidden);
+  });
+  document.addEventListener("click", function(e){
+    var m = document.getElementById("me-menu");
+    if(m && !m.hidden && !e.target.closest(".me-wrap")) meMenu(false);
+  });
+  document.addEventListener("keydown", function(e){
+    var m = document.getElementById("me-menu");
+    if(e.key === "Escape" && m && !m.hidden){ meMenu(false); document.getElementById("b-me").focus(); }
+  });
+
+  /* ---------- «ⓘ» و«⋯ أكتر» والحاجات المطوية ---------- */
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-info]");
+    if(b){
+      var h = b.closest("h2"), t = h && h.nextElementSibling;
+      if(t && t.hasAttribute("data-infotxt")){
+        t.hidden = !t.hidden; b.setAttribute("aria-expanded", t.hidden ? "false" : "true");
+      }
+      return;
+    }
+    b = e.target.closest("[data-foldbtn]");
+    if(b){
+      var box = document.getElementById(b.dataset.foldbtn);
+      if(box){ box.hidden = !box.hidden; b.setAttribute("aria-expanded", box.hidden ? "false" : "true"); }
+      return;
+    }
+    // دوسة على زرار جوه «⋯ أكتر» بتقفله — اتنفّذ اللي عايزه
+    var row = e.target.closest(".tmore-row");
+    if(row && e.target.closest("button")){
+      row.hidden = true;
+      var opener = document.querySelector('[data-foldbtn="' + row.id + '"]');
+      if(opener) opener.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  /* الكروت اللي فوق كل شاشة: السطر الصغير بيبان لما تقف على الكارت (title).
+     بنراقب بدل ما نعدّل كل دالة بترسم كروت — أي كارت جديد بياخدها لوحده. */
+  (function(){
+    var pend = false;
+    function tips(){
+      pend = false;
+      Array.prototype.forEach.call(document.querySelectorAll(".stats > div"), function(d){
+        var sm = d.querySelector(":scope > small");
+        var t = sm ? squish(sm.textContent) : "";
+        // بنلمس بس الـtitle اللي إحنا حاطّينه — في كروت ليها title من الرسم نفسه
+        if(t){ if(d.title !== t) d.title = t; d.dataset.tip = "1"; }
+        else if(d.dataset.tip){ d.removeAttribute("title"); delete d.dataset.tip; }
+      });
+    }
+    var main = document.querySelector("main");
+    if(main && window.MutationObserver){
+      new MutationObserver(function(){
+        if(pend) return; pend = true;
+        (window.requestAnimationFrame || setTimeout)(tips);
+      }).observe(main, { childList:true, subtree:true });
+    }
+  })();
+
   document.getElementById("b-refresh").addEventListener("click", async function(){
+    meMenu(false);
     this.disabled = true;
     if(fileHandle){
       try{ var f = await fileHandle.getFile(); absorb(JSON.parse(await f.text())); }catch(e){}
