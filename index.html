@@ -1099,7 +1099,10 @@
   }
   .sg-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4)}
   .sg-ph{margin-bottom:var(--sp-3)}
-  .sg-sum{background:var(--teal-soft);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);margin:0 0 var(--sp-3);font-weight:600}
+  .sg-sum{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px var(--sp-5);background:var(--teal-soft);border-radius:var(--r-sm);
+    padding:var(--sp-2) var(--sp-3);margin:0 0 var(--sp-3);font-weight:600}
+  .sg-sum small{font-weight:400;font-size:var(--fs-1);color:var(--ink-soft)}
+  .sg-sum small.v-due{color:var(--due);flex-basis:100%}
   .sg-sum b{font-size:var(--fs-5);margin-inline-start:6px}
   .sg-ph h3{margin:0;font-size:var(--fs-4)}
   .sg-ph p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-2)}
@@ -3291,8 +3294,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "112";
+  var VERSION = "113";
   var CHANGELOG = [
+    { v:"113", d:"2026-10-03", items:[
+      "«مع المندوب»: جنب الإجمالي «صافي الربح المتوقع» — هتكسب كام لو كل الأوردرات اللي مع المندوب اتسلّمت زي ما هي",
+      "نفس حسبة الربح المتوقع في درج الأوردر: البضاعة − تكلفتها بمتوسط الشراء + شحن على العميل − شحن للشركة، والصنف اللي لسه ما اتشراش بتنبيه وبره الحسبة. بيظهر بس للي عنده صلاحية يشوف الفلوس"
+    ]},
     { v:"112", d:"2026-10-03", items:[
       "«مع المندوب»: سطر فوق القايمة بإجمالي فلوس الأوردرات اللي مع المندوب — نفس المبالغ اللي جنب كل أوردر (تمن البضاعة + الشحن على العميل)"
     ]},
@@ -5019,6 +5026,20 @@
     },0);
   }
   // صافي الأوردر بعد الشحن — الملغي بيطلع بالسالب بقيمة شحنه
+  /* v113 — الربح المتوقع لأوردر لسه ما اتسلّمش: لو العميل خد كله. نفس حسبة
+     «صافي الربح المتوقع» في درج الأوردر (v99): البضاعة − تكلفتها بمتوسط الشراء
+     النهارده + شحن على العميل − شحن للشركة. صنف لسه ما اتشراش (مالوش تكلفة
+     ومش متثبّتة) بيطلع بره الحسبة بدل ما سعره كله يتحسب ربح. */
+  function expProfit(s){
+    var goods = 0, cost = 0, noCost = [];
+    SL(s).forEach(function(l){
+      var q = Number(l.qty)||0; if(!l.itemId || q <= 0) return;
+      var pinned = l.unitCost != null && l.unitCost !== "", uc = lineCost(l);
+      if(uc > 0 || pinned){ goods += q * (Number(l.price)||0); cost += q * uc; }
+      else if(noCost.indexOf(itemName(l.itemId)) < 0) noCost.push(itemName(l.itemId));
+    });
+    return { net: goods - cost + shipIn(s) - shipOut(s), noCost: noCost };
+  }
   function saleProfit(s){
     var net = goodsProfit(s);
     if(shipCounts(s)) net += shipIn(s) - shipOut(s);
@@ -9371,9 +9392,18 @@
       });
       /* v112 — إجمالي الفلوس اللي مع المندوب: نفس المبلغ اللي جنب كل أوردر (sgFull =
          تمن البضاعة + الشحن على العميل) — يعني اللي العملاء هيدفعوه لو كلهم خدوا كله */
-      var tot = g.st[2].reduce(function(a, s){ return a + sgFull(s); }, 0);
+      var tot = 0, exp = 0, nc = [];
+      g.st[2].forEach(function(s){
+        tot += sgFull(s);
+        var e = expProfit(s); exp += e.net;
+        e.noCost.forEach(function(n){ if(nc.indexOf(n) < 0) nc.push(n); });
+      });
       var sum = g.st[2].length
-        ? "<div class='sg-sum'><span>إجمالي الأوردرات اللي مع المندوب <b class='num'>" + esc(money(tot)) + "</b></span></div>" : "";
+        ? "<div class='sg-sum'><span>إجمالي الأوردرات اللي مع المندوب <b class='num'>" + esc(money(tot)) + "</b></span>" +
+          "<span class='money-only'>صافي الربح المتوقع <b class='num " + (exp >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(exp)) + "</b>" +
+          "<small> لو كلهم استلموا</small></span>" +
+          (nc.length ? "<small class='money-only v-due'>⚠ " + esc(nc.join(" · ")) + ": لسه ما اتشراش — بره حسبة الربح</small>" : "") +
+          "</div>" : "";
       var bulk = nSel
         ? "<div class='sg-bulk'><b>" + qty(nSel) + " مختارين</b>" +
           "<button class='tbtn primary' type='button' data-sgbulk='all'>كلهم خدوا كله ودفعوا</button>" +
