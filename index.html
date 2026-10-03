@@ -307,10 +307,14 @@
 
   #toast{
     position:fixed;inset-block-end:20px;inset-inline-start:50%;transform:translateX(50%);
-    background:var(--ink);color:#fff;padding:var(--sp-2) var(--sp-4);border-radius:var(--r-sm);font-size:var(--fs-3);
+    /* v111: الكلام بلون الخلفية العكسي — كان #fff ثابت، وفي الليلي --ink فاتح فبقى أبيض على أبيض */
+    background:var(--ink);color:var(--paper);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-sm);font-size:var(--fs-3);
+    font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.28);max-width:min(560px,calc(100vw - 32px));text-align:center;
     opacity:0;pointer-events:none;transition:opacity .18s;z-index:50;
   }
   #toast.show{opacity:1}
+  /* الموبايل: فوق شريط الأقسام اللي تحت بدل ما تغطّيه */
+  @media (max-width:760px){ #toast{inset-block-end:calc(76px + env(safe-area-inset-bottom,0px))} }
 
   .split{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)}
 
@@ -3285,8 +3289,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "110";
+  var VERSION = "111";
   var CHANGELOG = [
+    { v:"111", d:"2026-10-03", items:[
+      "إصلاح: رسالة التأكيد اللي بتطلع تحت («الحركة اتسجّلت»…) كانت أبيض على أبيض في الوضع الليلي — دلوقتي مقروءة في الوضعين",
+      "وعلى الموبايل بقت بتطلع فوق شريط الأقسام اللي تحت بدل ما تغطّيه"
+    ]},
     { v:"110", d:"2026-10-03", items:[
       "درج الأوردر: أول ما تكتب اسم شركة الشحن (أو السيستم يقترحه من محافظة العميل) — «التحصيل بيتم عن طريق» بيبقى «شركة الشحن» لوحده",
       "«أنا / مندوبي» = «مباشر ليك» زي ما هو. ولو غيّرت التحصيل بإيدك بعد كده، السيستم ما بيرجّعوش وإنت بتكمّل كتابة اسم الشركة",
