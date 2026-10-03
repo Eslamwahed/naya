@@ -86,6 +86,8 @@
   [data-theme="dark"] header.top{ background:#120F14;border-bottom:1px solid var(--line) }
   [data-theme="dark"] header.top h1{ color:var(--teal-deep) }
   header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr;white-space:nowrap}
+  /* رقم الإصدار جنب الاسم فوق على اليمين — بيبان على طول من غير ما تفتح حاجة */
+  header.top .ver-b{font-weight:400;font-size:var(--fs-1);opacity:.75;padding-inline-start:6px;letter-spacing:0;direction:rtl;display:inline-block}
   header.top .who{margin-inline-start:auto;display:flex;align-items:center;gap:var(--sp-3);font-size:var(--fs-2)}
   /* حالة الحفظ: نقطة ملوّنة بدل شارة — أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ */
   .savep{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;opacity:.85}
@@ -1719,7 +1721,7 @@
      الأقسام كانت صف لوحدها تحت الهيدر، وخانة الاسم والوضع الليلي والتحديث
      صف تاني — ٣ صفوف قبل ما الشغل يبان. على الموبايل الأقسام شريط تحت زي ما هي. -->
 <header class="top">
-  <h1>Lora Collection</h1>
+  <h1>Lora Collection <span id="ver-badge" class="ver-b"></span></h1>
   <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
     <button type="button" data-group="home"><span class="ic" aria-hidden="true">⌂</span><span class="lb">الرئيسية</span></button>
     <button type="button" data-group="orders"><span class="ic" aria-hidden="true">📦</span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
@@ -1732,7 +1734,7 @@
     <div class="me-wrap">
       <button type="button" id="b-me" aria-haspopup="true" aria-expanded="false" aria-controls="me-menu"><span id="me-lab">اسمك</span> ▾</button>
       <div class="me-menu" id="me-menu" hidden>
-        <div class="me-hd">Lora Collection <span id="ver-badge"></span></div>
+        <div class="me-hd">Lora Collection</div>
         <label for="me">اسمك</label>
         <input id="me" placeholder="اسمك" autocomplete="off">
         <button type="button" class="me-it" id="b-theme" title="الوضع الليلي">ليلي</button>
@@ -3236,8 +3238,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "104";
+  var VERSION = "105";
   var CHANGELOG = [
+    { v:"105", d:"2026-10-03", items:[
+      "رقم الإصدار رجع فوق على اليمين جنب «Lora Collection» زي الأول"
+    ]},
     { v:"104", d:"2026-10-03", items:[
       "الخط رجع Alexandria زي الأول (بدل IBM Plex Sans Arabic) — والمقاسات الأصغر والمسافات فاضلة زي ما هي"
     ]},
