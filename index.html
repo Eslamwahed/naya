@@ -6,7 +6,7 @@
 <title>Lora Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     /* برقوقي البوتيك — أساس التصميم */
@@ -70,9 +70,9 @@
   body{
     background:var(--paper);
     color:var(--ink);
-    /* IBM Plex Sans Arabic بدل Alexandria: أخف وأضيق وأرقامه أوضح وهي صغيرة —
-       نفس الشاشة بتشيل كلام أكتر من غير ما تبان زحمة */
-    font-family:"IBM Plex Sans Arabic","Alexandria","Segoe UI",Tahoma,sans-serif;
+    /* v104: رجعنا لـ Alexandria — جرّبنا IBM Plex Sans Arabic في v100 وما عجبش.
+       المقاسات الأصغر من v100 فاضلة زي ما هي. */
+    font-family:"Alexandria","Segoe UI",Tahoma,sans-serif;
     line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
@@ -86,6 +86,8 @@
   [data-theme="dark"] header.top{ background:#120F14;border-bottom:1px solid var(--line) }
   [data-theme="dark"] header.top h1{ color:var(--teal-deep) }
   header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr;white-space:nowrap}
+  /* رقم الإصدار جنب الاسم فوق على اليمين — بيبان على طول من غير ما تفتح حاجة */
+  header.top .ver-b{font-weight:400;font-size:var(--fs-1);opacity:.75;padding-inline-start:6px;letter-spacing:0;direction:rtl;display:inline-block}
   header.top .who{margin-inline-start:auto;display:flex;align-items:center;gap:var(--sp-3);font-size:var(--fs-2)}
   /* حالة الحفظ: نقطة ملوّنة بدل شارة — أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ */
   .savep{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;opacity:.85}
@@ -1719,7 +1721,7 @@
      الأقسام كانت صف لوحدها تحت الهيدر، وخانة الاسم والوضع الليلي والتحديث
      صف تاني — ٣ صفوف قبل ما الشغل يبان. على الموبايل الأقسام شريط تحت زي ما هي. -->
 <header class="top">
-  <h1>Lora Collection</h1>
+  <h1>Lora Collection <span id="ver-badge" class="ver-b"></span></h1>
   <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
     <button type="button" data-group="home"><span class="ic" aria-hidden="true">⌂</span><span class="lb">الرئيسية</span></button>
     <button type="button" data-group="orders"><span class="ic" aria-hidden="true">📦</span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
@@ -1732,7 +1734,7 @@
     <div class="me-wrap">
       <button type="button" id="b-me" aria-haspopup="true" aria-expanded="false" aria-controls="me-menu"><span id="me-lab">اسمك</span> ▾</button>
       <div class="me-menu" id="me-menu" hidden>
-        <div class="me-hd">Lora Collection <span id="ver-badge"></span></div>
+        <div class="me-hd">Lora Collection</div>
         <label for="me">اسمك</label>
         <input id="me" placeholder="اسمك" autocomplete="off">
         <button type="button" class="me-it" id="b-theme" title="الوضع الليلي">ليلي</button>
@@ -3236,8 +3238,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "103";
+  var VERSION = "105";
   var CHANGELOG = [
+    { v:"105", d:"2026-10-03", items:[
+      "رقم الإصدار رجع فوق على اليمين جنب «Lora Collection» زي الأول"
+    ]},
+    { v:"104", d:"2026-10-03", items:[
+      "الخط رجع Alexandria زي الأول (بدل IBM Plex Sans Arabic) — والمقاسات الأصغر والمسافات فاضلة زي ما هي"
+    ]},
     { v:"103", d:"2026-10-02", items:[
       "الرئيسية: الأرقام المهمة (صافي الربح · لازم تبيع بكام · الخزنة · المخزون · لك عند الشركات) بقت فوق",
       "«محتاج منك النهارده» بقت كروت صغيرة جنب بعض بدل سطر عريض لكل حاجة — ٤ في الصف على الكمبيوتر و٢ على الموبايل",
@@ -11605,7 +11613,7 @@
     bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
     brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
   };
-  function ciFont(w, px){ return w + " " + px + "px 'IBM Plex Sans Arabic', Alexandria, system-ui, sans-serif"; }
+  function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
   function ciRound(ctx, x, y, w, h, r){
     ctx.beginPath();
     ctx.moveTo(x+r, y);
