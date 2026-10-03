@@ -170,6 +170,7 @@
   .tmore-row .tbar{margin:0 0 var(--sp-2)}
   .fold-h{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
   .fold-h h3{margin:0}
+  .fold-h .quick{margin:0}
   .fold-h h3 small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft);margin-inline-start:var(--sp-2)}
   .fold-h + [data-fold]{margin-top:var(--sp-3)}
   [data-fold][hidden]{display:none}
@@ -2465,6 +2466,18 @@
   <div class="cap-grid" id="cap-cards"></div>
   <p class="hint" style="margin:0 0 var(--sp-3)">شريك جديد؟ من <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة.</p>
 
+  <!-- نصيب كل شريك من ربح الفترة — للفرجة، والتوزيع الفعلي من «وزّع أرباح» تحته -->
+  <div class="panel" id="cap-share-panel">
+    <div class="fold-h"><h3>نصيب الشركاء من ربح الفترة</h3>
+      <div class="quick" id="cs-per" role="group" aria-label="الفترة">
+        <button type="button" data-csper="month" aria-pressed="false">الشهر ده</button>
+        <button type="button" data-csper="prev" aria-pressed="false">الشهر اللي فات</button>
+        <button type="button" data-csper="all" aria-pressed="true" class="on">من البداية</button>
+      </div></div>
+    <p class="hint" id="cs-note"></p>
+    <div class="tbl-wrap"><table id="t-cap-share"></table></div>
+  </div>
+
   <div class="panel" id="dist-panel">
     <div class="fold-h"><h3>توزيع أرباح</h3>
       <button class="tbtn" type="button" data-foldbtn="dist-body" aria-expanded="false" aria-controls="dist-body">وزّع أرباح ▾</button></div>
@@ -3233,8 +3246,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "106";
+  var VERSION = "107";
   var CHANGELOG = [
+    { v:"107", d:"2026-10-03", items:[
+      "رأس المال: جدول «نصيب الشركاء من ربح الفترة» رجع هنا تحت كروت الشركاء — بفترة تختارها (الشهر ده · اللي فات · من البداية)",
+      "نفس الحسبة اللي كانت في الرئيسية بالظبط (مرجّحة بالأيام) — للفرجة بس، والتوزيع الفعلي من «وزّع أرباح» تحته"
+    ]},
     { v:"106", d:"2026-10-03", items:[
       "الرئيسية: جدول «نصيب الشركاء من ربح الفترة» اتشال — توزيع الأرباح والنسب في شاشة رأس المال زي ما هي"
     ]},
@@ -5090,6 +5107,15 @@
     return d;
   }
 
+  // كام يوم من الفترة فلوسه كانت شغّالة فيها
+  function capDaysIn(id, from, to){
+    var st = capStartOf(id);
+    if(!st || !from || !to) return null;
+    var a = st > from ? st : from;
+    if(a > to) return 0;
+    return daysBetween(a, to) + 1;
+  }
+
   // النسبة المرجّحة بالزمن — الأساس المعتمد في محاسبة شركات الأشخاص.
   // الشريك اللي ضخّ فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.
   function weightedRatio(id, from, to){
@@ -5907,6 +5933,126 @@
       });
     });
     return { q:q, rev:rev, pr:pr, ret:ret };
+  }
+
+  /* نصيب كل شريك من ربح الفترة — في شاشة رأس المال (كان في الرئيسية لحد v105).
+     للفرجة بس: مفيش حاجة بتتسجّل — التوزيع الفعلي من «وزّع أرباح» تحته. */
+  var csPer = "all";
+  function renderCapShare(){
+    var box = document.getElementById("cap-share-panel");
+    if(!box) return;
+    var ps = partners();
+    box.hidden = false;
+    // بدل ما اللوحة تختفي خالص والمستخدم يدوّر عليها، بتفضل باينة وبتقول المطلوب
+    if(!ps.length){
+      document.getElementById("cs-note").innerHTML =
+        "لسه مفيش شركاء مسجّلين. سجّلهم من تبويب <strong>العملاء والموردين</strong> بنوع «شريك»، " +
+        "وبعدين سجّل رأس مال كل واحد من تبويب <strong>رأس المال</strong> — " +
+        "وساعتها اللوحة دي هتوريك نصيب كل واحد من الربح لحظة بلحظة.";
+      document.getElementById("cs-note").className = "hint";
+      table("t-cap-share", ["الشريك"], [], "");
+      return;
+    }
+
+    var r = csPer === "all" ? null : distPerRange(csPer);
+    Array.prototype.forEach.call(document.querySelectorAll("#cs-per [data-csper]"), function(x){
+      x.classList.toggle("on", x.dataset.csper === csPer);
+      x.setAttribute("aria-pressed", x.dataset.csper === csPer ? "true" : "false");
+    });
+    // «كل الفترات» مالهاش حدود، فبنبدأ من أول حركة مسجّلة لحد النهاردة
+    var from = r ? r.from : earliestDate();
+    var to   = r ? r.to   : today();
+    var net  = periodStats(r).net;
+    var cap  = totalCapital();
+
+    var note = document.getElementById("cs-note");
+    if(!cap){
+      note.innerHTML = "الشركاء مسجّلين بس مفيش رأس مال متسجّل ليهم. " +
+        "سجّل رأس مال كل واحد من تبويب <strong>رأس المال</strong> عشان النسب تتحسب.";
+      note.className = "hint";
+      table("t-cap-share", ["الشريك"], [], "");
+      return;
+    }
+    // اللي اتوزّع بالفعل من ربح الفترة دي — من غيره الرقم بيوهم إن كله لسه متاح
+    var paidOut = live("cash").filter(function(c){
+      return c.type === "cap_share" && inRange(c.date, r);
+    }).reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
+    var left = net - paidOut;
+
+    note.innerHTML = "نصيب كل شريك من ربح الفترة، بنسبة مرجّحة بالزمن من " +
+      esc(from) + " لـ" + esc(to) + ". " +
+      (paidOut > 0.009
+        ? "<strong>اتوزّع منه " + esc(money(paidOut)) + " بالفعل، فاضل " + esc(money(left)) + ".</strong> "
+        : "") +
+      "التوزيع الفعلي من «وزّع أرباح» تحت." +
+      (ps.some(function(x){
+          var d = capDaysIn(x.id, from, to);
+          return d !== null && d < daysBetween(from, to) + 1;
+        })
+        ? "<br><strong>ليه شريكين بنفس المبلغ ليهم نسبتين مختلفتين؟</strong> " +
+          "لأن النسبة بتتحسب بعدد أيام ما فلوسه شغّالة، مش بالمبلغ لوحده. " +
+          "اللي دفع متأخّر فلوسه اشتغلت أيام أقل، فنصيبه أقل. التاريخ وعدد " +
+          "الأيام مكتوبين جنب كل شريك."
+        : "");
+    note.className = paidOut > 0.009 ? "hint" : "hint";
+
+    var rows = ps.map(function(x){
+      var w = weightedRatio(x.id, from, to);
+      return { p:x, w:w, share:net * w };
+    });
+    // فرق التقريب بيتسوّى على أكبر نصيب زي التوزيع الفعلي بالظبط
+    var rounded = rows.map(function(x){ return Math.round(x.share*100)/100; });
+    var diff = Math.round((net - rounded.reduce(function(a,b){ return a+b; },0))*100)/100;
+    if(diff !== 0 && rounded.length){
+      var big = 0;
+      rounded.forEach(function(v,i){ if(Math.abs(v) > Math.abs(rounded[big])) big = i; });
+      rounded[big] = Math.round((rounded[big]+diff)*100)/100;
+    }
+
+    var allDays = daysBetween(from, to) + 1;
+    var body = rows.map(function(x, i){
+      var cur = currentOf(x.p.id), capi = capitalOf(x.p.id);
+      var st = capStartOf(x.p.id), dz = capDaysIn(x.p.id, from, to);
+      // الشريك اللي فلوسه ما كملتش الفترة: قول له من إمتى وكام يوم
+      var when = (st && dz !== null && dz < allDays)
+        ? " · من " + esc(st) + " (" + qty(dz) + " من " + qty(allDays) + " يوم)"
+        : "";
+      return "<tr><td class='wide'>" + esc(x.p.name) +
+          "<span class='sub'>رأس ماله " + money(capi) + when + "</span></td>" +
+        "<td class='num'>" + (x.w*100).toFixed(2) + "%</td>" +
+        "<td class='num " + (rounded[i] >= 0 ? "v-gain" : "v-due") + "' style='font-weight:600'>" +
+          money(rounded[i]) + "</td>" +
+        "<td class='num" + (cur > 0.009 ? " v-gain" : "") + "'>" + money(cur) + "</td>" +
+        "<td class='num'>" + money(capi + cur) + "</td></tr>";
+    }).join("");
+    body += "<tr style='background:var(--teal-soft)'><td style='font-weight:600'>الإجمالي</td>" +
+      "<td class='num' style='font-weight:600'>" +
+        (rows.reduce(function(a,x){ return a+x.w; },0)*100).toFixed(2) + "%</td>" +
+      "<td class='num' style='font-weight:600'>" + money(net) + "</td>" +
+      "<td class='num' style='font-weight:600'>" +
+        money(ps.reduce(function(a,x){ return a + currentOf(x.id); },0)) + "</td>" +
+      "<td class='num' style='font-weight:600'>" +
+        money(ps.reduce(function(a,x){ return a + capitalOf(x.id) + currentOf(x.id); },0)) + "</td></tr>";
+
+    if(paidOut > 0.009){
+      body += "<tr><td class='wide' style='color:var(--ink-soft)'>اتوزّع منه بالفعل</td>" +
+        "<td></td><td class='num v-due'>−" + money(paidOut) + "</td><td></td><td></td></tr>" +
+        "<tr><td class='wide' style='font-weight:600'>الباقي غير موزّع</td>" +
+        "<td></td><td class='num' style='font-weight:600'>" + money(left) + "</td>" +
+        "<td></td><td></td></tr>";
+    }
+
+    var t = document.getElementById("t-cap-share");
+    t.innerHTML = "<thead><tr>" +
+      ["الشريك","نسبته المرجّحة","نصيبه من ربح الفترة","أرباح مستحقة له","إجمالي حقه"]
+        .map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("") +
+      "</tr></thead><tbody>" + body + "</tbody>";
+    Array.prototype.forEach.call(t.querySelectorAll("tbody tr"), function(tr){
+      Array.prototype.forEach.call(tr.children, function(td, i){
+        var H = ["الشريك","نسبته المرجّحة","نصيبه من ربح الفترة","أرباح مستحقة له","إجمالي حقه"];
+        if(H[i]) td.setAttribute("data-l", H[i]);
+      });
+    });
   }
 
   // أقدم تاريخ مسجّل — بداية «كل الفترات»
@@ -15371,7 +15517,7 @@
 
   function renderCapital(){
     renderCapStats(); renderPartners(); renderRecon(); renderCapLog(); renderCapHint();
-    renderCapRecon(); renderCapCards();
+    renderCapRecon(); renderCapCards(); renderCapShare();
     var df = document.getElementById("dist-from"), dt = document.getElementById("dist-to");
     if(df && !df.value){ var m = monthRange(0); df.value = m.from; dt.value = m.to; }
     distPerSync();
@@ -15646,6 +15792,10 @@
     el.className = "note";
   }
 
+  document.getElementById("cs-per").addEventListener("click", function(e){
+    var cs = e.target.closest("[data-csper]"); if(!cs) return;
+    csPer = cs.dataset.csper; renderCapShare();
+  });
   document.getElementById("dist-per").addEventListener("click", function(e){
     var b = e.target.closest("[data-distper]"); if(!b) return;
     var r = distPerRange(b.dataset.distper);
