@@ -3285,8 +3285,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "109";
+  var VERSION = "110";
   var CHANGELOG = [
+    { v:"110", d:"2026-10-03", items:[
+      "درج الأوردر: أول ما تكتب اسم شركة الشحن (أو السيستم يقترحه من محافظة العميل) — «التحصيل بيتم عن طريق» بيبقى «شركة الشحن» لوحده",
+      "«أنا / مندوبي» = «مباشر ليك» زي ما هو. ولو غيّرت التحصيل بإيدك بعد كده، السيستم ما بيرجّعوش وإنت بتكمّل كتابة اسم الشركة",
+      "إصلاح: لما ترجع من «أنا / مندوبي» لـ«شركة شحن» خانة التحصيل كانت فاضلة مكتوب فيها «مباشر» وهو بيتسجّل «شركة الشحن»"
+    ]},
     { v:"109", d:"2026-10-03", items:[
       "أيقونات بخط رفيع بدل الإيموجي في الأقسام فوق وكروت «محتاج منك» وأزرار الخزنة وحركاتها — شكلها واحد على كل الموبايلات",
       "المبالغ: الرقم بارز والقروش و«ج.م» هادية وأصغر — بتقرا المبلغ بنظرة",
@@ -13006,8 +13011,11 @@
       if(f === "itemId"){ renderDrawerLines(); return; }
       if(f === "color" || f === "size") refreshVariantOpts(Number(el.dataset.li));
     } else {
+      var prev = draft[f];
       draft[f] = v;
       if(f === "status"){ renderDrawerLines(); return; }  // المرتجع بيظهر ويختفي مع الحالة
+      // أول ما اسم شركة الشحن يتكتب في خانة فاضية → التحصيل عن طريقها
+      if(f === "shipCo" && !squish(prev || "") && squish(v)) autoPayViaShip();
       if(f === "partyId"){ suggestShipping(); shipHint(); }
       if(f === "shipIn" || f === "shipOut") shipHint();
       if(f === "payVia" || f === "paid" || f === "note") syncMore();
@@ -13094,7 +13102,8 @@
     g("e-courier-wrap").hidden = !self;
     g("e-shipout-lab").textContent = self ? "هتدفع للي هيوصّله" : "شحن هتدفعه للشركة";
     var pv = g("e-payvia");
-    if(pv){ pv.disabled = self; if(self){ pv.value = "direct"; draft.payVia = "direct"; } }
+    // الخانة لازم تقول نفس اللي هيتسجّل — قبل v110 لما ترجع من «أنا/مندوبي» كانت فاضلة «مباشر» وهو «شركة»
+    if(pv){ pv.disabled = self; if(self) draft.payVia = "direct"; pv.value = payVia(draft); }
     var dl = g("courier-list");
     if(dl){
       var seen = {};
@@ -13106,6 +13115,16 @@
       n.hidden = !self;
       n.textContent = self ? "شركة الشحن وكود البوليصة مش مطلوبين، والتحصيل مباشر ليك. سيب العربون فاضي — لما يتسلّم دوس «استلم ودفع» والفلوس تدخل الخزنة نفس اليوم." : "";
     }
+  }
+  /* v110 — شركة شحن = التحصيل عن طريقها، أنا/مندوبي = مباشر ليك (syncDelMode).
+     بيتنادى بس لما الاسم يتكتب في خانة كانت فاضية — لو غيّرت التحصيل بإيدك
+     بعدها لـ«مباشر»، باقي كتابة الاسم ما بترجّعوش. ولو في محصّل متكتب
+     بإيدك (عربون) بنسيبه: أوردر الشركة المحصّل بتاعه بيتحسب لوحده فكان هيضيع. */
+  function autoPayViaShip(){
+    if(draft.selfDel || draft.payVia === "ship" || (Number(draft.paid)||0)) return;
+    draft.payVia = "ship";
+    var pv = document.getElementById("e-payvia"); if(pv) pv.value = "ship";
+    syncMore();
   }
   document.getElementById("e-delmode").addEventListener("click", function(e){
     var b = e.target.closest("[data-delmode]"); if(!b) return;
@@ -13132,6 +13151,7 @@
     var filled = [];
     if(!squish(draft.shipCo || "")){
       draft.shipCo = last.shipCo; filled.push(squish(last.shipCo));
+      autoPayViaShip();
     }
     if(!draft.shipIn && (Number(last.shipIn)||0)){
       draft.shipIn = last.shipIn;
