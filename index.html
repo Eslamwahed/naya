@@ -82,7 +82,9 @@
     vertical-align:-.2em;flex:0 0 auto}
   /* v109 — المبلغ: الرقم بارز والقروش والعملة هادية — العين بتقرا المبلغ على طول */
   /* !important: كروت زي .stats و.band بتدّي أي span جوّاها مقاس ولون التسمية وسطر لوحده */
-  .m-i,.m-d,.m-c{display:inline!important;margin:0!important;padding:0!important;color:inherit!important;letter-spacing:inherit!important}
+  .m,.m-i,.m-d,.m-c{display:inline!important;margin:0!important;padding:0!important;color:inherit!important;letter-spacing:inherit!important}
+  .m{font-size:1em!important;white-space:nowrap}
+  .m-n{unicode-bidi:isolate;direction:ltr;display:inline-block!important;color:inherit!important;margin:0!important;padding:0!important;font-size:1em!important}
   .m-i{font-size:1em!important}
   .m-d{opacity:.55;font-size:.8em!important}
   .m-c{opacity:.6;font-size:.7em!important;font-weight:500!important}
@@ -1103,6 +1105,14 @@
     padding:var(--sp-2) var(--sp-3);margin:0 0 var(--sp-3);font-weight:600}
   .sg-sum small{font-weight:400;font-size:var(--fs-1);color:var(--ink-soft)}
   .sg-sum small.v-due{color:var(--due);flex-basis:100%}
+  .sg-exp{font:inherit;font-weight:600;color:inherit;background:none;border:0;border-bottom:1px dashed currentColor;
+    padding:0 0 1px;cursor:pointer;text-align:start}
+  .sg-exp:hover{color:var(--teal)}
+  #exp-drawer{width:min(980px,100%)}
+  #t-exp td.num{white-space:nowrap}
+  #t-exp tr.tot td{font-weight:700;background:var(--teal-soft)}
+  #t-exp .ono{font-weight:700;color:var(--ink);text-decoration:none}
+  #t-exp .ono:hover{color:var(--teal);text-decoration:underline}
   .sg-sum b{font-size:var(--fs-5);margin-inline-start:6px}
   .sg-ph h3{margin:0;font-size:var(--fs-4)}
   .sg-ph p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-2)}
@@ -3149,6 +3159,13 @@
 
 <div class="scrim" id="sale-scrim" hidden></div>
 <div class="scrim" id="gen-scrim" hidden></div>
+<!-- v114: تحليل صافي الربح المتوقع — كل أوردر: بيع · شراء · شحن · ربح -->
+<div class="panel as-drawer" id="exp-drawer" hidden role="dialog" aria-labelledby="exp-title">
+  <div class="dhead"><h3 id="exp-title">صافي الربح المتوقع</h3>
+    <button class="dclose" type="button" data-expclose aria-label="قفل">&times;</button></div>
+  <div class="dbody"><p class="hint" id="exp-note" style="margin-top:0"></p>
+    <div class="tbl-wrap"><table id="t-exp"></table></div></div>
+</div>
 <aside class="drawer" id="sale-drawer" hidden aria-label="بيانات الأوردر">
   <div class="drawer-head">
     <h2 id="sd-title">أوردر جديد</h2>
@@ -3294,8 +3311,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "113";
+  var VERSION = "114";
   var CHANGELOG = [
+    { v:"114", d:"2026-10-03", items:[
+      "«مع المندوب»: دوسة على «صافي الربح المتوقع» بتفتح شاشة جانبية فيها تحليل كل أوردر: سعر البيع · سعر الشراء · ربح البضاعة · الشحن على العميل · الشحن للشركة · صافي الشحن · صافي الربح المتوقع — وسطر إجمالي",
+      "فوق الجدول جملة بتلخّص: هتبيع بكام، والبضاعة تكلفتك كام، والشحن مكسّبك ولا من جيبك، وصافي ربحك. ودوسة على رقم أي أوردر بتفتح تفاصيله",
+      "إصلاح (من v109): في الجداول اللي بتتحوّل كروت على الموبايل، المبلغ كان بيتفرّق على عرض الكارت (الرقم في ناحية و«ج.م» في ناحية) — رجع حتة واحدة",
+      "المبالغ بالسالب بقت بتتكتب صح «‎-5,750.00» بدل «5,750.00-» (علامة السالب كانت بتنزل آخر الرقم)"
+    ]},
     { v:"113", d:"2026-10-03", items:[
       "«مع المندوب»: جنب الإجمالي «صافي الربح المتوقع» — هتكسب كام لو كل الأوردرات اللي مع المندوب اتسلّمت زي ما هي",
       "نفس حسبة الربح المتوقع في درج الأوردر: البضاعة − تكلفتها بمتوسط الشراء + شحن على العميل − شحن للشركة، والصنف اللي لسه ما اتشراش بتنبيه وبره الحسبة. بيظهر بس للي عنده صلاحية يشوف الفلوس"
@@ -5038,7 +5061,64 @@
       if(uc > 0 || pinned){ goods += q * (Number(l.price)||0); cost += q * uc; }
       else if(noCost.indexOf(itemName(l.itemId)) < 0) noCost.push(itemName(l.itemId));
     });
-    return { net: goods - cost + shipIn(s) - shipOut(s), noCost: noCost };
+    var sin = shipIn(s), sout = shipOut(s);
+    return { goods: goods, cost: cost, sin: sin, sout: sout, ship: sin - sout,
+             net: goods - cost + sin - sout, noCost: noCost };
+  }
+  /* الشاشة الجانبية: تحليل الربح المتوقع لكل أوردر في المرحلة */
+  var expStage = null;
+  function renderExp(){
+    var g = stageLists(), list = (g.st[expStage] || []);
+    var T = { goods:0, cost:0, sin:0, sout:0, net:0 }, nc = 0;
+    var rows = list.map(function(s){
+      var e = expProfit(s);
+      ["goods","cost","sin","sout","net"].forEach(function(k){ T[k] += e[k]; });
+      if(e.noCost.length) nc++;
+      var gp = e.goods - e.cost;
+      return "<tr><td class='wide'><a href='#' class='ono' data-expgo='" + esc(s.id) + "'>#" + esc(s.no || "—") + "</a> " +
+          esc(partyName(s.partyId)) + "<span class='sub'>" + esc(itemsLabel(s)) + "</span>" +
+          (e.noCost.length ? "<span class='sub v-due'>⚠ " + esc(e.noCost.join(" · ")) + ": لسه ما اتشراش — بره الحسبة</span>" : "") + "</td>" +
+        "<td class='num'>" + money(e.goods) + "</td>" +
+        "<td class='num'>" + money(e.cost) + "</td>" +
+        "<td class='num " + (gp >= 0 ? "v-gain" : "v-due") + "'>" + money(gp) + "</td>" +
+        "<td class='num'>" + money(e.sin) + "</td>" +
+        "<td class='num'>" + money(e.sout) + "</td>" +
+        "<td class='num " + (e.ship >= 0 ? "v-gain" : "v-due") + "'>" + money(e.ship) + "</td>" +
+        "<td class='num " + (e.net >= 0 ? "v-gain" : "v-due") + "' style='font-weight:700'>" + money(e.net) + "</td></tr>";
+    });
+    if(rows.length) rows.push("<tr class='tot'><td>الإجمالي · " + qty(list.length) + " أوردر</td>" +
+      "<td class='num'>" + money(T.goods) + "</td><td class='num'>" + money(T.cost) + "</td>" +
+      "<td class='num'>" + money(T.goods - T.cost) + "</td><td class='num'>" + money(T.sin) + "</td>" +
+      "<td class='num'>" + money(T.sout) + "</td><td class='num'>" + money(T.sin - T.sout) + "</td>" +
+      "<td class='num " + (T.net >= 0 ? "v-gain" : "v-due") + "'>" + money(T.net) + "</td></tr>");
+    table("t-exp", ["الأوردر","سعر البيع","سعر الشراء","ربح البضاعة","شحن على العميل","شحن للشركة","صافي الشحن","صافي الربح المتوقع"],
+      rows, "مفيش أوردرات في المرحلة دي.");
+    var n = document.getElementById("exp-note");
+    if(n) n.innerHTML = rows.length
+      ? "لو الـ" + esc(qty(list.length)) + " أوردر اتسلّموا كلهم زي ما هم: هتبيع بضاعة بـ <b>" + esc(money(T.goods)) +
+        "</b> تكلفتها عليك <b>" + esc(money(T.cost)) + "</b> (بمتوسط سعر الشراء)، والشحن " +
+        (T.sin - T.sout >= 0 ? "هيكسّبك <b>" + esc(money(T.sin - T.sout)) + "</b>" : "هيطلع من جيبك <b>" + esc(money(T.sout - T.sin)) + "</b>") +
+        " — يعني صافي ربحك <b class='" + (T.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(T.net)) + "</b>." +
+        " الرقم متوقع: لو عميل رجّع أو رفض الربح الفعلي هيقل، والربح بيتسجّل في الحسابات لما الأوردر يتسلّم بس." +
+        (nc ? " <span class='v-due'>" + esc(qty(nc)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "")
+      : "";
+  }
+  function openExp(stage){
+    expStage = stage;
+    var t = document.getElementById("exp-title");
+    if(t) t.textContent = "صافي الربح المتوقع — " + (stage === "2" ? "الأوردرات اللي مع المندوب" : "الأوردرات");
+    renderExp();
+    var box = document.getElementById("exp-drawer"), sc = document.getElementById("gen-scrim");
+    box.hidden = false; sc.hidden = false;
+    requestAnimationFrame(function(){ box.classList.add("on"); sc.classList.add("on"); });
+  }
+  function closeExp(quick){
+    var box = document.getElementById("exp-drawer"), sc = document.getElementById("gen-scrim");
+    if(!box || box.hidden) return;
+    expStage = null;
+    box.classList.remove("on"); if(!openEntryKey) sc.classList.remove("on");
+    var done = function(){ if(expStage) return; box.hidden = true; if(!openEntryKey) sc.hidden = true; };
+    if(quick) done(); else setTimeout(done, 240);
   }
   function saleProfit(s){
     var net = goodsProfit(s);
@@ -9299,6 +9379,7 @@
     }).join("");
 
     pnl.hidden = all;
+    if(expStage) renderExp();      // شاشة التحليل مفتوحة؟ تتحدّث مع أي تغيير (مزامنة من جهاز تاني مثلاً)
     if(all) return;
     pnl.innerHTML = SG_PANEL[sView](g);
   }
@@ -9400,8 +9481,8 @@
       });
       var sum = g.st[2].length
         ? "<div class='sg-sum'><span>إجمالي الأوردرات اللي مع المندوب <b class='num'>" + esc(money(tot)) + "</b></span>" +
-          "<span class='money-only'>صافي الربح المتوقع <b class='num " + (exp >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(exp)) + "</b>" +
-          "<small> لو كلهم استلموا</small></span>" +
+          "<button type='button' class='sg-exp money-only' data-expopen='2' title='تفاصيل ربح كل أوردر'>صافي الربح المتوقع <b class='num " + (exp >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(exp)) + "</b>" +
+          "<small> لو كلهم استلموا · التفاصيل ‹</small></button>" +
           (nc.length ? "<small class='money-only v-due'>⚠ " + esc(nc.join(" · ")) + ": لسه ما اتشراش — بره حسبة الربح</small>" : "") +
           "</div>" : "";
       var bulk = nSel
@@ -14904,12 +14985,19 @@
       if(t.length > 40 || t.indexOf(cur) < 0) return;
       var m = new RegExp("^(\\s*)([−\\-+]?[\\d,]+)(\\.\\d+)?(\\s*)(" + reEsc(cur) + ")(\\s*)$").exec(t);
       if(!m) return;
-      var f = document.createDocumentFragment(), add = function(txt, cls){
+      /* كله جوه span واحد (.m): الخانات اللي بتتحوّل كروت على الموبايل td بتاعها
+         flex، فلو الأجزاء أولاد مباشرين كانت بتتفرّق على عرض الكارت (v114) */
+      var f = document.createElement("span"), add = function(txt, cls){
         if(!txt) return;
         if(!cls){ f.appendChild(document.createTextNode(txt)); return; }
         var sp = document.createElement("span"); sp.className = cls; sp.textContent = txt; f.appendChild(sp);
       };
-      add(m[1]); add(m[2], "m-i"); add(m[3], "m-d"); add(m[4]); add(m[5], "m-c"); add(m[6]);
+      f.className = "m";
+      // الرقم (بالسالب والقروش) في حتة اتجاهها شمال→يمين: من غيرها «-10.00» كانت بتتعرض «10.00-»
+      var num = document.createElement("span"); num.className = "m-n";
+      add(m[1]);
+      f.appendChild(num); var g = f; f = num; add(m[2], "m-i"); add(m[3], "m-d"); f = g;
+      add(m[4]); add(m[5], "m-c"); add(m[6]);
       el.textContent = ""; el.appendChild(f);
     }
     function scan(root){
@@ -16253,7 +16341,17 @@
     if(op){ openEntry(op.dataset.openentry); return; }
     if(e.target.closest("[data-closeentry]")){ closeEntry(); return; }
   });
-  document.getElementById("gen-scrim").addEventListener("click", function(){ closeEntry(); });
+  document.getElementById("gen-scrim").addEventListener("click", function(){ closeEntry(); closeExp(); });
+  document.body.addEventListener("click", function(e){
+    var t;
+    if((t = e.target.closest("[data-expopen]"))){ openExp(t.dataset.expopen); return; }
+    if(e.target.closest("[data-expclose]")){ closeExp(); return; }
+    // رقم الأوردر في التحليل بيفتح تفاصيله في «الكل»
+    if((t = e.target.closest("[data-expgo]"))){ e.preventDefault(); closeExp(true); sgOpenRow(t.dataset.expgo); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && expStage) closeExp();
+  });
   document.addEventListener("keydown", function(e){
     if(e.key === "Escape" && openEntryKey) closeEntry();
   });
