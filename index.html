@@ -873,6 +873,8 @@
   .pc-ln .pc-c small,.pc-ln .pc-p small{display:block;font-size:11px;color:var(--ink-soft)}
   .pc-ln .pc-p{text-align:end;white-space:nowrap}
   .pc-ln .pc-tier{display:block;font-size:11px;color:var(--warn);text-align:center}
+  .pc-ln .pc-col{margin-top:4px}
+  .pc-ln .pc-c small.pc-avg{color:var(--warn);white-space:normal}
   .pc-ln .rm{border:0;background:none;color:var(--due);font-size:18px;cursor:pointer}
   .pc-ship{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
   .pc-res .big{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:2px 0}
@@ -896,6 +898,16 @@
   }
   #t-price input.prin{width:76px}
   #t-price input.prx{width:62px}
+  #t-price tr.prc-sub[hidden]{display:none}
+  #t-price tr.prc-sub td{background:var(--teal-soft);font-size:var(--fs-2)}
+  #t-price tr.prc-sub .prc-cn{padding-inline-start:14px;color:var(--ink-soft)}
+  #t-price tr.prc-sub .prc-cn::before{content:"↳ "}
+  #t-price .prc-dim{color:var(--ink-soft)}
+  #t-price small.prc-avg{display:block;font-size:11px;color:var(--warn);white-space:normal}
+  #t-price small.prc-avgn{color:var(--ink-soft);font-weight:400}
+  /* الموبايل: كارت اللون من غير خانات المصاريف المتكررة (هي هي بتاعة الصنف) */
+  @media (max-width:760px){ #t-price tr.prc-sub td.prc-dim{display:none} }
+  .prc-tog{border:0;background:var(--teal-soft);color:var(--teal);font:inherit;font-size:var(--fs-1);font-weight:600;border-radius:999px;padding:1px 8px;cursor:pointer;margin-inline-start:4px}
   #t-price th,#t-price td{padding-inline:8px}
   #t-price thead th{white-space:normal;line-height:1.3;vertical-align:bottom}
   #t-price td.prc-cost{white-space:nowrap}
@@ -2442,6 +2454,7 @@
 
   <div class="panel" id="offers-panel" hidden>
     <h3 id="offers-title"></h3>
+    <p class="hintline" id="offers-cnote" hidden style="margin-top:0"></p>
     <p class="hint" style="margin-bottom:12px">اكتب سعر القطعة أو إجمالي العرض — التاني بيتحسب لوحده. الكميات الأكبر من آخر شريحة بتاخد سعرها.</p>
     <form class="grid" id="f-offer">
       <div><label for="o-qty">من كمية</label><input type="number" id="o-qty" step="any" min="1" value="2"></div>
@@ -2689,7 +2702,7 @@
     <div class="pcalc">
       <div class="panel pc-in">
         <h3 style="margin-top:0">🧮 احسب أوردر — من غير ما يتسجّل حاجة</h3>
-        <p class="hint" style="margin-top:0">اختار الأصناف والكميات، والسعر بيتملي لوحده من سعر الصنف (أو سعر الجملة لو الكمية توصله) — وغيّره لو هتعمل سعر خاص. التكلفة = تكلفة القطعة الواصلة + «المصاريف الإضافية» اللي في جدول الأسعار.</p>
+        <p class="hint" style="margin-top:0">اختار الأصناف والكميات، والسعر بيتملي لوحده من سعر الصنف (أو سعر الجملة لو الكمية توصله) — وغيّره لو هتعمل سعر خاص. الصنف اللي ليه كذا لون: اختار اللون، والتكلفة والسعر بيبقوا بتوع اللون ده. التكلفة = تكلفة القطعة الواصلة + «المصاريف الإضافية» اللي في جدول الأسعار.</p>
         <div id="pc-lines"></div>
         <button class="addline" type="button" id="b-pc-add">+ صنف تاني</button>
         <div class="pc-ship">
@@ -3320,8 +3333,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "115";
+  var VERSION = "116";
   var CHANGELOG = [
+    { v:"116", d:"2026-10-03", items:[
+      "الصنف اللي ليه كذا لون بأسعار مختلفة: في «الأسعار» جنب الصنف «▾ ٣ ألوان» — بيفتح سطر لكل لون بتكلفته (متوسط اللي اشتريت بيه اللون ده) وخانة سعر ليه. اللون اللي سعره فاضي بياخد السعر الأساسي",
+      "«احسب أوردر»: خانة لون تحت الصنف — التكلفة والسعر بيبقوا بتوع اللون ده، و«اعمل منه أوردر» بينقل اللون",
+      "الأوردر الجديد: أول ما تختار اللون، السعر بيتكتب من سعر اللون. اللون اللي ليه سعر خاص ما بيتطبّقش عليه سعر الجملة",
+      "قيمة المخزون بسعر البيع والهامش المتوقع وكروت «الأسعار» بقت بتحسب كل لون بسعره"
+    ]},
     { v:"115", d:"2026-10-03", items:[
       "التقارير: «قايمة الدخل المتوقعة» — المبيعات − تكلفة البضاعة = مجمل الربح، + الشحن على العملاء − الشحن للشركات، − المصاريف المتغيّرة والثابتة = صافي الربح",
       "٣ أعمدة: «اتسلّم فعلاً» (نفس أرقام باقي التقارير) · «لسه ماشي» (الأوردرات اللي لسه ما اتسلّمتش لو اتسلّمت زي ما هي) · «الإجمالي لو كله اتسلّم» — وبتتبع فترة التقارير"
@@ -4688,28 +4707,28 @@
   function clearStockIdx(){ _sidx = null; }
   function stockIdx(){
     if(_sidx) return _sidx;
-    var free = {}, vars = {};
+    var free = {}, vars = {}, stock = {};
     var touch = function(r){
       var id = r.itemId; if(!id) return;
       var c = vColor(r), z = vSize(r), k = vKey(id,c,z);
       if(!vars[id]) vars[id] = {};
       if(!vars[id][k]) vars[id][k] = { color:c, size:z };
-      if(free[k] == null) free[k] = 0;
+      if(free[k] == null){ free[k] = 0; stock[k] = 0; }
       return k;
     };
     live("purchases").forEach(function(r){
-      var k = touch(r); if(k) free[k] += Number(r.qty)||0;
+      var k = touch(r); if(k){ free[k] += Number(r.qty)||0; stock[k] += Number(r.qty)||0; }
     });
     live("sales").forEach(function(x){
       var deliv = isDelivered(x), rsv = isReserved(x);
       SL(x).forEach(function(l){
         var k = touch(l); if(!k) return;
         // المتاح = اللي دخل − اللي اتباع فعلاً − اللي محجوز لأوردر لسه ما اتسلّمش
-        if(deliv) free[k] -= lineSold(l, x);
+        if(deliv){ free[k] -= lineSold(l, x); stock[k] -= lineSold(l, x); }
         else if(rsv) free[k] -= Number(l.qty)||0;
       });
     });
-    _sidx = { free:free, vars:vars };
+    _sidx = { free:free, vars:vars, stock:stock };   // stock = نفس stockOfV بالظبط من غير مسحة لكل تركيبة
     return _sidx;
   }
 
@@ -4729,6 +4748,45 @@
     var picked = null;
     tiersOf(item).forEach(function(t){ if(q >= t.q) picked = t; });
     return picked || {q:1, u:Number(item.price)||0};
+  }
+  /* سعر لكل لون (v116): الصنف اللي ألوانه بأسعار مختلفة بيتخزّن فيه
+     cprice = {"أسود":250, "بيج":300}. لون مالوش سعر = السعر الأساسي.
+     اللون اللي ليه سعر خاص ما بيتطبّقش عليه سعر الجملة — عشان شريحة
+     الجملة اتحسبت على السعر الأساسي وممكن تنزل تحت تكلفة اللون الغالي. */
+  function colorPrice(item, color){
+    var c = squish(color);
+    return c && item && item.cprice ? Math.max(0, Number(item.cprice[c])||0) : 0;
+  }
+  function itemHasPrice(item){
+    return (Number(item && item.price)||0) > 0 || Object.keys(item && item.cprice || {}).some(function(c){ return colorPrice(item, c) > 0; });
+  }
+  function vPrice(item, color){ return colorPrice(item, color) || (Number(item && item.price)||0); }
+  function priceFor(item, color, q){
+    var cp = colorPrice(item, color);
+    return cp > 0 ? { q:1, u:cp, color:true } : tierFor(item, q);
+  }
+  // ألوان الصنف: اللي اتحرّك فعلاً + اللي متكتب في الصنف — «» = من غير لون (لو ليه حركة)
+  function itemColors(itemId){
+    var it = db.items.find(function(x){ return x.id === itemId; });
+    var m = stockIdx().vars[itemId] || {}, seen = {}, out = [];
+    var add = function(c){ c = squish(c); if(seen[c] === 1) return; seen[c] = 1; out.push(c); };
+    Object.keys(m).forEach(function(k){ add(m[k].color); });
+    listOf(it, "colors").forEach(add);
+    return out;
+  }
+  function stockOfVi(itemId, color, size){ return stockIdx().stock[vKey(itemId, color, size)] || 0; }
+  function colorQty(itemId, color, fn){
+    var c = squish(color), m = stockIdx().vars[itemId] || {}, n = 0;
+    Object.keys(m).forEach(function(k){ if(m[k].color === c) n += fn(itemId, m[k].color, m[k].size); });
+    return n;
+  }
+  // متوسط تكلفة اللون بكل مقاساته — لون ما اتشراش قبل كده بياخد متوسط الصنف (own:false)
+  function costOfColor(itemId, color){
+    var c = squish(color), q = 0, v = 0;
+    live("purchases").forEach(function(p){
+      if(p.itemId === itemId && vColor(p) === c){ q += Number(p.qty)||0; v += (Number(p.qty)||0)*(Number(p.cost)||0); }
+    });
+    return q > 0 ? { c:v/q, own:true } : { c:avgCost(itemId), own:false };
   }
 
   // ---------- حالات الأوردر ----------
@@ -6400,8 +6458,8 @@
   function expectedMargin(){
     var rev = 0, cost = 0, units = 0;
     live("items").forEach(function(it){
-      var price = Number(it.price)||0; if(price <= 0) return;
       variantsOf(it.id).forEach(function(v){
+        var price = vPrice(it, v.color); if(price <= 0) return;
         var q = Math.max(0, stockOfV(it.id, v.color, v.size));
         if(q <= 0) return;
         var c = avgCostV(it.id, v.color, v.size);
@@ -6414,8 +6472,15 @@
     // مفيش مخزون: متوسط بسيط على الأصناف اللي ليها سعر وتكلفة معروفين
     var ps = [];
     live("items").forEach(function(it){
-      var price = Number(it.price)||0, c = itemAvgCost(it.id);
-      if(price > 0 && c > 0) ps.push((price - c)/price);
+      var c = itemAvgCost(it.id);
+      if(c <= 0) return;
+      var price = Number(it.price)||0;
+      if(price > 0) ps.push((price - c)/price);
+      // لون ليه سعر خاص: هامشه بسعره وتكلفته هو
+      Object.keys(it.cprice || {}).forEach(function(k){
+        var cp = colorPrice(it, k), cc = costOfColor(it.id, k).c;
+        if(cp > 0 && cc > 0) ps.push((cp - cc)/cp);
+      });
     });
     if(!ps.length) return null;
     return { pct: ps.reduce(function(a,b){ return a+b; },0)/ps.length,
@@ -6494,7 +6559,7 @@
   // إيه الناقص بالظبط عشان نقدر نحسب الهامش؟ «سجّل الاتنين» كانت
   // بتوديك في السكة الغلط وإنت مشترياتك متسجّلة فعلاً
   function marginMissing(){
-    var anyPrice = live("items").some(function(it){ return (Number(it.price)||0) > 0; });
+    var anyPrice = live("items").some(function(it){ return itemHasPrice(it); });
     var anyCost  = live("purchases").some(function(p){ return (Number(p.cost)||0) > 0; });
     if(!anyPrice && !anyCost) return "سجّل أصنافك بأسعار بيعها، وفواتير الشراء";
     if(!anyPrice) return "أصنافك مالهاش سعر بيع — حطّه من تبويب «الأصناف»";
@@ -6540,16 +6605,37 @@
       var cost  = buy > 0 ? buy + x + sh : 0;        // التكلفة الكلية للقطعة
       var price = Number(it.price)||0;
       var stock = Math.max(0, stockOf(it.id));
-      return { it:it, buy:buy, x:x, sh:sh, cost:cost, price:price, stock:stock,
-               unit: (price > 0 && cost > 0) ? price - cost : null };
+      var r = { it:it, buy:buy, x:x, sh:sh, cost:cost, price:price, stock:stock,
+               unit: (price > 0 && cost > 0) ? price - cost : null, cols:null };
+      r.noPrice = price <= 0; r.loss = price > 0 && cost > 0 && price <= cost;
+      // صنف بأكتر من لون: كل لون بتكلفته وسعره، وأرقام المخزون بتتجمع من الألوان
+      var ic = itemColors(it.id);
+      if(ic.filter(Boolean).length > 1){
+        r.cols = ic.map(function(c){ return prcColRow(it, c, x, sh); });
+        r.sbuy = 0; r.sx = 0; r.sval = 0; r.sprof = 0;
+        r.cols.forEach(function(k){
+          r.sbuy += k.stock * k.buy; r.sx += k.stock * (k.buy > 0 ? x + sh : 0);
+          r.sval += k.stock * (k.price > 0 ? k.price : k.cost);   // من غير سعر = من غير ربح
+          if(k.unit !== null) r.sprof += k.stock * k.unit;
+        });
+        r.noPrice = r.cols.some(function(k){ return k.price <= 0; });
+        r.loss = r.cols.some(function(k){ return k.price > 0 && k.cost > 0 && k.price <= k.cost; });
+      }
+      return r;
     });
+  }
+  function prcColRow(it, c, x, sh){
+    var cc = costOfColor(it.id, c), cost = cc.c > 0 ? cc.c + x + sh : 0;
+    var cp = colorPrice(it, c), price = vPrice(it, c);
+    return { color:c, stock:Math.max(0, colorQty(it.id, c, stockOfVi)), buy:cc.c, own:cc.own, cost:cost,
+             cp:cp, price:price, unit:(price > 0 && cost > 0) ? price - cost : null };
   }
   function prcList(){
     var q = squish(prcFilt.q).toLowerCase();
     return prcAll().filter(function(r){
       if(q && squish(r.it.name).toLowerCase().indexOf(q) < 0) return false;
-      if(prcFilt.only === "noprice") return r.price <= 0;
-      if(prcFilt.only === "loss")    return r.price > 0 && r.cost > 0 && r.price <= r.cost;
+      if(prcFilt.only === "noprice") return r.noPrice;
+      if(prcFilt.only === "loss")    return r.loss;
       if(prcFilt.only === "instock") return r.stock > 0;
       return true;
     });
@@ -6557,6 +6643,7 @@
   // ربح كل المخزون بالأسعار الحالية
   function prcStockProfit(all){
     return all.reduce(function(a, r){
+      if(r.cols) return a + r.sprof;
       return a + (r.stock && r.unit !== null ? r.stock * r.unit : 0);
     }, 0);
   }
@@ -6565,9 +6652,10 @@
     var all = prcAll();
     var cost = 0, extra = 0, val = 0, noPrice = 0, loss = 0, noCost = 0;
     all.forEach(function(r){
-      if(r.price <= 0) noPrice++;
+      if(r.noPrice) noPrice++;
       if(r.cost  <= 0) noCost++;
-      if(r.price > 0 && r.cost > 0 && r.price <= r.cost) loss++;
+      if(r.loss) loss++;
+      if(r.cols){ cost += r.sbuy; extra += r.sx; val += r.sval; return; }
       if(!r.stock) return;
       cost += r.stock * r.buy;
       extra += r.stock * (r.buy > 0 ? r.x + r.sh : 0);
@@ -6625,8 +6713,12 @@
       var mk = r.price > 0 ? prcMarkup(r.price, r.cost) : null;
       var bad = r.price > 0 && r.cost > 0 && r.price <= r.cost;
       var dis = ed ? "" : " disabled";
-      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "' data-buy='" + r.buy + "' data-stock='" + r.stock + "'>" +
-        "<td class='wide'>" + esc(r.it.name) + "</td>" +
+      var open = !!(r.cols && prcOpen[r.it.id]), nc = r.cols ? r.cols.filter(function(k){ return k.color; }).length : 0;
+      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "' data-buy='" + r.buy + "' data-stock='" + r.stock + "'" + (r.cols ? " data-cols='1'" : "") + ">" +
+        "<td class='wide'>" + esc(r.it.name) + (r.cols ? " <button type='button' class='prc-tog' data-prctog='" + esc(r.it.id) + "' aria-expanded='" + open + "'>" +
+           (open ? "▴" : "▾") + " " + plural(nc, "لون واحد", "لونين", "ألوان") + "</button>" : "") +
+           (r.cols && r.loss ? "<small class='prc-avg'>فيه لون سعره أقل من تكلفته — افتح الألوان</small>" : "") +
+           (r.cols ? "<small class='prc-avg prc-avgn'>الأرقام هنا متوسط كل الألوان</small>" : "") + "</td>" +
         "<td class='num'>" + esc(qty(r.stock)) + "</td>" +
         "<td class='num'>" + (r.buy > 0 ? money(r.buy)
            : "<span class='v-due'>لسه ما اشتريتش</span>") + "</td>" +
@@ -6645,12 +6737,77 @@
         "<td class='num prc-unit " + (bad ? "v-due" : (r.unit ? "v-gain" : "")) + "'>" +
            (r.unit === null ? "—" : money(r.unit)) + "</td>" +
         "<td class='num prc-mg'>" + esc(prcPct(r.price > 0 ? prcMargin(r.price, r.cost) : null)) + "</td>" +
-        "<td class='num prc-tot'>" + ((r.unit === null || !r.stock) ? "—" : money(r.unit * r.stock)) + "</td>" +
-      "</tr>";
+        "<td class='num prc-tot'>" + (r.cols ? (r.cols.some(function(k){ return k.stock > 0; }) ? money(r.sprof) : "—") : (r.unit === null || !r.stock) ? "—" : money(r.unit * r.stock)) + "</td>" +
+      "</tr>" + (r.cols ? r.cols.map(function(k){ return prcSubRow(r, k, open, dis); }).join("") : "");
     });
     table("t-price", PRC_HEAD, rows,
       (prcFilt.q || prcFilt.only !== "all") ? "مفيش صنف بالمواصفات دي."
                                             : "سجّل أصنافك الأول من تبويب «الأصناف».");
+  }
+
+  /* سطر لون تحت الصنف: تكلفة اللون ده بس + سعره. خانة السعر فاضية = السعر الأساسي
+     (باين كـplaceholder)، وأول ما تكتب فيها بيبقى للون ده سعر لوحده. */
+  var prcOpen = {};
+  function prcSubRow(r, k, open, dis){
+    var mk = k.price > 0 && k.cost > 0 ? prcMarkup(k.price, k.cost) : null;
+    var bad = k.price > 0 && k.cost > 0 && k.price <= k.cost;
+    return "<tr class='prc-sub' data-prcsub='" + esc(r.it.id) + "' data-color='" + esc(k.color) + "' data-cost='" + k.cost + "' data-buy='" + k.buy + "' data-stock='" + k.stock + "'" + (open ? "" : " hidden") + ">" +
+      "<td class='wide'><span class='prc-cn'>" + esc(k.color || "من غير لون") + "</span></td>" +
+      "<td class='num'>" + esc(qty(k.stock)) + "</td>" +
+      "<td class='num'>" + (k.buy > 0 ? esc(money(k.buy)) + (k.own ? "" : "<small class='prc-avg'>متوسط الصنف — اللون ده ما اتشراش</small>")
+                                      : "<span class='v-due'>لسه ما اشتريتش</span>") + "</td>" +
+      "<td class='num prc-dim'>" + (r.x > 0 ? esc(qty(r.x)) : "—") + "</td>" +
+      "<td class='num prc-dim'>" + (r.sh > 0 ? esc(qty(r.sh)) : "—") + "</td>" +
+      "<td class='num prc-cost'><b>" + (k.cost > 0 ? esc(money(k.cost)) : "—") + "</b></td>" +
+      "<td>" + (k.color ? "<input class='prin' inputmode='decimal' data-prccp='" + esc(r.it.id) + "' value='" + (k.cp > 0 ? k.cp : "") +
+         "' placeholder='" + (r.price > 0 ? r.price : "0") + "' aria-label='سعر بيع " + esc(k.color) + "'" + dis + ">"
+         : "<span class='num prc-dim'>" + (r.price > 0 ? esc(money(r.price)) : "—") + "</span>") + "</td>" +
+      "<td class='num prc-mk'>" + esc(mk === null ? "—" : (mk*100).toFixed(1) + "%") + "</td>" +
+      "<td class='num prc-unit " + (bad ? "v-due" : (k.unit ? "v-gain" : "")) + "'>" + (k.unit === null ? "—" : esc(money(k.unit))) + "</td>" +
+      "<td class='num prc-mg'>" + esc(prcPct(k.price > 0 ? prcMargin(k.price, k.cost) : null)) + "</td>" +
+      "<td class='num prc-tot'>" + ((k.unit === null || !k.stock) ? "—" : esc(money(k.unit * k.stock))) + "</td>" +
+    "</tr>";
+  }
+  // سعر لون أو السعر الأساسي اتغيّر: سطور الألوان وإجمالي الصنف بيتحدّثوا من غير إعادة رسم
+  function prcPaintSubs(id){
+    var t = document.getElementById("t-price"), itr = t.querySelector("tr[data-prcrow='" + CSS.escape(id) + "']");
+    if(!itr || !itr.dataset.cols) return;
+    var base = Number(toEn((itr.querySelector("[data-prcprice]") || {}).value || ""))||0, sum = 0;
+    Array.prototype.forEach.call(t.querySelectorAll("tr[data-prcsub='" + CSS.escape(id) + "']"), function(tr){
+      var inp = tr.querySelector("[data-prccp]"), own = inp && inp.value.trim() !== "" ? Number(toEn(inp.value))||0 : 0;
+      if(inp) inp.placeholder = base > 0 ? String(base) : "0";
+      var price = own > 0 ? own : base, cost = Number(tr.dataset.cost)||0;
+      var mk = tr.querySelector(".prc-mk"); if(mk) mk.textContent = price > 0 && cost > 0 ? (prcMarkup(price, cost)*100).toFixed(1) + "%" : "—";
+      prcPaint(tr, price);
+      var unit = (price > 0 && cost > 0) ? price - cost : null;
+      if(unit !== null) sum += unit * (Number(tr.dataset.stock)||0);
+    });
+    var tot = itr.querySelector(".prc-tot"), anyS = Array.prototype.some.call(t.querySelectorAll("tr[data-prcsub='" + CSS.escape(id) + "']"), function(tr){ return Number(tr.dataset.stock) > 0; });
+    if(tot) tot.textContent = anyS ? money(sum) : "—";
+  }
+  var prcCPend = {}, prcCTimer = null;
+  function prcQueueC(id, color, v){
+    (prcCPend[id] = prcCPend[id] || {})[color] = Math.round(v * 100) / 100;
+    clearTimeout(prcCTimer); prcCTimer = setTimeout(prcFlushC, 600);
+  }
+  function prcFlushC(){
+    clearTimeout(prcCTimer); prcCTimer = null;
+    var ids = Object.keys(prcCPend); if(!ids.length) return;
+    ids.forEach(function(id){
+      var it = db.items.find(function(x){ return x.id === id; }), ch = prcCPend[id];
+      if(!it) return;
+      var cp = Object.assign({}, it.cprice || {}), any = false;
+      Object.keys(ch).forEach(function(c){
+        var was = Number(cp[c])||0;
+        if(was === ch[c]) return;
+        if(ch[c] > 0) cp[c] = ch[c]; else delete cp[c];   // فاضي أو صفر = يرجع للسعر الأساسي
+        any = true;
+      });
+      if(any){ it.cprice = cp; it.at = Date.now(); it.editedBy = me || "غير محدد"; }
+    });
+    prcCPend = {};
+    saveSoon("items"); renderPrcKpis();
+    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
   }
 
   // بيحدّث خانات السطر من غير ما يعيد رسم الجدول — عشان المؤشر ما يقفزش
@@ -6711,6 +6868,13 @@
   }
 
   document.getElementById("t-price").addEventListener("input", function(e){
+    var sub = e.target.closest("tr[data-prcsub]");
+    if(sub){
+      if(!e.target.matches("[data-prccp]")) return;
+      prcPaintSubs(sub.dataset.prcsub);
+      if(canEdit()) prcQueueC(sub.dataset.prcsub, sub.dataset.color, e.target.value.trim() === "" ? 0 : Math.max(0, Number(toEn(e.target.value))||0));
+      return;
+    }
     var tr = e.target.closest("tr[data-prcrow]"); if(!tr) return;
     var pIn  = tr.querySelector("[data-prcprice]"), mIn = tr.querySelector("[data-prcmk]");
     var xIn = tr.querySelector("[data-prcx]"), sIn = tr.querySelector("[data-prcs]");
@@ -6724,6 +6888,14 @@
       var pr0 = Number(toEn(pIn.value))||0;
       if(mIn) mIn.value = (pIn.value.trim() === "" || !(c2 > 0)) ? "" : (prcMarkup(pr0, c2)*100).toFixed(1);
       prcPaint(tr, pr0);
+      // تكلفة كل لون فيها نفس المصاريف
+      Array.prototype.forEach.call(this.querySelectorAll("tr[data-prcsub='" + CSS.escape(tr.dataset.prcrow) + "']"), function(st){
+        var b = Number(st.dataset.buy)||0, cc = b > 0 ? b + xv + sv : 0;
+        st.dataset.cost = cc;
+        var ce2 = st.querySelector(".prc-cost"); if(ce2) ce2.innerHTML = "<b>" + (cc > 0 ? esc(money(cc)) : "—") + "</b>";
+        var d = st.querySelectorAll(".prc-dim"); if(d[0]) d[0].textContent = xv > 0 ? qty(xv) : "—"; if(d[1]) d[1].textContent = sv > 0 ? qty(sv) : "—";
+      });
+      prcPaintSubs(tr.dataset.prcrow);
       if(canEdit()) prcQueueX(tr.dataset.prcrow, e.target === xIn ? "xCost" : "shipCost", e.target === xIn ? xv : sv);
       return;
     }
@@ -6739,9 +6911,22 @@
     } else if(e.target !== pIn) return;
     var val = Number(toEn(pIn.value))||0;
     prcPaint(tr, val);
+    prcPaintSubs(tr.dataset.prcrow);
     if(canEdit()) prcQueue(tr.dataset.prcrow, val);
   });
+  document.getElementById("t-price").addEventListener("click", function(e){
+    var b = e.target.closest("[data-prctog]"); if(!b) return;
+    var id = b.dataset.prctog, open = !prcOpen[id];
+    prcOpen[id] = open;
+    b.setAttribute("aria-expanded", open);
+    b.textContent = (open ? "▴" : "▾") + b.textContent.slice(1);
+    Array.prototype.forEach.call(this.querySelectorAll("tr[data-prcsub='" + CSS.escape(id) + "']"), function(tr){ tr.hidden = !open; });
+  });
   document.getElementById("t-price").addEventListener("change", function(e){
+    if(e.target.matches("[data-prccp]")){
+      if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
+      prcFlushC(); return;
+    }
     var tr = e.target.closest("tr[data-prcrow]"); if(!tr) return;
     if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
     // من غير إعادة رسم: السطر بيتحدّث وانت بتكتب، والرسم من جديد كان بيضيّع الخانة اللي نقلت لها
@@ -6750,8 +6935,8 @@
     prcFlush();
   });
   // سبت الشاشة والتأخير لسه شغال؟ يتكتب قبل ما تمشي
-  window.addEventListener("beforeunload", function(){ prcFlush(); prcFlushX(); });
-  document.getElementById("nav").addEventListener("click", function(){ prcFlush(); prcFlushX(); }, true);
+  window.addEventListener("beforeunload", function(){ prcFlush(); prcFlushX(); prcFlushC(); });
+  document.getElementById("nav").addEventListener("click", function(){ prcFlush(); prcFlushX(); prcFlushC(); }, true);
 
   document.getElementById("prc-q").addEventListener("input", function(){
     prcFilt.q = this.value; renderPricing();
@@ -6773,7 +6958,18 @@
     var hit = 0, skip = 0;
     prcList().forEach(function(r){
       if(r.cost <= 0){ skip++; return; }
-      prcCommit(r.it.id, prcRound(r.cost * (1 + pct/100), step));
+      var base = prcRound(r.cost * (1 + pct/100), step);
+      prcCommit(r.it.id, base);
+      // صنف بأكتر من لون: كل لون اشتريته بيتسعّر على تكلفته هو، عشان اللون الغالي ما يتباعش تحت تكلفته
+      if(r.cols){
+        var cp = Object.assign({}, r.it.cprice || {}), was = JSON.stringify(cp);
+        r.cols.forEach(function(k){
+          if(!k.color || !k.own || !(k.cost > 0)) return;
+          var v = prcRound(k.cost * (1 + pct/100), step);
+          if(Math.abs(v - base) < 0.005) delete cp[k.color]; else cp[k.color] = v;
+        });
+        if(JSON.stringify(cp) !== was){ r.it.cprice = cp; r.it.at = Date.now(); r.it.editedBy = me || "غير محدد"; saveSoon("items"); }
+      }
       hit++;
     });
     renderPricing();
@@ -6794,17 +6990,16 @@
   })() || { lines:[{ itemId:"", qty:1, price:"", manual:false }], disc:"", sin:"", sout:"" };
   function pcSave(){ try{ if(LS) LS.setItem("naya:calc", JSON.stringify(pc)); }catch(e){} }
   function pcItem(id){ return db.items.find(function(x){ return x.id === id && !x.deleted; }); }
-  function pcAutoPrice(l){
-    var it = pcItem(l.itemId); if(!it) return 0;
-    return tierFor(it, Math.max(1, Number(l.qty)||1)).u;
-  }
   function pcCalc(){
     var goods = 0, cogs = 0, extra = 0, pcs = 0, rows = [];
     pc.lines.forEach(function(l){
       var it = pcItem(l.itemId), q = Math.max(0, Number(toEn(l.qty))||0);
-      var price = l.manual ? (Number(toEn(l.price))||0) : pcAutoPrice(l);
-      var buy = it ? avgCost(it.id) : 0, x = it ? prcExtra(it) : 0;
-      var r = { it:it, q:q, price:price, buy:buy, x:x, unit:price - buy - x };
+      // لون متحدد = تكلفة اللون ده بس، من غير لون = متوسط الصنف كله
+      var cols = it ? pcCols(it.id) : [], col = cols.length > 1 && cols.indexOf(squish(l.color)) >= 0 ? squish(l.color) : "";
+      var buy = it ? (col ? costOfColor(it.id, col).c : avgCost(it.id)) : 0, x = it ? prcExtra(it) : 0;
+      // السعر من نفس اللون اللي التكلفة اتحسبت عليه — مش من لون قديم متخزّن
+      var price = l.manual ? (Number(toEn(l.price))||0) : it ? priceFor(it, col, Math.max(1, Number(l.qty)||1)).u : 0;
+      var r = { it:it, q:q, price:price, buy:buy, x:x, unit:price - buy - x, cols:cols, col:col };
       r.profit = q * r.unit; r.mg = price > 0 ? r.unit / price : null;
       r.noCost = !!it && q > 0 && !(buy > 0);
       rows.push(r);
@@ -6820,14 +7015,14 @@
   }
   function renderPcLines(){
     var box = document.getElementById("pc-lines"); if(!box) return;
-    pc.lines.forEach(function(l){ if(l.itemId && !pcItem(l.itemId)){ l.itemId = ""; l.manual = false; l.price = ""; } });
+    pc.lines.forEach(function(l){ if(l.itemId && !pcItem(l.itemId)){ l.itemId = ""; l.color = ""; l.manual = false; l.price = ""; } });
     var items = live("items").slice().sort(function(a, b){ return (a.name||"") < (b.name||"") ? -1 : 1; });
     box.innerHTML = "<div class='pc-ln hd'><span>الصنف</span><span style='text-align:center'>التكلفة</span><span>العدد</span><span>سعر القطعة</span><span style='text-align:end'>ربح السطر</span><span></span></div>" +
       pc.lines.map(function(l, i){
         return "<div class='pc-ln' data-pci='" + i + "'>" +
           "<div class='pc-sel'><select data-pcf='itemId' aria-label='الصنف'><option value=''>اختار صنف…</option>" +
             items.map(function(x){ return "<option value='" + esc(x.id) + "'" + (x.id === l.itemId ? " selected" : "") + ">" + esc(x.name) + "</option>"; }).join("") +
-          "</select></div>" +
+          "</select>" + pcColorSel(l) + "</div>" +
           "<span class='pc-c num' data-pcc='" + i + "'></span>" +
           "<input data-pcf='qty' inputmode='decimal' value='" + esc(l.qty) + "' aria-label='العدد'>" +
           "<div><input data-pcf='price' inputmode='decimal' value='" + esc(l.manual ? l.price : "") + "' aria-label='سعر القطعة'><span class='pc-tier' data-pct='" + i + "'></span></div>" +
@@ -6840,16 +7035,32 @@
       if(el && document.activeElement !== el) el.value = pc[k] || "";
     });
   }
+  // خانة اللون بتظهر بس للصنف اللي ليه أكتر من لون، وجنب كل لون فاضل منه كام
+  function pcCols(itemId){ return itemColors(itemId).filter(Boolean); }
+  function pcColorSel(l){
+    var cols = l.itemId ? pcCols(l.itemId) : [];
+    if(cols.length < 2) return "";
+    var cur = squish(l.color);
+    return "<select data-pcf='color' class='pc-col' aria-label='اللون'><option value=''>كل الألوان (متوسط)</option>" +
+      cols.map(function(c){
+        var n = Math.max(0, colorQty(l.itemId, c, freeOfV));
+        return "<option value='" + esc(c) + "'" + (c === cur ? " selected" : "") + ">" + esc(c) + " — " + (n > 0 ? "فاضل " + qty(n) : "خلصان") + "</option>";
+      }).join("") + "</select>";
+  }
   function renderPcRes(){
     var c = pcCalc();
     c.rows.forEach(function(r, i){
       var ce = document.querySelector("[data-pcc='" + i + "']"), pe = document.querySelector("[data-pcp='" + i + "']");
       var te = document.querySelector("[data-pct='" + i + "']"), pin = document.querySelector("[data-pci='" + i + "'] [data-pcf='price']");
-      if(ce) ce.innerHTML = r.it ? (r.buy > 0 ? esc(money(r.buy + r.x)) + (r.x > 0 ? "<small>" + esc(qty(r.buy)) + " + " + esc(qty(r.x)) + " مصاريف</small>" : "")
+      var cnote = r.cols.length > 1 ? (r.col ? (costOfColor(r.it.id, r.col).own ? "تكلفة " + r.col : "متوسط الصنف — اللون ده ما اتشراش")
+                                             : "متوسط كل الألوان") : "";
+      if(ce) ce.innerHTML = r.it ? (r.buy > 0 ? esc(money(r.buy + r.x)) + (r.x > 0 ? "<small>" + esc(qty(r.buy)) + " + " + esc(qty(r.x)) + " مصاريف</small>" : "") +
+                                                (cnote ? "<small" + (r.col ? "" : " class='pc-avg'") + ">" + esc(cnote) + "</small>" : "")
                                               : "<span class='v-due'>لسه ما اشتريتش</span>") : "—";
       if(pin && !pc.lines[i].manual) pin.placeholder = r.it ? String(Math.round(r.price * 100) / 100) : "0";
-      if(te){ var it = r.it, base = it ? Number(it.price)||0 : 0;
-        te.textContent = (!pc.lines[i].manual && it && r.price < base - 0.009) ? "سعر جملة" : ""; }
+      if(te){ var it = r.it, base = it ? Number(it.price)||0 : 0, ln = pc.lines[i];
+        te.textContent = (ln.manual || !it) ? "" : colorPrice(it, r.col) > 0 ? "سعر " + r.col
+          : r.price < base - 0.009 ? "سعر جملة" : ""; }
       if(pe) pe.innerHTML = r.noCost ? "<small class='v-due'>التكلفة مش معروفة — بره الحسبة</small>" : r.it && r.q ? "<b class='" + (r.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(r.profit)) + "</b>" +
         (r.mg !== null ? "<small>" + (r.mg * 100).toFixed(1) + "% هامش</small>" : "") : "—";
     });
@@ -6900,7 +7111,9 @@
     var l = pc.lines[Number(row.dataset.pci)]; if(!l) return;
     if(f === "price"){ l.price = e.target.value; l.manual = e.target.value.trim() !== ""; }
     else l[f] = e.target.value;
-    if(f === "itemId"){ l.manual = false; l.price = ""; if(!(Number(l.qty) > 0)) l.qty = 1; pcSave(); renderPcalc(); return; }
+    if(f === "itemId"){ l.manual = false; l.price = ""; l.color = ""; if(!(Number(l.qty) > 0)) l.qty = 1; pcSave(); renderPcalc(); return; }
+    // لون جديد = سعره هو، حتى لو كنت كاتب سعر بإيدك للون اللي قبله
+    if(f === "color"){ l.manual = false; l.price = ""; var pin = row.querySelector("[data-pcf='price']"); if(pin) pin.value = ""; }
     pcSave(); renderPcRes();
   };
   document.getElementById("pc-lines").addEventListener("input", pcEdit);
@@ -6925,8 +7138,9 @@
     }
     if(e.target.id === "b-pc-order"){
       var c = pcCalc(), lines = [];
-      c.rows.forEach(function(r){ if(r.it && r.q) lines.push({ itemId:r.it.id, color:"", size:"", qty:r.q,
-        price:Math.round(r.price * 100) / 100, ret:"", manual:true }); });
+      // السعر اللي اتكتب بإيدك بيفضل ثابت؛ غير كده الدرج بيحسب السعر تاني لو اخترت لون أو غيّرت العدد
+      c.rows.forEach(function(r, i){ if(r.it && r.q) lines.push({ itemId:r.it.id, color:r.col || "", size:"", qty:r.q,
+        price:Math.round(r.price * 100) / 100, ret:"", manual:!!pc.lines[i].manual }); });
       if(!lines.length){ toast("اختار صنف الأول"); return; }
       if(!canEdit()){ toast("مالكش صلاحية تضيف أوردرات"); return; }
       editing.sales = null; clearEditBase("sales");
@@ -7641,7 +7855,7 @@
     retail: function(src){
       var rows = src.filter(function(x){ return x.stock > 0.0001; })
         .map(function(x){
-          var pr = Number(x.item.price)||0, rv = x.stock*pr, cv = x.stock*x.cost;
+          var pr = vPrice(x.item, x.color), rv = x.stock*pr, cv = x.stock*x.cost;
           return { v:rv, h:"<tr><td class='wide'>" + vRowName(x) + "</td>" +
             "<td class='num'>" + qty(x.stock) + "</td>" +
             "<td class='num'>" + money(pr) + "</td>" +
@@ -7650,7 +7864,7 @@
         });
       rows.sort(function(a,b){ return b.v - a.v; });
       var out = rows.map(function(x){ return x.h; });
-      var rv = src.reduce(function(a,x){ return a + Math.max(0,x.stock)*(Number(x.item.price)||0); },0);
+      var rv = src.reduce(function(a,x){ return a + Math.max(0,x.stock)*vPrice(x.item, x.color); },0);
       var cv = src.reduce(function(a,x){ return a + Math.max(0,x.stock)*x.cost; },0);
       out.push(sumRow(["الإجمالي","","","<b>"+money(rv)+"</b>",
         "<b class='money-only'>"+money(rv-cv)+"</b>"]));
@@ -8021,7 +8235,7 @@
     var scope    = filtered ? "<span class='sub'>حسب الفلتر</span>" : "";
     var units    = src.reduce(function(a,x){ return a + x.stock; },0);
     var value    = src.reduce(function(a,x){ return a + x.stock * x.cost; },0);
-    var retail   = src.reduce(function(a,x){ return a + x.stock * (Number(x.item.price)||0); },0);
+    var retail   = src.reduce(function(a,x){ return a + x.stock * vPrice(x.item, x.color); },0);
     var reserved = src.reduce(function(a,x){ return a + x.rsv; },0);
     var bought   = src.reduce(function(a,x){ return a + x.bought; },0);
     var sold     = src.reduce(function(a,x){ return a + x.sold; },0);
@@ -8316,7 +8530,7 @@
     (d.lines||[]).forEach(function(l){
       var it = db.items.find(function(x){ return x.id === l.itemId; });
       if(!it) return;
-      var now = Number(tierFor(it, Number(l.qty)||1).u)||0, was = Number(l.price)||0;
+      var now = Number(priceFor(it, l.color, Number(l.qty)||1).u)||0, was = Number(l.price)||0;
       if(now > 0 && was > 0 && Math.abs(now - was) > 0.009)
         out.push(itemName(l.itemId) + " " + money(was) + " ← " + money(now));
     });
@@ -12141,6 +12355,9 @@
           : "<button class='del' data-tier='"+it.id+"|"+t.q+"'>حذف</button>")+"</td></tr>";
     });
     table("t-offers", ["الكمية","سعر القطعة","إجمالي العرض","مكسب العميل",""], rows, "");
+    var cn = document.getElementById("offers-cnote"), cps = Object.keys(it.cprice || {}).filter(function(c){ return colorPrice(it, c) > 0; });
+    cn.hidden = !cps.length;
+    cn.textContent = cps.length ? "العروض دي ما بتتطبّقش على " + cps.join(" · ") + " — ليهم سعر خاص في «الأسعار»." : "";
   }
 
   /* ================= العملاء والموردين: كارت لكل واحد =================
@@ -13202,7 +13419,8 @@
       if(f === "itemId"){ l.color = ""; l.size = ""; l.manual = false; }
       // أول ما تختار صنف، الكمية الغالبة ١ — بدل ما تكتبها في كل سطر
       if(f === "itemId" && v && !String(l.qty||"").trim()) l.qty = 1;
-      if(f === "itemId" || f === "qty") applyDraftTier(l);
+      // اللون كمان: اللون اللي ليه سعر خاص بيتكتب سعره أول ما تختاره
+      if(f === "itemId" || f === "qty" || f === "color") applyDraftTier(l);
       // الصنف بيغيّر قوايم اللون والمقاس، فسطور الأصناف بس هي اللي بتتبني تاني
       if(f === "itemId"){ renderDrawerLines(); return; }
       if(f === "color" || f === "size") refreshVariantOpts(Number(el.dataset.li));
@@ -13221,7 +13439,7 @@
   function applyDraftTier(l){
     var it = db.items.find(function(x){ return x.id === l.itemId; });
     if(!it || l.manual) return;
-    var t = tierFor(it, Number(l.qty)||1);
+    var t = priceFor(it, l.color, Number(l.qty)||1);
     l.price = t.u || "";
     var el = document.querySelector("#e-lines [data-f='price'][data-li='"+draft.lines.indexOf(l)+"']");
     if(el) el.value = l.price;
