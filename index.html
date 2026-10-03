@@ -3246,8 +3246,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "107";
+  var VERSION = "108";
   var CHANGELOG = [
+    { v:"108", d:"2026-10-03", items:[
+      "إصلاح: «أصناف خلصت» في الرئيسية كانت بتعدّ أي لون أو مقاس المتاح منه صفر — حتى لو القطع موجودة ومحجوزة لأوردرات ماشية — فلما تدوس عليها المخزون يقول «خلصان 0»",
+      "دلوقتي «خلصت» و«قرّبت تخلص» في الرئيسية بنفس قاعدة فلاتر المخزون بالظبط، وبتتعدّ بالأصناف زي أزرار المخزون — فاللي بتدوس عليه هو اللي هتلاقيه",
+      "القطع المحجوزة لأوردرات ماشية بتبان في المخزون تحت «محجوز» زي ما هي",
+      "صنف لسه ما اتحركش خالص (ما اشتريتهوش ولا اتطلب) ما بقاش بيطلع «خلصان»"
+    ]},
     { v:"107", d:"2026-10-03", items:[
       "رأس المال: جدول «نصيب الشركاء من ربح الفترة» رجع هنا تحت كروت الشركاء — بفترة تختارها (الشهر ده · اللي فات · من البداية)",
       "نفس الحسبة اللي كانت في الرئيسية بالظبط (مرجّحة بالأيام) — للفرجة بس، والتوزيع الفعلي من «وزّع أرباح» تحته"
@@ -5509,21 +5515,31 @@
       /* صنف واحد: سطره بتفاصيله زي ما هو. أكتر من صنف: كارت واحد بالعدد
          وأسماء أول اتنين — كانوا سطر لكل لون ومقاس وبيزقّوا الباقي تحت. */
       var lows = lowStockList(), lowG = { out:[], low:[] };
-      lows.forEach(function(x){ lowG[x.free <= 0 ? "out" : "low"].push(x); });
+      lows.forEach(function(x){ lowG[x.out ? "out" : "low"].push(x); });
       ["out", "low"].forEach(function(k){
         var xs = lowG[k]; if(!xs.length) return;
         var nm = function(x){ var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : ""); };
+        // العدد بالأصناف زي زرار «خلصان»/«قرب يخلص» في المخزون — مش بكل لون ومقاس
+        var items = xs.map(function(x){ return x.itemId; }).filter(function(v, i, a){ return a.indexOf(v) === i; });
+        // الأسماء بالصنف برضه: صنف بلون/مقاس واحد بيتكتب بيه، وأكتر بيتكتب عددهم
+        var inm = function(id){
+          var vs = xs.filter(function(x){ return x.itemId === id; });
+          return vs.length === 1 ? nm(vs[0]) : vs[0].name + " (" + qty(vs.length) + " لون/مقاس)";
+        };
         if(xs.length === 1){
           var x = xs[0];
           line({ ic:"⚠", cls: k === "out" ? "bad" : "warn",
                  t:nm(x) + (k === "out" ? " خلصت" : " قرّبت تخلص"),
-                 s:"فاضل " + qty(x.free) + (x.min ? " — حد التنبيه " + qty(x.min) : ""), v:qty(x.free),
-                 go:"inv|" + k, n:1 });
+                 s: k === "out"
+                   ? "رصيده في المخزن صفر" + (x.rsv ? " — وعليه " + qty(x.rsv) + " لأوردرات ماشية" : "")
+                   : "متاح " + qty(x.free) + (x.min ? " — حد التنبيه " + qty(x.min) : ""),
+                 v:qty(k === "out" ? x.stock : x.free), go:"inv|" + k, n:1 });
         } else {
           line({ ic:"⚠", cls: k === "out" ? "bad" : "warn",
                  t: k === "out" ? "أصناف خلصت" : "أصناف قرّبت تخلص",
-                 s:xs.slice(0, 2).map(nm).join(" · ") + (xs.length > 2 ? " و" + qty(xs.length - 2) + " تاني" : ""),
-                 v:qty(xs.length), go:"inv|" + k, n:xs.length });
+                 s:items.slice(0, 2).map(inm).join(" · ") + (items.length > 2 ? " و" + qty(items.length - 2) + " تاني" : ""),
+                 // n = عدد صفوف اللون/المقاس (زي جدول التفصيلية) — الرقم الظاهر بالأصناف
+                 v:qty(items.length), go:"inv|" + k, n:xs.length });
         }
       });
     }
@@ -6081,20 +6097,17 @@
       "مفيش أصناف لسه. ضيف أصنافك من تبويب الأصناف الأول.");
   }
 
-  /* الأصناف اللي قربت تخلص أو خلصت — قاعدة واحدة للوحة التفصيلية
-     والرئيسية، عشان الاتنين يقولوا نفس الكلام. */
+  /* الأصناف اللي خلصت أو قرّبت تخلص — من صفوف المخزون نفسها وبنفس شروط فلاتره
+     (isOut / isLow)، فلما تدوس عليها في الرئيسية تلاقي نفس الأصناف بالظبط.
+     قبل v108 كانت بتعدّ «المتاح صفر» = خلصان، فالقطع المحجوزة لأوردرات ماشية
+     كانت بتطلع «خلصت» في الرئيسية وفي المخزون مش لاقيها. */
   function lowStockList(){
     var out = [];
-    live("items").forEach(function(i){
-      var min = Number(i.min)||0;
-      variantsOf(i.id).forEach(function(v){
-        var free = freeOfV(i.id, v.color, v.size);
-        var soldEver = live("sales").some(function(s){
-          return isDelivered(s) && SL(s).some(function(l){ return keyOf(l)===vKey(i.id,v.color,v.size); }); });
-        var boughtEver = live("purchases").some(function(p){ return keyOf(p)===vKey(i.id,v.color,v.size); });
-        var alert = (min > 0 && free <= min) || (free <= 0 && (soldEver || boughtEver));
-        if(alert) out.push({ itemId:i.id, name:i.name, unit:i.unit||"", color:v.color, size:v.size, free:free, min:min });
-      });
+    invRows().forEach(function(x){
+      var o = isOut(x), l = !o && isLow(x);
+      if(!o && !l) return;
+      out.push({ itemId:x.item.id, name:x.item.name, unit:x.item.unit||"", color:x.color, size:x.size,
+                 free:x.stock - x.rsv, stock:x.stock, rsv:x.rsv, min:Number(x.item.min)||0, out:o });
     });
     return out;
   }
@@ -6105,7 +6118,7 @@
           (lbl ? " <span class='pill'>"+esc(lbl)+"</span>" : "")+"</td>"+
           "<td class='num "+(free<=0?"v-due":"")+"'>"+qty(free)+" "+esc(x.unit)+"</td>"+
           "<td class='num'>"+(min?qty(min):"—")+"</td>"+
-          "<td>"+(free<=0?"<span class='pill due'>خلصان</span>":"<span class='pill due'>قرب يخلص</span>")+"</td></tr>";
+          "<td>"+(x.out?"<span class='pill due'>خلصان</span>":"<span class='pill due'>قرب يخلص</span>")+"</td></tr>";
     });
     document.getElementById("low-panel").hidden = !rows.length;
     if(rows.length) table("t-low", ["الصنف","المتاح","حد التنبيه",""], rows, "");
@@ -7564,6 +7577,9 @@
 
   // "قرب يخلص": بحد التنبيه لو متحدد، وإلا بتنبيه افتراضي عند قطعتين أو أقل
   var LOW_DEFAULT = 2;
+  /* «خلصان» = رصيده في المخزن صفر — نفس القاعدة في فلتر المخزون وعدّاده والرئيسية.
+     صنف لسه ما اتحركش خالص (ما اشتريتهوش ولا اتطلب) مش «خلصان». */
+  function isOut(x){ return x.stock <= 0 && !!stockIdx().vars[x.item.id]; }
   function isLow(x){
     var free = x.stock - x.rsv, min = Number(x.item.min)||0;
     if(x.stock <= 0) return false;
@@ -7636,7 +7652,7 @@
       all: function(){ return true; },
       instock: function(x){ return x.stock > 0; },
       low: isLow,
-      out: function(x){ return x.stock <= 0; },
+      out: isOut,
       rsv: function(x){ return x.rsv > 0; }
     };
     Array.prototype.forEach.call(document.querySelectorAll("#inv-quick button[data-invonly]"), function(b){
@@ -7752,7 +7768,7 @@
       if(ifilt.color && x.color !== ifilt.color) return false;
       if(ifilt.size  && x.size  !== ifilt.size)  return false;
       if(ifilt.only === "instock" && x.stock <= 0) return false;
-      if(ifilt.only === "out" && x.stock > 0) return false;
+      if(ifilt.only === "out" && !isOut(x)) return false;
       if(ifilt.only === "low" && !isLow(x)) return false;
       if(ifilt.only === "rsv" && !(x.rsv > 0)) return false;
       if(q){
