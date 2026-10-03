@@ -1108,6 +1108,8 @@
   .sg-exp{font:inherit;font-weight:600;color:inherit;background:none;border:0;border-bottom:1px dashed currentColor;
     padding:0 0 1px;cursor:pointer;text-align:start}
   .sg-exp:hover{color:var(--teal)}
+  #t-pis tr.pis-tot td{border-top:1px solid var(--line);background:var(--teal-soft)}
+  #t-pis td.num{white-space:nowrap}
   #exp-drawer{width:min(980px,100%)}
   #t-exp td.num{white-space:nowrap}
   #t-exp tr.tot td{font-weight:700;background:var(--teal-soft)}
@@ -2833,6 +2835,13 @@
 
   <p class="note bad" id="rep-unclass" hidden></p>
 
+  <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
+  <div class="panel money-only" id="pis-panel">
+    <h3>قايمة الدخل المتوقعة <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
+    <p class="hint" id="pis-note" style="margin:0 0 var(--sp-3)"></p>
+    <div class="tbl-wrap"><table id="t-pis"></table></div>
+  </div>
+
   <!-- السؤال الأهم: أبيع بكام؟ -->
   <div class="panel">
     <div class="fold-h"><h3>أبيع بكام؟ <small id="rep-be-sum"></small></h3>
@@ -3311,8 +3320,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "114";
+  var VERSION = "115";
   var CHANGELOG = [
+    { v:"115", d:"2026-10-03", items:[
+      "التقارير: «قايمة الدخل المتوقعة» — المبيعات − تكلفة البضاعة = مجمل الربح، + الشحن على العملاء − الشحن للشركات، − المصاريف المتغيّرة والثابتة = صافي الربح",
+      "٣ أعمدة: «اتسلّم فعلاً» (نفس أرقام باقي التقارير) · «لسه ماشي» (الأوردرات اللي لسه ما اتسلّمتش لو اتسلّمت زي ما هي) · «الإجمالي لو كله اتسلّم» — وبتتبع فترة التقارير"
+    ]},
     { v:"114", d:"2026-10-03", items:[
       "«مع المندوب»: دوسة على «صافي الربح المتوقع» بتفتح شاشة جانبية فيها تحليل كل أوردر: سعر البيع · سعر الشراء · ربح البضاعة · الشحن على العميل · الشحن للشركة · صافي الشحن · صافي الربح المتوقع — وسطر إجمالي",
       "فوق الجدول جملة بتلخّص: هتبيع بكام، والبضاعة تكلفتك كام، والشحن مكسّبك ولا من جيبك، وصافي ربحك. ودوسة على رقم أي أوردر بتفتح تفاصيله",
@@ -7347,8 +7360,62 @@
       .concat(["الإجمالي","أقدم دين"]), list, "مفيش مديونيات على العملاء دلوقتي.");
   }
 
+  /* v115 — قايمة الدخل المتوقعة: عمود الفعلي (اللي اتسلّم في الفترة — نفس أرقام
+     periodStats اللي في باقي التقارير)، وعمود الأوردرات اللي لسه ماشية لو اتسلّمت
+     زي ما هي (expProfit — نفس الربح المتوقع في «مع المندوب» ودرج الأوردر)،
+     والإجمالي. المصاريف فعلية بس — مفيش مصاريف متوقعة. والشحن بيتحسب في الفعلي
+     للمسلّم والملغي بس (shipCounts) فمفيش أوردر بيتحسب مرتين. */
+  function renderProjIS(){
+    var t = document.getElementById("t-pis"); if(!t) return;
+    var r = periodRange(), c = periodStats(r);
+    var A = { goods:c.revenue, cost:c.cogs, sin:0, sout:0 };
+    c.list.forEach(function(s){ if(shipCounts(s)){ A.sin += shipIn(s); A.sout += shipOut(s); } });
+    var open = c.list.filter(function(s){ return !isDelivered(s) && !isCancelled(s); });
+    var E = { goods:0, cost:0, sin:0, sout:0, net:0 }, nc = 0;
+    open.forEach(function(s){
+      var e = expProfit(s);
+      E.goods += e.goods; E.cost += e.cost; E.sin += e.sin; E.sout += e.sout; E.net += e.net;
+      if(e.noCost.length) nc++;
+    });
+    var col = function(a, e){ return [a, e, a + e]; };
+    var L = [
+      ["المبيعات (الإيرادات)", col(A.goods, E.goods), "b"],
+      ["− تكلفة البضاعة المباعة", col(A.cost, E.cost), ""],
+      ["مجمل الربح", col(c.revenue - c.cogs, E.goods - E.cost), "t"],
+      ["+ شحن محمّل على العملاء", col(A.sin, E.sin), ""],
+      ["− شحن مدفوع لشركات الشحن", col(A.sout, E.sout), ""],
+      ["صافي الشحن", col(c.netShip, E.sin - E.sout), "s"],
+      ["− مصاريف متغيّرة", col(c.varExp, 0), "x"],
+      ["− مصاريف ثابتة", col(c.fixedExp, 0), "x"],
+      ["صافي الربح", col(c.net, E.net), "n"]
+    ];
+    var cell = function(v, k, i){
+      if(k === "x" && i === 1) return "<td class='num' style='color:var(--ink-soft)'>—</td>";
+      var cls = (k === "t" || k === "s" || k === "n") ? (v >= 0 ? " v-gain" : " v-due") : "";
+      return "<td class='num" + cls + "'" + (k === "n" ? " style='font-weight:700'" : "") + ">" + money(v) + "</td>";
+    };
+    var rows = L.map(function(x){
+      var k = x[2];
+      return "<tr" + (k === "t" || k === "n" ? " class='pis-tot'" : "") + "><td class='wide'" +
+        (k === "t" || k === "n" || k === "b" ? " style='font-weight:700'" : "") + ">" + esc(x[0]) + "</td>" +
+        cell(x[1][0], k, 0) + cell(x[1][1], k, 1) + cell(x[1][2], k, 2) + "</tr>";
+    });
+    var tg = A.goods + E.goods, tn = c.net + E.net;
+    rows.push("<tr><td class='wide' style='color:var(--ink-soft)'>صافي الربح ÷ المبيعات</td>" +
+      [c.revenue ? c.net / c.revenue : null, E.goods ? E.net / E.goods : null, tg ? tn / tg : null].map(function(v){
+        return "<td class='num' style='color:var(--ink-soft)'>" + (v === null ? "—" : "<span dir='ltr'>" + (v * 100).toFixed(1) + "%</span>") + "</td>"; }).join("") + "</tr>");
+    table("t-pis", ["البند", "اتسلّم فعلاً", "لسه ماشي (متوقع) · " + qty(open.length) + " أوردر", "الإجمالي لو كله اتسلّم"], rows, "");
+    var sm = document.getElementById("pis-sum");
+    if(sm) sm.innerHTML = "صافي الربح لو كله اتسلّم: <b class='num " + (tn >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(tn)) + "</b>";
+    var nt = document.getElementById("pis-note");
+    if(nt) nt.innerHTML = "عمود <b>«اتسلّم فعلاً»</b> هو نفس أرقام باقي التقارير للفترة. عمود <b>«لسه ماشي»</b> = الأوردرات اللي لسه ما اتسلّمتش " +
+      "(جديدة أو مع المندوب) لو العملاء خدوها كلها: البضاعة بسعر بيعها − تكلفتها بمتوسط الشراء + الشحن. " +
+      "المصاريف فعلية بس — مفيش مصاريف متوقعة. الرقم متوقع: المرتجع والرفض بيقلّلوه، والربح بيتسجّل في الحسابات لما الأوردر يتسلّم." +
+      (nc ? " <span class='v-due'>" + esc(qty(nc)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
+  }
   function renderReports(){
     clearMonthly();
+    renderProjIS();
     renderAging();
     renderPerf();
     renderBreakEven();
