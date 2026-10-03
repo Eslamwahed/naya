@@ -1099,6 +1099,8 @@
   }
   .sg-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4)}
   .sg-ph{margin-bottom:var(--sp-3)}
+  .sg-sum{background:var(--teal-soft);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);margin:0 0 var(--sp-3);font-weight:600}
+  .sg-sum b{font-size:var(--fs-5);margin-inline-start:6px}
   .sg-ph h3{margin:0;font-size:var(--fs-4)}
   .sg-ph p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-2)}
   .sg-empty{color:var(--ink-soft);text-align:center;padding:var(--sp-5) 0;margin:0}
@@ -3289,8 +3291,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "111";
+  var VERSION = "112";
   var CHANGELOG = [
+    { v:"112", d:"2026-10-03", items:[
+      "«مع المندوب»: سطر فوق القايمة بإجمالي فلوس الأوردرات اللي مع المندوب — نفس المبالغ اللي جنب كل أوردر (تمن البضاعة + الشحن على العميل)"
+    ]},
     { v:"111", d:"2026-10-03", items:[
       "إصلاح: رسالة التأكيد اللي بتطلع تحت («الحركة اتسجّلت»…) كانت أبيض على أبيض في الوضع الليلي — دلوقتي مقروءة في الوضعين",
       "وعلى الموبايل بقت بتطلع فوق شريط الأقسام اللي تحت بدل ما تغطّيه"
@@ -9364,6 +9369,11 @@
           sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" + acts + part + "</div>";
       });
+      /* v112 — إجمالي الفلوس اللي مع المندوب: نفس المبلغ اللي جنب كل أوردر (sgFull =
+         تمن البضاعة + الشحن على العميل) — يعني اللي العملاء هيدفعوه لو كلهم خدوا كله */
+      var tot = g.st[2].reduce(function(a, s){ return a + sgFull(s); }, 0);
+      var sum = g.st[2].length
+        ? "<div class='sg-sum'><span>إجمالي الأوردرات اللي مع المندوب <b class='num'>" + esc(money(tot)) + "</b></span></div>" : "";
       var bulk = nSel
         ? "<div class='sg-bulk'><b>" + qty(nSel) + " مختارين</b>" +
           "<button class='tbtn primary' type='button' data-sgbulk='all'>كلهم خدوا كله ودفعوا</button>" +
@@ -9373,7 +9383,7 @@
       var note = sgNote ? "<p class='note " + (sgNote.bad ? "bad" : "ok") + "'>" + esc(sgNote.t) + "</p>" : "";
       return sgHead("٢ · مع المندوب — العميل استلم؟",
                "اللي العميل بيخده بيدفع تمنه للمندوب على الباب وخلاص — بعدها العميل مش عليه حاجة.") +
-        note + bulk + (rows.length ? "<div class='sg-rows'>" + rows.join("") + "</div>" : sgEmpty("مفيش أوردرات مع المندوب دلوقتي."));
+        sum + note + bulk + (rows.length ? "<div class='sg-rows'>" + rows.join("") + "</div>" : sgEmpty("مفيش أوردرات مع المندوب دلوقتي."));
     },
 
     "3": function(g){
