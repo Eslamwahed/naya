@@ -3333,8 +3333,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "116";
+  var VERSION = "117";
   var CHANGELOG = [
+    { v:"117", d:"2026-10-04", items:[
+      "تفاصيل الأوردر: الأوردر اللي لسه ما اتسلّمش بقى بيوريك «صافي الربح المتوقع لو اتسلّم» بدل «بيتحسب لما يتسلّم» — البضاعة − تكلفتها + الشحن على العميل − الشحن للشركة (نفس رقم «مع المندوب»)"
+    ]},
     { v:"116", d:"2026-10-03", items:[
       "الصنف اللي ليه كذا لون بأسعار مختلفة: في «الأسعار» جنب الصنف «▾ ٣ ألوان» — بيفتح سطر لكل لون بتكلفته (متوسط اللي اشتريت بيه اللون ده) وخانة سعر ليه. اللون اللي سعره فاضي بياخد السعر الأساسي",
       "«احسب أوردر»: خانة لون تحت الصنف — التكلفة والسعر بيبقوا بتوع اللون ده، و«اعمل منه أوردر» بينقل اللون",
@@ -5124,6 +5127,16 @@
      «صافي الربح المتوقع» في درج الأوردر (v99): البضاعة − تكلفتها بمتوسط الشراء
      النهارده + شحن على العميل − شحن للشركة. صنف لسه ما اتشراش (مالوش تكلفة
      ومش متثبّتة) بيطلع بره الحسبة بدل ما سعره كله يتحسب ربح. */
+  /* الأوردر لسه ما اتسلّمش: الربح الفعلي بيتحسب بعد التسليم، بس بنوريك المتوقع
+     لو اتسلّم زي ما هو — نفس رقم «صافي الربح المتوقع» في «مع المندوب». */
+  function ddExpProfit(s){
+    var e = expProfit(s);
+    return "<div class='dd-profit money-only'><span>صافي الربح المتوقع لو اتسلّم" +
+        "<small>بضاعة " + esc(money(e.goods)) + " − تكلفتها " + esc(money(e.cost)) +
+          (e.sin || e.sout ? " · شحن " + esc(money(e.sin)) + " − " + esc(money(e.sout)) : "") + "</small>" +
+        (e.noCost.length ? "<small class='v-due' style='display:block'>" + esc(e.noCost.join(" · ")) + " لسه ما اتشراش — تكلفته مش معروفة فمش داخل في الحسبة</small>" : "") +
+      "</span><b class='num " + (e.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(e.net)) + "</b></div>";
+  }
   function expProfit(s){
     var goods = 0, cost = 0, noCost = [];
     SL(s).forEach(function(l){
@@ -9222,11 +9235,12 @@
     var money_ = "<div class='dd-card dd-money'><h5>الفلوس</h5>" + fin +
       (warns.length ? "<div class='owarn'>" + warns.map(function(w){
           return "<p class='v-due'>" + esc(w) + "</p>"; }).join("") + "</div>" : "") +
-      "<div class='dd-profit money-only'><span>صافي ربح الأوردر" +
-        (m.known && m.pocket > 0.009 ? " <small class='v-due'>(شحن من جيبك " + esc(money(m.pocket)) + ")</small>" : "") +
-        (m.known ? "<small>" + esc(money(m.owed)) + " − " + esc(money(m.outlay)) + "</small>" : "") + "</span>" +
-        "<b class='num " + (m.known ? (m.profit >= 0 ? "v-gain" : "v-due") : "") + "'>" +
-        (m.known ? esc(money(m.profit)) : "بيتحسب لما يتسلّم") + "</b></div>" +
+      (m.known
+        ? "<div class='dd-profit money-only'><span>صافي ربح الأوردر" +
+            (m.pocket > 0.009 ? " <small class='v-due'>(شحن من جيبك " + esc(money(m.pocket)) + ")</small>" : "") +
+            "<small>" + esc(money(m.owed)) + " − " + esc(money(m.outlay)) + "</small></span>" +
+            "<b class='num " + (m.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(m.profit)) + "</b></div>"
+        : ddExpProfit(s)) +
       "</div>";
 
     /* ---- ٣ج مشوار الأوردر ---- */
