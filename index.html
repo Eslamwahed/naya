@@ -897,32 +897,20 @@
     .pc-ship{grid-template-columns:1fr 1fr}
   }
   #t-price input.prin{width:76px}
+  #t-price input.prx{width:62px}
   #t-price tr.prc-sub[hidden]{display:none}
-  .pol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:var(--sp-3)}
-  .pol-grid input{width:100%}
-  .pol-grid .sub{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px}
-  .pv-ovt{font-size:var(--fs-3);margin:0} .pv-ovt small{display:block;font-size:var(--fs-1);color:var(--ink-soft);font-weight:400}
-  .pv-ovt .pv-in{width:84px;font-size:var(--fs-5);font-weight:700;text-align:center;padding:4px 6px;margin:0 4px}
-  .pv-ship{margin-top:10px}
-  .pv-alert{margin:10px 0 0;background:#F6E1E6;color:var(--due);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-2)}
-  .pv-pill{display:inline-block;direction:ltr;unicode-bidi:isolate;font-weight:700;font-size:var(--fs-2);border-radius:8px;padding:2px 9px;min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
-  .pv-pill.hi{background:#E3F1EA;color:var(--gain)} .pv-pill.mid{background:#FBF1DC;color:var(--warn)} .pv-pill.lo{background:#F6E1E6;color:var(--due)}
-  .pv-rng{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap} .pv-rng .s{font-size:11px;color:var(--ink-soft)}
-  #t-price small.pv-x{display:block;font-size:11px;color:var(--ink-soft)}
-  .pv-lg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink-soft);margin-top:10px}
-  .pv-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:-1px}
-  .pv-lg i.hi{background:#E3F1EA} .pv-lg i.mid{background:#FBF1DC} .pv-lg i.lo{background:#F6E1E6}
-  .pv-advl{margin:0;padding:5px 0;line-height:1.8} .pv-advl + .pv-advl{border-top:1px dashed var(--line)}
-  .pv-w{color:var(--warn)} .pv-s{color:var(--ink-soft)}
-  [data-theme="dark"] .pv-pill.hi{background:#1F3A2E} [data-theme="dark"] .pv-pill.mid{background:#3A3018} [data-theme="dark"] .pv-pill.lo{background:#3E1A24}
-  [data-theme="dark"] .pv-alert{background:#3E1A24}
   #t-price tr.prc-sub td{background:var(--teal-soft);font-size:var(--fs-2)}
   #t-price tr.prc-sub .prc-cn{padding-inline-start:14px;color:var(--ink-soft)}
   #t-price tr.prc-sub .prc-cn::before{content:"↳ "}
   #t-price .prc-dim{color:var(--ink-soft)}
+  #t-price small.prc-avg{display:block;font-size:11px;color:var(--warn);white-space:normal}
+  #t-price small.prc-avgn{color:var(--ink-soft);font-weight:400}
+  /* الموبايل: كارت اللون من غير خانات المصاريف المتكررة (هي هي بتاعة الصنف) */
+  @media (max-width:760px){ #t-price tr.prc-sub td.prc-dim{display:none} }
   .prc-tog{border:0;background:var(--teal-soft);color:var(--teal);font:inherit;font-size:var(--fs-1);font-weight:600;border-radius:999px;padding:1px 8px;cursor:pointer;margin-inline-start:4px}
   #t-price th,#t-price td{padding-inline:8px}
   #t-price thead th{white-space:normal;line-height:1.3;vertical-align:bottom}
+  #t-price td.prc-cost{white-space:nowrap}
 
   /* ================= استبدال مع المورد ================= */
   .fset.xg-out{border-inline-start:4px solid var(--due)}
@@ -2703,7 +2691,7 @@
 <!-- التسعير -->
 <section id="tab-price" hidden>
   <h2>التسعير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
-  <p class="hint" data-infotxt hidden>السعر بتحطه إنت من السوق. الشاشة بتقولك كل صنف بيكسّبك كام <strong>بجد</strong>: ربح القطعة (سعرها − تكلفتها الواصلة) ناقص <strong>مصاريف الأوردر</strong> (إعلان + تغليف + مصاريف شهرية) — مرة لو العميل أخد قطعة واحدة، ومرة لو أخد قطعتين. الأخضر = الربح اللي عايزه أو أكتر.</p>
+  <p class="hint" data-infotxt hidden>الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
 
   <div class="quick" id="prc-tabs" role="tablist" aria-label="التسعير">
     <button type="button" data-prctab="list" class="on">أسعار الأصناف</button>
@@ -2729,26 +2717,40 @@
   </div>
 
   <div id="prc-listview">
-  <!-- v119: شاشة تسعير بسيطة — مصاريف الأوردر رقم واحد، وربح كل صنف لوحده وفي أوردر قطعتين -->
-  <div class="panel money-only pv-ov" id="pv-ov">
-    <div class="fold-h"><label class="pv-ovt" for="pv-perorder">كل أوردر عليه <input id="pv-perorder" class="pv-in num" inputmode="decimal" data-pol="perOrder" aria-label="مصاريف على كل أوردر"> مصاريف
-        <small>إعلان + تغليف + مصاريف شهرية — رقم واحد بتكتبه إنت (الشحن بيتحسب من الأوردر نفسه)</small></label>
-      <button class="tbtn" type="button" data-foldbtn="pv-edit" aria-expanded="false" aria-controls="pv-edit">إعدادات تانية</button></div>
-    <div id="pv-edit" data-fold hidden>
-      <div class="pol-grid">
-        <div><label for="pv-profit">الربح اللي عايزه من الأوردر</label><input id="pv-profit" inputmode="decimal" data-pol="profit"><span class="sub">الأخضر في الجدول = الرقم ده أو أكتر</span></div>
-        <div><label for="pv-adsweek">الإعلانات في الأسبوع</label><input id="pv-adsweek" inputmode="decimal" data-pol="adsWeek" placeholder="اختياري"><span class="sub" id="pv-adsweek-sub"></span></div>
-      </div>
-      <label class="allow pv-ship"><input type="checkbox" id="pol-ship"> الشحن على العميل بيتكتب لوحده في الأوردر زي اللي بتدفعه لشركة الشحن</label>
+  <div class="band" id="prc-kpis"></div>
+  <p class="note" id="prc-note"></p>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="prc-q" type="search" placeholder="دوّر باسم الصنف…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
     </div>
-    <p class="pv-alert" id="pv-alert" hidden></p>
   </div>
-  <div class="panel money-only">
-    <div class="tbl-wrap"><table id="t-price"></table></div>
-    <div class="pv-lg"><span><i class="hi"></i>هدفك أو أكتر</span><span><i class="mid"></i>كسبان بس أقل من هدفك</span><span><i class="lo"></i>خسران</span></div>
-    <p class="hintline" style="margin:6px 0 0">الأرقام = صافي ربحك بعد مصاريف الأوردر. بتغيّر السعر من الخانة، والأرقام بتتحدّث على طول. مترتبين من الأكسب للأقل.</p>
+
+  <div class="quick" id="prc-quick">
+    <button type="button" data-prconly="all" class="on">كل الأصناف</button>
+    <button type="button" data-prconly="noprice">لسه من غير سعر</button>
+    <button type="button" data-prconly="loss">السعر أقل من التكلفة</button>
+    <button type="button" data-prconly="instock">اللي في المخزن</button>
   </div>
-  <div class="panel money-only pv-adv" id="pv-adv" hidden></div>
+
+  <div class="filters" id="prc-bulk">
+    <div><label for="prc-bulk-pct">سعّر اللي ظاهر: زيادة على التكلفة الكلية %</label>
+      <input id="prc-bulk-pct" inputmode="decimal" placeholder="50"></div>
+    <div><label for="prc-bulk-round">قرّب السعر لأقرب</label>
+      <select id="prc-bulk-round">
+        <option value="0">من غير تقريب</option>
+        <option value="1">جنيه</option>
+        <option value="5" selected>٥ جنيه</option>
+        <option value="10">١٠ جنيه</option>
+      </select></div>
+    <div><label for="b-prc-apply">طبّق على كل اللي ظاهر</label>
+      <button class="tbtn" type="button" id="b-prc-apply">طبّق</button></div>
+  </div>
+
+  <div class="tbl-wrap"><table id="t-price"></table></div>
   </div>
 </section>
 
@@ -3231,7 +3233,6 @@
       <h3>الأصناف</h3>
       <div id="e-lines"></div>
       <button class="addline" type="button" id="b-addline">+ صنف تاني</button>
-      <p class="hintline bad money-only" id="e-polwarn" hidden></p>
       <p class="hintline bad" id="s-note-msg" hidden></p>
       <label id="s-allow-wrap" class="allow" hidden>
         <input type="checkbox" id="s-allow">
@@ -3332,22 +3333,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "119";
+  var VERSION = "120";
   var CHANGELOG = [
-    { v:"119", d:"2026-10-04", items:[
-      "شاشة التسعير من جديد وبسيطة: سطر واحد فوق «كل أوردر عليه [50] مصاريف» — إعلان + تغليف + مصاريف شهرية في رقم واحد بتكتبه إنت في الخانة على طول (الشحن بيتحسب من الأوردر نفسه)",
-      "جدول ٥ أعمدة: الصنف · سعر البيع · التكلفة · ربحك لو اتباع لوحده · ربحك لو أخد قطعتين — بعد مصاريف الأوردر، ملوّن (أخضر = هدفك 150 أو أكتر · أصفر = أقل · أحمر = خسران) ومترتب من الأكسب",
-      "تحت الجدول: مين بيكسّبك هدفك لوحده (إعلن عنهم) · مين محتاج قطعة تانية · مين حتى بقطعتين أقل",
-      "تنبيه أحمر لو الإعلانات في الأسبوع ÷ أوردرات الأسبوع أكتر من مصاريف الأوردر اللي حاططها",
-      "اتشال: الكروت ونسبة الزيادة والهامش وربح المخزون والتسعير بالجملة ولوحة سياسة التسعير القديمة",
-      "«احسب أوردر» والأوردر بيطرحوا نفس الرقم (مصاريف الأوردر) — و«أقصى خصم من غير خسارة» بقى بيحسبها"
-    ]},
-    { v:"118", d:"2026-10-04", items:[
-      "«الأسعار»: لوحة «سياسة التسعير» — ميزانية الإعلانات في الأسبوع ÷ أوردرات الأسبوع (تلقائي من شغلك) = إعلان لكل أوردر، + تغليف + نصيبه من المصاريف الشهرية + الربح اللي عايزه، ÷ متوسط القطع في الأوردر = «سعر القطعة = تكلفتها + كذا»",
-      "جدول الأسعار: عمودين «السعر المطلوب» و«سعر التعادل» لكل صنف ولكل لون، وعلامة: ✓ فوق المطلوب · ⚠ ناقص كذا · ✗ تحت التعادل — وفلتر «تحت السعر المطلوب» وزرار يرفع اللي تحته (بتأكيد، وعمره ما بينزّل سعر)",
-      "«احسب أوردر»: بعد «صافي ربحك» بيطرح الإعلان والتغليف والمصاريف ويقولك «صافي بعد كل حاجة» ومقارنته بهدفك",
-      "الأوردر: تنبيه لو صنف سعره تحت التعادل أو الأوردر هيخسّر بعد الإعلان والتغليف — الحفظ مش بيتمنع",
-      "الشحن على العميل بقى بيتكتب لوحده = اللي بتدفعه لشركة الشحن (ولو أول أوردر للمحافظة: 75 القاهرة والجيزة · 95 بحري · 105 قبلي · 150 الحدود) — وتقدر تقفلها من اللوحة"
+    { v:"120", d:"2026-10-04", items:[
+      "شاشة التسعير رجعت زي ما كانت في الإصدار 117 — اتشال كل اللي اتعمل فيها في 118 و119 (سياسة التسعير، السعر المطلوب والتعادل، مصاريف الأوردر، الجدول الجديد، وتنبيهات الأوردر)",
+      "الشحن على العميل رجع يتملي من آخر أوردر لنفس المحافظة زي الأول",
+      "الأسعار اللي كتبتها بنفسك في الأصناف (وأسعار الألوان) زي ما هي — ما اتلمستش"
     ]},
     { v:"117", d:"2026-10-04", items:[
       "تفاصيل الأوردر: الأوردر اللي لسه ما اتسلّمش بقى بيوريك «صافي الربح المتوقع لو اتسلّم» بدل «بيتحسب لما يتسلّم» — البضاعة − تكلفتها + الشحن على العميل − الشحن للشركة (نفس رقم «مع المندوب»)"
@@ -6608,221 +6599,209 @@
 
      ملحوظة على الأسماء: «pr-» محجوزة لدرج مرتجع المشتريات،
      فالشاشة دي كلها «prc-». */
-  /* ---------- التسعير (v119): شاشة بسيطة ----------
-     السعر بتحطه إنت من السوق، والسيستم بيقولك كل صنف بيكسّبك كام بجد:
-     ربح القطعة − «مصاريف الأوردر» (رقم واحد بيكتبه صاحب الشغل: إعلان + تغليف +
-     نصيبه من المصاريف الشهرية — الشحن مش جواه، لأنه بيتحسب من الأوردر نفسه
-     (شحن على العميل − شحن للشركة)، وإلا كان هيتطرح مرتين). المصاريف دي على الأوردر مهما كان فيه كام
-     قطعة، عشان كده بنوري «لو اتباع لوحده» و«لو أخد قطعتين». */
+  var prcFilt = { q:"", only:"all" };
 
-  /* مصاريف القطعة اللي اتكتبت قبل كده على الصنف (xCost / shipCost) —
-     بتفضل داخلة في تكلفة القطعة، ومش بتتسجّل في الدفاتر. */
+  function prcMarkup(price, cost){ return cost > 0 ? (price - cost) / cost : null; }
+  function prcMargin(price, cost){ return price > 0 ? (price - cost) / price : null; }
+  function prcRound(v, step){
+    var st = Number(step)||0;
+    if(st <= 0) return Math.round(v * 100) / 100;
+    return Math.round(v / st) * st;
+  }
+  function prcPct(v){ return (v === null || !isFinite(v)) ? "—" : (v*100).toFixed(1) + "%"; }
+
+  /* مصاريف القطعة اللي بتكتبها بإيدك (تغليف، إعلانات، …) ومصاريف الشحن للقطعة —
+     أرقام تخطيط على الصنف بس، زي سعر البيع: مش بتتسجّل في الدفاتر، لأن الشحن
+     الفعلي بيتسجّل في الأوردر والمصاريف الفعلية في الخزنة. */
   function prcExtra(it){ return Math.max(0, Number(it && it.xCost)||0); }
   function prcShip(it){ return Math.max(0, Number(it && it.shipCost)||0); }
-
-  // الإعدادات في settings.policy (بتتزامن مع باقي الإعدادات). فاضي = الافتراضي
-  var POL_DEF = { perOrder:50, profit:150, adsWeek:null, shipFollow:true };
-  function pol(){
-    var p = settings.policy || {}, o = {};
-    Object.keys(POL_DEF).forEach(function(k){ o[k] = (p[k] == null || p[k] === "") ? POL_DEF[k] : p[k]; });
-    return o;
-  }
-  /* أوردرات الأسبوع من شغلك: أوردرات آخر ١٤ يوم على عدد الأيام اللي اشتغلتها
-     فعلاً فيهم (لو بادئ من ٥ أيام بنقسم على ٥ مش ١٤) × ٧ */
-  function polAuto(){
-    var to = today(), d = new Date(to + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 13);
-    var from = d.toISOString().slice(0, 10), r = { from:from, to:to }, first = "";
-    var all = live("sales").filter(function(s){ return !isCancelled(s); });
-    all.forEach(function(s){ if(s.date && (!first || s.date < first)) first = s.date; });
-    var ord = all.filter(function(s){ return inRange(s.date, r); }).length;
-    var start = first && first > from ? first : from;
-    var days = Math.min(14, Math.max(1, Math.round((new Date(to + "T00:00:00Z") - new Date(start + "T00:00:00Z")) / 864e5) + 1));
-    return { orders:ord, days:days, ordWeek: ord ? ord / days * 7 : null };
-  }
-  function polCalc(){
-    var p = pol(), a = polAuto();
-    var ordWeek = a.ordWeek || 0;                // دايماً من شغلك — مفيش خانة تتكتب
-    var adsWeek = Math.max(0, Number(p.adsWeek)||0);
-    return { p:p, auto:a, over:Math.max(0, Number(p.perOrder)||0), profit:Math.max(0, Number(p.profit)||0),
-             adsWeek:adsWeek, ordWeek:ordWeek, adsPer: adsWeek > 0 && ordWeek > 0 ? adsWeek / ordWeek : null };
-  }
-  // ربح أوردر فيه n قطعة من نفس الصنف بعد مصاريف الأوردر
-  function polNet(pp, n, pc){ return pp === null ? null : n * pp - pc.over; }
-
-  // كل الأصناف: التكلفة الكلية للقطعة وسعرها وربحها — ولو بأكتر من لون: كل لون لوحده
+  // كل الأصناف بتكلفتها وسعرها ورصيدها — مصدر الجدول والكروت مع بعض
   function prcAll(){
     return live("items").map(function(it){
-      var x = prcExtra(it), sh = prcShip(it), buy = avgCost(it.id);
-      var cost = buy > 0 ? buy + x + sh : 0, price = Number(it.price)||0;
-      var r = { it:it, buy:buy, x:x, sh:sh, cost:cost, price:price,
-                pp: (price > 0 && cost > 0) ? price - cost : null, cols:null };
-      var ic = itemColors(it.id), cols = ic.filter(Boolean).length > 1 ? ic.map(function(c){ return prcColRow(it, c, x, sh); }) : null;
-      /* سطور الألوان بتظهر بس لو ليها لازمة: لون تكلفته مختلفة أو ليه سعر لوحده.
-         صنف كل ألوانه بنفس التكلفة والسعر = سطر واحد، من غير زرار ألوان */
-      if(cols && cols.some(function(k){ return k.cp > 0 || (k.cost > 0 && cost > 0 && Math.abs(k.cost - cost) > 0.01); })){
-        r.cols = cols;
-        // الصنف بياخد أضعف لون فيه — عشان الترتيب والنصيحة ما يطمّنوش على لون خسران
-        var pps = r.cols.filter(function(k){ return k.pp !== null; }).map(function(k){ return k.pp; });
-        r.ppMin = pps.length ? Math.min.apply(null, pps) : null;
-        r.ppMax = pps.length ? Math.max.apply(null, pps) : null;
-      } else { r.ppMin = r.ppMax = r.pp; }
+      var buy   = avgCost(it.id);
+      var x = prcExtra(it), sh = prcShip(it);
+      var cost  = buy > 0 ? buy + x + sh : 0;        // التكلفة الكلية للقطعة
+      var price = Number(it.price)||0;
+      var stock = Math.max(0, stockOf(it.id));
+      var r = { it:it, buy:buy, x:x, sh:sh, cost:cost, price:price, stock:stock,
+               unit: (price > 0 && cost > 0) ? price - cost : null, cols:null };
+      r.noPrice = price <= 0; r.loss = price > 0 && cost > 0 && price <= cost;
+      // صنف بأكتر من لون: كل لون بتكلفته وسعره، وأرقام المخزون بتتجمع من الألوان
+      var ic = itemColors(it.id);
+      if(ic.filter(Boolean).length > 1){
+        r.cols = ic.map(function(c){ return prcColRow(it, c, x, sh); });
+        r.sbuy = 0; r.sx = 0; r.sval = 0; r.sprof = 0;
+        r.cols.forEach(function(k){
+          r.sbuy += k.stock * k.buy; r.sx += k.stock * (k.buy > 0 ? x + sh : 0);
+          r.sval += k.stock * (k.price > 0 ? k.price : k.cost);   // من غير سعر = من غير ربح
+          if(k.unit !== null) r.sprof += k.stock * k.unit;
+        });
+        r.noPrice = r.cols.some(function(k){ return k.price <= 0; });
+        r.loss = r.cols.some(function(k){ return k.price > 0 && k.cost > 0 && k.price <= k.cost; });
+      }
       return r;
     });
   }
   function prcColRow(it, c, x, sh){
     var cc = costOfColor(it.id, c), cost = cc.c > 0 ? cc.c + x + sh : 0;
     var cp = colorPrice(it, c), price = vPrice(it, c);
-    return { color:c, buy:cc.c, own:cc.own, cost:cost, cp:cp, price:price,
-             pp: (price > 0 && cost > 0) ? price - cost : null };
+    return { color:c, stock:Math.max(0, colorQty(it.id, c, stockOfVi)), buy:cc.c, own:cc.own, cost:cost,
+             cp:cp, price:price, unit:(price > 0 && cost > 0) ? price - cost : null };
+  }
+  function prcList(){
+    var q = squish(prcFilt.q).toLowerCase();
+    return prcAll().filter(function(r){
+      if(q && squish(r.it.name).toLowerCase().indexOf(q) < 0) return false;
+      if(prcFilt.only === "noprice") return r.noPrice;
+      if(prcFilt.only === "loss")    return r.loss;
+      if(prcFilt.only === "instock") return r.stock > 0;
+      return true;
+    });
+  }
+  // ربح كل المخزون بالأسعار الحالية
+  function prcStockProfit(all){
+    return all.reduce(function(a, r){
+      if(r.cols) return a + r.sprof;
+      return a + (r.stock && r.unit !== null ? r.stock * r.unit : 0);
+    }, 0);
   }
 
-  var PRC_HEAD = ["الصنف","سعر البيع","التكلفة","ربحك لو اتباع لوحده","ربحك لو أخد قطعتين"];
-  // الألوان: أخضر = هدفك (150) أو أكتر · أصفر = كسبان بس أقل من هدفك · أحمر = خسران
-  function polPill(v, pc){
-    if(v === null) return "<span class='pv-pill'>—</span>";
-    v = Math.round(v);                           // اللون بيتحدد من نفس الرقم اللي ظاهر
-    var cls = v >= pc.profit ? "hi" : (v >= 0 ? "mid" : "lo");
-    return "<span class='pv-pill " + cls + "'>" + (v >= 0 ? "+" : "−") + esc(qty(Math.abs(v))) + "</span>";
-  }
-  function polPillRange(a, b, pc){
-    if(a === null) return polPill(null, pc);
-    if(Math.abs(b - a) < 0.5) return polPill(a, pc);
-    return "<span class='pv-rng'>" + polPill(a, pc) + "<span class='s'>لـ</span>" + polPill(b, pc) + "</span>";
-  }
-  function rngTxt(a, b, fmt){ return Math.abs(b - a) < 0.005 ? fmt(a) : fmt(a) + " – " + fmt(b); }
+  function renderPrcKpis(){
+    var all = prcAll();
+    var cost = 0, extra = 0, val = 0, noPrice = 0, loss = 0, noCost = 0;
+    all.forEach(function(r){
+      if(r.noPrice) noPrice++;
+      if(r.cost  <= 0) noCost++;
+      if(r.loss) loss++;
+      if(r.cols){ cost += r.sbuy; extra += r.sx; val += r.sval; return; }
+      if(!r.stock) return;
+      cost += r.stock * r.buy;
+      extra += r.stock * (r.buy > 0 ? r.x + r.sh : 0);
+      val  += r.stock * (r.price > 0 ? r.price : r.cost);   // من غير سعر = من غير ربح
+    });
+    var prof = val - cost - extra;
+    var cells = [
+      ["تكلفة اللي في مخزنك", money(cost), "", extra > 0.009 ? "بسعر الشراء الواصل · + " + money(extra) + " مصاريف وشحن" : "بسعر الشراء الواصل"],
+      ["هتبيعها بكام", money(val), "", "بأسعارك المسجّلة"],
+      ["ربحك لو بعتها كلها", money(prof), prof > 0 ? "v-gain" : (prof < 0 ? "v-due" : ""),
+        "هامش " + prcPct(val > 0 ? prof/val : null)],
+      ["أصناف لسه من غير سعر", qty(noPrice), noPrice ? "v-due" : "v-gain",
+        noPrice ? "دي بتتباع من غير ربح محسوب" : "كلها متسعّرة"],
+      ["سعرها أقل من تكلفتها", qty(loss), loss ? "v-due" : "v-gain",
+        loss ? "كل قطعة منها خسارة" : "مفيش صنف بيتباع بخسارة"]
+    ];
+    document.getElementById("prc-kpis").innerHTML = cells.map(function(c){
+      return "<div class='money-only'><span>" + esc(c[0]) + "</span>" +
+        "<strong class='num " + c[2] + "'>" + esc(c[1]) + "</strong>" +
+        "<span class='sub'>" + esc(c[3]) + "</span></div>";
+    }).join("");
 
-  var prcOpen = {};
+    /* الربح ده بضاعة بس. الثابت (إيجار، نت، مرتبات) بيتاكل منه —
+       وده اللي بيخلّي «أبيع بكام» في التقارير مفهوم. */
+    var el = document.getElementById("prc-note");
+    if(!el) return;
+    if(all.length && noCost === all.length){
+      el.innerHTML = "<span class='v-due'>مفيش تكلفة شراء مسجّلة لأي صنف — سجّل فاتورة شراء الأول عشان نعرف بتشتري بكام.</span>";
+      return;
+    }
+    var fx = live("cash").reduce(function(a, c){
+      return a + (c.type === "expense" && costKindOf(c) === "fixed" ? (Number(c.amount)||0) : 0);
+    }, 0);
+    var sp = prcStockProfit(all);
+    var anyX = all.some(function(r){ return r.x > 0 || r.sh > 0; });
+    el.innerHTML = (anyX
+        ? "الربح اللي فوق بعد تكلفة البضاعة والمصاريف الإضافية والشحن اللي كتبتهم لكل صنف — لسه هيتاكل منه مصاريفك الثابتة"
+        : "الربح اللي فوق ربح <strong>بضاعة</strong> بس — لسه هيتاكل منه الشحن اللي بتدفعه من جيبك ومصاريفك الثابتة") +
+      (fx > 0
+        ? " (<strong>" + esc(money(fx)) + "</strong> مسجّلة من البداية لحد دلوقتي). " +
+          (sp >= fx ? "بضاعة مخزنك بتغطّيها وفاضل <strong>" + esc(money(sp - fx)) + "</strong>."
+                    : "<span class='v-due'>بضاعة مخزنك مش بتغطّيها — ناقص <strong>" + esc(money(fx - sp)) + "</strong>.</span>")
+        : ".");
+  }
+
+  var PRC_HEAD = ["الصنف","في المخزن","تكلفة القطعة","مصاريف إضافية","مصاريف شحن","التكلفة الكلية","سعر البيع",
+                  "زيادة على التكلفة %","ربح القطعة","الهامش %","ربح كل المخزون"];
+
   function renderPricing(){
     if(pcTab === "calc") renderPcalc();     // القوايم كمان — صنف اتضاف أو اتغيّر اسمه من مكان تاني
-    var pc = polCalc(), ed = canEdit(), dis = ed ? "" : " disabled";
-    renderPolHead(pc);
-    var all = prcAll().sort(function(a, b){
-      var x = a.ppMin === null ? -1e9 : a.ppMin, y = b.ppMin === null ? -1e9 : b.ppMin;
-      return y - x || ((a.it.name||"") < (b.it.name||"") ? -1 : 1);
-    });
-    var rows = all.map(function(r){
+    renderPrcKpis();
+    var ed = canEdit();
+    var rows = prcList().map(function(r){
+      // صنف من غير سعر: الخانة تفضل فاضية — «−100%» رقم صح ومالوش أي معنى هنا
+      var mk = r.price > 0 ? prcMarkup(r.price, r.cost) : null;
+      var bad = r.price > 0 && r.cost > 0 && r.price <= r.cost;
+      var dis = ed ? "" : " disabled";
       var open = !!(r.cols && prcOpen[r.it.id]), nc = r.cols ? r.cols.filter(function(k){ return k.color; }).length : 0;
-      var costs = r.cols ? r.cols.filter(function(k){ return k.cost > 0; }).map(function(k){ return k.cost; }) : [];
-      var costCell = r.cols && costs.length ? esc(rngTxt(Math.min.apply(null, costs), Math.max.apply(null, costs), function(v){ return qty(Math.round(v * 100) / 100); }))
-                   : (r.cost > 0 ? esc(money(r.cost)) : "<span class='v-due'>لسه ما اشتريتش</span>");
-      if(r.cost > 0 && (r.x + r.sh) > 0) costCell += "<small class='pv-x'>شامل مصاريف " + esc(qty(r.x + r.sh)) + "</small>";
-      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "'" + (r.cols ? " data-cols='1'" : "") + ">" +
+      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "' data-buy='" + r.buy + "' data-stock='" + r.stock + "'" + (r.cols ? " data-cols='1'" : "") + ">" +
         "<td class='wide'>" + esc(r.it.name) + (r.cols ? " <button type='button' class='prc-tog' data-prctog='" + esc(r.it.id) + "' aria-expanded='" + open + "'>" +
-           (open ? "▴" : "▾") + " " + plural(nc, "لون واحد", "لونين", "ألوان") + "</button>" : "") + "</td>" +
-        "<td><input class='prin' inputmode='decimal' data-prcprice='" + esc(r.it.id) + "' value='" + (r.price > 0 ? r.price : "") +
-           "' placeholder='حط سعر' aria-label='سعر البيع'" + dis + "></td>" +
-        "<td class='num'>" + costCell + "</td>" +
-        "<td class='pv-one'>" + polPillRange(polNet(r.ppMin, 1, pc), polNet(r.ppMax, 1, pc), pc) + "</td>" +
-        "<td class='pv-two'>" + polPillRange(polNet(r.ppMin, 2, pc), polNet(r.ppMax, 2, pc), pc) + "</td>" +
-      "</tr>" + (r.cols ? r.cols.map(function(k){ return prcSubRow(r, k, open, dis, pc); }).join("") : "");
+           (open ? "▴" : "▾") + " " + plural(nc, "لون واحد", "لونين", "ألوان") + "</button>" : "") +
+           (r.cols && r.loss ? "<small class='prc-avg'>فيه لون سعره أقل من تكلفته — افتح الألوان</small>" : "") +
+           (r.cols ? "<small class='prc-avg prc-avgn'>الأرقام هنا متوسط كل الألوان</small>" : "") + "</td>" +
+        "<td class='num'>" + esc(qty(r.stock)) + "</td>" +
+        "<td class='num'>" + (r.buy > 0 ? money(r.buy)
+           : "<span class='v-due'>لسه ما اشتريتش</span>") + "</td>" +
+        "<td><input class='prin prx' inputmode='decimal' data-prcx='" + esc(r.it.id) + "' value='" + (r.x > 0 ? r.x : "") +
+           "' placeholder='0' aria-label='مصاريف إضافية للقطعة'" + dis + "></td>" +
+        "<td><input class='prin prx' inputmode='decimal' data-prcs='" + esc(r.it.id) + "' value='" + (r.sh > 0 ? r.sh : "") +
+           "' placeholder='0' aria-label='مصاريف شحن للقطعة'" + dis + "></td>" +
+        "<td class='num prc-cost'><b>" + (r.cost > 0 ? money(r.cost) : "—") + "</b></td>" +
+        "<td><input class='prin' inputmode='decimal' data-prcprice='" + esc(r.it.id) + "'" +
+           " value='" + (r.price > 0 ? r.price : "") + "' placeholder='0' aria-label='سعر البيع'" + dis + "></td>" +
+        "<td>" + (r.buy > 0
+           ? "<input class='prin' inputmode='decimal' data-prcmk='" + esc(r.it.id) + "'" +
+             " value='" + (mk === null ? "" : (mk*100).toFixed(1)) + "' placeholder='0'" +
+             " aria-label='زيادة على التكلفة بالمية'" + dis + ">"
+           : "<span class='num'>—</span>") + "</td>" +
+        "<td class='num prc-unit " + (bad ? "v-due" : (r.unit ? "v-gain" : "")) + "'>" +
+           (r.unit === null ? "—" : money(r.unit)) + "</td>" +
+        "<td class='num prc-mg'>" + esc(prcPct(r.price > 0 ? prcMargin(r.price, r.cost) : null)) + "</td>" +
+        "<td class='num prc-tot'>" + (r.cols ? (r.cols.some(function(k){ return k.stock > 0; }) ? money(r.sprof) : "—") : (r.unit === null || !r.stock) ? "—" : money(r.unit * r.stock)) + "</td>" +
+      "</tr>" + (r.cols ? r.cols.map(function(k){ return prcSubRow(r, k, open, dis); }).join("") : "");
     });
-    table("t-price", PRC_HEAD, rows, "سجّل أصنافك الأول من تبويب «الأصناف».");
-    renderPolAdvice(all, pc);
+    table("t-price", PRC_HEAD, rows,
+      (prcFilt.q || prcFilt.only !== "all") ? "مفيش صنف بالمواصفات دي."
+                                            : "سجّل أصنافك الأول من تبويب «الأصناف».");
   }
+
   /* سطر لون تحت الصنف: تكلفة اللون ده بس + سعره. خانة السعر فاضية = السعر الأساسي
      (باين كـplaceholder)، وأول ما تكتب فيها بيبقى للون ده سعر لوحده. */
-  function prcSubRow(r, k, open, dis, pc){
-    return "<tr class='prc-sub' data-prcsub='" + esc(r.it.id) + "' data-color='" + esc(k.color) + "' data-cost='" + k.cost + "'" + (open ? "" : " hidden") + ">" +
+  var prcOpen = {};
+  function prcSubRow(r, k, open, dis){
+    var mk = k.price > 0 && k.cost > 0 ? prcMarkup(k.price, k.cost) : null;
+    var bad = k.price > 0 && k.cost > 0 && k.price <= k.cost;
+    return "<tr class='prc-sub' data-prcsub='" + esc(r.it.id) + "' data-color='" + esc(k.color) + "' data-cost='" + k.cost + "' data-buy='" + k.buy + "' data-stock='" + k.stock + "'" + (open ? "" : " hidden") + ">" +
       "<td class='wide'><span class='prc-cn'>" + esc(k.color || "من غير لون") + "</span></td>" +
+      "<td class='num'>" + esc(qty(k.stock)) + "</td>" +
+      "<td class='num'>" + (k.buy > 0 ? esc(money(k.buy)) + (k.own ? "" : "<small class='prc-avg'>متوسط الصنف — اللون ده ما اتشراش</small>")
+                                      : "<span class='v-due'>لسه ما اشتريتش</span>") + "</td>" +
+      "<td class='num prc-dim'>" + (r.x > 0 ? esc(qty(r.x)) : "—") + "</td>" +
+      "<td class='num prc-dim'>" + (r.sh > 0 ? esc(qty(r.sh)) : "—") + "</td>" +
+      "<td class='num prc-cost'><b>" + (k.cost > 0 ? esc(money(k.cost)) : "—") + "</b></td>" +
       "<td>" + (k.color ? "<input class='prin' inputmode='decimal' data-prccp='" + esc(r.it.id) + "' value='" + (k.cp > 0 ? k.cp : "") +
          "' placeholder='" + (r.price > 0 ? r.price : "0") + "' aria-label='سعر بيع " + esc(k.color) + "'" + dis + ">"
          : "<span class='num prc-dim'>" + (r.price > 0 ? esc(money(r.price)) : "—") + "</span>") + "</td>" +
-      "<td class='num'>" + (k.cost > 0 ? esc(money(k.cost)) + (k.own ? "" : "<small class='pv-x'>متوسط الصنف</small>")
-                                       : "<span class='v-due'>لسه ما اشتريتش</span>") + "</td>" +
-      "<td class='pv-one'>" + polPill(polNet(k.pp, 1, pc), pc) + "</td>" +
-      "<td class='pv-two'>" + polPill(polNet(k.pp, 2, pc), pc) + "</td>" +
+      "<td class='num prc-mk'>" + esc(mk === null ? "—" : (mk*100).toFixed(1) + "%") + "</td>" +
+      "<td class='num prc-unit " + (bad ? "v-due" : (k.unit ? "v-gain" : "")) + "'>" + (k.unit === null ? "—" : esc(money(k.unit))) + "</td>" +
+      "<td class='num prc-mg'>" + esc(prcPct(k.price > 0 ? prcMargin(k.price, k.cost) : null)) + "</td>" +
+      "<td class='num prc-tot'>" + ((k.unit === null || !k.stock) ? "—" : esc(money(k.unit * k.stock))) + "</td>" +
     "</tr>";
   }
-  // السطر اللي فوق: مصاريف الأوردر · وتنبيه لو الإعلان لوحده أكتر منها
-  function renderPolHead(pc){
-    var sp = settings.policy || {}, ed = canEdit();
-    [["pv-perorder","perOrder"],["pv-profit","profit"],["pv-adsweek","adsWeek"]].forEach(function(f){
-      var el = document.getElementById(f[0]); if(!el) return;
-      if(document.activeElement !== el) el.value = f[1] === "adsWeek" ? (sp.adsWeek == null ? "" : sp.adsWeek) : pc.p[f[1]];
-      el.disabled = !ed;
-    });
-    var as = document.getElementById("pv-adsweek-sub");
-    if(as) as.textContent = pc.ordWeek > 0 ? "÷ " + qty(Math.round(pc.ordWeek * 10) / 10) + " أوردر في الأسبوع (من شغلك)" +
-      (pc.adsPer !== null ? " = " + money(pc.adsPer) + " على الأوردر" : "") : "عشان نقولك الإعلان بيكلّف كام على الأوردر";
-    var sh = document.getElementById("pol-ship"); if(sh){ sh.checked = !!pc.p.shipFollow; sh.disabled = !ed; }
-    var al = document.getElementById("pv-alert");
-    if(al){
-      var bad = pc.adsPer !== null && pc.adsPer > pc.over + 0.005;
-      al.hidden = !bad;
-      al.innerHTML = bad ? "⚠ الإعلان لوحده بيكلّف دلوقتي <b>" + esc(money(pc.adsPer)) + "</b> على الأوردر (" + esc(qty(pc.adsWeek)) +
-        " في الأسبوع ÷ " + esc(qty(Math.round(pc.ordWeek * 10) / 10)) + " أوردر) — أكتر من الـ" + esc(qty(pc.over)) +
-        " اللي حاططها لكل مصاريف الأوردر. ربحك الحقيقي أقل من اللي في الجدول." : "";
-    }
-  }
-  // النصيحة: مين بيكسّبك هدفك لوحده · مين محتاج قطعة تانية · مين حتى بقطعتين أقل
-  function renderPolAdvice(all, pc){
-    var box = document.getElementById("pv-adv"); if(!box) return;
-    var g = { solo:[], pair:[], weak:[], none:[] };
-    all.forEach(function(r){
-      if(r.ppMin === null){ g.none.push(r.it.name); return; }
-      if(Math.round(polNet(r.ppMin, 1, pc)) >= pc.profit) g.solo.push(r.it.name);
-      else if(Math.round(polNet(r.ppMin, 2, pc)) >= pc.profit) g.pair.push(r.it.name);
-      else g.weak.push(r.it.name);
-    });
-    var L = function(cls, t, list){ return list.length ? "<p class='pv-advl'><b class='" + cls + "'>" + t + "</b> " + list.map(esc).join(" · ") + "</p>" : ""; };
-    var tg = qty(pc.profit);
-    box.innerHTML = L("v-gain", "✓ بيكسّبوك " + tg + " حتى لوحدهم — إعلن عنهم:", g.solo) +
-      L("pv-w", "↔ محتاجين قطعة تانية عشان يوصلوا " + tg + ":", g.pair) +
-      L("v-due", "✗ حتى بقطعتين أقل من " + tg + ":", g.weak) +
-      L("pv-s", "من غير سعر أو لسه ما اشتريتهوش:", g.none);
-    box.hidden = !box.innerHTML;
-  }
-  // تحديث السطر وإنت بتكتب من غير ما الجدول يترسم تاني (عشان المؤشر ما يقفزش)
-  function prcPaintRow(tr, price, pc){
-    pc = pc || polCalc();
-    var cost = Number(tr.dataset.cost)||0, pp = (price > 0 && cost > 0) ? price - cost : null;
-    var a = tr.querySelector(".pv-one"), b = tr.querySelector(".pv-two");
-    if(a) a.innerHTML = polPill(polNet(pp, 1, pc), pc);
-    if(b) b.innerHTML = polPill(polNet(pp, 2, pc), pc);
-    return pp;
-  }
-  // صنف بألوان: الألوان اللي من غير سعر بتمشي ورا الأساسي، وسطر الصنف بياخد أضعف وأحسن لون
-  function prcPaintItem(id){
+  // سعر لون أو السعر الأساسي اتغيّر: سطور الألوان وإجمالي الصنف بيتحدّثوا من غير إعادة رسم
+  function prcPaintSubs(id){
     var t = document.getElementById("t-price"), itr = t.querySelector("tr[data-prcrow='" + CSS.escape(id) + "']");
-    if(!itr) return;
-    var base = Number(toEn((itr.querySelector("[data-prcprice]") || {}).value || ""))||0;
-    var pc = polCalc();
-    if(!itr.dataset.cols){ prcPaintRow(itr, base, pc); return; }
-    var pps = [];
+    if(!itr || !itr.dataset.cols) return;
+    var base = Number(toEn((itr.querySelector("[data-prcprice]") || {}).value || ""))||0, sum = 0;
     Array.prototype.forEach.call(t.querySelectorAll("tr[data-prcsub='" + CSS.escape(id) + "']"), function(tr){
       var inp = tr.querySelector("[data-prccp]"), own = inp && inp.value.trim() !== "" ? Number(toEn(inp.value))||0 : 0;
       if(inp) inp.placeholder = base > 0 ? String(base) : "0";
-      var pp = prcPaintRow(tr, own > 0 ? own : base, pc);
-      if(pp !== null) pps.push(pp);
+      var price = own > 0 ? own : base, cost = Number(tr.dataset.cost)||0;
+      var mk = tr.querySelector(".prc-mk"); if(mk) mk.textContent = price > 0 && cost > 0 ? (prcMarkup(price, cost)*100).toFixed(1) + "%" : "—";
+      prcPaint(tr, price);
+      var unit = (price > 0 && cost > 0) ? price - cost : null;
+      if(unit !== null) sum += unit * (Number(tr.dataset.stock)||0);
     });
-    var lo = pps.length ? Math.min.apply(null, pps) : null, hi = pps.length ? Math.max.apply(null, pps) : null;
-    var a = itr.querySelector(".pv-one"), b = itr.querySelector(".pv-two");
-    if(a) a.innerHTML = polPillRange(polNet(lo, 1, pc), polNet(hi, 1, pc), pc);
-    if(b) b.innerHTML = polPillRange(polNet(lo, 2, pc), polNet(hi, 2, pc), pc);
-  }
-
-  function prcCommit(id, price){
-    var it = db.items.find(function(x){ return x.id === id; });
-    if(!it) return;
-    var v = Math.round((Number(price)||0) * 100) / 100;
-    if((Number(it.price)||0) === v) return;             // ما اتغيّرش = ما نلخبطش وقت السجل
-    it.price = v; it.at = Date.now(); it.editedBy = me || "غير محدد";
-    saveSoon("items");
-  }
-  /* الحفظ بيتعمل وإنت بتكتب (بتأخير بسيط) مش على blur بس — عشان لو سبت
-     الشاشة من غير ما تخرج من الخانة السعر ما يضيعش. */
-  var prcTimer = null, prcPend = null;
-  function prcQueue(id, price){
-    prcPend = { id:id, price:price };
-    clearTimeout(prcTimer); prcTimer = setTimeout(prcFlush, 600);
-  }
-  function prcFlush(){
-    clearTimeout(prcTimer); prcTimer = null;
-    if(!prcPend) return;
-    var q = prcPend; prcPend = null;
-    prcCommit(q.id, q.price);
-    renderPolAdvice(prcAll(), polCalc());
-    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
+    var tot = itr.querySelector(".prc-tot"), anyS = Array.prototype.some.call(t.querySelectorAll("tr[data-prcsub='" + CSS.escape(id) + "']"), function(tr){ return Number(tr.dataset.stock) > 0; });
+    if(tot) tot.textContent = anyS ? money(sum) : "—";
   }
   var prcCPend = {}, prcCTimer = null;
   function prcQueueC(id, color, v){
@@ -6845,7 +6824,64 @@
       if(any){ it.cprice = cp; it.at = Date.now(); it.editedBy = me || "غير محدد"; }
     });
     prcCPend = {};
-    saveSoon("items"); renderPolAdvice(prcAll(), polCalc());
+    saveSoon("items"); renderPrcKpis();
+    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
+  }
+
+  // بيحدّث خانات السطر من غير ما يعيد رسم الجدول — عشان المؤشر ما يقفزش
+  function prcPaint(tr, price){
+    var cost = Number(tr.dataset.cost)||0, st = Number(tr.dataset.stock)||0;
+    var unit = (price > 0 && cost > 0) ? price - cost : null;
+    var u = tr.querySelector(".prc-unit"), g = tr.querySelector(".prc-mg"), t = tr.querySelector(".prc-tot");
+    if(u){
+      u.textContent = unit === null ? "—" : money(unit);
+      u.className = "num prc-unit " + (unit === null ? "" : (unit <= 0 ? "v-due" : "v-gain"));
+    }
+    if(g) g.textContent = prcPct(price > 0 ? prcMargin(price, cost) : null);
+    if(t) t.textContent = (unit === null || !st) ? "—" : money(unit * st);
+  }
+  function prcCommit(id, price){
+    var it = db.items.find(function(x){ return x.id === id; });
+    if(!it) return;
+    var v = Math.round((Number(price)||0) * 100) / 100;
+    if((Number(it.price)||0) === v) return;             // ما اتغيّرش = ما نلخبطش وقت السجل
+    it.price = v; it.at = Date.now(); it.editedBy = me || "غير محدد";
+    saveSoon("items");
+  }
+
+  /* الحفظ بيتعمل وإنت بتكتب (بتأخير بسيط) مش على blur بس. السبب:
+     لما تكتب في خانة النسبة، خانة السعر بتتملى بالكود — والمتصفح
+     مابيبعتش change لخانة اتغيّرت بالكود، فالسعر كان هيضيع لو سبت
+     الشاشة من غير ما تلمس خانة السعر نفسها. */
+  var prcTimer = null, prcPend = null;
+  var prcXTimer = null, prcXPend = {};
+  function prcQueueX(id, field, v){
+    (prcXPend[id] = prcXPend[id] || {})[field] = Math.round(v * 100) / 100;
+    clearTimeout(prcXTimer); prcXTimer = setTimeout(prcFlushX, 600);
+  }
+  function prcFlushX(){
+    clearTimeout(prcXTimer); prcXTimer = null;
+    var ids = Object.keys(prcXPend); if(!ids.length) return;
+    ids.forEach(function(id){
+      var it = db.items.find(function(x){ return x.id === id; }), ch = prcXPend[id];
+      if(!it) return;
+      var any = false;
+      Object.keys(ch).forEach(function(k){ if((Number(it[k])||0) !== ch[k]){ it[k] = ch[k]; any = true; } });
+      if(any){ it.at = Date.now(); it.editedBy = me || "غير محدد"; }
+    });
+    prcXPend = {};
+    saveSoon("items"); renderPrcKpis();
+  }
+  function prcQueue(id, price){
+    prcPend = { id:id, price:price };
+    clearTimeout(prcTimer); prcTimer = setTimeout(prcFlush, 600);
+  }
+  function prcFlush(){
+    clearTimeout(prcTimer); prcTimer = null;
+    if(!prcPend) return;
+    var q = prcPend; prcPend = null;
+    prcCommit(q.id, q.price);
+    renderPrcKpis();
     dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
   }
 
@@ -6853,18 +6889,48 @@
     var sub = e.target.closest("tr[data-prcsub]");
     if(sub){
       if(!e.target.matches("[data-prccp]")) return;
-      prcPaintItem(sub.dataset.prcsub);
+      prcPaintSubs(sub.dataset.prcsub);
       if(canEdit()) prcQueueC(sub.dataset.prcsub, sub.dataset.color, e.target.value.trim() === "" ? 0 : Math.max(0, Number(toEn(e.target.value))||0));
       return;
     }
-    var tr = e.target.closest("tr[data-prcrow]"); if(!tr || !e.target.matches("[data-prcprice]")) return;
-    prcPaintItem(tr.dataset.prcrow);
-    if(canEdit()) prcQueue(tr.dataset.prcrow, Number(toEn(e.target.value))||0);
-  });
-  document.getElementById("t-price").addEventListener("change", function(e){
-    if(!e.target.matches("[data-prccp],[data-prcprice]")) return;
-    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
-    if(e.target.matches("[data-prccp]")) prcFlushC(); else prcFlush();
+    var tr = e.target.closest("tr[data-prcrow]"); if(!tr) return;
+    var pIn  = tr.querySelector("[data-prcprice]"), mIn = tr.querySelector("[data-prcmk]");
+    var xIn = tr.querySelector("[data-prcx]"), sIn = tr.querySelector("[data-prcs]");
+    if(e.target === xIn || e.target === sIn){
+      // المصاريف اتغيّرت: التكلفة الكلية بتتحسب تاني، والسعر ثابت والنسبة بتمشي وراه
+      var buy = Number(tr.dataset.buy)||0;
+      var xv = Math.max(0, Number(toEn(xIn.value))||0), sv = Math.max(0, Number(toEn(sIn.value))||0);
+      var c2 = buy > 0 ? buy + xv + sv : 0;
+      tr.dataset.cost = c2;
+      var ce = tr.querySelector(".prc-cost"); if(ce) ce.innerHTML = "<b>" + (c2 > 0 ? esc(money(c2)) : "—") + "</b>";
+      var pr0 = Number(toEn(pIn.value))||0;
+      if(mIn) mIn.value = (pIn.value.trim() === "" || !(c2 > 0)) ? "" : (prcMarkup(pr0, c2)*100).toFixed(1);
+      prcPaint(tr, pr0);
+      // تكلفة كل لون فيها نفس المصاريف
+      Array.prototype.forEach.call(this.querySelectorAll("tr[data-prcsub='" + CSS.escape(tr.dataset.prcrow) + "']"), function(st){
+        var b = Number(st.dataset.buy)||0, cc = b > 0 ? b + xv + sv : 0;
+        st.dataset.cost = cc;
+        var ce2 = st.querySelector(".prc-cost"); if(ce2) ce2.innerHTML = "<b>" + (cc > 0 ? esc(money(cc)) : "—") + "</b>";
+        var d = st.querySelectorAll(".prc-dim"); if(d[0]) d[0].textContent = xv > 0 ? qty(xv) : "—"; if(d[1]) d[1].textContent = sv > 0 ? qty(sv) : "—";
+      });
+      prcPaintSubs(tr.dataset.prcrow);
+      if(canEdit()) prcQueueX(tr.dataset.prcrow, e.target === xIn ? "xCost" : "shipCost", e.target === xIn ? xv : sv);
+      return;
+    }
+    var cost = Number(tr.dataset.cost)||0;
+    if(e.target === mIn && cost > 0){
+      var mk = Number(toEn(mIn.value));
+      // خانة فاضية = مش بتصفّر السعر، بتستنى لحد ما يكتب
+      if(mIn.value.trim() === "" || !isFinite(mk)) return;
+      pIn.value = (cost * (1 + mk/100)).toFixed(2);
+    } else if(e.target === pIn && mIn){
+      var pr = Number(toEn(pIn.value));
+      mIn.value = (pIn.value.trim() === "" || !isFinite(pr)) ? "" : (prcMarkup(pr, cost)*100).toFixed(1);
+    } else if(e.target !== pIn) return;
+    var val = Number(toEn(pIn.value))||0;
+    prcPaint(tr, val);
+    prcPaintSubs(tr.dataset.prcrow);
+    if(canEdit()) prcQueue(tr.dataset.prcrow, val);
   });
   document.getElementById("t-price").addEventListener("click", function(e){
     var b = e.target.closest("[data-prctog]"); if(!b) return;
@@ -6874,23 +6940,61 @@
     b.textContent = (open ? "▴" : "▾") + b.textContent.slice(1);
     Array.prototype.forEach.call(this.querySelectorAll("tr[data-prcsub='" + CSS.escape(id) + "']"), function(tr){ tr.hidden = !open; });
   });
-  // سبت الشاشة والتأخير لسه شغال؟ يتكتب قبل ما تمشي
-  window.addEventListener("beforeunload", function(){ prcFlush(); prcFlushC(); });
-  document.getElementById("nav").addEventListener("click", function(){ prcFlush(); prcFlushC(); }, true);
-
-  // تعديل الأرقام: مصاريف الأوردر · الربح اللي عايزه · الإعلانات في الأسبوع · الشحن
-  function polSave(k, v){
+  document.getElementById("t-price").addEventListener("change", function(e){
+    if(e.target.matches("[data-prccp]")){
+      if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
+      prcFlushC(); return;
+    }
+    var tr = e.target.closest("tr[data-prcrow]"); if(!tr) return;
     if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
-    var sp = Object.assign({}, settings.policy || {});
-    if(v === "" || v == null) delete sp[k]; else sp[k] = v;
-    settings.policy = sp;
-    saveSettings(); renderPricing();
-  }
-  document.getElementById("pv-ov").addEventListener("change", function(e){
-    var k = e.target.dataset.pol;
-    if(k){ var raw = e.target.value.trim(), v = Number(toEn(raw));
-      polSave(k, raw === "" || !isFinite(v) ? "" : Math.max(0, v)); return; }
-    if(e.target.id === "pol-ship") polSave("shipFollow", !!e.target.checked);
+    // من غير إعادة رسم: السطر بيتحدّث وانت بتكتب، والرسم من جديد كان بيضيّع الخانة اللي نقلت لها
+    if(e.target.matches("[data-prcx],[data-prcs]")){ prcFlushX(); return; }
+    prcQueue(tr.dataset.prcrow, Number(toEn(tr.querySelector("[data-prcprice]").value))||0);
+    prcFlush();
+  });
+  // سبت الشاشة والتأخير لسه شغال؟ يتكتب قبل ما تمشي
+  window.addEventListener("beforeunload", function(){ prcFlush(); prcFlushX(); prcFlushC(); });
+  document.getElementById("nav").addEventListener("click", function(){ prcFlush(); prcFlushX(); prcFlushC(); }, true);
+
+  document.getElementById("prc-q").addEventListener("input", function(){
+    prcFilt.q = this.value; renderPricing();
+  });
+  document.getElementById("prc-quick").addEventListener("click", function(e){
+    var b = e.target.closest("[data-prconly]"); if(!b) return;
+    prcFilt.only = b.dataset.prconly;
+    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){
+      x.classList.toggle("on", x === b); });
+    renderPricing();
+  });
+  // التسعير بالجملة: بيمشي على اللي ظاهر قدامك بس — مش على كل الداتا
+  document.getElementById("b-prc-apply").addEventListener("click", function(){
+    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
+    var box = document.getElementById("prc-bulk-pct");
+    var pct = Number(toEn(box.value));
+    if(box.value.trim() === "" || !isFinite(pct)){ toast("اكتب نسبة الزيادة الأول"); return; }
+    var step = Number(document.getElementById("prc-bulk-round").value)||0;
+    var hit = 0, skip = 0;
+    prcList().forEach(function(r){
+      if(r.cost <= 0){ skip++; return; }
+      var base = prcRound(r.cost * (1 + pct/100), step);
+      prcCommit(r.it.id, base);
+      // صنف بأكتر من لون: كل لون اشتريته بيتسعّر على تكلفته هو، عشان اللون الغالي ما يتباعش تحت تكلفته
+      if(r.cols){
+        var cp = Object.assign({}, r.it.cprice || {}), was = JSON.stringify(cp);
+        r.cols.forEach(function(k){
+          if(!k.color || !k.own || !(k.cost > 0)) return;
+          var v = prcRound(k.cost * (1 + pct/100), step);
+          if(Math.abs(v - base) < 0.005) delete cp[k.color]; else cp[k.color] = v;
+        });
+        if(JSON.stringify(cp) !== was){ r.it.cprice = cp; r.it.at = Date.now(); r.it.editedBy = me || "غير محدد"; saveSoon("items"); }
+      }
+      hit++;
+    });
+    renderPricing();
+    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
+    toast(hit ? ("اتسعّر " + qty(hit) + " صنف" +
+                 (skip ? " · " + qty(skip) + " من غير تكلفة اتساب زي ما هو" : ""))
+              : "مفيش صنف له تكلفة شراء في اللي ظاهر");
   });
 
   /* ---------- 🧮 احسب أوردر ----------
@@ -6925,8 +7029,7 @@
     var disc = Math.max(0, Number(toEn(pc.disc))||0), sin = Math.max(0, Number(toEn(pc.sin))||0), sout = Math.max(0, Number(toEn(pc.sout))||0);
     var pays = goods - disc + sin, profit = goods - disc - cogs - extra + sin - sout;
     return { rows:rows, noCost:noCost, goods:goods, cogs:cogs, extra:extra, pcs:pcs, disc:disc, sin:sin, sout:sout, pays:pays, profit:profit,
-             // أقصى خصم من غير خسارة = الربح قبل الخصم (والشحن فيه) − مصاريف الأوردر (إعلان وتغليف ومصاريف)
-             mg: goods - disc > 0 ? profit / (goods - disc) : null, floor: profit + disc - polCalc().over };
+             mg: goods - disc > 0 ? profit / (goods - disc) : null, floor: profit + disc };
   }
   function renderPcLines(){
     var box = document.getElementById("pc-lines"); if(!box) return;
@@ -6952,15 +7055,6 @@
   }
   // خانة اللون بتظهر بس للصنف اللي ليه أكتر من لون، وجنب كل لون فاضل منه كام
   function pcCols(itemId){ return itemColors(itemId).filter(Boolean); }
-  // سياسة التسعير: الأوردر ده بعد الإعلان والتغليف ونصيبه من المصاريف الشهرية
-  function pcPolRows(profit){
-    var pc = polCalc(); if(!(pc.over > 0)) return "";
-    var net = profit - pc.over, ok = net >= pc.profit - 0.005;
-    return "<div class='pc-row'><span>− مصاريف الأوردر <small class='hint' style='margin:0'>(إعلان وتغليف ومصاريف)</small></span><b class='num v-due'>" + esc(money(pc.over)) + "</b></div>" +
-      "<div class='pc-row t'><span>صافي بعد كل حاجة</span><b class='num " + (net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(net)) +
-        "<small style='display:block;font-weight:400;font-size:11px'>" + (ok ? "✓ فوق هدفك (" + esc(qty(pc.profit)) + ")"
-          : net >= 0 ? "أقل من هدفك (" + esc(qty(pc.profit)) + ")" : "الأوردر ده بيخسّرك") + "</small></b></div>";
-  }
   function pcColorSel(l){
     var cols = l.itemId ? pcCols(l.itemId) : [];
     if(cols.length < 2) return "";
@@ -7010,11 +7104,10 @@
         (c.extra ? R("− مصاريف إضافية", c.extra, "v-due") : "") +
         (c.sout ? R("− شحن للشركة", c.sout, "v-due") : "") +
         "<div class='pc-row t'><span>صافي ربحك</span><b class='num " + (c.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(c.profit)) + "</b></div>" +
-        pcPolRows(c.profit) +
       "</div>" +
       "<div class='pc-floor'>" + (c.floor > 0.009
-        ? "أقصى خصم من غير خسارة (بعد مصاريف الأوردر): <b class='num'>" + esc(money(c.floor)) + "</b> — يعني أقل مبلغ تقبله من العميل <b class='num'>" + esc(money(c.pays + c.disc - c.floor)) + "</b>."
-        : "<span class='v-due'>الأوردر ده خسران بعد مصاريف الأوردر حتى من غير خصم — ارفع السعر أو ضيف قطعة.</span>") + "</div>" +
+        ? "أقصى خصم من غير خسارة: <b class='num'>" + esc(money(c.floor)) + "</b> — يعني العميل يدفع <b class='num'>" + esc(money(c.pays + c.disc - c.floor)) + "</b> بس."
+        : "<span class='v-due'>الأوردر ده خسران حتى من غير خصم — ارفع السعر أو قلّل الشحن اللي بتدفعه.</span>") + "</div>" +
       "<div class='pc-btns'><button class='tbtn' type='button' id='b-pc-clear'>فضّي الحاسبة</button>" +
         "<button class='tbtn primary' type='button' id='b-pc-order'>اعمل منه أوردر ←</button></div>" +
       "<p class='hintline' style='margin:6px 0 0'>«اعمل منه أوردر» بيفتح درج أوردر جديد بالأصناف والأسعار دي — ومش بيتسجّل غير لما تدوس حفظ هناك.</p>";
@@ -8667,7 +8760,6 @@
   }
 
   function openDrawer(){
-    shipInAutoVal = null;      // رقم اتكتب لوحده في أوردر تاني ما يمشيش في الأوردر ده
     // لازم يبان الأول: updateEntryCalc بيخرج بدري لو الدرج لسه hidden
     SD.hidden = false;
     var scrim = document.getElementById("sale-scrim");
@@ -8754,20 +8846,6 @@
     else if(est && !(pgoods > 0)) net = null;        // ولا صنف تكلفته معروفة — الشحن لوحده مش ربح
     else if(st === "delivered" || est) net = (pgoods - cost) + sin - sout;
     else if(st === "cancelled") net = sin - sout;
-    /* سياسة التسعير: تنبيه بس — الحفظ مش بيتمنع. صافي الأوردر بعد «مصاريف
-       الأوردر» (رقم واحد من شاشة التسعير) خسران، أو أقل من الربح اللي عايزه. */
-    var pwn = document.getElementById("e-polwarn");
-    if(pwn){
-      var pmsg = "", pcx = polCalc();
-      if(net !== null && pcx.over > 0 && (est || (!editing.sales && st !== "cancelled"))){
-        var after = net - pcx.over;
-        if(after < -0.005) pmsg = "⚠ بعد مصاريف الأوردر (" + money(pcx.over) + ") الأوردر ده هيخسّرك " + money(-after) + ".";
-        else if(after < pcx.profit - 0.005) pmsg = "⚠ صافي الأوردر بعد مصاريف الأوردر (" + money(pcx.over) + "): " + money(after) +
-          " — أقل من الـ" + money(pcx.profit) + " اللي عايزها.";
-      }
-      pwn.innerHTML = pmsg ? esc(pmsg) + "<br><small>تقدر تحفظ عادي — ده تنبيه بس.</small>" : "";
-      pwn.hidden = !pmsg;
-    }
     var pw = document.getElementById("e-profit-wrap"), pf = document.getElementById("e-profit");
     var plab = document.getElementById("e-profit-lab");
     var plabel = est ? "صافي الربح المتوقع" : "صافي ربح الأوردر";
@@ -13372,12 +13450,6 @@
       // أول ما اسم شركة الشحن يتكتب في خانة فاضية → التحصيل عن طريقها
       if(f === "shipCo" && !squish(prev || "") && squish(v)) autoPayViaShip();
       if(f === "partyId"){ suggestShipping(); shipHint(); }
-      // أوردر قديم بيتعدّل: شحن العميل المتسجّل (حتى لو ببلاش) ما بيتلمسش
-      if(f === "shipOut" && pol().shipFollow && !draft.selfDel && !editing.sales &&
-         (!String(draft.shipIn || "").trim() || String(draft.shipIn) === shipInAutoVal)){
-        draft.shipIn = v; shipInAutoVal = String(v);
-        var sie = SD.querySelector("[data-f='shipIn']:not([data-li])"); if(sie) sie.value = v;
-      }
       if(f === "shipIn" || f === "shipOut") shipHint();
       if(f === "payVia" || f === "paid" || f === "note") syncMore();
     }
@@ -13495,19 +13567,6 @@
     syncDelMode(); shipHint(); syncMore(); updateEntryCalc();
   });
 
-  /* أسعار شركة الشحن الافتراضية للمنطقة — بتتستعمل بس في أول أوردر لمحافظة
-     (بعد كده السيستم بيتعلّم من آخر أوردر لنفس المحافظة). */
-  var SHIP_DEF = [
-    [75,  ["القاهرة","الجيزة"]],
-    [95,  ["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية","الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"]],
-    [105, ["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"]],
-    [150, ["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"]]
-  ];
-  function shipDefault(gov){
-    var g = squish(gov), hit = SHIP_DEF.find(function(z){ return z[1].indexOf(g) >= 0; });
-    return hit ? hit[0] : 0;
-  }
-  var shipInAutoVal = null;     // آخر رقم «شحن على العميل» اتكتب لوحده — طول ما هو زي ما هو بيمشي ورا شحن الشركة
   function suggestShipping(){
     if(draft.selfDel) return;              // بتوصّله بنفسك — مفيش شركة تتقترح
     if(suggestFor === draft.partyId) return;
@@ -13520,37 +13579,20 @@
       var q = db.parties.find(function(y){ return y.id===x.partyId; });
       return q && q.gov === p.gov && !isCancelled(x) && squish(x.shipCo);
     }).sort(byDate)[0];
-    var follow = !!pol().shipFollow;
-    /* أول أوردر للمحافظة دي: مفيش أوردر قديم نتعلّم منه، فبنكتب سعر
-       شركة الشحن الافتراضي للمنطقة (بس لو السياسة شغالة) */
-    if(!last){
-      var dflt = follow ? shipDefault(p.gov) : 0;
-      if(!dflt || draft.shipOut) return;
-      draft.shipOut = dflt;
-      if(!draft.shipIn){ draft.shipIn = dflt; shipInAutoVal = String(dflt); }
-      ["shipIn","shipOut"].forEach(function(f){
-        var el = SD.querySelector("[data-f='"+f+"']:not([data-li])"); if(el) el.value = draft[f]; });
-      if(note){ note.textContent = "أول أوردر لـ" + p.gov + ": الشحن من أسعار المنطقة الافتراضية (" + money(dflt) +
-        ") — العميل بيدفع زي اللي بتدفعه. غيّره لو مختلف."; note.hidden = false; }
-      shipHint();
-      return;
-    }
+    if(!last) return;
     // السطر ده لازم يقول اللي اتملّى فعلاً بس، مش كل اللي في آخر أوردر
     var filled = [];
     if(!squish(draft.shipCo || "")){
       draft.shipCo = last.shipCo; filled.push(squish(last.shipCo));
       autoPayViaShip();
     }
+    if(!draft.shipIn && (Number(last.shipIn)||0)){
+      draft.shipIn = last.shipIn;
+      filled.push("على العميل " + money(shipIn(last)));
+    }
     if(!draft.shipOut && (Number(last.shipOut)||0)){
       draft.shipOut = last.shipOut;
       filled.push("للشركة " + money(shipOut(last)));
-    }
-    // سياسة التسعير: العميل بيدفع اللي بتدفعه لشركة الشحن — مش اللي اتاخد منه آخر مرة
-    var inV = follow && (Number(draft.shipOut)||0) ? draft.shipOut : last.shipIn;
-    if(!draft.shipIn && (Number(inV)||0)){
-      draft.shipIn = inV;
-      if(follow) shipInAutoVal = String(inV);
-      filled.unshift("على العميل " + money(Number(inV)||0));
     }
     ["shipCo","shipIn","shipOut"].forEach(function(f){
       var el = SD.querySelector("[data-f='"+f+"']:not([data-li])");
