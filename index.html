@@ -899,14 +899,6 @@
   #t-price input.prin{width:76px}
   #t-price input.prx{width:62px}
   #t-price tr.prc-sub[hidden]{display:none}
-  .pol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:var(--sp-3)}
-  .pol-grid input{width:100%}
-  .pol-grid .sub{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px}
-  .pol-res{margin-top:12px;background:var(--teal-soft);border-radius:var(--r-sm);padding:10px 12px;font-size:var(--fs-2);line-height:1.9}
-  .pol-res b{font-size:var(--fs-3)}
-  .pol-btns{margin-top:10px}
-  #t-price .prc-req small{display:block;font-size:11px;font-weight:600;white-space:nowrap}
-  #t-price .prc-req small.ok{color:var(--gain)} #t-price .prc-req small.lo{color:var(--warn)} #t-price .prc-req small.bad{color:var(--due)}
   #t-price tr.prc-sub td{background:var(--teal-soft);font-size:var(--fs-2)}
   #t-price tr.prc-sub .prc-cn{padding-inline-start:14px;color:var(--ink-soft)}
   #t-price tr.prc-sub .prc-cn::before{content:"↳ "}
@@ -2725,25 +2717,6 @@
   </div>
 
   <div id="prc-listview">
-  <!-- v118: سياسة التسعير — كل أوردر محتاج يغطي كام، والسعر المطلوب لكل صنف -->
-  <div class="panel money-only pol" id="pol-panel">
-    <div class="fold-h"><h3>سياسة التسعير <small id="pol-sum"></small></h3>
-      <button class="tbtn" type="button" data-foldbtn="pol-body" aria-expanded="false" aria-controls="pol-body">الأرقام ▾</button></div>
-    <div id="pol-body" data-fold hidden>
-      <div class="pol-grid">
-        <div><label for="pol-ads">الإعلانات في الأسبوع</label><input id="pol-ads" inputmode="decimal" data-pol="adsWeek"><span class="sub" id="pol-ads-sub"></span></div>
-        <div><label for="pol-ordw">أوردرات في الأسبوع</label><input id="pol-ordw" inputmode="decimal" data-pol="ordWeek"><span class="sub" id="pol-ordw-sub"></span></div>
-        <div><label for="pol-pack">تغليف لكل أوردر</label><input id="pol-pack" inputmode="decimal" data-pol="pack"><span class="sub">بابلز ولزق وكيس</span></div>
-        <div><label for="pol-fixed">المصاريف الشهرية</label><input id="pol-fixed" inputmode="decimal" data-pol="fixed"><span class="sub">اشتراكات وخطوط ومرتبات…</span></div>
-        <div><label for="pol-orders">أوردرات في الشهر</label><input id="pol-orders" inputmode="decimal" data-pol="orders"><span class="sub" id="pol-orders-sub"></span></div>
-        <div><label for="pol-profit">الربح اللي عايزه من الأوردر</label><input id="pol-profit" inputmode="decimal" data-pol="profit"><span class="sub">صافي، بعد كل حاجة</span></div>
-        <div><label for="pol-pcs">قطع في الأوردر</label><input id="pol-pcs" inputmode="decimal" data-pol="pcs"><span class="sub" id="pol-pcs-sub"></span></div>
-      </div>
-      <label class="allow" style="margin-top:10px"><input type="checkbox" id="pol-ship"> الشحن على العميل = اللي بتدفعه لشركة الشحن (بيتكتب لوحده في الأوردر)</label>
-      <div class="pol-res" id="pol-res"></div>
-      <div class="pol-btns"><button class="tbtn" type="button" id="b-pol-apply">طبّق السعر المطلوب على الأصناف اللي تحته</button></div>
-    </div>
-  </div>
   <div class="band" id="prc-kpis"></div>
   <p class="note" id="prc-note"></p>
 
@@ -2760,7 +2733,6 @@
     <button type="button" data-prconly="all" class="on">كل الأصناف</button>
     <button type="button" data-prconly="noprice">لسه من غير سعر</button>
     <button type="button" data-prconly="loss">السعر أقل من التكلفة</button>
-    <button type="button" data-prconly="under">تحت السعر المطلوب</button>
     <button type="button" data-prconly="instock">اللي في المخزن</button>
   </div>
 
@@ -3261,7 +3233,6 @@
       <h3>الأصناف</h3>
       <div id="e-lines"></div>
       <button class="addline" type="button" id="b-addline">+ صنف تاني</button>
-      <p class="hintline bad money-only" id="e-polwarn" hidden></p>
       <p class="hintline bad" id="s-note-msg" hidden></p>
       <label id="s-allow-wrap" class="allow" hidden>
         <input type="checkbox" id="s-allow">
@@ -3362,14 +3333,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "118";
+  var VERSION = "120";
   var CHANGELOG = [
-    { v:"118", d:"2026-10-04", items:[
-      "«الأسعار»: لوحة «سياسة التسعير» — ميزانية الإعلانات في الأسبوع ÷ أوردرات الأسبوع (تلقائي من شغلك) = إعلان لكل أوردر، + تغليف + نصيبه من المصاريف الشهرية + الربح اللي عايزه، ÷ متوسط القطع في الأوردر = «سعر القطعة = تكلفتها + كذا»",
-      "جدول الأسعار: عمودين «السعر المطلوب» و«سعر التعادل» لكل صنف ولكل لون، وعلامة: ✓ فوق المطلوب · ⚠ ناقص كذا · ✗ تحت التعادل — وفلتر «تحت السعر المطلوب» وزرار يرفع اللي تحته (بتأكيد، وعمره ما بينزّل سعر)",
-      "«احسب أوردر»: بعد «صافي ربحك» بيطرح الإعلان والتغليف والمصاريف ويقولك «صافي بعد كل حاجة» ومقارنته بهدفك",
-      "الأوردر: تنبيه لو صنف سعره تحت التعادل أو الأوردر هيخسّر بعد الإعلان والتغليف — الحفظ مش بيتمنع",
-      "الشحن على العميل بقى بيتكتب لوحده = اللي بتدفعه لشركة الشحن (ولو أول أوردر للمحافظة: 75 القاهرة والجيزة · 95 بحري · 105 قبلي · 150 الحدود) — وتقدر تقفلها من اللوحة"
+    { v:"120", d:"2026-10-04", items:[
+      "شاشة التسعير رجعت زي ما كانت في الإصدار 117 — اتشال كل اللي اتعمل فيها في 118 و119 (سياسة التسعير، السعر المطلوب والتعادل، مصاريف الأوردر، الجدول الجديد، وتنبيهات الأوردر)",
+      "الشحن على العميل رجع يتملي من آخر أوردر لنفس المحافظة زي الأول",
+      "الأسعار اللي كتبتها بنفسك في الأصناف (وأسعار الألوان) زي ما هي — ما اتلمستش"
     ]},
     { v:"117", d:"2026-10-04", items:[
       "تفاصيل الأوردر: الأوردر اللي لسه ما اتسلّمش بقى بيوريك «صافي الربح المتوقع لو اتسلّم» بدل «بيتحسب لما يتسلّم» — البضاعة − تكلفتها + الشحن على العميل − الشحن للشركة (نفس رقم «مع المندوب»)"
@@ -6646,62 +6615,8 @@
      الفعلي بيتسجّل في الأوردر والمصاريف الفعلية في الخزنة. */
   function prcExtra(it){ return Math.max(0, Number(it && it.xCost)||0); }
   function prcShip(it){ return Math.max(0, Number(it && it.shipCost)||0); }
-
-  /* ---------- سياسة التسعير (v118) ----------
-     كل أوردر عليه مصاريف ثابتة مهما كان فيه كام قطعة: الإعلان اللي جابه،
-     التغليف، ونصيبه من المصاريف الشهرية. السعر المطلوب للقطعة = تكلفتها
-     الكلية + (المصاريف دي + الربح اللي عايزه من الأوردر) ÷ متوسط القطع
-     في الأوردر. سعر التعادل = نفس الحسبة من غير الربح — تحته بتخسر.
-     الإعدادات في settings.policy (بتتزامن مع باقي الإعدادات). فاضي = تلقائي. */
-  var POL_DEF = { adsWeek:750, ordWeek:null, pack:10, fixed:1340, orders:100, profit:100, pcs:null, shipFollow:true };
-  function pol(){
-    var p = settings.policy || {}, o = {};
-    Object.keys(POL_DEF).forEach(function(k){ o[k] = (p[k] == null || p[k] === "") ? POL_DEF[k] : p[k]; });
-    return o;
-  }
-  function isAdExpense(c){ return c.type === "expense" && /[اإأ]علان|ممول|sponsor/i.test(String(c.note || "")); }
-  /* من شغلك الفعلي: أوردرات الأسبوع = أوردرات آخر ١٤ يوم على عدد الأيام اللي
-     اشتغلتها فعلاً فيهم (لو لسه بادئ من ٥ أيام، بنقسم على ٥ مش ١٤) × ٧ ·
-     ومتوسط القطع في الأوردر. الإعلان بيتكتب ميزانية في الأسبوع — المسجّل في
-     الخزنة بيتدفع على دفعات (شحن رصيد) فمش بيقول بتصرف كام في الأسبوع. */
-  function polAuto(){
-    var to = today(), d = new Date(to + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() - 13);
-    var from = d.toISOString().slice(0, 10), r = { from:from, to:to };
-    var all = live("sales").filter(function(s){ return !isCancelled(s); }), pcs = 0, first = "";
-    all.forEach(function(s){ SL(s).forEach(function(l){ pcs += Math.max(0, Number(l.qty)||0); });
-      if(s.date && (!first || s.date < first)) first = s.date; });
-    var ord = all.filter(function(s){ return inRange(s.date, r); }).length;
-    var start = first && first > from ? first : from;
-    var days = Math.min(14, Math.max(1, Math.round((new Date(to + "T00:00:00Z") - new Date(start + "T00:00:00Z")) / 864e5) + 1));
-    var ads = live("cash").filter(function(c){ return isAdExpense(c) && inRange(c.date, r); })
-      .reduce(function(a, c){ return a + (Number(c.amount)||0); }, 0);
-    return { ads14:ads, orders:ord, days:days, ordWeek: ord ? ord / days * 7 : null,
-             pcs: all.length ? Math.max(1, pcs / all.length) : null };
-  }
-  function polCalc(){
-    var p = pol(), a = polAuto();
-    var ordWeek = p.ordWeek != null ? Math.max(0, Number(p.ordWeek)||0) : (a.ordWeek || 0);
-    var adsWeek = Math.max(0, Number(p.adsWeek)||0);
-    var ads = ordWeek > 0 ? adsWeek / ordWeek : 0;                  // إعلان على كل أوردر
-    var pcs = p.pcs != null ? Math.max(1, Number(p.pcs)||1) : (a.pcs || 1);
-    var fixedPer = (Number(p.orders)||0) > 0 ? Math.max(0, Number(p.fixed)||0) / Number(p.orders) : 0;
-    var over = ads + Math.max(0, Number(p.pack)||0) + fixedPer;       // مصاريف الأوردر من غير الربح
-    var need = over + Math.max(0, Number(p.profit)||0);
-    return { p:p, auto:a, ads:ads, adsWeek:adsWeek, ordWeek:ordWeek, pcs:pcs, pack:Math.max(0, Number(p.pack)||0), fixedPer:fixedPer, profit:Math.max(0, Number(p.profit)||0),
-             over:over, need:need, perPiece:need / pcs, bePiece:over / pcs };
-  }
-  function ceil5(v){ return Math.ceil(Math.round(v * 100) / 100 / 5) * 5; }
-  // c = التكلفة الكلية للقطعة (شراء + مصاريف إضافية + شحن البضاعة)
-  function polReq(c, pc){ return c > 0 ? ceil5(c + (pc || polCalc()).perPiece) : 0; }
-  function polBE(c, pc){ return c > 0 ? ceil5(c + (pc || polCalc()).bePiece) : 0; }
-  // التكلفة الكلية لقطعة من لون معيّن (أو متوسط الصنف لو من غير لون)
-  function unitCostFull(it, color){
-    var b = squish(color) ? costOfColor(it.id, color).c : avgCost(it.id);
-    return b > 0 ? b + prcExtra(it) + prcShip(it) : 0;
-  }
   // كل الأصناف بتكلفتها وسعرها ورصيدها — مصدر الجدول والكروت مع بعض
   function prcAll(){
-    var pc = polCalc();
     return live("items").map(function(it){
       var buy   = avgCost(it.id);
       var x = prcExtra(it), sh = prcShip(it);
@@ -6711,12 +6626,10 @@
       var r = { it:it, buy:buy, x:x, sh:sh, cost:cost, price:price, stock:stock,
                unit: (price > 0 && cost > 0) ? price - cost : null, cols:null };
       r.noPrice = price <= 0; r.loss = price > 0 && cost > 0 && price <= cost;
-      // من غير سعر = فلتر «لسه من غير سعر» مش «تحت المطلوب» — والتطبيق بيرفع أسعار موجودة بس
-      r.req = polReq(cost, pc); r.be = polBE(cost, pc); r.under = cost > 0 && price > 0 && price < r.req;
       // صنف بأكتر من لون: كل لون بتكلفته وسعره، وأرقام المخزون بتتجمع من الألوان
       var ic = itemColors(it.id);
       if(ic.filter(Boolean).length > 1){
-        r.cols = ic.map(function(c){ var k = prcColRow(it, c, x, sh); k.req = polReq(k.cost, pc); k.be = polBE(k.cost, pc); return k; });
+        r.cols = ic.map(function(c){ return prcColRow(it, c, x, sh); });
         r.sbuy = 0; r.sx = 0; r.sval = 0; r.sprof = 0;
         r.cols.forEach(function(k){
           r.sbuy += k.stock * k.buy; r.sx += k.stock * (k.buy > 0 ? x + sh : 0);
@@ -6725,7 +6638,6 @@
         });
         r.noPrice = r.cols.some(function(k){ return k.price <= 0; });
         r.loss = r.cols.some(function(k){ return k.price > 0 && k.cost > 0 && k.price <= k.cost; });
-        r.under = r.cols.some(function(k){ return k.cost > 0 && k.price > 0 && k.price < k.req; });
       }
       return r;
     });
@@ -6742,7 +6654,6 @@
       if(q && squish(r.it.name).toLowerCase().indexOf(q) < 0) return false;
       if(prcFilt.only === "noprice") return r.noPrice;
       if(prcFilt.only === "loss")    return r.loss;
-      if(prcFilt.only === "under")   return r.under;
       if(prcFilt.only === "instock") return r.stock > 0;
       return true;
     });
@@ -6808,13 +6719,12 @@
         : ".");
   }
 
-  var PRC_HEAD = ["الصنف","في المخزن","تكلفة القطعة","مصاريف إضافية","مصاريف شحن","التكلفة الكلية","سعر البيع","السعر المطلوب","سعر التعادل",
+  var PRC_HEAD = ["الصنف","في المخزن","تكلفة القطعة","مصاريف إضافية","مصاريف شحن","التكلفة الكلية","سعر البيع",
                   "زيادة على التكلفة %","ربح القطعة","الهامش %","ربح كل المخزون"];
 
   function renderPricing(){
     if(pcTab === "calc") renderPcalc();     // القوايم كمان — صنف اتضاف أو اتغيّر اسمه من مكان تاني
     renderPrcKpis();
-    renderPol();
     var ed = canEdit();
     var rows = prcList().map(function(r){
       // صنف من غير سعر: الخانة تفضل فاضية — «−100%» رقم صح ومالوش أي معنى هنا
@@ -6822,7 +6732,7 @@
       var bad = r.price > 0 && r.cost > 0 && r.price <= r.cost;
       var dis = ed ? "" : " disabled";
       var open = !!(r.cols && prcOpen[r.it.id]), nc = r.cols ? r.cols.filter(function(k){ return k.color; }).length : 0;
-      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "' data-buy='" + r.buy + "' data-stock='" + r.stock + "' data-req='" + r.req + "' data-be='" + r.be + "'" + (r.cols ? " data-cols='1'" : "") + ">" +
+      return "<tr data-prcrow='" + esc(r.it.id) + "' data-cost='" + r.cost + "' data-buy='" + r.buy + "' data-stock='" + r.stock + "'" + (r.cols ? " data-cols='1'" : "") + ">" +
         "<td class='wide'>" + esc(r.it.name) + (r.cols ? " <button type='button' class='prc-tog' data-prctog='" + esc(r.it.id) + "' aria-expanded='" + open + "'>" +
            (open ? "▴" : "▾") + " " + plural(nc, "لون واحد", "لونين", "ألوان") + "</button>" : "") +
            (r.cols && r.loss ? "<small class='prc-avg'>فيه لون سعره أقل من تكلفته — افتح الألوان</small>" : "") +
@@ -6837,7 +6747,6 @@
         "<td class='num prc-cost'><b>" + (r.cost > 0 ? money(r.cost) : "—") + "</b></td>" +
         "<td><input class='prin' inputmode='decimal' data-prcprice='" + esc(r.it.id) + "'" +
            " value='" + (r.price > 0 ? r.price : "") + "' placeholder='0' aria-label='سعر البيع'" + dis + "></td>" +
-        polCells(r.price, r.req, r.be) +
         "<td>" + (r.buy > 0
            ? "<input class='prin' inputmode='decimal' data-prcmk='" + esc(r.it.id) + "'" +
              " value='" + (mk === null ? "" : (mk*100).toFixed(1)) + "' placeholder='0'" +
@@ -6857,25 +6766,10 @@
   /* سطر لون تحت الصنف: تكلفة اللون ده بس + سعره. خانة السعر فاضية = السعر الأساسي
      (باين كـplaceholder)، وأول ما تكتب فيها بيبقى للون ده سعر لوحده. */
   var prcOpen = {};
-  // الحالة: فوق المطلوب · ناقص كذا · تحت التعادل (بيخسّرك بعد الإعلان والتغليف)
-  function polStatus(price, req, be){
-    if(!(req > 0) || !(price > 0)) return { c:"", t:"" };
-    if(price >= req - 0.005) return { c:"ok", t:"✓ فوق المطلوب" };
-    if(price >= be - 0.005) return { c:"lo", t:"⚠ ناقص " + qty(Math.round((req - price) * 100) / 100) };
-    return { c:"bad", t:"✗ تحت التعادل" };
-  }
-  function polCellsInner(price, req, be){
-    var st = polStatus(price, req, be);
-    return (req > 0 ? esc(money(req)) : "—") + (st.t ? "<small class='" + st.c + "'>" + esc(st.t) + "</small>" : "");
-  }
-  function polCells(price, req, be){
-    return "<td class='num prc-req'>" + polCellsInner(price, req, be) + "</td>" +
-           "<td class='num prc-be'>" + (be > 0 ? esc(money(be)) : "—") + "</td>";
-  }
   function prcSubRow(r, k, open, dis){
     var mk = k.price > 0 && k.cost > 0 ? prcMarkup(k.price, k.cost) : null;
     var bad = k.price > 0 && k.cost > 0 && k.price <= k.cost;
-    return "<tr class='prc-sub' data-prcsub='" + esc(r.it.id) + "' data-color='" + esc(k.color) + "' data-cost='" + k.cost + "' data-buy='" + k.buy + "' data-stock='" + k.stock + "' data-req='" + k.req + "' data-be='" + k.be + "'" + (open ? "" : " hidden") + ">" +
+    return "<tr class='prc-sub' data-prcsub='" + esc(r.it.id) + "' data-color='" + esc(k.color) + "' data-cost='" + k.cost + "' data-buy='" + k.buy + "' data-stock='" + k.stock + "'" + (open ? "" : " hidden") + ">" +
       "<td class='wide'><span class='prc-cn'>" + esc(k.color || "من غير لون") + "</span></td>" +
       "<td class='num'>" + esc(qty(k.stock)) + "</td>" +
       "<td class='num'>" + (k.buy > 0 ? esc(money(k.buy)) + (k.own ? "" : "<small class='prc-avg'>متوسط الصنف — اللون ده ما اتشراش</small>")
@@ -6886,7 +6780,6 @@
       "<td>" + (k.color ? "<input class='prin' inputmode='decimal' data-prccp='" + esc(r.it.id) + "' value='" + (k.cp > 0 ? k.cp : "") +
          "' placeholder='" + (r.price > 0 ? r.price : "0") + "' aria-label='سعر بيع " + esc(k.color) + "'" + dis + ">"
          : "<span class='num prc-dim'>" + (r.price > 0 ? esc(money(r.price)) : "—") + "</span>") + "</td>" +
-      polCells(k.price, k.req, k.be) +
       "<td class='num prc-mk'>" + esc(mk === null ? "—" : (mk*100).toFixed(1) + "%") + "</td>" +
       "<td class='num prc-unit " + (bad ? "v-due" : (k.unit ? "v-gain" : "")) + "'>" + (k.unit === null ? "—" : esc(money(k.unit))) + "</td>" +
       "<td class='num prc-mg'>" + esc(prcPct(k.price > 0 ? prcMargin(k.price, k.cost) : null)) + "</td>" +
@@ -6931,7 +6824,7 @@
       if(any){ it.cprice = cp; it.at = Date.now(); it.editedBy = me || "غير محدد"; }
     });
     prcCPend = {};
-    saveSoon("items"); renderPrcKpis(); renderPol();
+    saveSoon("items"); renderPrcKpis();
     dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
   }
 
@@ -6945,9 +6838,6 @@
       u.className = "num prc-unit " + (unit === null ? "" : (unit <= 0 ? "v-due" : "v-gain"));
     }
     if(g) g.textContent = prcPct(price > 0 ? prcMargin(price, cost) : null);
-    var rq = tr.querySelector(".prc-req"), be = tr.querySelector(".prc-be");
-    if(rq) rq.innerHTML = polCellsInner(price, Number(tr.dataset.req)||0, Number(tr.dataset.be)||0);
-    if(be) be.textContent = (Number(tr.dataset.be)||0) > 0 ? money(Number(tr.dataset.be)) : "—";
     if(t) t.textContent = (unit === null || !st) ? "—" : money(unit * st);
   }
   function prcCommit(id, price){
@@ -6980,7 +6870,7 @@
       if(any){ it.at = Date.now(); it.editedBy = me || "غير محدد"; }
     });
     prcXPend = {};
-    saveSoon("items"); renderPrcKpis(); renderPol();
+    saveSoon("items"); renderPrcKpis();
   }
   function prcQueue(id, price){
     prcPend = { id:id, price:price };
@@ -6991,7 +6881,7 @@
     if(!prcPend) return;
     var q = prcPend; prcPend = null;
     prcCommit(q.id, q.price);
-    renderPrcKpis(); renderPol();
+    renderPrcKpis();
     dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
   }
 
@@ -7010,8 +6900,8 @@
       // المصاريف اتغيّرت: التكلفة الكلية بتتحسب تاني، والسعر ثابت والنسبة بتمشي وراه
       var buy = Number(tr.dataset.buy)||0;
       var xv = Math.max(0, Number(toEn(xIn.value))||0), sv = Math.max(0, Number(toEn(sIn.value))||0);
-      var c2 = buy > 0 ? buy + xv + sv : 0, pcx = polCalc();
-      tr.dataset.cost = c2; tr.dataset.req = polReq(c2, pcx); tr.dataset.be = polBE(c2, pcx);
+      var c2 = buy > 0 ? buy + xv + sv : 0;
+      tr.dataset.cost = c2;
       var ce = tr.querySelector(".prc-cost"); if(ce) ce.innerHTML = "<b>" + (c2 > 0 ? esc(money(c2)) : "—") + "</b>";
       var pr0 = Number(toEn(pIn.value))||0;
       if(mIn) mIn.value = (pIn.value.trim() === "" || !(c2 > 0)) ? "" : (prcMarkup(pr0, c2)*100).toFixed(1);
@@ -7019,7 +6909,7 @@
       // تكلفة كل لون فيها نفس المصاريف
       Array.prototype.forEach.call(this.querySelectorAll("tr[data-prcsub='" + CSS.escape(tr.dataset.prcrow) + "']"), function(st){
         var b = Number(st.dataset.buy)||0, cc = b > 0 ? b + xv + sv : 0;
-        st.dataset.cost = cc; st.dataset.req = polReq(cc, pcx); st.dataset.be = polBE(cc, pcx);
+        st.dataset.cost = cc;
         var ce2 = st.querySelector(".prc-cost"); if(ce2) ce2.innerHTML = "<b>" + (cc > 0 ? esc(money(cc)) : "—") + "</b>";
         var d = st.querySelectorAll(".prc-dim"); if(d[0]) d[0].textContent = xv > 0 ? qty(xv) : "—"; if(d[1]) d[1].textContent = sv > 0 ? qty(sv) : "—";
       });
@@ -7107,93 +6997,6 @@
               : "مفيش صنف له تكلفة شراء في اللي ظاهر");
   });
 
-  /* ---------- لوحة سياسة التسعير ---------- */
-  var POL_IN = { adsWeek:"pol-ads", ordWeek:"pol-ordw", pack:"pol-pack", fixed:"pol-fixed", orders:"pol-orders", profit:"pol-profit", pcs:"pol-pcs" };
-  function n2(v){ return String(Math.round(v * 100) / 100); }
-  function renderPol(){
-    var c = polCalc(), sp = settings.policy || {};
-    Object.keys(POL_IN).forEach(function(k){
-      var el = document.getElementById(POL_IN[k]); if(!el || document.activeElement === el) return;
-      // الإعلان والقطع: فاضي = تلقائي من شغلك (باين كـplaceholder). الباقي: الرقم الحالي
-      if(k === "ordWeek" || k === "pcs") el.value = sp[k] == null ? "" : sp[k];
-      else el.value = c.p[k];
-      el.disabled = !canEdit();
-    });
-    var a = c.auto, aw = document.getElementById("pol-ordw"), ap = document.getElementById("pol-pcs");
-    if(aw) aw.placeholder = a.ordWeek != null ? n2(Math.round(a.ordWeek * 10) / 10) : "0";
-    if(ap) ap.placeholder = a.pcs != null ? n2(a.pcs) : "1";
-    var as = document.getElementById("pol-ads-sub");
-    if(as) as.textContent = c.ordWeek > 0 ? "= " + money(c.ads) + " على كل أوردر" : "اكتب عدد الأوردرات في الأسبوع";
-    var ws = document.getElementById("pol-ordw-sub");
-    if(ws) ws.textContent = a.orders ? "تلقائي: " + qty(a.orders) + " أوردر في آخر " + qty(a.days) + " يوم" : "مفيش أوردرات في آخر ١٤ يوم — اكتبه بإيدك";
-    var ps = document.getElementById("pol-pcs-sub");
-    if(ps) ps.textContent = a.pcs != null ? "تلقائي: متوسط أوردراتك" : "";
-    var os = document.getElementById("pol-orders-sub");
-    if(os) os.textContent = "= " + money(c.fixedPer) + " على كل أوردر";
-    var sh = document.getElementById("pol-ship");
-    if(sh){ sh.checked = !!c.p.shipFollow; sh.disabled = !canEdit(); }
-    var res = document.getElementById("pol-res");
-    if(res) res.innerHTML = "كل أوردر محتاج يغطي <b class='num'>" + esc(money(c.need)) + "</b>" +
-      " <span class='hint' style='margin:0'>(إعلان " + esc(qty(Math.round(c.ads * 100) / 100)) + " + تغليف " + esc(qty(c.pack)) +
-      " + مصاريف " + esc(qty(Math.round(c.fixedPer * 100) / 100)) + " + ربح " + esc(qty(c.profit)) + ")</span>" +
-      " ÷ <b class='num'>" + esc(n2(c.pcs)) + "</b> قطعة في الأوردر<br>" +
-      "← <b>سعر القطعة = تكلفتها + " + esc(qty(Math.round(c.perPiece))) + "</b>" +
-      " · <span class='v-due'>سعر التعادل = تكلفتها + " + esc(qty(Math.round(c.bePiece))) + "</span> (تحته بتخسر بعد الإعلان والتغليف والمصاريف)" +
-      "<br><span class='hint' style='margin:0'>التكلفة هنا = «التكلفة الكلية» في الجدول (الشراء + المصاريف الإضافية + مصاريف الشحن). مواصلات شراء البضاعة حطها في «مصاريف إضافية» للصنف.</span>";
-    var under = prcAll().filter(function(r){ return r.under; }).length;
-    var sum = document.getElementById("pol-sum");
-    if(sum) sum.textContent = "سعر القطعة = تكلفتها + " + qty(Math.round(c.perPiece)) +
-      (under ? " · " + qty(under) + " صنف تحت المطلوب" : " · كل الأصناف فوق المطلوب");
-    var ab = document.getElementById("b-pol-apply");
-    if(ab){ ab.hidden = !under || !canEdit(); }
-  }
-  function polSave(k, v){
-    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
-    var sp = Object.assign({}, settings.policy || {});
-    if(v === "" || v == null) delete sp[k]; else sp[k] = v;
-    settings.policy = sp;
-    saveSettings(); renderPricing();
-  }
-  document.getElementById("pol-body").addEventListener("change", function(e){
-    var k = e.target.dataset.pol;
-    if(k){ var raw = e.target.value.trim(), v = Number(toEn(raw));
-      polSave(k, raw === "" || !isFinite(v) ? "" : Math.max(0, v)); return; }
-    if(e.target.id === "pol-ship") polSave("shipFollow", !!e.target.checked);
-  });
-  // طبّق: بيرفع بس، عمره ما بينزّل سعر — ولون سعره أقل من المطلوب بتاعه بياخد سعر لوحده
-  var polArm = 0;
-  document.getElementById("b-pol-apply").addEventListener("click", function(){
-    if(!canEdit()){ toast("مالكش صلاحية التعديل"); return; }
-    var list = prcAll().filter(function(r){ return r.under; });
-    if(!list.length){ renderPol(); return; }
-    if(Date.now() - polArm > 6000){
-      polArm = Date.now();
-      this.textContent = "هيرفع سعر " + qty(list.length) + " صنف للسعر المطلوب — دوس تاني للتأكيد";
-      var b = this; setTimeout(function(){ if(Date.now() - polArm >= 6000) b.textContent = "طبّق السعر المطلوب على الأصناف اللي تحته"; }, 6100);
-      return;
-    }
-    polArm = 0; this.textContent = "طبّق السعر المطلوب على الأصناف اللي تحته";
-    var hit = 0;
-    list.forEach(function(r){
-      var it = r.it, ch = false, base = Number(it.price)||0;
-      if(r.cost > 0 && base > 0 && base < r.req){ base = r.req; it.price = r.req; ch = true; }
-      if(r.cols){
-        var cp = Object.assign({}, it.cprice || {});
-        r.cols.forEach(function(k){
-          if(!k.color || !(k.cost > 0)) return;
-          var eff = colorPrice(it, k.color) || base;
-          if(eff > 0 && eff < k.req){ cp[k.color] = k.req; ch = true; }
-        });
-        it.cprice = cp;
-      }
-      if(ch){ it.at = Date.now(); it.editedBy = me || "غير محدد"; hit++; }
-    });
-    saveSoon("items");
-    dirtyTabs.dash = 1; dirtyTabs.rep = 1; dirtyTabs.inv = 1; dirtyTabs.items = 1;
-    renderPricing();
-    toast(hit ? "اتعدّل سعر " + qty(hit) + " صنف للسعر المطلوب" : "مفيش حاجة اتغيّرت");
-  });
-
   /* ---------- 🧮 احسب أوردر ----------
      حسبة بس — مفيش حاجة بتتسجّل في الدفاتر. بتاخد من كل صنف تكلفة القطعة الواصلة
      (avgCost) + «المصاريف الإضافية» اللي في جدول الأسعار، والشحن مرة على الأوردر.
@@ -7252,17 +7055,6 @@
   }
   // خانة اللون بتظهر بس للصنف اللي ليه أكتر من لون، وجنب كل لون فاضل منه كام
   function pcCols(itemId){ return itemColors(itemId).filter(Boolean); }
-  // سياسة التسعير: الأوردر ده بعد الإعلان والتغليف ونصيبه من المصاريف الشهرية
-  function pcPolRows(profit){
-    var pc = polCalc(); if(!(pc.over > 0)) return "";
-    var net = profit - pc.over, ok = net >= pc.profit - 0.005;
-    var R = function(t, v){ return "<div class='pc-row'><span>" + esc(t) + "</span><b class='num v-due'>" + esc(money(v)) + "</b></div>"; };
-    return (pc.ads > 0 ? R("− إعلان", pc.ads) : "") + (pc.pack > 0 ? R("− تغليف", pc.pack) : "") +
-      (pc.fixedPer > 0 ? R("− نصيبه من المصاريف الشهرية", pc.fixedPer) : "") +
-      "<div class='pc-row t'><span>صافي بعد كل حاجة</span><b class='num " + (net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(net)) +
-        "<small style='display:block;font-weight:400;font-size:11px'>" + (ok ? "✓ فوق هدفك (" + esc(qty(pc.profit)) + ")"
-          : net >= 0 ? "أقل من هدفك (" + esc(qty(pc.profit)) + ")" : "الأوردر ده بيخسّرك") + "</small></b></div>";
-  }
   function pcColorSel(l){
     var cols = l.itemId ? pcCols(l.itemId) : [];
     if(cols.length < 2) return "";
@@ -7312,7 +7104,6 @@
         (c.extra ? R("− مصاريف إضافية", c.extra, "v-due") : "") +
         (c.sout ? R("− شحن للشركة", c.sout, "v-due") : "") +
         "<div class='pc-row t'><span>صافي ربحك</span><b class='num " + (c.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(c.profit)) + "</b></div>" +
-        pcPolRows(c.profit) +
       "</div>" +
       "<div class='pc-floor'>" + (c.floor > 0.009
         ? "أقصى خصم من غير خسارة: <b class='num'>" + esc(money(c.floor)) + "</b> — يعني العميل يدفع <b class='num'>" + esc(money(c.pays + c.disc - c.floor)) + "</b> بس."
@@ -8969,7 +8760,6 @@
   }
 
   function openDrawer(){
-    shipInAutoVal = null;      // رقم اتكتب لوحده في أوردر تاني ما يمشيش في الأوردر ده
     // لازم يبان الأول: updateEntryCalc بيخرج بدري لو الدرج لسه hidden
     SD.hidden = false;
     var scrim = document.getElementById("sale-scrim");
@@ -9056,26 +8846,6 @@
     else if(est && !(pgoods > 0)) net = null;        // ولا صنف تكلفته معروفة — الشحن لوحده مش ربح
     else if(st === "delivered" || est) net = (pgoods - cost) + sin - sout;
     else if(st === "cancelled") net = sin - sout;
-    /* سياسة التسعير: تنبيه بس — الحفظ مش بيتمنع. سعر تحت التعادل، أو
-       أوردر صافيه بعد الإعلان والتغليف والمصاريف بالسالب. */
-    var pwn = document.getElementById("e-polwarn");
-    if(pwn){
-      var pmsg = [];
-      if(est || (!editing.sales && st !== "cancelled")){
-        var pcx = polCalc(), seen = {};
-        draft.lines.forEach(function(l){
-          var it = l.itemId && pcItem(l.itemId), pr = Number(l.price)||0;
-          if(!it || !(pr > 0)) return;
-          var be = polBE(unitCostFull(it, l.color), pcx), key = l.itemId + "|" + squish(l.color);
-          if(be > 0 && pr < be - 0.005 && !seen[key]){ seen[key] = 1;
-            pmsg.push(itemName(l.itemId) + (squish(l.color) ? " " + squish(l.color) : "") + " بـ" + qty(pr) + " أقل من سعر التعادل (" + qty(be) + ")"); }
-        });
-        if(net !== null && pcx.over > 0 && net - pcx.over < -0.005)
-          pmsg.push("بعد الإعلان والتغليف والمصاريف (" + money(pcx.over) + ") الأوردر ده هيخسّرك " + money(pcx.over - net));
-      }
-      pwn.innerHTML = pmsg.length ? "⚠ " + pmsg.map(esc).join(" · ") + "<br><small>تقدر تحفظ عادي — ده تنبيه بس.</small>" : "";
-      pwn.hidden = !pmsg.length;
-    }
     var pw = document.getElementById("e-profit-wrap"), pf = document.getElementById("e-profit");
     var plab = document.getElementById("e-profit-lab");
     var plabel = est ? "صافي الربح المتوقع" : "صافي ربح الأوردر";
@@ -13680,12 +13450,6 @@
       // أول ما اسم شركة الشحن يتكتب في خانة فاضية → التحصيل عن طريقها
       if(f === "shipCo" && !squish(prev || "") && squish(v)) autoPayViaShip();
       if(f === "partyId"){ suggestShipping(); shipHint(); }
-      // أوردر قديم بيتعدّل: شحن العميل المتسجّل (حتى لو ببلاش) ما بيتلمسش
-      if(f === "shipOut" && pol().shipFollow && !draft.selfDel && !editing.sales &&
-         (!String(draft.shipIn || "").trim() || String(draft.shipIn) === shipInAutoVal)){
-        draft.shipIn = v; shipInAutoVal = String(v);
-        var sie = SD.querySelector("[data-f='shipIn']:not([data-li])"); if(sie) sie.value = v;
-      }
       if(f === "shipIn" || f === "shipOut") shipHint();
       if(f === "payVia" || f === "paid" || f === "note") syncMore();
     }
@@ -13803,19 +13567,6 @@
     syncDelMode(); shipHint(); syncMore(); updateEntryCalc();
   });
 
-  /* أسعار شركة الشحن الافتراضية للمنطقة — بتتستعمل بس في أول أوردر لمحافظة
-     (بعد كده السيستم بيتعلّم من آخر أوردر لنفس المحافظة). */
-  var SHIP_DEF = [
-    [75,  ["القاهرة","الجيزة"]],
-    [95,  ["الإسكندرية","البحيرة","كفر الشيخ","الدقهلية","دمياط","الشرقية","الغربية","المنوفية","القليوبية","بورسعيد","الإسماعيلية","السويس"]],
-    [105, ["الفيوم","بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان"]],
-    [150, ["شمال سيناء","جنوب سيناء","البحر الأحمر","الوادي الجديد","مطروح"]]
-  ];
-  function shipDefault(gov){
-    var g = squish(gov), hit = SHIP_DEF.find(function(z){ return z[1].indexOf(g) >= 0; });
-    return hit ? hit[0] : 0;
-  }
-  var shipInAutoVal = null;     // آخر رقم «شحن على العميل» اتكتب لوحده — طول ما هو زي ما هو بيمشي ورا شحن الشركة
   function suggestShipping(){
     if(draft.selfDel) return;              // بتوصّله بنفسك — مفيش شركة تتقترح
     if(suggestFor === draft.partyId) return;
@@ -13828,37 +13579,20 @@
       var q = db.parties.find(function(y){ return y.id===x.partyId; });
       return q && q.gov === p.gov && !isCancelled(x) && squish(x.shipCo);
     }).sort(byDate)[0];
-    var follow = !!pol().shipFollow;
-    /* أول أوردر للمحافظة دي: مفيش أوردر قديم نتعلّم منه، فبنكتب سعر
-       شركة الشحن الافتراضي للمنطقة (بس لو السياسة شغالة) */
-    if(!last){
-      var dflt = follow ? shipDefault(p.gov) : 0;
-      if(!dflt || draft.shipOut) return;
-      draft.shipOut = dflt;
-      if(!draft.shipIn){ draft.shipIn = dflt; shipInAutoVal = String(dflt); }
-      ["shipIn","shipOut"].forEach(function(f){
-        var el = SD.querySelector("[data-f='"+f+"']:not([data-li])"); if(el) el.value = draft[f]; });
-      if(note){ note.textContent = "أول أوردر لـ" + p.gov + ": الشحن من أسعار المنطقة الافتراضية (" + money(dflt) +
-        ") — العميل بيدفع زي اللي بتدفعه. غيّره لو مختلف."; note.hidden = false; }
-      shipHint();
-      return;
-    }
+    if(!last) return;
     // السطر ده لازم يقول اللي اتملّى فعلاً بس، مش كل اللي في آخر أوردر
     var filled = [];
     if(!squish(draft.shipCo || "")){
       draft.shipCo = last.shipCo; filled.push(squish(last.shipCo));
       autoPayViaShip();
     }
+    if(!draft.shipIn && (Number(last.shipIn)||0)){
+      draft.shipIn = last.shipIn;
+      filled.push("على العميل " + money(shipIn(last)));
+    }
     if(!draft.shipOut && (Number(last.shipOut)||0)){
       draft.shipOut = last.shipOut;
       filled.push("للشركة " + money(shipOut(last)));
-    }
-    // سياسة التسعير: العميل بيدفع اللي بتدفعه لشركة الشحن — مش اللي اتاخد منه آخر مرة
-    var inV = follow && (Number(draft.shipOut)||0) ? draft.shipOut : last.shipIn;
-    if(!draft.shipIn && (Number(inV)||0)){
-      draft.shipIn = inV;
-      if(follow) shipInAutoVal = String(inV);
-      filled.unshift("على العميل " + money(Number(inV)||0));
     }
     ["shipCo","shipIn","shipOut"].forEach(function(f){
       var el = SD.querySelector("[data-f='"+f+"']:not([data-li])");
