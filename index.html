@@ -1768,6 +1768,35 @@
   }
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  /* ===== ماشي إزاي؟ (v121) ===== */
+  .co-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-3)}
+  .co-head h2{margin:0} .co-head .quick{margin:0}
+  .co-vd{display:flex;gap:14px;align-items:center;border-radius:var(--radius);padding:14px 16px;margin-bottom:var(--sp-3);border:1px solid var(--line);background:var(--card)}
+  .co-vd.ok{border-color:rgba(50,123,99,.35);background:rgba(50,123,99,.08)} .co-vd.wr{border-color:rgba(138,98,18,.35);background:rgba(138,98,18,.08)}
+  .co-vd.bd{border-color:rgba(154,19,51,.35);background:rgba(154,19,51,.07)}
+  .co-ic{font-size:28px;line-height:1} .co-vt b{display:block;font-size:var(--fs-5)} .co-vt span{color:var(--ink-soft);font-size:var(--fs-2)}
+  .co-exp{margin-inline-start:auto;text-align:center;background:var(--card);border-radius:var(--r-sm);padding:8px 14px;border:1px solid var(--line)}
+  .co-exp small{display:block;color:var(--ink-soft);font-size:11px} .co-exp b{font-size:var(--fs-5)}
+  .co-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+  .co-t{position:relative;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;background:var(--card)}
+  .co-t small{display:block;color:var(--ink-soft);font-size:var(--fs-1)} .co-t b{display:block;font-size:var(--fs-5);margin:2px 0}
+  .co-sub{display:block;font-size:var(--fs-1);color:var(--ink-soft);line-height:1.5}
+  .co-st{position:absolute;top:9px;inset-inline-end:10px;font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px}
+  .co-t.ok .co-st{background:rgba(50,123,99,.14);color:var(--gain)} .co-t.wr .co-st{background:rgba(138,98,18,.14);color:var(--warn)}
+  .co-t.bd .co-st{background:rgba(154,19,51,.12);color:var(--due)} .co-t.na .co-st{background:var(--teal-soft);color:var(--ink-soft)}
+  .co-t.bd{border-color:rgba(154,19,51,.35)} .co-t.wr{border-color:rgba(138,98,18,.35)}
+  .co-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)} .co-two .panel h3{margin-top:0}
+  .co-li{margin:0;padding:7px 0;border-top:1px dashed var(--line);line-height:1.7} .co-li:first-of-type{border-top:0}
+  .co-act{display:block;font-size:var(--fs-2);color:var(--teal);font-weight:600}
+  .co-todo{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+  .co-td{text-align:start;border:0;border-radius:var(--r-sm);padding:10px;background:var(--teal-soft);color:var(--ink);font:inherit;font-size:var(--fs-2);line-height:1.6;cursor:pointer}
+  .co-td b{display:block;font-size:var(--fs-3)} .co-td span{display:block;color:var(--ink-soft)} .co-td em{display:block;font-style:normal;margin-top:4px;color:var(--teal);font-weight:700}
+  .co-bal{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .co-p{background:var(--teal-soft);border-radius:var(--r-sm);padding:6px 10px} .co-p small{display:block;color:var(--ink-soft);font-size:11px}
+  .co-op{color:var(--ink-soft);font-size:var(--fs-4)}
+  .co-okb{background:rgba(50,123,99,.14);color:var(--gain);border-radius:99px;padding:2px 10px;font-weight:700;font-size:var(--fs-1)}
+  .co-badb{border:0;background:rgba(154,19,51,.12);color:var(--due);border-radius:99px;padding:2px 10px;font:inherit;font-weight:700;font-size:var(--fs-1);cursor:pointer}
+  @media (max-width:760px){ .co-two{grid-template-columns:1fr} .co-vd{flex-wrap:wrap} .co-exp{margin-inline-start:0;width:100%} }
 </style>
 </head>
 <body>
@@ -1835,6 +1864,7 @@
     <button data-tab="parties" data-grp="more">العملاء والموردين</button>
     <button data-tab="rep" data-grp="more">تقارير</button>
     <button data-tab="log" data-grp="more">سجل الحركات</button>
+    <button data-tab="coach" data-grp="more">ماشي إزاي؟</button>
     <button data-tab="backup" data-grp="more">الإعدادات</button>
   </div>
 </nav>
@@ -2954,6 +2984,22 @@
   <div class="tbl-wrap"><table id="t-log"></table></div>
 </section>
 
+<!-- v121: ماشي إزاي؟ — تقييم الشغل من الحركات نفسها، بيتحدّث بعد كل حركة -->
+<section id="tab-coach" hidden>
+  <div class="co-head"><h2>ماشي إزاي؟<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+    <div class="quick" id="co-per" role="group" aria-label="الفترة">
+      <button type="button" data-coper="7">آخر 7 أيام</button>
+      <button type="button" data-coper="30">آخر 30 يوم</button>
+      <button type="button" data-coper="all" class="on">من البداية</button>
+    </div></div>
+  <p class="hint" data-infotxt hidden>الشاشة دي بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وتعمل إيه. بتتحدّث لوحدها بعد كل حركة. المسطرة: <strong>هامش البضاعة</strong> ✓ 40% أو أكتر · ✗ أقل من 30% — <strong>الإعلان على الأوردر</strong> (من مصاريف الخزنة اللي بيانها فيه «اعلان») ✓ أقل من تلت ربح بضاعة الأوردر · ✗ أكتر من النص — <strong>الشحن</strong> ✓ العميل بيدفع زي الشركة · ✗ أكتر من 25 من جيبك في الأوردر — <strong>الرفض والإلغاء</strong> بيتحسب من 5 أوردرات خلصوا: ✓ أقل من 10% · ✗ 20% أو أكتر.</p>
+  <div id="co-verdict"></div>
+  <div class="panel"><h3 style="margin-top:0">مؤشراتك</h3><div class="co-tiles" id="co-tiles"></div></div>
+  <div class="co-two"><div class="panel" id="co-good"></div><div class="panel" id="co-bad"></div></div>
+  <div class="panel"><h3 style="margin-top:0">اعمل إيه النهارده</h3><div class="co-todo" id="co-todo"></div></div>
+  <div class="panel"><h3 style="margin-top:0">فلوسك فين <span id="co-bal-badge"></span></h3><div class="co-bal" id="co-bal"></div></div>
+</section>
+
 <!-- نسخة احتياطية -->
 <section id="tab-backup" hidden>
   <h2>الإعدادات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
@@ -3333,8 +3379,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "120";
+  var VERSION = "121";
   var CHANGELOG = [
+    { v:"121", d:"2026-10-05", items:[
+      "شاشة جديدة «ماشي إزاي؟» في «المزيد» بعد سجل الحركات — بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وبتتحدّث لوحدها بعد كل حركة",
+      "فوق: الحكم في سطر (🟢 بتكسب · 🟡 كويس بس لسه مش بتكسب · 🔴 بتخسر) وصافي الربح لو الأوردرات اللي ماشية اتسلّمت — نفس رقم «قايمة الدخل المتوقعة»",
+      "٨ مؤشرات بعلامة ✓ ⚠ ✗: الطلب · حجم الأوردر · هامش البضاعة · الإعلان على الأوردر (من مصاريف الخزنة اللي بيانها فيه «اعلان») · الشحن · الرفض والإلغاء · الكاش · البضاعة",
+      "«اللي ماشي كويس» و«اللي محتاج يتظبط» وتحت كل واحدة تعمل إيه · «اعمل إيه النهارده» بزرار للشاشة · «فلوسك فين» بنفس أرقام توفيق الميزانية",
+      "الفترة من فوق: آخر 7 أيام · آخر 30 يوم · من البداية"
+    ]},
     { v:"120", d:"2026-10-04", items:[
       "شاشة التسعير رجعت زي ما كانت في الإصدار 117 — اتشال كل اللي اتعمل فيها في 118 و119 (سياسة التسعير، السعر المطلوب والتعادل، مصاريف الأوردر، الجدول الجديد، وتنبيهات الأوردر)",
       "الشحن على العميل رجع يتملي من آخر أوردر لنفس المحافظة زي الأول",
@@ -3981,7 +4034,7 @@
     ["dash","لوحة المتابعة"],["capital","رأس المال"],["cash","الخزنة"],
     ["purch","المشتريات"],["items","الأصناف"],["price","التسعير"],["inv","المخزون"],
     ["sales","المبيعات"],["ship","شركات الشحن"],["parties","العملاء والموردين"],
-    ["rep","تقارير"],["log","سجل الحركات"],["backup","الإعدادات"]
+    ["rep","تقارير"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"]
   ];
   var TAB_NAME = {}; TABS.forEach(function(t){ TAB_NAME[t[0]] = t[1]; });
   var authUser = null;                  // المستخدم الداخل دلوقتي
@@ -3996,11 +4049,11 @@
   /* شاشة جديدة اتضافت بعد ما المستخدمين اتعملوا: صلاحياتهم المتخزّنة
      مافيهاش اسمها، فكانوا هيلاقوها مختفية من غير سبب. بنورّثها من
      الشاشة اللي هي جزء منها. */
-  var TAB_FROM = { price:"items" };
+  var TAB_FROM = { price:"items", coach:"rep" };
   /* شاشات كلها تكلفة وربح من أول سطر لآخر سطر — مينفعش تتفتح لحد
      الأرباح مخفية عنه، حتى لو التبويب متعلّم له. إخفاء أعمدة واحد
      واحد بيسيب تسريب أول ما يتضاف عمود جديد. */
-  var TAB_MONEY = { price:1 };
+  var TAB_MONEY = { price:1, coach:1 };
   function canTab(t){
     if(!lockOn()) return true;
     var u = curUser();
@@ -12847,6 +12900,267 @@
      مبيعات بآلاف الصفوف مخفي ورا. على موبايل متوسط ده كان بيوصل
      لـ١٨ ثانية للحركة الواحدة. دلوقتي بنرسم الشاشة المفتوحة بس،
      والباقي بيتعلّم "محتاج رسم" وبيترسم أول ما تفتحه. */
+  /* ================= ماشي إزاي؟ (v121) =================
+     تقييم الشغل من الحركات نفسها — مفيش ولا رقم بيتكتب بإيد، وبيتحدّث مع
+     أي حركة (renderAll بيعلّم الشاشة محتاجة رسم). الأرقام من نفس الدوال
+     اللي بتحسب التقارير والرئيسية: periodStats · expProfit · stageLists ·
+     cashBox · walletsTotal · netAssets · totalEquity — فالرقم هنا = الرقم هناك.
+     المسطرة (✓ ⚠ ✗) ثابتة ومكتوبة جنب كل مؤشر:
+       هامش البضاعة: ✓ 40% أو أكتر · ✗ أقل من 30%
+       الإعلان على الأوردر: ✓ أقل من تلت ربح بضاعة الأوردر · ✗ أكتر من النص
+       الشحن: ✓ العميل بيدفع زي الشركة · ✗ أكتر من 25 من جيبك في الأوردر
+       الرفض: بيتحسب من 5 أوردرات خلصوا · ✓ أقل من 10% · ✗ 20% أو أكتر */
+  var coPer = "all";
+  var CO_SHIP_BAD = 25, CO_STOCK_DAYS = 30;
+  function isAdExp(c){ return c.type === "expense" && /[اإأ]علان|ممول|sponsor/i.test(String(c.note || "")); }
+  function coShift(d, n){ var x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+  function coDiff(a, b){ return Math.round((new Date(b + "T00:00:00Z") - new Date(a + "T00:00:00Z")) / 864e5); }
+  function coRange(){
+    if(coPer === "all") return null;
+    var n = Number(coPer), to = today();
+    return { from:coShift(to, -(n - 1)), to:to };
+  }
+  // عدد أيام الفترة: «من البداية» = من أول أوردر لحد النهارده
+  function coDays(r){
+    if(r) return coDiff(r.from, r.to) + 1;
+    var first = live("sales").reduce(function(a, s){ return s.date && (!a || s.date < a) ? s.date : a; }, "");
+    return first ? Math.max(1, coDiff(first, today()) + 1) : 1;
+  }
+  // البضاعة في الأوردر: اللي اتسلّم بالفعلي (بعد المرتجع)، واللي لسه ماشي بالمتوقع
+  function coGoods(s){
+    if(isDelivered(s)){
+      var g = 0, c = 0;
+      SL(s).forEach(function(l){ var q = lineSold(l, s); g += q * (Number(l.price)||0); c += q * lineCost(l); });
+      return { goods:g, cost:c };
+    }
+    var e = expProfit(s); return { goods:e.goods, cost:e.cost };
+  }
+  function coStats(r){
+    var all = live("sales").filter(function(s){ return inRange(s.date, r); });
+    var ok = all.filter(function(s){ return !isCancelled(s); });
+    var S = { n:ok.length, pcs:0, goods:0, cost:0, gap:0, shipN:0, freeShip:0, lowShip:0, days:coDays(r) };
+    ok.forEach(function(s){
+      SL(s).forEach(function(l){ S.pcs += Math.max(0, Number(l.qty)||0); });
+      var g = coGoods(s); S.goods += g.goods; S.cost += g.cost;
+    });
+    /* الشحن: كل أوردر خرج فعلاً (اتبعت أو خلص) — والمرفوض والملغي داخلين، لأنهم
+       أكبر خسارة شحن. الأوردر اللي لسه ما اتشحنش بره حتى لو رقم الشحن متكتب. */
+    all.forEach(function(s){
+      if(s.selfDel || !(shipOut(s) > 0) || !(shipCounts(s) || squish(s.shipCode || "") || s.shippedAt)) return;
+      S.shipN++; S.gap += shipOut(s) - shipIn(s);
+      if(shipIn(s) <= 0) S.freeShip++; else if(shipIn(s) < shipOut(s)) S.lowShip++;
+    });
+    S.ads = live("cash").filter(function(c){ return isAdExp(c) && inRange(c.date, r); })
+      .reduce(function(a, c){ return a + (Number(c.amount)||0); }, 0);
+    var done = all.filter(function(s){ return isDelivered(s) || isCancelled(s); });
+    S.done = done.length; S.refused = done.filter(isCancelled).length;
+    S.perDay = S.n / S.days;
+    S.gp = S.goods - S.cost;
+    S.margin = S.goods > 0 ? S.gp / S.goods : null;
+    S.gpOrder = S.n ? S.gp / S.n : 0;
+    S.adOrder = S.n && S.ads > 0 ? S.ads / S.n : null;
+    S.gapOrder = S.shipN ? S.gap / S.shipN : 0;
+    return S;
+  }
+  /* الأصناف: معدّل الطلب (قطع في اليوم من الأوردرات اللي مش ملغية) والمتاح —
+     منها «واقف» (بيكفي أكتر من ٣٠ يوم، أو ما اتطلبش خالص من أسبوع شراء)
+     و«قرّب يخلص وبيتباع». الفترة ثابتة: آخر ١٤ يوم أو من أول أوردر لو أقصر. */
+  function coItems(){
+    var to = today(), r = { from:coShift(to, -13), to:to }, days = Math.min(14, coDays(null));
+    var ord = {}; live("sales").forEach(function(s){
+      if(isCancelled(s) || !inRange(s.date, r)) return;
+      SL(s).forEach(function(l){ if(l.itemId) ord[l.itemId] = (ord[l.itemId]||0) + Math.max(0, Number(l.qty)||0); });
+    });
+    return live("items").map(function(it){
+      var buys = live("purchases").filter(function(p){ return p.itemId === it.id; });
+      var first = buys.reduce(function(a, p){ return p.date && (!a || p.date < a) ? p.date : a; }, "");
+      var free = Math.max(0, freeOf(it.id)), stock = Math.max(0, stockOf(it.id)), q = ord[it.id] || 0;
+      var rate = q / days, ac = avgCost(it.id);
+      var pp = (Number(it.price)||0) > 0 && ac > 0 ? (Number(it.price)||0) - ac : null;
+      return { it:it, q:q, rate:rate, free:free, value:stock * ac, pp:pp,
+               cover: rate > 0 ? free / rate : null,
+               idle: !q && free > 0 && first && coDiff(first, to) >= 7,
+               slow: q > 0 && free > 0 && free / rate > CO_STOCK_DAYS && free * ac >= 1000,
+               short: q >= 5 && free <= 3 };
+    });
+  }
+  function coSet(id, html){ var el = document.getElementById(id); if(el) el.innerHTML = html; }
+  function renderCoach(){
+    var r = coRange(), S = coStats(r), IT = coItems();
+    Array.prototype.forEach.call(document.querySelectorAll("#co-per [data-coper]"), function(b){ b.classList.toggle("on", b.dataset.coper === coPer); });
+    var T = [], good = [], bad = [];
+    var tile = function(st, stTxt, label, val, sub){ T.push({ st:st, stTxt:stTxt, label:label, val:val, sub:sub }); };
+    var top = IT.filter(function(x){ return x.pp !== null; }).sort(function(a, b){ return b.pp - a.pp; });
+    var topNames = top.slice(0, 2).map(function(x){ return x.it.name; });
+
+    // ١ الطلب — ومقارنة بالفترة اللي قبلها لو الفترة محددة
+    var prev = null;
+    if(r){ var n = coDays(r); prev = coStats({ from:coShift(r.from, -n), to:coShift(r.from, -1) }); }
+    var down = prev && prev.n >= 3 && S.perDay < prev.perDay * 0.75;
+    if(!S.n) tile("bd", "✗ مفيش", "الطلب", "0 أوردر", "مفيش أوردرات في الفترة دي");
+    else tile(down ? "wr" : "ok", down ? "⚠ قل" : "✓ كويس", "الطلب",
+      qty(Math.round(S.perDay * 10) / 10) + " أوردر/يوم",
+      qty(S.n) + " أوردر في " + qty(S.days) + " يوم" + (prev && prev.n ? " · قبلها " + qty(Math.round(prev.perDay * 10) / 10) + "/يوم" : ""));
+    if(S.n && !down) good.push("فيه طلب: " + qty(Math.round(S.perDay * 10) / 10) + " أوردر في اليوم.");
+    if(down) bad.push(["الأوردرات قلّت عن الفترة اللي قبلها (" + qty(Math.round(S.perDay * 10) / 10) + " بدل " + qty(Math.round(prev.perDay * 10) / 10) + " في اليوم).",
+                       "زوّد الإعلان على الأصناف اللي بتكسب" + (topNames.length ? " (" + topNames.join(" · ") + ")" : "")]);
+
+    // ٢ حجم الأوردر
+    if(S.n){
+      var ppo = S.pcs / S.n, big = ppo >= 1.5;
+      tile(big ? "ok" : "wr", big ? "✓ كويس" : "⚠ صغير", "حجم الأوردر",
+        qty(Math.round(ppo * 10) / 10) + " قطعة · " + money(S.goods / S.n), "متوسط القطع وقيمة البضاعة في الأوردر");
+      if(big) good.push("العميل بياخد " + qty(Math.round(ppo * 10) / 10) + " قطعة في المتوسط.");
+      else bad.push(["أغلب الأوردرات قطعة واحدة — والمصاريف على الأوردر مش على القطعة.", "اعرض على العميل قطعة تانية مع الأوردر"]);
+    }
+
+    // ٣ هامش البضاعة
+    if(S.margin !== null){
+      var mp = Math.round(S.margin * 100), mst = S.margin >= 0.4 ? "ok" : (S.margin >= 0.3 ? "wr" : "bd");
+      tile(mst, mst === "ok" ? "✓ كويس" : (mst === "wr" ? "⚠ ضعيف" : "✗ قليل"), "هامش البضاعة", mp + "%", "من سعر البيع · الهدف 40% أو أكتر");
+      if(mst === "ok") good.push("هامش البضاعة " + mp + "%" + (top.length ? " — أكسب صنف: " + top[0].it.name + " (" + qty(Math.round(top[0].pp)) + " في القطعة)" : "") + ".");
+      else bad.push(["هامش البضاعة " + mp + "% بس.", "راجع أسعار الأصناف اللي ربحها أقل" +
+        (top.length > 1 ? " (" + top.slice(-2).map(function(x){ return x.it.name; }).join(" · ") + ")" : "")]);
+    }
+
+    // ٤ الإعلان على الأوردر — من مصاريف الخزنة اللي بيانها فيه «اعلان»
+    if(S.adOrder === null) tile("na", "مش متسجّل", "الإعلان على الأوردر", "—", "اكتب كلمة «اعلان» في بيان مصروف الإعلانات في الخزنة");
+    else if(!(S.gpOrder > 0)){
+      // البضاعة نفسها مش بتكسب — مفيش نسبة تتحسب ولا حد للحملة
+      tile("bd", "✗ عالي", "الإعلان على الأوردر", money(S.adOrder), "إعلانات " + money(S.ads) + " ÷ " + qty(S.n) + " أوردر · والبضاعة نفسها مش بتكسب");
+      bad.push(["الإعلان بيتكلّف " + money(S.adOrder) + " على الأوردر والبضاعة نفسها مش بتكسب.", "راجع أسعار البيع الأول، وبعدين الإعلان"]);
+    } else {
+      var share = S.adOrder / S.gpOrder, ast = share <= 1/3 ? "ok" : (share <= 0.5 ? "wr" : "bd");
+      tile(ast, ast === "ok" ? "✓ كويس" : (ast === "wr" ? "⚠ عالي" : "✗ عالي"), "الإعلان على الأوردر", money(S.adOrder),
+        "إعلانات " + money(S.ads) + " ÷ " + qty(S.n) + " أوردر · بياكل " + Math.round(share * 100) + "% من ربح بضاعة الأوردر (" + money(S.gpOrder) + ")");
+      if(ast === "ok") good.push("الإعلان بيتكلّف " + money(S.adOrder) + " على الأوردر — في الحدود.");
+      else bad.push(["الإعلان بيتكلّف " + money(S.adOrder) + " على الأوردر — بياكل " + Math.round(share * 100) + "% من ربح البضاعة.",
+        "وقّف الحملة اللي الأوردر منها فوق " + qty(Math.round(S.gpOrder / 3)) + (topNames.length ? "، وركّز على " + topNames.join(" · ") : "")]);
+    }
+
+    // ٥ الشحن من جيبك
+    if(S.shipN){
+      var gst = S.gapOrder <= 0.005 ? "ok" : (S.gapOrder <= CO_SHIP_BAD ? "wr" : "bd");
+      tile(gst, gst === "ok" ? "✓ متغطّي" : (gst === "wr" ? "⚠ من جيبك" : "✗ من جيبك"), "الشحن",
+        gst === "ok" ? "متغطّي" : "−" + money(S.gapOrder) + " للأوردر",
+        gst === "ok" ? "العميل بيدفع زي الشركة أو أكتر" : money(S.gap) + " في " + qty(S.shipN) + " أوردر · العميل بيدفع أقل من الشركة");
+      if(gst === "ok") good.push("الشحن متغطّي من العميل.");
+      else bad.push([money(S.gap) + " شحن طلعوا من جيبك" + (S.freeShip || S.lowShip ? " (" +
+          [S.freeShip ? qty(S.freeShip) + " أوردر العميل ما دفعش فيهم شحن" : "", S.lowShip ? qty(S.lowShip) + " أقل من الشركة" : ""].filter(Boolean).join(" و") + ")" : "") + ".",
+        "خلّي العميل يدفع الشحن زي الشركة، ووقّف الشحن المجاني"]);
+    }
+
+    // ٦ الرفض والإلغاء — بعد ٥ أوردرات خلصوا
+    if(S.done < 5) tile("na", "لسه بدري", "الرفض والإلغاء", qty(S.refused) + " من " + qty(S.done), "بيتحسب لما 5 أوردرات على الأقل يخلصوا");
+    else {
+      var rr = S.refused / S.done, rst = rr < 0.1 ? "ok" : (rr < 0.2 ? "wr" : "bd");
+      tile(rst, rst === "ok" ? "✓ قليل" : (rst === "wr" ? "⚠ عالي" : "✗ عالي"), "الرفض والإلغاء", Math.round(rr * 100) + "%", qty(S.refused) + " من " + qty(S.done) + " أوردر خلصوا");
+      if(rst === "ok") good.push("الرفض والإلغاء " + Math.round(rr * 100) + "% بس.");
+      else bad.push([Math.round(rr * 100) + "% من الأوردرات اترفضت أو اتلغت — كل واحد بيكلّفك إعلان وشحن من غير إيراد.", "أكّد مع العميل بالتليفون قبل الشحن"]);
+    }
+
+    // ٧ الكاش
+    var cash = cashBox(), cap = totalCapital();
+    tile(cash >= 0 ? "ok" : "bd", cash >= 0 ? "✓ في أمان" : "✗ بالسالب", "الكاش", money(cash),
+      cap > 0 ? Math.round(cash / cap * 100) + "% من رأس المال في الخزنة" : "رصيد الخزنة");
+    if(cash > 0) good.push("الفلوس في أمان: " + money(cash) + " في الخزنة.");
+    if(cash < 0) bad.push(["الخزنة بالسالب " + money(-cash) + ".", "سجّل الفلوس اللي دخلت أو قلّل المشتريات لحد ما تحصّل"]);
+
+    // ٨ البضاعة — تركيز في صنف واحد أو أصناف واقفة
+    var sv = IT.reduce(function(a, x){ return a + x.value; }, 0);
+    var byVal = IT.slice().sort(function(a, b){ return b.value - a.value; }), big1 = byVal[0];
+    // صنف واقف بيتحسب لو حابس فلوس تفرق: 1,000 أو أكتر و10% من البضاعة على الأقل
+    IT.forEach(function(x){ if(x.slow && x.free * avgCost(x.it.id) < sv * 0.1) x.slow = false; });
+    var conc = sv > 0 && big1 && big1.value / sv > 0.35, stuck = IT.filter(function(x){ return x.slow || x.idle; });
+    tile(conc || stuck.length ? "wr" : "ok", conc || stuck.length ? "⚠ مش متوزّعة" : "✓ كويس", "البضاعة", money(sv),
+      conc ? Math.round(big1.value / sv * 100) + "% منها في صنف واحد (" + big1.it.name + ")"
+           : (stuck.length ? qty(stuck.length) + " صنف واقف" : "بالتكلفة"));
+    IT.filter(function(x){ return x.slow; }).sort(function(a, b){ return b.value - a.value; }).slice(0, 2).forEach(function(x){
+      bad.push([x.it.name + ": " + qty(x.free) + " قطعة متاحة (" + money(x.free * avgCost(x.it.id)) + ") — بتكفي حوالي " + qty(Math.round(x.cover)) + " يوم بالمعدل ده.", "ما تشتريش منه تاني لحد ما يتحرك"]);
+    });
+    var idle = IT.filter(function(x){ return x.idle; }).map(function(x){ return x.it.name; });
+    if(idle.length) bad.push([idle.join(" و") + ": ولا قطعة اتطلبت في آخر أسبوعين.", "اعمل إعلان أو عرض عليهم"]);
+
+    // الحكم — زي «قايمة الدخل المتوقعة» في التقارير بالظبط
+    var c = periodStats(r), en = 0;
+    c.list.forEach(function(s){ if(!isDelivered(s) && !isCancelled(s)) en += expProfit(s).net; });
+    var tn = c.net + en, okBase = S.n > 0 && S.margin !== null && S.margin >= 0.3;
+    var badNames = T.filter(function(t){ return t.st === "bd"; }).map(function(t){ return t.label; });
+    var vd = !S.n ? { ic:"⚪", cls:"na", t:"مفيش أوردرات في الفترة دي", s:"اختار فترة أطول من فوق." }
+      : tn >= 0 ? { ic:"🟢", cls:"ok", t:"ماشي كويس وبتكسب", s:"الأرقام كويسة — كمّل وراقب المؤشرات." }
+      : okBase ? { ic:"🟡", cls:"wr", t:(coPer === "all" && S.days <= 30 ? "بداية كويسة — بس لسه مش بتكسب" : "الطلب والهامش كويسين — بس لسه مش بتكسب"),
+                   s: badNames.length ? badNames.join(" و") + " بياكلوا الربح." : "المصاريف لسه أكبر من الربح." }
+      : { ic:"🔴", cls:"bd", t:"بتخسر", s:"شوف «اللي محتاج يتظبط» تحت." };
+    coSet("co-verdict", "<div class='co-vd " + vd.cls + "'><span class='co-ic' aria-hidden='true'>" + vd.ic + "</span>" +
+      "<div class='co-vt'><b>" + esc(vd.t) + "</b><span>" + esc(vd.s) + "</span></div>" +
+      (S.n ? "<div class='co-exp money-only'><small>" + (en ? "لو الأوردرات اللي ماشية اتسلّمت" : "صافي الربح في الفترة") + "</small>" +
+        "<b class='num " + (tn >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(tn)) + "</b><small>بعد كل المصاريف المسجّلة</small></div>" : "") + "</div>");
+    coSet("co-tiles", T.map(function(t){
+      return "<div class='co-t " + t.st + "'><span class='co-st'>" + esc(t.stTxt) + "</span><small>" + esc(t.label) + "</small>" +
+        "<b class='num'>" + esc(t.val) + "</b><span class='co-sub'>" + esc(t.sub) + "</span></div>";
+    }).join(""));
+    coSet("co-good", "<h3 class='v-gain'>✓ اللي ماشي كويس</h3>" + (good.length
+      ? good.map(function(x){ return "<p class='co-li'>" + esc(x) + "</p>"; }).join("") : "<p class='co-li hint'>لسه مفيش — كمّل.</p>"));
+    coSet("co-bad", "<h3 class='v-due'>⚠ اللي محتاج يتظبط</h3>" + (bad.length
+      ? bad.map(function(x){ return "<p class='co-li'>" + esc(x[0]) + "<span class='co-act'>← " + esc(x[1]) + "</span></p>"; }).join("")
+      : "<p class='co-li hint'>مفيش حاجة — كله في الحدود ✓</p>"));
+    renderCoachTodo(IT);
+    renderCoachBal();
+  }
+  // اعمل إيه النهارده — الوضع دلوقتي، مش الفترة
+  function renderCoachTodo(IT){
+    var D = [], g = stageLists();
+    // زرار لشاشة مش من حقك ما يظهرش أصلاً (نفس قاعدة الرئيسية)
+    var add = function(t, s, go, lab){ if(!canTab(go.split("|")[0])) return; D.push("<button type='button' class='co-td' data-cgo='" + esc(go) + "'><b>" + esc(t) + "</b><span>" + esc(s) + "</span><em>" + esc(lab) + " ←</em></button>"); };
+    if(g.st[1].length){
+      var bigU = g.st[1].slice().sort(function(a, b){ return saleTotal(b) - saleTotal(a); })[0];
+      var pc = SL(bigU).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
+      if(g.st[1].length === 1) add("اشحن أوردر #" + (bigU.no || "—"), qty(pc) + " قطعة · " + money(saleTotal(bigU)) + " — من " + dShort(bigU.date), "sales|1", "الأوردرات");
+      else add("اشحن " + qty(g.st[1].length) + " أوردر", "أكبرهم #" + (bigU.no || "—") + " (" + money(saleTotal(bigU)) + ") من " + dShort(bigU.date), "sales|1", "الأوردرات");
+    }
+    var byCo = {};
+    g.st[3].forEach(function(x){ var c = squish(x.shipCo); (byCo[c] = byCo[c] || []).push(x); });
+    Object.keys(byCo).forEach(function(c){
+      var sum = byCo[c].reduce(function(a, x){ return a + shipPend(x).left; }, 0);
+      if(sum > 0.009) add("حصّل " + money(sum) + " من " + (c || "شركة الشحن"), "من " + qty(byCo[c].length) + " أوردر اتسلّموا", "sales|3", "التحصيل");
+    });
+    var stale = g.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; })
+      .sort(function(a, b){ return daysSince(b.date) - daysSince(a.date); });
+    if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + qty(daysSince(stale[0].date)) + " أيام", "sales|2", "الأوردرات");
+    if(heldOpen().length) add("استلم المرتجع", qty(heldOpenQty()) + " قطعة عند شركة الشحن", "sales|4", "المرتجع");
+    IT.filter(function(x){ return x.short; }).sort(function(a, b){ return b.q - a.q; }).slice(0, 2).forEach(function(x){
+      add("اطلب " + x.it.name + " تاني", "اتطلب منه " + qty(x.q) + " في آخر أسبوعين وفاضل " + qty(x.free), "purch", "فاتورة شراء");
+    });
+    var slow = IT.filter(function(x){ return x.slow; }).sort(function(a, b){ return b.value - a.value; })[0];
+    if(slow) add("ما تشتريش " + slow.it.name, "عندك " + qty(slow.free) + " قطعة = حوالي " + qty(Math.round(slow.cover)) + " يوم بيع بالمعدل ده", "inv", "المخزون");
+    coSet("co-todo", D.length ? D.slice(0, 6).join("") : "<p class='hint' style='margin:0'>مفيش حاجة مستعجلة النهارده ✓</p>");
+  }
+  // فلوسك فين — نفس أرقام «توفيق الميزانية» في رأس المال
+  function renderCoachBal(){
+    var a = netAssets(), e = totalEquity(), d = a - e, dues = reconDues(), w = walletsTotal(), sv = a - cashBox() - w - dues;
+    var P = function(l, v){ return "<span class='co-p'><small>" + esc(l) + "</small><b class='num'>" + esc(money(v)) + "</b></span>"; };
+    var parts = [P("الخزنة", cashBox()), P("بضاعة", sv)];
+    if(Math.abs(w) >= 0.01) parts.push(P("عند شركات الشحن", w));
+    if(Math.abs(dues) >= 0.01) parts.push(P("عند العملاء والموردين", dues));
+    var re = retainedEarnings();
+    coSet("co-bal-badge", Math.abs(d) < 0.01 ? "<span class='co-okb'>✓ الميزانية مظبوطة</span>"
+      : canTab("capital") ? "<button type='button' class='co-badb' data-cgo='capital'>⚠ فيه فرق " + esc(money(d)) + " — شوف رأس المال</button>"
+      : "<span class='co-badb'>⚠ فيه فرق " + esc(money(d)) + "</span>");
+    coSet("co-bal", parts.join("<span class='co-op'>+</span>") + "<span class='co-op'>=</span>" + P("كل اللي عندك", a) +
+      "<span class='co-op'>=</span>" + P("رأس المال " + money(totalCapital()) + (re < 0 ? " − الخسارة لحد النهارده" : " + الأرباح"), e));
+  }
+  document.getElementById("co-per").addEventListener("click", function(e){
+    var b = e.target.closest("[data-coper]"); if(!b) return;
+    coPer = b.dataset.coper; renderCoach();
+  });
+  document.getElementById("tab-coach").addEventListener("click", function(e){
+    var t = e.target.closest("[data-cgo]"); if(!t) return;
+    var q = t.dataset.cgo.split("|");
+    if(!canTab(q[0])){ toast("مالكش صلاحية الشاشة دي"); return; }
+    if(q[0] === "sales"){ goTab("sales"); setSView(q[1]); window.scrollTo(0, 0); return; }
+    goTab(q[0]);
+  });
+
   var TAB_RENDER = {
     dash:    function(){ syncPeriodUI(); renderHome(); renderKPIs(); renderStock();
                          renderLowStock(); renderShipping(); renderBalances(); },
@@ -12861,6 +13175,7 @@
     parties: function(){ renderParties(); renderStatement(); },
     rep:     function(){ renderReports(); },
     log:     function(){ renderLog(); },
+    coach:   function(){ renderCoach(); },
     backup:  function(){ foldSettings(); renderOpening(); renderLock(); renderSnoState(); renderUsers(); }
   };
   var dirtyTabs = {};          // تبويبات محتاجة رسم لما تتفتح
