@@ -1122,6 +1122,51 @@
   .sg-exp:hover{color:var(--teal)}
   #t-pis tr.pis-tot td{border-top:1px solid var(--line);background:var(--teal-soft)}
   #t-pis td.num{white-space:nowrap}
+  /* ═══ v123 — رسومات ═══ ألوان البنود متجرّبة لعمى الألوان (ΔE ≥ 9 بين أي اتنين جنب بعض)،
+     وكل بند ليه نفس اللون في كل الرسومات. الكلام دايماً بلون الكلام مش بلون البند. */
+  :root{ --s-goods:#2a78d6; --s-ship:#eb6834; --s-ads:#1baf7a; --s-pack:#eda100; --s-fixed:#e87ba4;
+          --vz-tot:#4A2545; --vz-tot-t:#fff; --vz-neg:#9A1333 }
+  /* الليلي: البرقوقي والنبيذي بيبقوا وردي فاتح — كانوا هيتلخبطوا مع «ثابت». الإجمالي رمادي بنفسجي والسالب أحمر صريح */
+  [data-theme="dark"]{ --s-goods:#3987e5; --s-ship:#d95926; --s-ads:#199e70; --s-pack:#c98500; --s-fixed:#d55181;
+          --vz-tot:#A08AA6; --vz-tot-t:#1d1720; --vz-neg:#e5534b }
+  .vz-card{position:relative}
+  .vz-hd{display:flex;align-items:flex-start;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-3)}
+  .vz-hd h3{margin:0 0 4px} .vz-lead{margin:0;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.7;max-width:640px}
+  .vz-seg{margin:0 0 0 0;margin-inline-start:auto}
+  .vz-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-4);overflow:hidden}
+  .vz-st{padding:9px 12px;border-inline-start:1px solid var(--line)} .vz-st:first-child{border-inline-start:0}
+  .vz-st small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .vz-st b{display:inline-block;font-size:var(--fs-6);font-weight:600;direction:ltr;unicode-bidi:isolate;margin:2px 0}
+  .vz-st em{display:block;font-style:normal;font-size:var(--fs-1);color:var(--ink-soft)}
+  .vz-plot{width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+  .vz-plot svg{display:block;direction:rtl} .vz-plot svg text{font-family:inherit}
+  .vz-empty{color:var(--ink-soft);padding:var(--sp-5) 0;text-align:center}
+  .vz-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:var(--fs-2);color:var(--ink-soft);margin-top:var(--sp-2)}
+  .vz-legend span{display:inline-flex;align-items:center;gap:6px} .vz-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .vz-legend b{color:var(--ink);font-weight:600;direction:ltr;unicode-bidi:isolate}
+  .vz-foot{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--line);font-size:var(--fs-1);color:var(--ink-soft)}
+  .vz-go{border:0;background:none;color:var(--teal);font:inherit;font-weight:700;cursor:pointer;padding:2px 0}
+  .vz-tip{position:fixed;z-index:60;pointer-events:none;background:#241E26;color:#fff;border-radius:var(--r-sm);padding:8px 11px;font-size:var(--fs-2);line-height:1.7;box-shadow:0 6px 18px rgba(0,0,0,.2);min-width:170px}
+  [data-theme="dark"] .vz-tip{background:#EDE7EF;color:#191419}
+  .vz-tip b{display:block;font-size:var(--fs-3)} .vz-tip .r{display:flex;justify-content:space-between;gap:14px} .vz-tip .r span:first-child{opacity:.75}
+  .vz-tip i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-end:6px}
+  .vz-tip .r span:last-child{direction:ltr;unicode-bidi:isolate}
+  .vz-goods{fill:var(--s-goods)} .vz-ship{fill:var(--s-ship)} .vz-ads{fill:var(--s-ads)} .vz-pack{fill:var(--s-pack)} .vz-fixed{fill:var(--s-fixed)}
+  .vz-tot{fill:var(--vz-tot)} .vz-sub{fill:var(--vz-tot);opacity:.72} .vz-neg{fill:var(--vz-neg)} .vz-tt{fill:var(--vz-tot-t)} .vz-band{fill:var(--s-ads);opacity:.08}
+  .vz-gl{stroke:var(--line);stroke-width:1} .vz-bl{stroke:var(--ink-soft);stroke-width:1.5} .vz-cn{stroke:var(--ink-soft);stroke-width:1;opacity:.6}
+  .vz-tx{fill:var(--ink)} .vz-ts{fill:var(--ink-soft)} .vz-td{fill:var(--due)} .vz-tg{fill:var(--gain)} .vz-tw{fill:#fff} .vz-tk{fill:#1d1720}
+  .vz-dl{stroke:var(--due)} .vz-dlf{fill:var(--due)} .vz-gn{stroke:var(--gain)} .vz-gnf{fill:var(--gain)}
+  .vz-oth{fill:var(--ink-soft)}
+  .vz-tip i.vz-goods{background:var(--s-goods)} .vz-tip i.vz-ship{background:var(--s-ship)} .vz-tip i.vz-ads{background:var(--s-ads)}
+  .vz-tip i.vz-pack{background:var(--s-pack)} .vz-tip i.vz-fixed{background:var(--s-fixed)} .vz-tip i.vz-oth{background:var(--ink-soft)}
+  .vz-tip i.vz-tot{background:var(--vz-tot)}
+  .vz-plot svg text{pointer-events:none}
+  .vz-plot [data-vt]{cursor:pointer} .vz-plot [data-vt]:hover{filter:brightness(1.06)}
+  @media (max-width:760px){
+    .vz-stats{grid-template-columns:repeat(2,1fr)}
+    .vz-st:nth-child(3){border-inline-start:0} .vz-st:nth-child(n+3){border-top:1px solid var(--line)}
+    .vz-seg{margin-inline-start:0}
+  }
   .pis-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-2)}
   .pis-head h3{margin:0} .pis-head .quick{margin:0}
   #t-pis tr.pis-net td{border-top:2px solid var(--line);background:var(--teal-soft);font-weight:700;font-size:var(--fs-4)}
@@ -1877,6 +1922,7 @@
     <button data-tab="capital" data-grp="money">رأس المال</button>
     <button data-tab="parties" data-grp="more">العملاء والموردين</button>
     <button data-tab="rep" data-grp="more">تقارير</button>
+    <button data-tab="viz" data-grp="more">رسومات</button>
     <button data-tab="log" data-grp="more">سجل الحركات</button>
     <button data-tab="coach" data-grp="more">ماشي إزاي؟</button>
     <button data-tab="backup" data-grp="more">الإعدادات</button>
@@ -2997,6 +3043,57 @@
 </section>
 
 <!-- السجل -->
+<!-- v123 — رسومات: نفس أرقام قايمة الدخل في شكل رسمة -->
+<section id="tab-viz" hidden>
+  <h2>رسومات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>نفس أرقام «قايمة الدخل» في التقارير بس في شكل رسمة، وبتتحدّث لوحدها بعد كل حركة. قف على أي عمود (أو دوس عليه في الموبايل) تشوف تفاصيله. كل بند ليه لون واحد في كل الرسومات — الإعلان أخضر في التلاتة.</p>
+  <div class="panel" style="padding:12px 14px">
+    <div class="grid" style="align-items:end">
+      <div><label for="per-viz">الفترة</label>
+        <select id="per-viz" class="per">
+          <option value="all">كل الفترات</option>
+          <option value="month">الشهر ده</option>
+          <option value="prev">الشهر اللي فات</option>
+          <option value="d30">آخر ٣٠ يوم</option>
+          <option value="custom">فترة محددة</option>
+        </select></div>
+      <div class="per-cust" hidden><label for="per-from-viz">من</label><input type="date" id="per-from-viz" class="per-from"></div>
+      <div class="per-cust" hidden><label for="per-to-viz">لـ</label><input type="date" id="per-to-viz" class="per-to"></div>
+      <div style="grid-column:1/-1"><p class="note ok" id="per-label-viz" style="margin:0"></p></div>
+    </div>
+  </div>
+
+  <div class="panel vz-card" id="vz1">
+    <div class="vz-hd"><div><h3>فلوسك راحت فين؟</h3><p class="vz-lead" id="vz1-lead"></p></div>
+      <div class="quick vz-seg" id="vz-mode" role="group" aria-label="الأوردرات">
+        <button type="button" data-vzm="exp" class="on">لو كله اتسلّم</button>
+        <button type="button" data-vzm="act">اتسلّم فعلاً</button>
+      </div></div>
+    <div class="vz-stats" id="vz1-stats"></div>
+    <div class="vz-plot vz-wide" id="vz-wf"></div>
+    <div class="vz-foot"><span>نفس أرقام «قايمة الدخل» · بتتحدّث بعد كل حركة</span><button type="button" class="vz-go" data-vzgo="rep">قايمة الدخل ←</button></div>
+  </div>
+
+  <div class="panel vz-card" id="vz2">
+    <div class="vz-hd"><div><h3>الأوردر الواحد: بيدخل كام وبيكلّف كام؟</h3><p class="vz-lead" id="vz2-lead"></p></div></div>
+    <div class="vz-plot" id="vz-po"></div>
+    <div class="vz-legend" id="vz2-leg"></div>
+    <div class="vz-foot"><span>من عمود «على الأوردر» في قايمة الدخل</span><button type="button" class="vz-go" data-vzgo="rep">عشان تبدأ تكسب ←</button></div>
+  </div>
+
+  <div class="panel vz-card" id="vz3">
+    <div class="vz-hd"><div><h3>الإعلان بيجيب أوردرات؟</h3><p class="vz-lead">أيام الإعلان متعلّمة بالأخضر الفاتح في الرسمتين. الإعلان بيتسجّل يوم الدفع، فالأوردرات ممكن تيجي بعده بيوم أو اتنين.</p></div>
+      <div class="quick vz-seg" id="vz-days" role="group" aria-label="الأيام">
+        <button type="button" data-vzd="7">آخر 7 أيام</button>
+        <button type="button" data-vzd="30" class="on">آخر 30 يوم</button>
+      </div></div>
+    <div class="vz-stats" id="vz3-stats"></div>
+    <div class="vz-plot" id="vz-ad"></div>
+    <div class="vz-foot"><span>رسمتين بنفس الأيام بدل رسمة بمقياسين — الجنيه والأوردر مش بيتقاسوا ببعض</span><button type="button" class="vz-go" data-vzgo="cash">مصاريف الخزنة ←</button></div>
+  </div>
+  <div class="vz-tip" id="vz-tip" role="tooltip" hidden></div>
+</section>
+
 <section id="tab-log" hidden>
   <h2>سجل الحركات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
   <p class="hint" data-infotxt hidden>آخر ١٠٠ حركة، وكل واحدة مسجّل عليها اسم اللي أدخلها ووقتها.</p>
@@ -3398,8 +3495,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "122";
+  var VERSION = "123";
   var CHANGELOG = [
+    { v:"123", d:"2026-10-06", items:[
+      "شاشة جديدة «رسومات» في «المزيد» بعد التقارير — نفس أرقام قايمة الدخل في شكل رسمة، وبتتحدّث لوحدها بعد كل حركة",
+      "«فلوسك راحت فين؟»: من المبيعات لصافي الربح خطوة خطوة بنفس ترتيب القايمة (ربح البضاعة · قبل الثابت · الصافي)، والمتغيّر والثابت متعلّمين تحت",
+      "«الأوردر الواحد: بيدخل كام وبيكلّف كام؟»: اللي العميل بيدفعه جنب تكلفة الأوردر متقسّمة، والفرق مكتوب خسارة أو مكسب في كل أوردر",
+      "«الإعلان بيجيب أوردرات؟»: فلوس الإعلان والأوردرات يوم بيوم في رسمتين على نفس الأيام (آخر 7 أو 30 يوم)، وأيام الإعلان متعلّمة",
+      "قف على أي عمود (أو دوس عليه في الموبايل) تشوف المبلغ وعلى الأوردر كام ونسبته من المبيعات · كل بند ليه نفس اللون في كل الرسومات · الوضع الليلي متظبط"
+    ]},
     { v:"122", d:"2026-10-06", items:[
       "الأرقام بقت واحدة في كل الشاشات: صافي الربح في الرئيسية = قايمة الدخل في التقارير = «ماشي إزاي؟» — لو الأوردرات اللي ماشية اتسلّمت، واللي اتسلّم فعلاً مكتوب تحته",
       "قايمة الدخل في التقارير اتعملت من جديد: عمود واحد بزرارين («لو كله اتسلّم» و«اتسلّم فعلاً»)، وجنبه «على الأوردر» و«من المبيعات»، والمصاريف بنوعها: الإعلان والتغليف متغيّر فوق «ربح الأوردر بعد مصاريف البيع»، والثابت تحته",
@@ -4063,7 +4167,7 @@
     ["dash","لوحة المتابعة"],["capital","رأس المال"],["cash","الخزنة"],
     ["purch","المشتريات"],["items","الأصناف"],["price","التسعير"],["inv","المخزون"],
     ["sales","المبيعات"],["ship","شركات الشحن"],["parties","العملاء والموردين"],
-    ["rep","تقارير"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"]
+    ["rep","تقارير"],["viz","رسومات"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"]
   ];
   var TAB_NAME = {}; TABS.forEach(function(t){ TAB_NAME[t[0]] = t[1]; });
   var authUser = null;                  // المستخدم الداخل دلوقتي
@@ -4078,11 +4182,11 @@
   /* شاشة جديدة اتضافت بعد ما المستخدمين اتعملوا: صلاحياتهم المتخزّنة
      مافيهاش اسمها، فكانوا هيلاقوها مختفية من غير سبب. بنورّثها من
      الشاشة اللي هي جزء منها. */
-  var TAB_FROM = { price:"items", coach:"rep" };
+  var TAB_FROM = { price:"items", coach:"rep", viz:"rep" };
   /* شاشات كلها تكلفة وربح من أول سطر لآخر سطر — مينفعش تتفتح لحد
      الأرباح مخفية عنه، حتى لو التبويب متعلّم له. إخفاء أعمدة واحد
      واحد بيسيب تسريب أول ما يتضاف عمود جديد. */
-  var TAB_MONEY = { price:1, coach:1 };
+  var TAB_MONEY = { price:1, coach:1, viz:1 };
   function canTab(t){
     if(!lockOn()) return true;
     var u = curUser();
@@ -5874,8 +5978,9 @@
     var mk = function(goods, cost, sin, sout, n){
       var v = { goods:goods, cost:cost, gross:goods - cost, sin:sin, sout:sout, ship:sin - sout, n:n,
                 ads:X.ads, pack:X.pack, xloss:xl, othervar:X.othervar, subs:X.subs, salary:X.salary, once:X.once, trans:X.trans, other:X.other };
-      v.varExp = v.ads + v.pack + v.xloss + v.othervar;
-      v.fixedExp = v.subs + v.salary + v.once + v.trans + v.other;
+      // المتغيّر والثابت من EXP_CATS نفسها — نوع جديد بيتحسب لوحده في الناحية الصح
+      v.varExp = v.xloss; v.fixedExp = 0;
+      EXP_CATS.forEach(function(x){ if(x[2] === "var") v.varExp += X[x[0]]; else v.fixedExp += X[x[0]]; });
       v.contrib = v.gross + v.ship - v.varExp;
       v.net = v.contrib - v.fixedExp;
       v.margin = goods > 0.009 ? v.gross / goods : null;
@@ -5920,7 +6025,7 @@
     });
     var r0 = periodRange();
     var txt = r0 ? ("الفترة: من " + r0.from + " لـ " + r0.to) : "كل الحركات المسجّلة من البداية";
-    ["per-label","per-label-rep"].forEach(function(id){
+    ["per-label","per-label-rep","per-label-viz"].forEach(function(id){
       var lbl = document.getElementById(id);
       if(lbl) lbl.textContent = txt;
     });
@@ -13367,6 +13472,308 @@
     goTab(q[0]);
   });
 
+  /* ================= رسومات (v123) =================
+     تلات رسومات من نفس أرقام قايمة الدخل (projStats) — مفيش رقم بيتحسب هنا لوحده:
+       ١ فلوسك راحت فين؟ — شلال من المبيعات لصافي الربح بنفس ترتيب القايمة
+       ٢ الأوردر الواحد — اللي بيدخل جنب اللي بيتصرف (عمود «على الأوردر»)
+       ٣ الإعلان بيجيب أوردرات؟ — رسمتين على نفس الأيام (مش رسمة بمقياسين)
+     SVG مرسوم بإيدينا من غير مكتبة — بيشتغل من غير نت. الألوان classes بتاخد من
+     الـCSS، فالوضع الليلي بيتظبط لوحده. الأيام والترتيب من اليمين للشمال. */
+  var vizMode = "exp", vizDays = 30, vzTips = [];
+  var VZ_NS = "http://www.w3.org/2000/svg";
+  function vzEl(p, t, a, txt){
+    var e = document.createElementNS(VZ_NS, t);
+    for(var k in a) e.setAttribute(k, a[k]);
+    if(txt != null) e.textContent = txt;
+    p.appendChild(e); return e;
+  }
+  // رقم جوّه الرسمة: معزول LTR عشان السالب ما يتقلبش (−2,644.50 مش 2,644.50−)
+  function vzN(v, d){
+    var a = Math.abs(v), dd = d == null ? (Math.abs(a - Math.round(a)) > 0.004 ? 2 : 0) : d;
+    return "\u2066" + (v < -0.004 ? "−" : "") + a.toLocaleString("en-US", { minimumFractionDigits:dd, maximumFractionDigits:dd }) + "\u2069";
+  }
+  // نفس الرقم للـHTML: العزل هناك بالـCSS (direction:ltr) أو <bdi>
+  function vzH(v, d){ return vzN(v, d).replace(/[\u2066\u2069]/g, ""); }
+  // كلام: dir بيحدد start/end — «ltr» للأرقام، «rtl» للعربي
+  function vzT(p, x, y, txt, o){
+    o = o || {};
+    return vzEl(p, "text", { x:x, y:y, "font-size":o.fs || 11.5, "font-weight":o.fw || 400, "class":o.c || "vz-tx",
+      "text-anchor":o.a || "middle", direction:o.d || "rtl" }, txt);
+  }
+  // عمود بطرف مدوّر ٤px ناحية القيمة بس، ومربّع عند خط الأساس
+  function vzCol(p, x, w, y1, y2, cls, upward){
+    var h = Math.max(1.5, y2 - y1), r = Math.min(4, h / 2, w / 2), d;
+    if(upward) d = "M" + x + "," + (y1 + h) + "V" + (y1 + r) + "Q" + x + "," + y1 + " " + (x + r) + "," + y1 + "H" + (x + w - r) +
+                   "Q" + (x + w) + "," + y1 + " " + (x + w) + "," + (y1 + r) + "V" + (y1 + h) + "Z";
+    else d = "M" + x + "," + y1 + "V" + (y1 + h - r) + "Q" + x + "," + (y1 + h) + " " + (x + r) + "," + (y1 + h) + "H" + (x + w - r) +
+             "Q" + (x + w) + "," + (y1 + h) + " " + (x + w) + "," + (y1 + h - r) + "V" + y1 + "Z";
+    return vzEl(p, "path", { d:d, "class":cls });
+  }
+  // خطوة مقياس «حلوة»: 1 · 2 · 2.5 · 5 × 10ⁿ — حوالي ٥ خطوط
+  function vzStep(span){
+    if(!(span > 0)) return 1;
+    var raw = span / 5, p = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10)), m = raw / p;
+    return p * (m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10);
+  }
+  function vzTick(v){
+    var a = Math.abs(v), k = a >= 1000, x = k ? a / 1000 : a;
+    return "\u2066" + (v < -0.004 ? "−" : "") + x.toLocaleString("en-US", { maximumFractionDigits:2 }) + (k ? "k" : "") + "\u2069";
+  }
+  // tooltip: كل علامة ليها data-vt = رقمها في vzTips
+  function vzTip(i, cls, rows){
+    vzTips[i] = "<b>" + (cls ? "<i class='" + cls + "'></i>" : "") + esc(rows[0]) + "</b>" +
+      rows.slice(1).map(function(r){ return "<div class='r'><span>" + esc(r[0]) + "</span><span>" + esc(r[1]) + "</span></div>"; }).join("");
+  }
+  function vzSvg(host, w, h, label){
+    host.innerHTML = "";
+    return vzEl(host, "svg", { width:w, height:h, viewBox:"0 0 " + w + " " + h, role:"img", "aria-label":label });
+  }
+  function vzW(host, min){ return Math.max(min, Math.floor(host.clientWidth || 700)); }
+  function vzStats(id, L){
+    var el = document.getElementById(id); if(!el) return;
+    el.innerHTML = L.map(function(x){
+      return "<div class='vz-st'><small>" + esc(x[0]) + "</small><b class='" + (x[2] || "") + "'>" + esc(x[1]) + "</b><em>" + (x[3] || "&nbsp;") + "</em></div>";
+    }).join("");
+  }
+  var VZ_FILL = { goods:"vz-goods", ship:"vz-ship", ads:"vz-ads", pack:"vz-pack", fixed:"vz-fixed", oth:"vz-oth" };
+  var VZ_SW = { goods:"--s-goods", ship:"--s-ship", ads:"--s-ads", pack:"--s-pack", fixed:"--s-fixed", oth:"--ink-soft" };
+  function vzSw(k){ return "background:var(" + VZ_SW[k] + ")"; }
+
+  function renderViz(){
+    var sec = document.getElementById("tab-viz"); if(!sec) return;
+    vzTips = []; vzHideTip();
+    var hw = document.getElementById("vz-wf"); if(hw && hw.clientWidth) vzLastW = hw.clientWidth;
+    Array.prototype.forEach.call(document.querySelectorAll("#vz-mode [data-vzm]"), function(b){ b.classList.toggle("on", b.dataset.vzm === vizMode); });
+    Array.prototype.forEach.call(document.querySelectorAll("#vz-days [data-vzd]"), function(b){ b.classList.toggle("on", Number(b.dataset.vzd) === vizDays); });
+    var P = projStats(periodRange()), v = vizMode === "act" ? P.act : P.exp;
+    renderVzFlow(P, v);
+    renderVzOrder(P, P.exp);
+    renderVzAds(P);
+  }
+
+  // ١ — الشلال
+  function renderVzFlow(P, v){
+    var host = document.getElementById("vz-wf"), n = v.n, g = v.goods;
+    var lead = document.getElementById("vz1-lead");
+    if(!n && !(v.fixedExp + v.varExp > 0.009)){
+      host.innerHTML = "<p class='vz-empty'>مفيش أوردرات ولا مصاريف في الفترة دي — اختار فترة تانية من فوق.</p>";
+      vzStats("vz1-stats", []); if(lead) lead.textContent = ""; return;
+    }
+    var per = function(x){ return n ? vzH(x / n, 2) : "—"; }, pc = function(x){ return g > 0.009 ? vzH(x / g * 100, 1) + "%" : "—"; };
+    vzStats("vz1-stats", [
+      ["المبيعات", vzH(g), "", qty(n) + " أوردر" + (vizMode === "act" ? " خلصوا" : "")],
+      ["ربح البضاعة", vzH(v.gross), v.gross < 0 ? "v-due" : "", v.margin === null ? "" : "<bdi>" + vzH(v.margin * 100, 1) + "%</bdi> من المبيعات"],
+      ["قبل المصاريف الثابتة", vzH(v.contrib), v.contrib < 0 ? "v-due" : "v-gain", n ? "<bdi>" + per(v.contrib) + "</bdi> على الأوردر" : ""],
+      ["صافي الربح", vzH(v.net), v.net < 0 ? "v-due" : "v-gain", v.net < 0 ? "▼ خسارة" : "▲ مكسب"]
+    ]);
+    // الخطوات بنفس ترتيب قايمة الدخل — البنود الصفر ما بتترسمش
+    var S = [{ l:"المبيعات", t:"tot", v:g }, { l:"بضاعة", v:-v.cost, k:"goods" }, { l:"ربح البضاعة", t:"sub" }];
+    if(Math.abs(v.ship) > 0.009) S.push({ l:v.ship >= 0 ? "ربح الشحن" : "فرق الشحن", v:v.ship, k:"ship", grp:v.ship < 0 ? "v" : "" });
+    if(v.ads > 0.009) S.push({ l:"إعلانات", v:-v.ads, k:"ads", grp:"v" });
+    if(v.pack > 0.009) S.push({ l:"تغليف", v:-v.pack, k:"pack", grp:"v" });
+    if(Math.abs(v.xloss + v.othervar) > 0.009) S.push({ l:"متغيّر تاني", v:-(v.xloss + v.othervar), k:"oth", grp:"v" });
+    S.push({ l:"قبل الثابت", t:"sub" });
+    EXP_CATS.forEach(function(x){
+      if(x[2] !== "var" && Math.abs(v[x[0]]) > 0.009) S.push({ l:x[0] === "trans" ? "انتقالات من غير فاتورة" : x[1], v:-v[x[0]], k:"fixed", grp:"f" });
+    });
+    S.push({ l:"صافي الربح", t:"net" });
+    // المدى
+    var run = 0, hi = 0, lo = 0;
+    S.forEach(function(st){ if(st.t === "tot") run = st.v; else if(!st.t) run += st.v; hi = Math.max(hi, run); lo = Math.min(lo, run); });
+    var stp = vzStep(hi - lo), max = Math.ceil(hi * 1.08 / stp) * stp, min = Math.floor(Math.min(0, lo * 1.15) / stp) * stp;
+    if(max <= 0) max = stp;
+    var W = vzW(host, 600), H = 330, top = 28, bot = 250, axW = 48, x0 = W - axW;
+    var y = function(val){ return top + (max - val) / (max - min) * (bot - top); };
+    var svg = vzSvg(host, W, H, "فلوسك راحت فين: من المبيعات لصافي الربح");
+    for(var t = min; t <= max + stp / 2; t += stp){
+      vzEl(svg, "line", { x1:6, x2:x0, y1:y(t), y2:y(t), "class":Math.abs(t) < stp / 2 ? "vz-bl" : "vz-gl" });
+      vzT(svg, W - 2, y(t) + 4, vzTick(t), { a:"end", d:"ltr", c:"vz-ts", fs:10.5 });
+    }
+    var N = S.length, slot = (x0 - 8) / N, bw = Math.min(40, slot * 0.52), cx = function(i){ return x0 - slot * (i + 0.5); };
+    run = 0;
+    S.forEach(function(st, i){
+      var a, b, cls, isT = !!st.t;
+      if(st.t === "tot"){ a = 0; b = st.v; run = b; cls = "vz-tot"; }
+      else if(isT){ a = 0; b = run; cls = run < 0 ? "vz-neg" : (st.t === "sub" ? "vz-sub" : "vz-tot"); }
+      else { a = run; b = run + st.v; run = b; cls = VZ_FILL[st.k]; }
+      var top1 = Math.max(a, b), bot1 = Math.min(a, b), X = cx(i) - bw / 2, m;
+      if(isT) m = vzCol(svg, X, bw, y(Math.max(0, top1)), y(Math.min(0, bot1)), cls, b >= 0);
+      else m = vzEl(svg, "rect", { x:X, y:y(top1), width:bw, height:Math.max(1.5, y(bot1) - y(top1)), rx:3, "class":cls });
+      m.setAttribute("data-vt", vzTips.length);
+      var amt = isT ? run : st.v, sz = isT ? amt : Math.abs(amt);     // البند: قد إيه بياخد · الإجمالي: بإشارته
+      vzTip(vzTips.length, isT ? "" : VZ_FILL[st.k], [st.l, ["المبلغ", vzH(amt, 2)], ["على الأوردر", per(sz)], ["من المبيعات", pc(sz)],
+        ["النوع", isT ? "إجمالي" : st.grp === "f" ? "ثابت" : st.k === "goods" ? "تكلفة البضاعة" : "متغيّر"]]);
+      if(i < N - 1) vzEl(svg, "line", { x1:X, x2:cx(i + 1) + bw / 2, y1:y(run), y2:y(run), "class":"vz-cn" });
+      var up = isT ? run >= 0 : (st.v >= 0);
+      vzT(svg, cx(i), up ? y(top1) - 7 : y(bot1) + 15, vzN(amt), { fw:isT ? 700 : 600, c:isT && run < 0 ? "vz-td" : "vz-tx", d:"ltr" });
+      vzT(svg, cx(i), bot + 22, st.l, { fw:isT ? 700 : 400, c:isT ? "vz-tx" : "vz-ts", fs:slot < 70 ? 10.5 : 11.5 });
+    });
+    // أقواس المتغيّر والثابت تحت المحور
+    var brace = function(grp, label){
+      var ix = []; S.forEach(function(st, i){ if(st.grp === grp) ix.push(i); });
+      if(!ix.length) return;
+      var xa = cx(ix[0]) + bw / 2 + 3, xb = cx(ix[ix.length - 1]) - bw / 2 - 3, yb = bot + 36, sum = 0;
+      ix.forEach(function(i){ sum += -S[i].v; });
+      vzEl(svg, "path", { d:"M" + xa + "," + (yb - 5) + "V" + yb + "H" + xb + "V" + (yb - 5), fill:"none", "class":"vz-gl" });
+      vzT(svg, (xa + xb) / 2, yb + 16, label + " · " + vzN(sum), { c:"vz-ts", fs:11 });
+    };
+    brace("v", "مصاريف البيع — متغيّرة"); brace("f", "ثابتة");
+    if(lead){
+      var big = S.filter(function(st){ return !st.t && st.k !== "goods" && st.v < 0; }).sort(function(p, q){ return p.v - q.v; })[0];
+      var cross = null; run = 0;
+      S.forEach(function(st){ if(st.t === "tot") run = st.v; else if(!st.t){ var was = run; run += st.v; if(was >= 0 && run < 0 && !cross) cross = st.l; } });
+      lead.textContent = "من " + money(g) + " مبيعات: البضاعة واخدة " + pc(v.cost) +
+        (big ? "، وأكبر بند بعدها " + big.l + " (" + money(-big.v) + ")" : "") +
+        (cross ? ". الرقم نزل تحت الصفر عند «" + cross + "»." : v.net >= 0 ? ". وفاضل لك " + money(v.net) + " صافي." : ".");
+    }
+  }
+
+  // ٢ — الأوردر الواحد
+  function renderVzOrder(P, v){
+    var host = document.getElementById("vz-po"), n = v.n, lead = document.getElementById("vz2-lead"), leg = document.getElementById("vz2-leg");
+    if(!n){ host.innerHTML = "<p class='vz-empty'>مفيش أوردرات في الفترة دي.</p>"; if(lead) lead.textContent = ""; if(leg) leg.innerHTML = ""; return; }
+    var d = function(x){ return x / n; };
+    var inn = [{ l:"مبيعات", v:d(v.goods), c:"vz-tot" }];
+    if(v.ship > 0.009) inn.push({ l:"ربح الشحن", v:d(v.ship), c:"vz-ship", k:"ship" });
+    var out = [{ l:"بضاعة", v:d(v.cost), k:"goods" }];
+    if(v.ship < -0.009) out.push({ l:"شحن", v:d(-v.ship), k:"ship" });
+    if(v.ads > 0.009) out.push({ l:"إعلان", v:d(v.ads), k:"ads" });
+    if(v.pack > 0.009) out.push({ l:"تغليف", v:d(v.pack), k:"pack" });
+    if(v.xloss + v.othervar > 0.009) out.push({ l:"متغيّر تاني", v:d(v.xloss + v.othervar), k:"oth" });
+    if(v.fixedExp > 0.009) out.push({ l:"ثابت", v:d(v.fixedExp), k:"fixed" });
+    var tIn = inn.reduce(function(a, x){ return a + x.v; }, 0), tOut = out.reduce(function(a, x){ return a + x.v; }, 0), diff = tIn - tOut;
+    var W = vzW(host, 340), H = 176, lab = W < 520 ? 96 : 140, x0 = W - lab, plotW = x0 - 64, bh = 24;
+    var stp = vzStep(Math.max(tIn, tOut)), max = Math.max(stp, Math.ceil(Math.max(tIn, tOut) * 1.02 / stp) * stp);
+    var x = function(val){ return x0 - val / max * plotW; };
+    var svg = vzSvg(host, W, H, "الأوردر الواحد: بيدخل كام وبيكلّف كام");
+    for(var t = 0; t <= max + stp / 2; t += stp){
+      vzEl(svg, "line", { x1:x(t), x2:x(t), y1:24, y2:132, "class":t ? "vz-gl" : "vz-bl" });
+      vzT(svg, x(t), 15, vzN(t, 0), { c:"vz-ts", fs:10.5, d:"ltr" });
+    }
+    var rowY = [40, 96];
+    [["العميل بيدفع", "متوسط الأوردر"], ["الأوردر بيكلّف", "بعد كل المصاريف"]].forEach(function(r, i){
+      vzT(svg, W - 2, rowY[i] + 11, r[0], { a:"start", fw:700, fs:12.5 });
+      vzT(svg, W - 2, rowY[i] + 26, r[1], { a:"start", c:"vz-ts", fs:10.5 });
+    });
+    var stack = function(list, Y, total){
+      var a = 0;
+      list.forEach(function(sg, i){
+        var b = a + sg.v, xr = x(a) - (i ? 1 : 0), xl = x(b) + (i < list.length - 1 ? 1 : 0), w = Math.max(1, xr - xl), last = i === list.length - 1, m;
+        if(last) m = vzEl(svg, "path", { d:"M" + xr + "," + Y + "H" + (xl + 4) + "Q" + xl + "," + Y + " " + xl + "," + (Y + 4) + "V" + (Y + bh - 4) +
+          "Q" + xl + "," + (Y + bh) + " " + (xl + 4) + "," + (Y + bh) + "H" + xr + "Z", "class":sg.c || VZ_FILL[sg.k] });
+        else m = vzEl(svg, "rect", { x:xl, y:Y, width:w, height:bh, "class":sg.c || VZ_FILL[sg.k] });
+        m.setAttribute("data-vt", vzTips.length);
+        vzTip(vzTips.length, sg.c ? "" : VZ_FILL[sg.k], [sg.l, ["على الأوردر", vzH(sg.v, 2)], ["من اللي العميل بيدفعه", tIn > 0.009 ? vzH(sg.v / tIn * 100, 1) + "%" : "—"], ["على الـ" + qty(n) + " أوردر", vzH(sg.v * n, 2)]]);
+        var lbl = sg.l.split(" ")[0] + " " + Math.round(sg.v);
+        if(w > lbl.length * 7 + 14) vzT(svg, (xl + xr) / 2, Y + bh / 2 + 4.5, lbl, { fw:700, fs:11, c:sg.c === "vz-tot" ? "vz-tt" : (sg.k === "goods" || sg.k === "ship") ? "vz-tw" : "vz-tk" });
+        a = b;
+      });
+      vzT(svg, x(total) - 8, Y + bh / 2 + 5, vzN(total, 2), { a:"end", d:"ltr", fw:700, fs:12.5 });
+    };
+    stack(inn, rowY[0], tIn); stack(out, rowY[1], tOut);
+    // الفرق
+    var xa = x(Math.min(tIn, tOut)), xb = x(Math.max(tIn, tOut)), lossy = diff < -0.009, yb = rowY[1] + bh + 8;
+    if(Math.abs(diff) > 0.009){
+      vzEl(svg, "line", { x1:xa, x2:xa, y1:rowY[0] + bh, y2:yb + 2, "class":lossy ? "vz-dl" : "vz-gn", "stroke-width":1.5 });
+      vzEl(svg, "rect", { x:xb, y:yb, width:xa - xb, height:4, rx:2, "class":lossy ? "vz-dlf" : "vz-gnf" });
+      vzT(svg, (xa + xb) / 2, yb + 20, (lossy ? "خسارة " : "مكسب ") + vzN(Math.abs(diff), 2) + " في كل أوردر", { fw:700, fs:12, c:lossy ? "vz-td" : "vz-tg" });
+    }
+    if(lead){
+      var top2 = out.slice(1).sort(function(p, q){ return q.v - p.v; })[0];
+      lead.textContent = "المتوسط على " + qty(n) + " أوردر. العميل بيدفع " + money(tIn) + " والأوردر بيكلّف " + money(tOut) +
+        (lossy ? " — الفرق خسارة في كل أوردر." : " — الفرق مكسب في كل أوردر.") + (top2 ? " أكبر بند بعد البضاعة: " + top2.l + "." : "");
+    }
+    if(leg) leg.innerHTML = out.map(function(sg){
+      return "<span><i style='" + vzSw(sg.k) + "'></i>" + esc(sg.l) + " <b>" + esc(money(sg.v)) + "</b>" +
+        (sg.k === "fixed" ? " <span style='color:var(--ink-soft)'>(بيقل كل ما الأوردرات تزيد)</span>" : "") + "</span>";
+    }).join("");
+  }
+
+  // ٣ — الإعلان والأوردرات يوم بيوم
+  // P = قايمة الدخل للفترة المختارة فوق — منها «الحد» اللي الإعلان على الأوردر لازم ينزل تحته
+  function renderVzAds(P){
+    var host = document.getElementById("vz-ad"), N = vizDays, to = today(), from = addDays(to, -(N - 1));
+    var days = [], ix = {};
+    for(var i = 0; i < N; i++){ var dd = addDays(from, i); ix[dd] = days.length; days.push({ d:dd, ads:0, n:0 }); }
+    live("cash").forEach(function(c){ if(c.type === "expense" && expCat(c) === "ads" && ix[c.date] != null) days[ix[c.date]].ads += Number(c.amount)||0; });
+    live("sales").forEach(function(s){ if(ix[s.date] != null) days[ix[s.date]].n++; });
+    var tAds = days.reduce(function(a, x){ return a + x.ads; }, 0), tN = days.reduce(function(a, x){ return a + x.n; }, 0);
+    var adDays = days.filter(function(x){ return x.ads > 0.009; }).length;
+    var best = days.reduce(function(a, x){ return x.n > (a ? a.n : 0) ? x : a; }, null);
+    var u = unitEcon((P || projStats(periodRange())).exp);
+    vzStats("vz3-stats", [
+      ["صرف إعلان", vzH(tAds), "", qty(adDays) + " يوم إعلان"],
+      ["أوردرات", qty(tN), "", "<bdi>" + vzH(tN / N, 1) + "</bdi> في اليوم"],
+      ["الإعلان على الأوردر", tN ? vzH(tAds / tN, 2) : "—", u && tN && tAds / tN > u.pre ? "v-due" : "",
+        u && u.pre > 0.009 ? "الحد في قايمة الدخل <bdi>" + vzH(u.pre, 2) + "</bdi>" : ""],
+      ["أحسن يوم", best ? qty(best.n) : "—", "", best ? "أوردر يوم " + dShort(best.d) : ""]
+    ]);
+    if(!tAds && !tN){ host.innerHTML = "<p class='vz-empty'>مفيش إعلانات ولا أوردرات في آخر " + qty(N) + " يوم.</p>"; return; }
+    var W = vzW(host, 340), H = 300, axW = 44, x0 = W - axW, slot = (x0 - 6) / N, bw = Math.min(24, slot * 0.6);
+    var cx = function(k){ return x0 - slot * (k + 0.5); };          // الأقدم يمين
+    var svg = vzSvg(host, W, H, "الإعلان والأوردرات يوم بيوم");
+    days.forEach(function(x, k){ if(x.ads > 0.009) vzEl(svg, "rect", { x:cx(k) - slot / 2 + 1, y:6, width:slot - 2, height:262, rx:Math.min(6, slot / 3), "class":"vz-band" }); });
+    var panel = function(top, h, key, title, cls, fmtv){
+      var mx = days.reduce(function(a, x){ return Math.max(a, x[key]); }, 0), stp = vzStep(mx || 1), max = Math.max(stp, Math.ceil(mx / stp) * stp);
+      var y = function(val){ return top + h - val / max * h; };
+      vzT(svg, W - 2, top - 14, title, { a:"start", fw:700, fs:12 });
+      for(var t = 0; t <= max + stp / 2; t += stp){
+        vzEl(svg, "line", { x1:6, x2:x0, y1:y(t), y2:y(t), "class":t ? "vz-gl" : "vz-bl" });
+        if(t) vzT(svg, W - 2, y(t) + 4, vzTick(t), { a:"end", d:"ltr", c:"vz-ts", fs:10.5 });
+      }
+      days.forEach(function(x, k){
+        if(!(x[key] > 0)) return;
+        var m = vzCol(svg, cx(k) - bw / 2, bw, y(x[key]), y(0), cls, true);
+        m.setAttribute("data-vt", vzTips.length);
+        vzTip(vzTips.length, cls, [dShort(x.d), ["إعلان", vzH(x.ads, 2)], ["أوردرات", qty(x.n)]]);
+        if(slot >= 22) vzT(svg, cx(k), y(x[key]) - 6, fmtv(x[key]), { fw:600, fs:10.5, d:"ltr" });
+      });
+    };
+    panel(30, 92, "ads", "فلوس الإعلان", "vz-ads", function(val){ return vzN(val); });
+    panel(170, 84, "n", "الأوردرات", "vz-tot", function(val){ return qty(val); });
+    var every = N <= 10 ? 1 : 5;
+    days.forEach(function(x, k){ if(k % every === 0 || k === N - 1) vzT(svg, cx(k), 288, dShort(x.d), { c:"vz-ts", fs:10.5, d:"ltr" }); });
+  }
+
+  // tooltip — ماوس، وفي الموبايل دوسة
+  function vzHideTip(){ var t = document.getElementById("vz-tip"); if(t) t.hidden = true; }
+  function vzShowTip(m, ev){
+    var t = document.getElementById("vz-tip"), i = Number(m.getAttribute("data-vt"));
+    if(!t || !vzTips[i]) return;
+    t.innerHTML = vzTips[i]; t.hidden = false;
+    var r = m.getBoundingClientRect(), tw = t.offsetWidth, th = t.offsetHeight;
+    var x = r.left - tw - 10; if(x < 8) x = Math.min(window.innerWidth - tw - 8, r.right + 10);
+    var yy = (ev && ev.clientY ? ev.clientY : r.top + r.height / 2) - th / 2;
+    t.style.left = Math.max(8, x) + "px"; t.style.top = Math.max(8, Math.min(window.innerHeight - th - 8, yy)) + "px";
+  }
+  (function(){
+    var sec = document.getElementById("tab-viz"); if(!sec) return;
+    sec.addEventListener("pointermove", function(e){
+      var m = e.target.closest && e.target.closest("[data-vt]");
+      if(m) vzShowTip(m, e); else vzHideTip();
+    });
+    sec.addEventListener("pointerleave", vzHideTip);
+    sec.addEventListener("click", function(e){
+      var m = e.target.closest("[data-vt]");
+      if(m){ vzShowTip(m, e); return; }
+      var b = e.target.closest("[data-vzm]");
+      if(b){
+        vizMode = b.dataset.vzm;
+        Array.prototype.forEach.call(document.querySelectorAll("#vz-mode [data-vzm]"), function(x){ x.classList.toggle("on", x === b); });
+        var P = projStats(periodRange()); renderVzFlow(P, vizMode === "act" ? P.act : P.exp); return;
+      }
+      b = e.target.closest("[data-vzd]");
+      if(b){
+        vizDays = Number(b.dataset.vzd);
+        Array.prototype.forEach.call(document.querySelectorAll("#vz-days [data-vzd]"), function(x){ x.classList.toggle("on", x === b); });
+        renderVzAds(); return;
+      }
+      b = e.target.closest("[data-vzgo]");
+      if(b){ if(canTab(b.dataset.vzgo)) goTab(b.dataset.vzgo); else toast("مالكش صلاحية الشاشة دي"); }
+    });
+    window.addEventListener("scroll", vzHideTip, { passive:true });
+  })();
+
   var TAB_RENDER = {
     dash:    function(){ syncPeriodUI(); renderHome(); renderKPIs(); renderStock();
                          renderLowStock(); renderShipping(); renderBalances(); },
@@ -13382,6 +13789,7 @@
     rep:     function(){ renderReports(); },
     log:     function(){ renderLog(); },
     coach:   function(){ renderCoach(); },
+    viz:     function(){ syncPeriodUI(); renderViz(); },
     backup:  function(){ foldSettings(); renderOpening(); renderLock(); renderSnoState(); renderUsers(); }
   };
   var dirtyTabs = {};          // تبويبات محتاجة رسم لما تتفتح
@@ -14325,6 +14733,17 @@
   }
   window.addEventListener("scroll", function(){ if(activeTab === "sales") placeSide(); }, { passive:true });
   window.addEventListener("resize", function(){ if(activeTab === "sales") placeSide(); });
+  // الرسومات بتتحسب بعرض الشاشة — لو اتغيّر نرسمها تاني
+  // (شريط العنوان في الموبايل بيطلّع resize وإنت بتسكرل — من غير ما العرض يتغيّر)
+  var vzResize = null, vzLastW = 0;
+  window.addEventListener("resize", function(){
+    if(activeTab !== "viz") return;
+    clearTimeout(vzResize);
+    vzResize = setTimeout(function(){
+      var h = document.getElementById("vz-wf"), w = h ? h.clientWidth : 0;
+      if(w && w !== vzLastW){ vzLastW = w; renderViz(); }
+    }, 150);
+  });
   TSALES.addEventListener("click", function(e){
     // الأزرار جوه السطر ليها معالجاتها الخاصة
     if(e.target.closest("button,select,input,a,[data-zoom]")) return;
