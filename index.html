@@ -7476,9 +7476,10 @@
       renderTarget();
       return;
     }
-    if(bs) bs.textContent = u.cu > 0.009
-      ? "كل أوردر بيكسب " + money(u.cu) + " قبل الثابت — الثابت يتغطّى بعد " + qty(u.need) + " أوردر"
-      : "كل أوردر بيخسر " + money(-u.cu) + " قبل الثابت";
+    var noFixed = u.fixed <= 0.009;
+    if(bs) bs.textContent = u.cu <= 0.009 ? "كل أوردر بيخسر " + money(-u.cu) + " قبل الثابت"
+      : "كل أوردر بيكسب " + money(u.cu) + " قبل الثابت — " +
+        (noFixed ? "ومفيش مصاريف ثابتة في الفترة" : v.n >= u.need ? "غطّيت الثابت ✓" : "الثابت يتغطّى بعد " + qty(u.need) + " أوردر");
     var n = v.n, per = function(x){ return x / n; };
     var html = beBox("الأوردر الواحد بيكسب كام؟", [
         mRow("ربح البضاعة", per(v.gross)),
@@ -7495,6 +7496,8 @@
           mRow("الإعلان على الأوردر دلوقتي", u.ad),
           mRow("لازم ينزل تحت", u.pre, "tot v-gain")
         ], "كل أوردر بيخسر <b>" + esc(money(-u.cu)) + "</b> قبل المصاريف الثابتة — فكل ما الأوردرات تزيد الخسارة بتزيد.", "✗", "v-due");
+    else if(noFixed)
+      html += beBox("مفيش مصاريف ثابتة", [], "كل أوردر بيكسب <b>" + esc(money(u.cu)) + "</b> صافي — مفيش مصاريف ثابتة مسجّلة في الفترة.", "✓", "v-gain");
     else
       html += beBox("الثابت يتغطّى بعد", [
           mRow("المصاريف الثابتة", u.fixed),
