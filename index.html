@@ -1122,6 +1122,13 @@
   .sg-exp:hover{color:var(--teal)}
   #t-pis tr.pis-tot td{border-top:1px solid var(--line);background:var(--teal-soft)}
   #t-pis td.num{white-space:nowrap}
+  .pis-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-2)}
+  .pis-head h3{margin:0} .pis-head .quick{margin:0}
+  #t-pis tr.pis-net td{border-top:2px solid var(--line);background:var(--teal-soft);font-weight:700;font-size:var(--fs-4)}
+  #t-pis tr.pis-tot td:first-child,#t-pis tr.pis-net td:first-child{font-weight:700}
+  .pis-tag{font-size:10.5px;font-weight:600;border-radius:99px;padding:1px 7px;margin-inline-start:6px;white-space:nowrap}
+  .c-cats{margin:0} .c-cats button{font-size:var(--fs-2);padding:5px 12px}
+  .pis-tag.var{background:rgba(138,98,18,.14);color:var(--warn)} .pis-tag.fixed{background:var(--teal-soft);color:var(--ink-soft)}
   #exp-drawer{width:min(980px,100%)}
   #t-exp td.num{white-space:nowrap}
   #t-exp tr.tot td{font-weight:700;background:var(--teal-soft)}
@@ -1693,6 +1700,13 @@
     tbody td:empty,tbody td[data-l=""]{display:none}
     tbody td.wide{flex-direction:column;align-items:flex-start;gap:var(--sp-1)}
     tbody td.wide::before{margin-bottom:var(--sp-1)}
+    /* v122: قايمة الدخل تفضل جدول — كروت لكل بند كانت بتطوّلها ١٢ كارت. «من المبيعات» بتستخبى */
+    #t-pis thead{display:table-header-group}
+    #t-pis tbody tr{display:table-row;background:none;border:0;border-radius:0;margin:0;padding:0}
+    #t-pis th,#t-pis tbody td,#t-pis tbody td.wide{display:table-cell;padding:8px 6px;border-bottom:1px solid var(--line)}
+    #t-pis tbody td::before{content:none}
+    #t-pis th:nth-child(4),#t-pis td:nth-child(4){display:none}
+    #t-pis td.num{font-size:var(--fs-2)}
 
     .del{padding:var(--sp-1) var(--sp-2)}
   }
@@ -2387,19 +2401,21 @@
       </div>
       <div class="cash-ship" hidden><label for="c-shipco">شركة الشحن</label>
         <select id="c-shipco"></select></div>
-      <div class="cash-kind" hidden><label for="c-kind">نوع المصروف</label>
-        <select id="c-kind">
-          <option value="fixed">ثابت — بيتدفع حتى لو ما بعتش</option>
-          <option value="var">متغيّر — بيزيد مع البيع</option>
-        </select></div>
       <div><label for="c-party">الجهة</label><select id="c-party"></select></div>
       <div><label for="c-amount">المبلغ</label><input type="number" id="c-amount" step="any" min="0" required></div>
       <div><label for="c-note">البيان</label><input id="c-note" autocomplete="off"></div>
-      <div class="cash-kind span2" hidden><p class="hintline" style="margin:0">
-        <strong>ثابت</strong>: إيجار · مرتبات · كهربا ونت · اشتراكات — بتتدفع كل شهر مهما بعت.
-        <strong>متغيّر</strong>: تغليف · عمولة · مصاريف بتزيد كل ما تبيع أكتر.
-        التفرقة دي هي اللي بتخلّي <strong>نقطة التعادل</strong> تطلع صح.
-      </p></div>
+      <div class="cash-kind" hidden style="grid-column:1/-1"><label id="c-cat-l">نوع المصروف</label>
+        <div class="quick c-cats" id="c-cats" role="group" aria-labelledby="c-cat-l">
+          <button type="button" data-ccat="ads">إعلانات</button>
+          <button type="button" data-ccat="pack">تغليف</button>
+          <button type="button" data-ccat="trans">انتقالات شراء بضاعة</button>
+          <button type="button" data-ccat="subs">اشتراكات</button>
+          <button type="button" data-ccat="salary">مرتبات</button>
+          <button type="button" data-ccat="once">مرة واحدة (معدات · فلايرات · تفاعل)</button>
+          <button type="button" data-ccat="other">تاني</button>
+        </div>
+        <input type="hidden" id="c-cat">
+        <p class="hintline" id="c-cat-hint" style="margin:6px 0 0"></p></div>
       <div id="c-over" hidden style="grid-column:1/-1">
         <p class="note bad" id="c-over-msg" style="margin-top:0"></p>
         <label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-2);cursor:pointer;margin-top:6px">
@@ -2876,21 +2892,23 @@
     </div>
   </div>
 
-  <p class="note bad" id="rep-unclass" hidden></p>
-
   <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
   <div class="panel money-only" id="pis-panel">
-    <h3>قايمة الدخل المتوقعة <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
+    <div class="pis-head"><h3>قايمة الدخل <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
+      <div class="quick" id="pis-mode" role="group" aria-label="الأوردرات">
+        <button type="button" data-pism="exp" class="on">لو كله اتسلّم</button>
+        <button type="button" data-pism="act">اتسلّم فعلاً</button>
+      </div></div>
     <p class="hint" id="pis-note" style="margin:0 0 var(--sp-3)"></p>
     <div class="tbl-wrap"><table id="t-pis"></table></div>
   </div>
 
   <!-- السؤال الأهم: أبيع بكام؟ -->
   <div class="panel">
-    <div class="fold-h"><h3>أبيع بكام؟ <small id="rep-be-sum"></small></h3>
-      <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">التفاصيل ▾</button></div>
-    <div id="rep-be-body" data-fold hidden>
+    <div class="fold-h"><h3>عشان تبدأ تكسب <small id="rep-be-sum"></small></h3>
+      <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">عشان أكسب مبلغ معيّن ▾</button></div>
     <div class="money3" id="rep-be"></div>
+    <div id="rep-be-body" data-fold hidden>
     <div class="fset" style="margin-top:14px">
       <h3>وعشان أكسب مبلغ معيّن؟</h3>
       <div class="fgrid">
@@ -2915,6 +2933,7 @@
   <div class="panel">
     <h3>تقييم الأداء</h3>
     <div class="stats" id="rep-kpi"></div>
+    <p class="hint" id="rep-kpi-wait" hidden style="margin:var(--sp-2) 0 0"></p>
   </div>
 
   <!-- الباقي مطوي -->
@@ -2992,7 +3011,7 @@
       <button type="button" data-coper="30">آخر 30 يوم</button>
       <button type="button" data-coper="all" class="on">من البداية</button>
     </div></div>
-  <p class="hint" data-infotxt hidden>الشاشة دي بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وتعمل إيه. بتتحدّث لوحدها بعد كل حركة. المسطرة: <strong>هامش البضاعة</strong> ✓ 40% أو أكتر · ✗ أقل من 30% — <strong>الإعلان على الأوردر</strong> (من مصاريف الخزنة اللي بيانها فيه «اعلان») ✓ أقل من تلت ربح بضاعة الأوردر · ✗ أكتر من النص — <strong>الشحن</strong> ✓ العميل بيدفع زي الشركة · ✗ أكتر من 25 من جيبك في الأوردر — <strong>الرفض والإلغاء</strong> بيتحسب من 5 أوردرات خلصوا: ✓ أقل من 10% · ✗ 20% أو أكتر.</p>
+  <p class="hint" data-infotxt hidden>الشاشة دي بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وتعمل إيه. بتتحدّث لوحدها بعد كل حركة. المسطرة: <strong>هامش البضاعة</strong> ✓ 40% أو أكتر · ✗ أقل من 30% — <strong>الإعلان على الأوردر</strong> (مصاريف الخزنة اللي نوعها «إعلانات») ✓ أقل من تلت ربح بضاعة الأوردر · ✗ أكتر من النص — <strong>الشحن</strong> ✓ العميل بيدفع زي الشركة · ✗ أكتر من 25 من جيبك في الأوردر — <strong>الرفض والإلغاء</strong> بيتحسب من 5 أوردرات خلصوا: ✓ أقل من 10% · ✗ 20% أو أكتر.</p>
   <div id="co-verdict"></div>
   <div class="panel"><h3 style="margin-top:0">مؤشراتك</h3><div class="co-tiles" id="co-tiles"></div></div>
   <div class="co-two"><div class="panel" id="co-good"></div><div class="panel" id="co-bad"></div></div>
@@ -3379,8 +3398,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "121";
+  var VERSION = "122";
   var CHANGELOG = [
+    { v:"122", d:"2026-10-06", items:[
+      "الأرقام بقت واحدة في كل الشاشات: صافي الربح في الرئيسية = قايمة الدخل في التقارير = «ماشي إزاي؟» — لو الأوردرات اللي ماشية اتسلّمت، واللي اتسلّم فعلاً مكتوب تحته",
+      "قايمة الدخل في التقارير اتعملت من جديد: عمود واحد بزرارين («لو كله اتسلّم» و«اتسلّم فعلاً»)، وجنبه «على الأوردر» و«من المبيعات»، والمصاريف بنوعها: الإعلان والتغليف متغيّر فوق «ربح الأوردر بعد مصاريف البيع»، والثابت تحته",
+      "الخزنة: المصروف بقى ليه نوع (إعلانات · تغليف · انتقالات شراء بضاعة · اشتراكات · مرتبات · مرة واحدة · تاني) بدل ثابت/متغيّر — والقديم نوعه اتعرف من البيان وتقدر تعدّله",
+      "انتقالات شراء البضاعة بقت على تكلفة القطعة: المشوار بيتوزّع على فواتير الشراء بتاعة نفس اليوم (أو لحد ٣ أيام قبل أو بعد) حسب قيمتها — اللي اتباع نصيبه في تكلفة البضاعة، واللي على الرف في قيمة المخزون",
+      "«لازم تبيع بكام» في الرئيسية بقى اسمه «فلوس لسه ما رجعتش» ومكتوب تحته قد إيه منه بضاعة على الرف وقد إيه خسارة",
+      "«أبيع بكام؟» في التقارير بقى «عشان تبدأ تكسب»: الأوردر الواحد بيكسب كام قبل المصاريف الثابتة، والإعلان على الأوردر لازم ينزل لحد فين، وكام أوردر تغطّي الثابت",
+      "هامش الأمان ودوران المخزون وصافي الربح ÷ المبيعات بيستخبّوا لحد ٣٠ يوم من أول أوردر · «الربح شهر بشهر» ما بيقارنش بشهر التجهيز اللي قبل أول بيعة",
+      "قطع اتباعت ولسه ما اتشرتش بقت بتبان لوحدها: كارت «اشتري للأوردرات» في الرئيسية و«ماشي إزاي؟»، والمخزون بيكتب «ناقص» جنب المتاح بدل ما الزيادة في مقاس تخبّي العجز في مقاس تاني"
+    ]},
     { v:"121", d:"2026-10-05", items:[
       "شاشة جديدة «ماشي إزاي؟» في «المزيد» بعد سجل الحركات — بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وبتتحدّث لوحدها بعد كل حركة",
       "فوق: الحكم في سطر (🟢 بتكسب · 🟡 كويس بس لسه مش بتكسب · 🔴 بتخسر) وصافي الربح لو الأوردرات اللي ماشية اتسلّمت — نفس رقم «قايمة الدخل المتوقعة»",
@@ -4570,20 +4599,45 @@
   }
 
   /* ---------- حسابات ---------- */
-  function avgCost(itemId){                       // متوسط الصنف كله
+  /* v122 — التكلفة = سعر الشراء + النقل (B = اللي في الفاتورة) + نصيب القطعة من
+     «انتقالات شراء البضاعة» (trIdx). الدوال اللي من غير B هي اللي بتتعرض وبتتحسب
+     بيها الأرباح؛ و«B» للحاجات اللي بتخص المورد نفسه (مقارنة سعره، المرتجع له). */
+  function avgCostQ(itemId){
     var q=0, v=0;
     live("purchases").forEach(function(p){
       if(p.itemId===itemId){ q += Number(p.qty)||0; v += (Number(p.qty)||0)*(Number(p.cost)||0); }
     });
-    return q>0 ? v/q : 0;
+    return { q:q, v:v };
+  }
+  function avgCostB(itemId){ var a = avgCostQ(itemId); return a.q>0 ? a.v/a.q : 0; }
+  function trPerI(itemId){
+    var T = trIdx(), t = T.perI[itemId]; if(!t) return 0;
+    var q = T.qI[itemId] || 0; return q>0 ? t/q : 0;
+  }
+  function avgCost(itemId){                       // متوسط الصنف كله
+    var a = avgCostQ(itemId);
+    return a.q>0 ? a.v/a.q + (trIdx().perI[itemId]||0)/a.q : 0;
   }
   // متوسط تكلفة اللون/المقاس نفسه، ولو ماتشتراش قبل كده بنرجع لمتوسط الصنف
-  function avgCostV(itemId, color, size){
+  function avgCostVQ(itemId, color, size){
     var k = vKey(itemId, color, size), q=0, v=0;
     live("purchases").forEach(function(p){
       if(keyOf(p) === k){ q += Number(p.qty)||0; v += (Number(p.qty)||0)*(Number(p.cost)||0); }
     });
-    return q>0 ? v/q : avgCost(itemId);
+    return { k:k, q:q, v:v };
+  }
+  function avgCostVB(itemId, color, size){
+    var a = avgCostVQ(itemId, color, size);
+    return a.q>0 ? a.v/a.q : avgCostB(itemId);
+  }
+  function trPerV(itemId, color, size){
+    var T = trIdx(); if(!(T.total > 0)) return 0;
+    var k = vKey(itemId, color, size), q = T.qV[k] || 0;
+    return q>0 ? (T.perV[k]||0)/q : trPerI(itemId);
+  }
+  function avgCostV(itemId, color, size){
+    var a = avgCostVQ(itemId, color, size);
+    return a.q>0 ? (a.v + (trIdx().perV[a.k]||0))/a.q : avgCost(itemId);
   }
   // ---------- أصناف الأوردر ----------
   // الأوردر الجديد بيتخزّن بـ lines[]، والقديم بصنف واحد على مستوى السجل.
@@ -4596,8 +4650,14 @@
   }
   // التكلفة بتتثبّت على السطر وقت التسليم وما بتتغيّرش بعد كده.
   // من غير التثبيت ده، أي شراء جديد بسعر مختلف كان بيعيد كتابة أرباح الشهور اللي فاتت.
+  /* v122: unitCost المتثبّت = سعر الشراء + النقل بس، ونصيب الانتقالات متثبّت لوحده
+     في trCost. سطر اتسلّم قبل v122 (مالوش trCost) بياخد نصيبه بالمتوسط الحالي. */
+  function lineTr(l){
+    if(l && l.trCost != null && l.trCost !== "") return Number(l.trCost)||0;
+    return trPerV(l.itemId, vColor(l), vSize(l));
+  }
   function lineCost(l){
-    if(l && l.unitCost != null && l.unitCost !== "") return Number(l.unitCost)||0;
+    if(l && l.unitCost != null && l.unitCost !== "") return (Number(l.unitCost)||0) + lineTr(l);
     return avgCostV(l.itemId, vColor(l), vSize(l));   // السجلات القديمة: نفس السلوك القديم
   }
 
@@ -4610,8 +4670,10 @@
     if(stOf(rec) === "delivered"){
       if(!rec.deliveredAt) rec.deliveredAt = today();
       SL(rec).forEach(function(l){
-        if(l && (l.unitCost == null || l.unitCost === ""))
-          l.unitCost = avgCostV(l.itemId, vColor(l), vSize(l));
+        if(l && (l.unitCost == null || l.unitCost === "")){
+          l.unitCost = avgCostVB(l.itemId, vColor(l), vSize(l));
+          l.trCost = trPerV(l.itemId, vColor(l), vSize(l));
+        }
       });
     } else {
       // رجع لحالة تانية: التاريخ يتلغي عشان لو اتسلّم تاني ياخد تاريخه الصح
@@ -4706,6 +4768,26 @@
     var n = stockIdx().free[vKey(itemId,color,size)];
     return n == null ? 0 : n;
   }
+  /* v122 — المتاح بالصنف كله كان بيجمع الألوان والمقاسات: ٥ زيادة في مقاسات و٢ ناقصين
+     في مقاس تاني كانوا بيطلعوا «فاضل ٣» — والعجز مستخبّي. هنا كل تركيبة لوحدها:
+     pos = المتاح فعلاً، neg = اللي اتباع أو اتحجز ولسه ما اتشراش، short = التركيبات دي. */
+  function freeSplit(itemId){
+    var o = { pos:0, neg:0, short:[] };
+    variantsOf(itemId).forEach(function(v){
+      var n = freeOfV(itemId, v.color, v.size);
+      if(n > 0) o.pos += n;
+      else if(n < 0){ o.neg += -n; o.short.push({ color:v.color, size:v.size, n:-n }); }
+    });
+    return o;
+  }
+  // كل التركيبات الناقصة في كل الأصناف — «اشتري للأوردرات»
+  function shortList(){
+    var out = [];
+    live("items").forEach(function(it){
+      freeSplit(it.id).short.forEach(function(x){ out.push({ itemId:it.id, name:it.name, color:x.color, size:x.size, n:x.n }); });
+    });
+    return out;
+  }
   // ---------- الألوان والمقاسات ----------
   // كل حركة ممكن يكون معاها لون ومقاس. السجلات القديمة من غيرهم = نسخة "عام"
   function vColor(r){ return r ? squish(r.color) : ""; }
@@ -4765,7 +4847,7 @@
      تركيبة كان بيقرا الداتا كلها من الأول — وده بيبوّظ سرعة درج البيع
      لما الأصناف والتركيبات تكتر. بيتصفّر مع أي تعديل في الداتا. */
   var _sidx = null;
-  function clearStockIdx(){ _sidx = null; }
+  function clearStockIdx(){ _sidx = null; _tidx = null; }
   function stockIdx(){
     if(_sidx) return _sidx;
     var free = {}, vars = {}, stock = {};
@@ -4847,7 +4929,7 @@
     live("purchases").forEach(function(p){
       if(p.itemId === itemId && vColor(p) === c){ q += Number(p.qty)||0; v += (Number(p.qty)||0)*(Number(p.cost)||0); }
     });
-    return q > 0 ? { c:v/q, own:true } : { c:avgCost(itemId), own:false };
+    return q > 0 ? { c:(v + (trIdx().perC[itemId + "\u0001" + c]||0))/q, own:true } : { c:avgCost(itemId), own:false };
   }
 
   // ---------- حالات الأوردر ----------
@@ -5470,7 +5552,8 @@
        · صنف اتشال: مشترياته لسه محسوبة لأننا مش بنلف على live("items")
      (IAS 2.27 — المتوسط المتحرّك) */
   function stockBookValue(){
-    var v = live("purchases").reduce(function(a,p){ return a + purchTotal(p); }, 0);
+    // + الانتقالات اللي اتحطت على البضاعة — نصيب المباع منها بيطلع مع lineCost تحت
+    var v = live("purchases").reduce(function(a,p){ return a + purchTotal(p); }, 0) + trIdx().total;
     live("sales").forEach(function(s){
       if(!isDelivered(s)) return;
       SL(s).forEach(function(l){ v -= lineCost(l) * lineSold(l, s); });
@@ -5632,21 +5715,118 @@
   // الأوردر بيدخل الفترة بتاريخ تسليمه مش تاريخ طلبه — أوردر اتعمل آخر الشهر
   // واتسلّم أول الشهر اللي بعده إيراده بيتسجّل في شهر التسليم (IFRS 15.31)
   function salesIn(r){ return live("sales").filter(function(s){ return inRange(revDate(s), r); }); }
-  /* تصنيف المصروف. السجلات القديمة مالهاش تصنيف، فبتتعامل «ثابت» —
-     ده الأحوط: بيطلّع نقطة تعادل أعلى مش أقل، فما يخدعكش إنك مغطّي
-     تكاليفك وإنت لأ. الشاشة بتنبّه إنها محتاجة مراجعة. */
-  function costKindOf(c){ return (c && c.costKind === "var") ? "var" : "fixed"; }
+  /* v122 — نوع المصروف (c.cat). النوع هو اللي بيحدد ثابت ولا متغيّر:
+     الإعلان والتغليف بيزيدوا مع كل أوردر (متغيّر)، والباقي ثابت.
+     «انتقالات شراء بضاعة» مش مصروف أصلاً: بتتحط على تكلفة القطع اللي
+     اتشرت في المشوار ده (IAS 2.11 — زي النقل بالظبط) — شوف trIdx تحت.
+     السجلات القديمة مالهاش نوع، فبنعرفه من البيان (expCatGuess)، ولو
+     ما اتعرفش بنرجع للتصنيف القديم ثابت/متغيّر (costKind). */
+  var EXP_CATS = [
+    ["ads",    "إعلانات",            "var"],
+    ["pack",   "تغليف",              "var"],
+    ["trans",  "انتقالات شراء بضاعة", "goods"],
+    ["subs",   "اشتراكات",           "fixed"],
+    ["salary", "مرتبات",             "fixed"],
+    ["once",   "مرة واحدة",          "fixed"],
+    ["other",  "تاني",               "fixed"],
+    // مش زرار: مصروف قديم متعلّم «متغيّر» وبيانه ما بيقولش نوعه (أو عمولة) — بيفضل متغيّر
+    ["othervar", "مصاريف متغيّرة تانية", "var"]
+  ];
+  var EXP_CAT = {}; EXP_CATS.forEach(function(x){ EXP_CAT[x[0]] = { label:x[1], kind:x[2] }; });
+  function expCatGuess(note){
+    var n = String(note || "");
+    if(/[اإأ]علان|ممول|sponsor/i.test(n)) return "ads";
+    if(/بابلز|لزق|تغليف|[اأ]كياس|شنط|كرتون|كراتين/.test(n)) return "pack";
+    if(/انتقال|مواصلات|مشوار|مشاوير|تو?كتوك|تكاتك|[اأ]وبر|بنزين|نقل/.test(n) && /بضا[عئ]|شراء|مورد|مصنع/.test(n)) return "trans";
+    if(/مرتب|راتب/.test(n)) return "salary";
+    if(/عمول|كوميشن/.test(n)) return "othervar";
+    if(/اشتراك/.test(n)) return "subs";
+    if(/معدات|فلاير|تفاعل|طابع|لوجو|ختم|رينج|ديكور|تصوير|(^|\s)خط(\s|$)/.test(n)) return "once";
+    return "";
+  }
+  // النوع اللي اتسجّل بإيدك، وإلا المستنتج من البيان، وإلا «تاني»
+  function expCat(c){
+    if(c && EXP_CAT[c.cat]) return c.cat;
+    // قديم: «متغيّر» اللي اخترته بإيدك زمان بيكسب على التخمين لو التخمين ثابت
+    var g = expCatGuess(c && c.note);
+    if(c && c.costKind === "var" && (!g || EXP_CAT[g].kind !== "var")) return "othervar";
+    return g || "other";
+  }
+  function expCatSet(c){ return !!(c && EXP_CAT[c.cat]); }
+  function costKindOf(c){ return EXP_CAT[expCat(c)].kind === "var" ? "var" : "fixed"; }
   function isVarCost(c){ return costKindOf(c) === "var"; }
+  // المصاريف اللي نوعها مستنتج من البيان — الشاشة بتقولك تراجعها
   function unclassifiedExpenses(){
     return live("cash").filter(function(c){
-      return c.type === "expense" && !c.costKind; }).length;
+      return c.type === "expense" && !expCatSet(c); }).length;
   }
+  /* ---------- انتقالات شراء البضاعة على تكلفة القطعة ----------
+     كل مصروف «انتقالات شراء بضاعة» بيتربط بفواتير الشراء اللي في نفس يومه،
+     ولو مفيش: بأقرب يوم فيه فاتورة لحد ٣ أيام قبل أو بعد (الأقرب، ولو
+     اتساووا الأقدم). المبلغ بيتوزّع على سطور الفواتير دي حسب قيمتها،
+     فكل قطعة بتشيل نصيبها. القطع اللي اتباعت نصيبها بيدخل في تكلفة
+     البضاعة المباعة، واللي لسه على الرف نصيبها جوّه قيمة المخزون.
+     مشوار مالوش فاتورة في الـ٣ أيام بيفضل مصروف ثابت عادي (unlinked).
+     ما بيتخزّنش حاجة — بيتحسب من الداتا مع كل رسم، وبيتصفّر مع فهرس المخزون. */
+  var _tidx = null;
+  function trIdx(){
+    if(_tidx) return _tidx;
+    var byDate = {}, dates = [];
+    live("purchases").forEach(function(p){
+      if(isPRet(p) || !p.date || !(purchTotal(p) > 0)) return;
+      if(!byDate[p.date]){ byDate[p.date] = []; dates.push(p.date); }
+      byDate[p.date].push(p);
+    });
+    var T = { byP:{}, link:{}, unlinked:[], total:0, perV:{}, perI:{}, perC:{}, qV:{}, qI:{}, qC:{} };
+    /* مشوار في فترة مقفولة ما يتربطش بفاتورة بعد القفل — وإلا فاتورة جديدة كانت
+       هتشيل مصروف من شهر مقفول وتغيّر ربحه */
+    var lk = lockDate();
+    live("cash").forEach(function(c){
+      if(c.type !== "expense" || expCat(c) !== "trans") return;
+      var amt = Number(c.amount)||0; if(!(amt > 0)) return;
+      var shut = lk && c.date && c.date <= lk;
+      var d = byDate[c.date] ? c.date : "";
+      if(!d && c.date){
+        var best = null;
+        dates.forEach(function(x){
+          var n = Math.abs(daysBetween(c.date, x));
+          if(n > 3 || (shut && x > lk)) return;    // ٣ أيام قبل أو بعد
+          if(!best || n < best.n || (n === best.n && x < best.d)) best = { d:x, n:n };
+        });
+        if(best) d = best.d;
+      }
+      if(!d){ T.unlinked.push(c.id); return; }
+      var ps = byDate[d], sum = ps.reduce(function(a, p){ return a + purchTotal(p); }, 0);
+      T.link[c.id] = d; T.total += amt;
+      ps.forEach(function(p){ T.byP[p.id] = (T.byP[p.id]||0) + amt * purchTotal(p) / sum; });
+    });
+    // الكميات بنفس طريقة avgCost (المرتجع للمورد بيطرح) — عشان نصيب القطعة يتحسب من غير لفة على المشتريات
+    live("purchases").forEach(function(p){
+      var a = T.byP[p.id] || 0, q = Number(p.qty)||0;
+      var k = vKey(p.itemId, vColor(p), vSize(p)), kc = p.itemId + "\u0001" + vColor(p);
+      T.qV[k] = (T.qV[k]||0) + q; T.qI[p.itemId] = (T.qI[p.itemId]||0) + q; T.qC[kc] = (T.qC[kc]||0) + q;
+      if(!a) return;
+      T.perV[k] = (T.perV[k]||0) + a; T.perI[p.itemId] = (T.perI[p.itemId]||0) + a; T.perC[kc] = (T.perC[kc]||0) + a;
+    });
+    _tidx = T;
+    return T;
+  }
+  function trLinked(c){ return !!(c && trIdx().link[c.id]); }
   function expensesIn(r, kind){
     return live("cash").filter(function(c){
-      if(c.type !== "expense" || !inRange(c.date, r)) return false;
+      if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c)) return false;
       return !kind || costKindOf(c) === kind;
     }).reduce(function(a,c){ return a + (Number(c.amount)||0); },0) +
       (!kind || kind === "var" ? xLossIn(r) : 0);
+  }
+  // مصاريف الفترة بالنوع — من غير الانتقالات اللي اتحطت على البضاعة
+  function expByCat(r){
+    var o = {}; EXP_CATS.forEach(function(x){ o[x[0]] = 0; });
+    live("cash").forEach(function(c){
+      if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c)) return;
+      o[expCat(c)] += Number(c.amount)||0;
+    });
+    return o;
   }
   // خسارة (أو مكسب) الاستبدال مع المورد — مصروف متغيّر من غير خزنة
   function xLossIn(r){
@@ -5675,6 +5855,48 @@
              netShip:netShip, expenses:exp, fixedExp:fixedExp, varExp:varExp,
              varCost:varCost, cm:cm, cmPct: revenue ? cm / revenue : 0,
              net: profit + netShip - exp };
+  }
+
+  /* v122 — قايمة الدخل الموحّدة. رقم واحد بيتعرض في الرئيسية والتقارير و«ماشي إزاي؟»:
+     الفعلي (periodStats — اللي اتسلّم والملغي) + الأوردرات اللي لسه ماشية لو اتسلّمت
+     (expProfit)، والمصاريف بأنواعها. «على الأوردر» = المبلغ ÷ عدد أوردرات الفترة كلها
+     (الملغي داخل — فلوس الإعلان اتصرفت عليه برضه). */
+  function projStats(r){
+    var c = periodStats(r), X = expByCat(r), xl = xLossIn(r);
+    var A = { sin:0, sout:0 }, E = { goods:0, cost:0, sin:0, sout:0, net:0 }, nc = 0;
+    c.list.forEach(function(s){ if(shipCounts(s)){ A.sin += shipIn(s); A.sout += shipOut(s); } });
+    var open = c.list.filter(function(s){ return !isDelivered(s) && !isCancelled(s); });
+    open.forEach(function(s){
+      var e = expProfit(s);
+      E.goods += e.goods; E.cost += e.cost; E.sin += e.sin; E.sout += e.sout; E.net += e.net;
+      if(e.noCost.length) nc++;
+    });
+    var mk = function(goods, cost, sin, sout, n){
+      var v = { goods:goods, cost:cost, gross:goods - cost, sin:sin, sout:sout, ship:sin - sout, n:n,
+                ads:X.ads, pack:X.pack, xloss:xl, othervar:X.othervar, subs:X.subs, salary:X.salary, once:X.once, trans:X.trans, other:X.other };
+      v.varExp = v.ads + v.pack + v.xloss + v.othervar;
+      v.fixedExp = v.subs + v.salary + v.once + v.trans + v.other;
+      v.contrib = v.gross + v.ship - v.varExp;
+      v.net = v.contrib - v.fixedExp;
+      v.margin = goods > 0.009 ? v.gross / goods : null;
+      return v;
+    };
+    var done = c.list.length - open.length;
+    return { c:c, open:open, n:c.list.length, nOpen:open.length, nDone:done, noCost:nc,
+             act: mk(c.revenue, c.cogs, A.sin, A.sout, done),
+             exp: mk(c.revenue + E.goods, c.cogs + E.cost, A.sin + E.sin, A.sout + E.sout, c.list.length) };
+  }
+  /* «عشان تبدأ تكسب»: كل أوردر بيكسب كام قبل الثابت (بعد البضاعة والشحن والإعلان والتغليف)،
+     والإعلان على الأوردر لازم ينزل لحد كام، وكام أوردر تغطّي الثابت. */
+  function unitEcon(v){
+    if(!v.n) return null;
+    var per = function(x){ return x / v.n; };
+    var pre = per(v.gross + v.ship - v.pack - v.xloss - v.othervar);     // ربح الأوردر قبل الإعلان
+    var ad = per(v.ads), cu = pre - ad;
+    // سيناريو: إعلان على الأوردر = تلات أرباع اللي الأوردر يقدر يستحمله، مقرّب لأقرب ١٠
+    var adT = pre > 20 ? Math.max(10, Math.round(pre * 0.75 / 10) * 10) : null, cuT = adT === null ? null : pre - adT;
+    var need = function(x){ return x > 0.009 ? Math.ceil(v.fixedExp / x - 1e-9) : null; };
+    return { pre:pre, ad:ad, cu:cu, fixed:v.fixedExp, need:need(cu), adT:adT, cuT:cuT, needT: cuT === null ? null : need(cuT) };
   }
 
   function pct(now, before){
@@ -5708,6 +5930,7 @@
     var r = periodRange();
     var cur = periodStats(r);
     var prev = prevRange() ? periodStats(prevRange()) : null;
+    var curP = projStats(r), prevP = prevRange() ? projStats(prevRange()) : null;
 
     var stockValue = stockBookValue();
     var recv=0, pay=0;
@@ -5728,8 +5951,10 @@
       ["gross", "مجمل ربح البضاعة", money(cur.profit), cur.profit>=0?"v-gain":"v-due", prev?deltaHTML(cur.profit, prev.profit):""],
       ["ship",  "صافي الشحن", money(cur.netShip), cur.netShip>=0?"v-gain":"v-due", prev?deltaHTML(cur.netShip, prev.netShip):""],
       ["exp",   "المصاريف", money(cur.expenses), cur.expenses>0?"v-due":"", prev?deltaHTML(cur.expenses, prev.expenses):""],
-      ["net",   "صافي الربح", money(cur.net), cur.net>=0?"v-gain":"v-due", prev?deltaHTML(cur.net, prev.net):""],
-      ["be",    "لازم تبيع بكام", cashBeTxt(), cashBeCls(), cashBeSub()],
+      ["net",   "صافي الربح", money(curP.exp.net), curP.exp.net>=0?"v-gain":"v-due",
+        (curP.nOpen ? "<span class='sub'>لو الـ" + qty(curP.nOpen) + " اللي ماشيين اتسلّموا · اتسلّم فعلاً " + esc(money(curP.act.net)) + "</span>" : "") +
+        (prevP ? deltaHTML(curP.exp.net, prevP.exp.net) : "")],
+      ["be",    "فلوس لسه ما رجعتش", cashBeTxt(), cashBeCls(), cashBeSub()],
       ["stock", "قيمة المخزون", money(stockValue), "", "<span class='sub'>تراكمي</span>"],
       ["cash",  "رصيد الخزنة", money(cashBox()), cashBox()>=0?"":"v-due", "<span class='sub'>تراكمي</span>"],
       ["wallet","لك عند شركات الشحن", money(walletsTotal()), walletsTotal()>0?"v-gain":"", "<span class='sub'>لسه ما اتسحبتش</span>"],
@@ -5749,7 +5974,7 @@
     var GROUPS = [
       { t:"", hero:true, keys:["net","be"] },
       { t:"فلوسك دلوقتي",  keys:["cash","wallet","recv","pay","stock"] },
-      { t:"حركة الفترة",   keys:["rev","cogs","gross","ship","exp"] },
+      { t:"حركة الفترة — اللي اتسلّم فعلاً",   keys:["rev","cogs","gross","ship","exp"] },
       { t:"الأوردرات",     keys:["deliv","open","canc"] }
     ];
     var card = function(c, hero){
@@ -5820,6 +6045,17 @@
                v:qty(n) + " قطعة", go:"sales|4" });
       });
     }
+    if(canTab("purch") || canTab("inv")){
+      // v122 — قطع اتباعت أو اتحجزت لأوردرات ولسه ما اتشرتش من المورد
+      var SH = shortList();
+      if(SH.length){
+        var shn = SH.reduce(function(a, x){ return a + x.n; }, 0);
+        line({ ic:"receipt", cls:"bad", t:"اشتري للأوردرات",
+               s:SH.slice(0, 2).map(function(x){ var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : "") + " × " + qty(x.n); }).join(" · ") +
+                 (SH.length > 2 ? " و" + qty(SH.length - 2) + " تاني" : ""),
+               v:qty(shn) + " قطعة", go: canTab("purch") ? "purch" : "inv|out" });
+      }
+    }
     if(canTab("inv")){
       /* صنف واحد: سطره بتفاصيله زي ما هو. أكتر من صنف: كارت واحد بالعدد
          وأسماء أول اتنين — كانوا سطر لكل لون ومقاس وبيزقّوا الباقي تحت. */
@@ -5875,10 +6111,12 @@
     var cur = periodStats(periodRange());
     var sel = document.getElementById("per-home");
     var perTxt = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : "";
-    var be = toBreakCash();
+    // v122: صافي الربح = نفس قايمة الدخل «لو كله اتسلّم»، واللي اتسلّم فعلاً تحته
+    var PS = projStats(periodRange()), xn = PS.exp.net;
     var K = [
-      ["net", "صافي الربح", money(cur.net), cur.net >= 0 ? "v-gain" : "v-due", perTxt, 1],
-      ["be", "لازم تبيع بكام", cashBeTxt(), cashBeCls(), be > 0.009 ? "عشان ترجّع فلوسك" : "رجّعت فلوسك ✓", 1],
+      ["net", "صافي الربح", money(xn), xn >= 0 ? "v-gain" : "v-due",
+        PS.nOpen ? "لو الـ" + qty(PS.nOpen) + " أوردر اللي ماشيين اتسلّموا · اتسلّم فعلاً " + money(PS.act.net) : perTxt, 1],
+      ["be", "فلوس لسه ما رجعتش", cashBeTxt(), cashBeCls(), cashBeSubTxt(), 1],
       ["cash", "الخزنة", money(cashBox()), cashBox() >= 0 ? "" : "v-due", "الفلوس اللي في إيدك", 0],
       ["stock", "قيمة المخزون", money(stockBookValue()), "", "بالتكلفة", 1],
       ["wallet", "لك عند شركات الشحن", money(walletsTotal()), walletsTotal() > 0.009 ? "v-gain" : "", "لسه ما استلمتهاش", 0]
@@ -6020,18 +6258,18 @@
                head:["الأوردر","شركة الشحن","حمّلته للعميل","دفعته للشركة","الصافي"], rows:rows };
     },
     exp: function(cur, r){
-      var rows = live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r); })
+      var rows = live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r) && !trLinked(c); })
         .concat(live("purchases").filter(function(p){ return p.xloss && inRange(p.date, r); })
           .map(function(p){ return { date:p.date, at:p.at, partyId:p.partyId, amount:p.xloss,
             note:(p.xloss > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
         .sort(byDate).map(function(c){
         return "<tr><td class='num'>" + esc(c.date||"—") + "</td>" +
-          "<td class='wide'>" + (esc(squish(c.note)) || "بدون بيان") + "</td>" +
+          "<td class='wide'>" + (esc(squish(c.note)) || "بدون بيان") + (c.type === "expense" ? "<span class='sub'>" + esc(EXP_CAT[expCat(c)].label) + "</span>" : "") + "</td>" +
           "<td>" + (c.partyId ? esc(partyName(c.partyId)) : "—") + "</td>" +
           "<td class='num v-due'>" + money(c.amount) + "</td></tr>";
       });
       rows.push(sumRow(["الإجمالي","","","<b>"+money(cur.expenses)+"</b>"]));
-      return { note:"مصاريف التشغيل المسجّلة في الخزنة. مصاريف نقل المشتريات مش هنا — دي بتتحط على تكلفة البضاعة.",
+      return { note:"مصاريف التشغيل المسجّلة في الخزنة. مصاريف نقل المشتريات وانتقالات شراء البضاعة اللي ليها فاتورة مش هنا — دي بتتحط على تكلفة البضاعة.",
                head:["التاريخ","البيان","الجهة","المبلغ"], rows:rows };
     },
     be: function(cur, r){
@@ -6065,26 +6303,33 @@
       if(fromSup)  rows.push(L("استرداد من موردين", fromSup));
       if(manIn)    rows.push(L("تحصيل يدوي", manIn));
       rows.push(L("إجمالي اللي رجع", back, "sumrow"));
-      rows.push(L(left > 0.009 ? "لازم تبيع بـ" : "رجّعت فلوسك وزيادة",
+      rows.push(L(left > 0.009 ? "لسه ما رجعش" : "رجّعت فلوسك وزيادة",
                   Math.abs(left), "sumrow"));
+      var bs = cashBeSplit();
+      if(left > 0.009 && bs.stock > 0.009) rows.push(L("منه بضاعة على الرف (بالتكلفة)", bs.stock));
+      if(left > 0.009 && bs.rest > 0.009) rows.push(L(bs.isLoss ? "ومنه خسارة لحد النهارده" : "والباقي", bs.rest));
       return { note: left > 0.009
-          ? "كل اللي خرج من جيبك على الشغل ناقص كل اللي رجع من البيع. رقم كاش تراكمي من البداية — بيقل مع كل تحصيل. المحصّل عن طريق شركة الشحن محسوب هنا حتى لو لسه ما سحبتوش."
+          ? "كل اللي خرج من جيبك على الشغل ناقص كل اللي رجع من البيع. رقم كاش تراكمي من البداية — بيقل مع كل تحصيل. المحصّل عن طريق شركة الشحن محسوب هنا حتى لو لسه ما سحبتوش. البضاعة اللي على الرف مش خسارة: هترجع لما تتباع."
           : "رجّعت كل اللي دفعته، واللي بعد كده مكسب. الرقم تراكمي من البداية.",
         head:["البند","المبلغ"], rows:rows };
     },
 
-    net: function(cur){
+    net: function(cur, r){
       var L = function(a,b,cls){
         return "<tr><td class='wide'>"+esc(a)+"</td><td class='num "+(cls||"")+"'>"+money(b)+"</td></tr>"; };
-      var rows = [
-        L("الإيرادات (مبيعات مسلّمة)", cur.revenue, "v-gain"),
-        L("− تكلفة البضاعة المباعة", -cur.cogs, "v-due"),
-        sumRow(["مجمل ربح البضاعة","<b>"+money(cur.profit)+"</b>"]),
-        L((cur.netShip>=0?"+ ":"") + "صافي الشحن", cur.netShip, cur.netShip>=0?"v-gain":"v-due"),
-        L("− المصاريف", -cur.expenses, "v-due"),
-        sumRow(["صافي الربح","<b>"+money(cur.net)+"</b>"])
+      // v122: نفس قايمة الدخل في التقارير («لو كله اتسلّم») — نفس رقم الكارت
+      var P = projStats(r), v = P.exp, rows = [
+        L("المبيعات" + (P.nOpen ? " (منها " + qty(P.nOpen) + " أوردر لسه ماشي)" : ""), v.goods, "v-gain"),
+        L("− تكلفة البضاعة", -v.cost, "v-due"),
+        sumRow(["ربح البضاعة","<b>"+money(v.gross)+"</b>"]),
+        L((v.ship>=0?"+ ربح الشحن":"− فرق الشحن"), v.ship, v.ship>=0?"v-gain":"v-due"),
+        L("− إعلانات وتغليف (متغيّر)", -v.varExp, "v-due"),
+        sumRow(["ربح الأوردرات بعد مصاريف البيع","<b>"+money(v.contrib)+"</b>"]),
+        L("− مصاريف ثابتة", -v.fixedExp, "v-due"),
+        sumRow(["صافي الربح لو كله اتسلّم","<b>"+money(v.net)+"</b>"]),
+        L("منه اتسلّم فعلاً", P.act.net, P.act.net>=0?"v-gain":"v-due")
       ];
-      return { note:"ده ربح الفترة المختارة. رصيد الخزنة رقم تاني خالص — فيه رأس المال والمشتريات والتحصيل.",
+      return { note:"نفس «قايمة الدخل» في التقارير. «لو كله اتسلّم» = قبل أي رفض. رصيد الخزنة رقم تاني خالص — فيه رأس المال والمشتريات والتحصيل.",
                head:["البند","المبلغ"], rows:rows };
     },
     stock: function(){
@@ -6205,7 +6450,7 @@
              rows:rows };
   }
 
-  var KPI_TITLE = { be:"لازم تبيع بكام", rev:"الإيرادات", cogs:"تكلفة البضاعة المباعة", gross:"مجمل ربح البضاعة",
+  var KPI_TITLE = { be:"فلوس لسه ما رجعتش", rev:"الإيرادات", cogs:"تكلفة البضاعة المباعة", gross:"مجمل ربح البضاعة",
     ship:"صافي الشحن", exp:"المصاريف", net:"صافي الربح", stock:"قيمة المخزون",
     cash:"رصيد الخزنة", wallet:"لك عند شركات الشحن", recv:"لك عند العملاء",
     pay:"عليك للموردين", deliv:"أوردرات مسلّمة", open:"أوردرات جارية", canc:"أوردرات ملغية" };
@@ -6218,7 +6463,7 @@
     var d = KPI_DETAIL[kpiOpen](cur, r);
     pnl.hidden = false;
     var rr = periodRange();
-    /* «لازم تبيع بكام» رقم تراكمي من البداية — مش تابع للفترة المختارة،
+    /* «فلوس لسه ما رجعتش» رقم تراكمي من البداية — مش تابع للفترة المختارة،
        فما ينفعش نكتب تحته تواريخ الفترة. */
     var CUMULATIVE = { be:1, stock:1, cash:1, wallet:1, recv:1, pay:1 };
     document.getElementById("kpi-title").textContent = KPI_TITLE[kpiOpen] +
@@ -6398,7 +6643,8 @@
       var rev = st2.rev, pr = st2.pr;
       return "<tr><td class='wide'>"+thumbHTML(i.id)+esc(i.name)+"</td><td class='num'>"+qty(st)+" "+esc(i.unit||"")+"</td>"+
         "<td class='num'>"+(rsv ? "<span class='pill due'>"+qty(rsv)+"</span>" : "—")+"</td>"+
-        "<td class='num'>"+qty(st-rsv)+"</td>"+
+        "<td class='num'>"+(function(){ var fs = freeSplit(i.id);
+          return qty(fs.pos) + (fs.neg ? "<span class='sub v-due'>ناقص " + qty(fs.neg) + "</span>" : ""); })()+"</td>"+
         "<td class='num'>"+money(ac)+"</td><td class='num'>"+money(i.price)+"</td>"+
         "<td class='num'>"+money(rev)+"</td><td class='num "+(pr>=0?"v-gain":"v-due")+"'>"+money(pr)+"</td></tr>";
     });
@@ -6511,54 +6757,7 @@
 
   function pctTxt(v){ return (isFinite(v) ? (v*100).toFixed(1) : "0.0") + "%"; }
 
-  /* «أبيع بكام عشان أغطّي مصاريفي» — أهم رقم في الشاشة، فمكانه
-     لوحة المتابعة مش جوّه التقارير. */
-  // متوسط تكلفة القطعة للصنف من كل مشترياته
-  function itemAvgCost(itemId){
-    var q = 0, c = 0;
-    live("purchases").forEach(function(x){
-      if(x.itemId !== itemId) return;
-      var n = Number(x.qty)||0; q += n; c += n * (Number(x.cost)||0);
-    });
-    return q > 0 ? c / q : 0;
-  }
-
-  /* لسه ما بعتش حاجة؟ الهامش لسه ممكن يتحسب من أسعار البيع المسجّلة
-     وتكلفة الشراء الفعلية. من غير كده الشاشة بتقول «—» وإنت محتاج
-     الرقم ده بالذات في أول يوم قبل ما تبيع. */
-  function expectedMargin(){
-    var rev = 0, cost = 0, units = 0;
-    live("items").forEach(function(it){
-      variantsOf(it.id).forEach(function(v){
-        var price = vPrice(it, v.color); if(price <= 0) return;
-        var q = Math.max(0, stockOfV(it.id, v.color, v.size));
-        if(q <= 0) return;
-        var c = avgCostV(it.id, v.color, v.size);
-        if(c <= 0) return;
-        rev += q * price; cost += q * c; units += q;
-      });
-    });
-    if(units > 0 && rev > 0)
-      return { pct:(rev - cost)/rev, basis:"البضاعة اللي في مخزنك بأسعار البيع المسجّلة" };
-    // مفيش مخزون: متوسط بسيط على الأصناف اللي ليها سعر وتكلفة معروفين
-    var ps = [];
-    live("items").forEach(function(it){
-      var c = itemAvgCost(it.id);
-      if(c <= 0) return;
-      var price = Number(it.price)||0;
-      if(price > 0) ps.push((price - c)/price);
-      // لون ليه سعر خاص: هامشه بسعره وتكلفته هو
-      Object.keys(it.cprice || {}).forEach(function(k){
-        var cp = colorPrice(it, k), cc = costOfColor(it.id, k).c;
-        if(cp > 0 && cc > 0) ps.push((cp - cc)/cp);
-      });
-    });
-    if(!ps.length) return null;
-    return { pct: ps.reduce(function(a,b){ return a+b; },0)/ps.length,
-             basis:"متوسط أسعارك وتكاليفك المسجّلة" };
-  }
-
-  /* ---------- «لازم تبيع بكام» عشان ترجّع فلوسك ----------
+  /* ---------- «فلوس لسه ما رجعتش» (كان «لازم تبيع بكام») ----------
      ده رقم كاش مش رقم محاسبي: كل اللي خرج من جيبك على الشغل ناقص كل
      اللي رجع من البيع. تراكمي من البداية، وبيتحدّث مع كل حركة.
 
@@ -6607,36 +6806,25 @@
     var n = toBreakCash();
     return money(n > 0.009 ? n : 0);
   }
-  function cashBeCls(){ return toBreakCash() > 0.009 ? "v-due" : "v-gain"; }
+  function cashBeCls(){ return toBreakCash() > 0.009 ? "" : "v-gain"; }
+  /* v122 — «فلوس لسه ما رجعتش» (كان «لازم تبيع بكام»): أغلبه غالباً بضاعة على
+     الرف مش خسارة، فبنقسمه: البضاعة بقيمتها في الدفاتر، والباقي — ولو الباقي هو
+     الخسارة بالظبط بنسمّيه باسمه، وإلا «الباقي» من غير ما نفترض. */
+  function cashBeSplit(){
+    var n = toBreakCash(), st = Math.max(0, stockBookValue());
+    var stock = Math.min(st, Math.max(0, n)), rest = Math.max(0, n - stock), loss = -netProfitAll();
+    return { n:n, stock:stock, rest:rest, isLoss: rest > 0.009 && Math.abs(rest - loss) < 0.5 };
+  }
+  function cashBeSubTxt(){
+    var b = cashBeSplit();
+    if(b.n <= 0.009) return "رجّعت فلوسك ✓ واللي بعده مكسب";
+    return (b.stock > 0.009 ? "منها " + money(b.stock) + " بضاعة على الرف" : "") +
+      (b.rest > 0.009 ? (b.stock > 0.009 ? " · و" : "") + money(b.rest) + (b.isLoss ? " خسارة لحد النهارده" : " الباقي") : "");
+  }
   function cashBeSub(){
-    var n = toBreakCash();
-    if(n > 0.009) return "<span class='sub'>عشان ترجّع فلوسك</span>";
-    return "<span class='sub v-gain'>رجّعت فلوسك ✓ واللي بعده مكسب</span>";
+    return "<span class='sub" + (toBreakCash() > 0.009 ? "" : " v-gain") + "'>" + esc(cashBeSubTxt()) + "</span>";
   }
 
-  /* الهامش اللي بنحسب بيه: الفعلي من مبيعاتك لو موجود، وإلا تقديري. */
-  function cmBasis(c){
-    /* عندك مبيعات فعلية؟ هي وحدها الأساس. لو هامشها سالب (بتبيع بأقل من
-       التكلفة) بنرجّع null عشان الكارت يقول كده صريح — ممنوع نحطّ مكانه
-       رقم تقديري من أسعار القايمة، ده بيخبّي الخسارة ويطلّع رقم متفائل. */
-    if(c.revenue > 0.009) return c.cmPct > 0 ? { pct:c.cmPct, est:false } : null;
-    var e = expectedMargin();
-    return (e && e.pct > 0) ? { pct:e.pct, est:true, basis:e.basis } : null;
-  }
-  function beOf(c){
-    var m = cmBasis(c);
-    return m ? c.fixedExp / m.pct : null;
-  }
-  // إيه الناقص بالظبط عشان نقدر نحسب الهامش؟ «سجّل الاتنين» كانت
-  // بتوديك في السكة الغلط وإنت مشترياتك متسجّلة فعلاً
-  function marginMissing(){
-    var anyPrice = live("items").some(function(it){ return itemHasPrice(it); });
-    var anyCost  = live("purchases").some(function(p){ return (Number(p.cost)||0) > 0; });
-    if(!anyPrice && !anyCost) return "سجّل أصنافك بأسعار بيعها، وفواتير الشراء";
-    if(!anyPrice) return "أصنافك مالهاش سعر بيع — حطّه من تبويب «الأصناف»";
-    if(!anyCost)  return "سجّل فاتورة شراء عشان نعرف تكلفة القطعة";
-    return "محتاج صنف عنده سعر بيع وتكلفة شراء مع بعض";
-  }
 
 
   /* ================= التسعير =================
@@ -6757,9 +6945,7 @@
       el.innerHTML = "<span class='v-due'>مفيش تكلفة شراء مسجّلة لأي صنف — سجّل فاتورة شراء الأول عشان نعرف بتشتري بكام.</span>";
       return;
     }
-    var fx = live("cash").reduce(function(a, c){
-      return a + (c.type === "expense" && costKindOf(c) === "fixed" ? (Number(c.amount)||0) : 0);
-    }, 0);
+    var fx = expensesIn(null, "fixed");      // من غير الانتقالات اللي اتحطت على البضاعة
     var sp = prcStockProfit(all);
     var anyX = all.some(function(r){ return r.x > 0 || r.sh > 0; });
     el.innerHTML = (anyX
@@ -7226,49 +7412,48 @@
   /* ---------- تقييم الأداء ---------- */
   function renderPerf(){
     var r = periodRange(), c = periodStats(r);
-    var gross = c.revenue - c.cogs;
     var stockVal = Math.max(0, stockBookValue());
     var turns   = stockVal > 0 ? c.cogs / stockVal : 0;     // مرات الدوران في الفترة
     var days    = r ? daysBetween(r.from, r.to) + 1 : null;
     var shelf   = turns > 0 && days ? days / turns : null;  // أيام لحد ما البضاعة تتباع
-    var nDeliv  = c.deliv.length;
-    var aov     = nDeliv ? c.revenue / nDeliv : 0;
     var nAll    = c.list.length;
     var nCanc   = c.list.filter(isCancelled).length;
     var retV    = c.deliv.reduce(function(a,s){
       return a + SL(s).reduce(function(b,l){ return b + lineRet(l)*(Number(l.price)||0); },0); },0);
     var be      = c.cmPct > 0 ? c.fixedExp / c.cmPct : null;
     var mos     = (be !== null && c.revenue > 0) ? (c.revenue - be) / c.revenue : null;
+    /* v122: الهوامش ومتوسط الأوردر من نفس قايمة الدخل («لو كله اتسلّم»). وهامش
+       الأمان والدوران والصافي ÷ المبيعات بيستنّوا ٣٠ يوم من أول أوردر — قبلها
+       بيطلعوا أرقام زي −1634% مالهاش معنى غير إنها تخوّف. */
+    var P = projStats(r).exp, okN = c.list.length - c.list.filter(isCancelled).length;
+    var first = live("sales").reduce(function(a, s){ return s.date && (!a || s.date < a) ? s.date : a; }, "");
+    var age = first ? daysBetween(first, today()) + 1 : 0, wait = age < 30;
 
     var cells = [
-      ["هامش مجمل الربح", pctTxt(c.revenue ? gross/c.revenue : 0), gross>=0?"v-gain":"v-due",
-       "بعد تكلفة البضاعة بس"],
-      ["هامش المساهمة", pctTxt(c.cmPct), c.cm>=0?"v-gain":"v-due",
-       "اللي بيفضل من كل جنيه يغطّي الثابت"],
-      ["هامش صافي الربح", pctTxt(c.revenue ? c.net/c.revenue : 0), c.net>=0?"v-gain":"v-due",
-       "بعد كل حاجة"],
-      ["هامش الأمان", mos === null ? "—" : pctTxt(mos), (mos||0)>0?"v-gain":"v-due",
+      ["هامش البضاعة", P.margin === null ? "—" : pctTxt(P.margin), (P.margin||0)>=0?"v-gain":"v-due",
+       "ربح البضاعة ÷ المبيعات — لو كله اتسلّم"],
+      ["هامش المساهمة", P.goods > 0.009 ? pctTxt(P.contrib/P.goods) : "—", P.contrib>=0?"v-gain":"v-due",
+       "بعد البضاعة والشحن والإعلان والتغليف"],
+      wait ? null : ["هامش صافي الربح", pctTxt(c.revenue ? c.net/c.revenue : 0), c.net>=0?"v-gain":"v-due",
+       "بعد كل حاجة — اللي اتسلّم فعلاً"],
+      wait ? null : ["هامش الأمان", mos === null ? "—" : pctTxt(mos), (mos||0)>0?"v-gain":"v-due",
        mos === null ? "محتاج هامش مساهمة موجب"
                     : "المبيعات ممكن تنزل كده قبل ما تخسر"],
-      ["متوسط قيمة الأوردر", money(aov), "", qty(nDeliv) + " أوردر مسلّم"],
-      ["معدل دوران المخزون", turns ? turns.toFixed(2) + "×" : "—",
+      ["متوسط الأوردر", okN ? money(P.goods / okN) : "—", "", qty(okN) + " أوردر مش ملغي"],
+      wait ? null : ["معدل دوران المخزون", turns ? turns.toFixed(2) + "×" : "—",
        "", shelf ? "البضاعة بتقعد " + Math.round(shelf) + " يوم في المتوسط" : "محتاج مخزون وتكلفة مبيعات"],
       ["نسبة الإلغاء", pctTxt(nAll ? nCanc/nAll : 0), nCanc?"v-due":"",
        qty(nCanc) + " من " + qty(nAll) + " أوردر"],
       ["قيمة المرتجع", money(retV), retV>0.009?"v-due":"",
        c.revenue ? pctTxt(retV/(c.revenue+retV)) + " من المبيعات قبل المرتجع" : "—"]
     ];
-    document.getElementById("rep-kpi").innerHTML = cells.map(function(x){
+    var kw = document.getElementById("rep-kpi-wait");
+    if(kw){ kw.hidden = !wait; kw.textContent = wait ? "هامش صافي الربح وهامش الأمان ودوران المخزون هيظهروا بعد 30 يوم من أول أوردر (فاضل " + qty(30 - age) + " يوم) — قبلها الأرقام بتبقى مالهاش معنى." : ""; }
+    document.getElementById("rep-kpi").innerHTML = cells.filter(Boolean).map(function(x){
       return "<div><span>"+esc(x[0])+"</span><strong class='num "+x[2]+"'>"+esc(x[1])+"</strong>" +
         "<small>"+esc(x[3])+"</small></div>"; }).join("");
 
-    var u = unclassifiedExpenses(), un = document.getElementById("rep-unclass");
-    if(un){
-      un.hidden = !u;
-      un.innerHTML = u ? "⚠ في " + qty(u) + " مصروف مسجّل قبل ما نضيف التصنيف، " +
-        "واتحسبوا <strong>ثابتين</strong> مؤقتًا. راجعهم من شاشة الخزنة — " +
-        "لو فيهم مصاريف متغيّرة، نقطة التعادل دلوقتي <strong>أعلى من الحقيقة</strong>." : "";
-    }
+    // v122: المصاريف اللي نوعها اتعرف من البيان بقت سطر في ملاحظة قايمة الدخل
   }
 
   /* ---------- نقطة التعادل ---------- */
@@ -7278,117 +7463,98 @@
       rows.join("") + (note ? "<p class='mnote'>" + note + "</p>" : "") + "</div>";
   }
 
-  /* «مفيش مبيعات في الفترة» حاجة، و«الهامش سالب» حاجة تانية خالص.
-     الاتنين كانوا بيدّوا نفس الرسالة — وهي رسالة مرعبة وغلط. */
-  function noSalesNote(){
-    var out = live("sales").filter(isDelivered);
-    if(!out.length) return "لسه ما بعتش حاجة، فالرقم محسوب من أسعارك مش من مبيعات فعلية.";
-    var last = out.slice().sort(byDate)[0];
-    return "<strong>مفيش مبيعات مسلّمة في الفترة المختارة</strong> — بس عندك " + qty(out.length) +
-      " أوردر مسلّم بره الفترة دي (آخر واحد " + esc(revDate(last)) +
-      "). غيّر «الفترة» فوق لـ<strong>كل الفترات</strong> وهتشوف الرقم الفعلي.";
-  }
-
+  /* v122 — «عشان تبدأ تكسب» بدل «أبيع بكام؟»: بالأوردر مش بالجنيه، ومن نفس قايمة
+     الدخل (projStats — لو كله اتسلّم). الأوردر الواحد بيكسب كام قبل المصاريف
+     الثابتة، ولو بيخسر: الإعلان على الأوردر لازم ينزل لحد فين. */
   function renderBreakEven(){
-    var r = periodRange(), c = periodStats(r);
-    var days = r ? daysBetween(r.from, r.to) + 1 : null;
-    var mB   = cmBasis(c);
-    var be   = beOf(c);
-    var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
+    var P = projStats(periodRange()), v = P.exp, u = unitEcon(v);
+    var bs = document.getElementById("rep-be-sum"), box = document.getElementById("rep-be");
+    if(!u){
+      if(bs) bs.textContent = "";
+      box.innerHTML = beBox("لسه بدري", [], "مفيش أوردرات في الفترة دي — اختار فترة تانية من فوق.", "—", "");
+      table("t-rep-cost", ["البند"], [], "مفيش تكاليف في الفترة دي.");
+      renderTarget();
+      return;
+    }
+    if(bs) bs.textContent = u.cu > 0.009
+      ? "كل أوردر بيكسب " + money(u.cu) + " قبل الثابت — الثابت يتغطّى بعد " + qty(u.need) + " أوردر"
+      : "كل أوردر بيخسر " + money(-u.cu) + " قبل الثابت";
+    var n = v.n, per = function(x){ return x / n; };
+    var html = beBox("الأوردر الواحد بيكسب كام؟", [
+        mRow("ربح البضاعة", per(v.gross)),
+        mRow(v.ship >= 0 ? "+ ربح الشحن" : "− فرق الشحن", Math.abs(per(v.ship))),
+        v.pack + v.xloss + v.othervar > 0.009 ? mRow(v.xloss + v.othervar > 0.009 ? "− تغليف ومتغيّر تاني" : "− تغليف", per(v.pack + v.xloss + v.othervar)) : "",
+        mRow("= قبل الإعلان", u.pre, "tot"),
+        mRow("− إعلان", u.ad),
+        mRow("= قبل المصاريف الثابتة", u.cu, "tot " + (u.cu > 0.009 ? "v-gain" : "v-due"))
+      ], "متوسط " + qty(n) + " أوردر في الفترة — لو كلهم اتسلّموا.");
+    if(u.pre <= 0.009)
+      html += beBox("مفيش عدد أوردرات يغطّي", [], "البضاعة والشحن نفسهم مش بيغطّوا بعض قبل أي إعلان — راجع أسعار البيع وفرق الشحن الأول.", "✗", "v-due");
+    else if(u.cu <= 0.009)
+      html += beBox("مفيش عدد أوردرات يغطّي", [
+          mRow("الإعلان على الأوردر دلوقتي", u.ad),
+          mRow("لازم ينزل تحت", u.pre, "tot v-gain")
+        ], "كل أوردر بيخسر <b>" + esc(money(-u.cu)) + "</b> قبل المصاريف الثابتة — فكل ما الأوردرات تزيد الخسارة بتزيد.", "✗", "v-due");
+    else
+      html += beBox("الثابت يتغطّى بعد", [
+          mRow("المصاريف الثابتة", u.fixed),
+          mRow("÷ كسب الأوردر", u.cu)
+        ], "عندك " + qty(n) + " أوردر في الفترة" + (n >= u.need ? " — <b class='v-gain'>غطّيت الثابت ✓</b>" : " — ناقصك <b>" + qty(u.need - n) + "</b>") + ".",
+        qty(u.need) + " أوردر", n >= u.need ? "v-gain" : "");
+    if(u.adT !== null && u.adT < u.ad - 0.009)
+      html += beBox("لو الإعلان نزل لـ " + money(u.adT) + " على الأوردر", [
+          mRow("كل أوردر يكسب", u.cuT, "tot v-gain"),
+          u.needT ? "<div class='mrow'><span>الثابت (" + esc(money(u.fixed)) + ") يتغطّى بعد</span><b class='num'>" + esc(qty(u.needT)) + " أوردر</b></div>" : ""
+        ], "");
+    box.innerHTML = html;
 
-    var bs = document.getElementById("rep-be-sum");
-    if(bs) bs.textContent = be === null ? ""
-      : (c.fixedExp <= 0.009 ? "مفيش مصاريف ثابتة مسجّلة في الفترة"
-         : "لازم تبيع بـ " + money(be) + (days ? " (" + money(be/days) + " في اليوم)" : ""));
-    document.getElementById("rep-be").innerHTML =
-      beBox("تكاليفك الثابتة", [
-        mRow("مصاريف ثابتة", c.fixedExp, "tot")
-      ], "دي اللي لازم تغطّيها الأول قبل ما تكسب جنيه.") +
-      beBox("كل جنيه مبيعات بيفضل منه كام؟", [
-        mRow("مبيعات البضاعة", c.revenue),
-        mRow("− تكلفة البضاعة", c.cogs),
-        mRow(c.netShip >= 0 ? "+ صافي الشحن" : "− تكلفة الشحن", Math.abs(c.netShip)),
-        mRow("− مصاريف متغيّرة", c.varExp),
-        mRow("هامش المساهمة", c.cm, "tot " + (c.cm>=0?"v-gain":"v-due"))
-      ], !mB
-           ? marginMissing() + " — من غير كده الهامش مش هيتحسب."
-           : (mB.est
-              ? "<b>" + esc(pctTxt(mB.pct)) + "</b> هامش <b>تقديري</b> من " + esc(mB.basis) +
-                ". " + noSalesNote()
-              : "<b>" + esc(pctTxt(mB.pct)) + "</b> من كل جنيه مبيعات بيفضل يغطّي الثابت.")) +
-      (be === null
-        ? beBox("مبيعات التعادل", [],
-            c.revenue > 0.009
-              ? "هامش المساهمة سالب — كل قطعة بتبيعها بتزوّد الخسارة. " +
-                "مينفعش يتحسب تعادل قبل ما السعر يغطّي التكلفة المتغيّرة."
-              : marginMissing() + "، وساعتها هنقدر نقولك الرقم حتى قبل أول بيعة.",
-            "—", c.revenue > 0.009 ? "v-due" : "")
-        : beBox("لازم تبيع بكام؟", [
-            days ? mRow("في اليوم", be/days) : "",
-            aov ? "<div class='mrow'><span>يعني كام أوردر</span><b class='num'>" +
-                  esc(qty(Math.ceil(be/aov))) + "</b></div>" : ""
-          ], "عشان صافي الربح يساوي <b>صفر</b> على " +
-             (days ? qty(days) + " يوم" : "الفترة دي") + "." +
-             (mB.est ? " <b>الرقم تقديري</b> — من أسعارك وتكاليفك مش من مبيعات فعلية." : ""),
-             money(be),
-             c.revenue >= be ? "v-gain" : "v-due"));
-
-    // جدول هيكل التكلفة
-    var rows = [
-      ["تكلفة البضاعة المباعة", "متغيّرة", c.cogs],
-      ["صافي الشحن", "متغيّرة", -c.netShip],
-      ["مصاريف متغيّرة", "متغيّرة", c.varExp],
-      ["مصاريف ثابتة", "ثابتة", c.fixedExp]
-    ].map(function(x){
+    // جدول هيكل التكلفة — بالأنواع
+    var C = [
+      ["تكلفة البضاعة المباعة", "متغيّرة", v.cost],
+      [v.ship >= 0 ? "ربح الشحن" : "فرق الشحن", "متغيّرة", -v.ship],
+      ["إعلانات", "متغيّرة", v.ads], ["تغليف", "متغيّرة", v.pack], ["خسارة استبدال", "متغيّرة", v.xloss], ["متغيّرة تانية", "متغيّرة", v.othervar],
+      ["اشتراكات", "ثابتة", v.subs], ["مرتبات", "ثابتة", v.salary], ["مرة واحدة", "ثابتة", v.once],
+      ["انتقالات من غير فاتورة", "ثابتة", v.trans], ["مصاريف تانية", "ثابتة", v.other]
+    ].filter(function(x, i){ return i < 3 || Math.abs(x[2]) > 0.009; });
+    var tot = C.reduce(function(a, x){ return a + x[2]; }, 0);
+    var rows = C.map(function(x){
       return "<tr><td class='wide'>" + esc(x[0]) + "</td>" +
         "<td><span class='st st-" + (x[1]==="ثابتة"?"cancelled":"progress") + "'>" + esc(x[1]) + "</span></td>" +
         "<td class='num'>" + money(x[2]) + "</td>" +
-        "<td class='num'>" + (c.revenue ? pctTxt(x[2]/c.revenue) : "—") + "</td></tr>";
+        "<td class='num'>" + (v.goods ? pctTxt(x[2]/v.goods) : "—") + "</td></tr>";
     });
     rows.push("<tr class='sumrow'><td class='wide'>إجمالي التكاليف</td><td></td>" +
-      "<td class='num'>" + money(c.varCost + c.fixedExp) + "</td>" +
-      "<td class='num'>" + (c.revenue ? pctTxt((c.varCost+c.fixedExp)/c.revenue) : "—") + "</td></tr>");
+      "<td class='num'>" + money(tot) + "</td><td class='num'>" + (v.goods ? pctTxt(tot/v.goods) : "—") + "</td></tr>");
     table("t-rep-cost", ["البند","النوع","المبلغ","% من المبيعات"], rows, "مفيش تكاليف في الفترة دي.");
 
     renderTarget();
   }
 
+  // وعشان أكسب مبلغ معيّن؟ — بعدد الأوردرات، من نفس كسب الأوردر فوق
   function renderTarget(){
     var box = document.getElementById("rep-target");
     if(!box) return;
-    var r = periodRange(), c = periodStats(r);
     var t = Number(toEn((document.getElementById("be-target")||{}).value))||0;
     var d = Number(toEn((document.getElementById("be-days")||{}).value))||0;
     if(!t){ box.innerHTML = ""; return; }
-    var mT = cmBasis(c);
-    if(!mT){
+    var u = unitEcon(projStats(periodRange()).exp);
+    if(!u || u.cu <= 0.009){
       box.innerHTML = beBox("مينفعش يتحسب", [],
-        c.revenue > 0.009
-          ? "هامش المساهمة سالب — لازم السعر يغطّي التكلفة المتغيّرة الأول."
-          : "سجّل أسعار البيع وفواتير الشراء الأول.", "—", "v-due");
+        u ? "كل أوردر بيخسر قبل المصاريف الثابتة — لازم الإعلان على الأوردر ينزل تحت " + esc(money(u.pre)) + " الأول."
+          : "مفيش أوردرات في الفترة دي.", "—", "v-due");
       return;
     }
-    var need = (c.fixedExp + t) / mT.pct;
-    var nDeliv = c.deliv.length, aov = nDeliv ? c.revenue / nDeliv : 0;
+    var need = Math.ceil((u.fixed + t) / u.cu - 1e-9);
     box.innerHTML =
-      beBox("لازم تبيع بكام؟", [
-        d ? mRow("في اليوم", need/d) : "",
-        aov ? "<div class='mrow'><span>يعني كام أوردر</span><b class='num'>" +
-              esc(qty(Math.ceil(need/aov))) + "</b></div>" : ""
-      ], "عشان صافي الربح يبقى <b>" + esc(money(t)) + "</b>" +
-         (d ? " في " + qty(d) + " يوم" : "") + "." +
-         (mT.est ? " " + noSalesNote() : ""), money(need), "v-gain") +
+      beBox("محتاج كام أوردر؟", [
+        d ? "<div class='mrow'><span>في اليوم</span><b class='num'>" + esc(qty(Math.ceil(need / d * 10) / 10)) + "</b></div>" : ""
+      ], "عشان صافي الربح يبقى <b>" + esc(money(t)) + "</b>" + (d ? " في " + qty(d) + " يوم" : "") + ".", qty(need) + " أوردر", "v-gain") +
       beBox("المعادلة", [
-        mRow("مصاريف ثابتة", c.fixedExp),
+        mRow("مصاريف ثابتة", u.fixed),
         mRow("+ الربح المطلوب", t),
-        mRow("= لازم تغطّي", c.fixedExp + t, "tot")
-      ], "÷ هامش المساهمة" + (mT.est ? " (تقديري)" : "") + " <b>" + esc(pctTxt(mT.pct)) +
-         "</b> = <b>" + esc(money(need)) + "</b>") +
-      beBox("مقارنة بمبيعاتك الحالية", [
-        mRow("مبيعات الفترة", c.revenue),
-        mRow(need > c.revenue ? "ناقصك" : "زيادة عندك", Math.abs(need - c.revenue),
-             "tot " + (need > c.revenue ? "v-due" : "v-gain"))
-      ], c.revenue ? "يعني تزوّد <b>" + esc(pctTxt((need - c.revenue)/c.revenue)) + "</b>." : "");
+        mRow("÷ كسب الأوردر", u.cu),
+        "<div class='mrow tot'><span>= أوردرات</span><b class='num'>" + esc(qty(need)) + "</b></div>"
+      ], "");
   }
 
   /* ---------- استرداد رأس المال ---------- */
@@ -7467,10 +7633,17 @@
     var stats = ms.map(function(mo){ var c = periodStats(mo); c.key = mo.key; return c; });
     var max = stats.reduce(function(a,c){ return Math.max(a, Math.abs(c.net)); }, 0);
 
+    /* v122: شهر خلص قبل أول بيعة (أول أوردر اتسلّم) = تجهيز — مش بيتقارن بيه، وإلا
+       الشهر اللي بعده بيبان «اتحسّن» وهو أول شهر بيع. والشهر الحالي مكتوب لحد النهارده. */
+    var first = live("sales").filter(isDelivered).reduce(function(a, s){ var d = revDate(s); return d && (!a || d < a) ? d : a; }, "");
+    ms.forEach(function(mo, i){ stats[i].setup = !first || mo.to < first; stats[i].cur = inRange(today(), mo); });
     var rows = stats.map(function(c, i){
-      var prev = i ? stats[i-1].net : null;
+      var prev = i && !stats[i-1].setup && !c.setup ? stats[i-1].net : null;
       var d = prev === null ? null : c.net - prev;
-      return "<tr><td class='wide num'>" + esc(c.key) + "</td>" +
+      var why = c.setup ? "مش بيتقارن" : (i && stats[i-1].setup ? "أول شهر بيع" : "");
+      return "<tr><td class='wide'><span class='num'>" + esc(c.key) + "</span>" +
+          (c.setup ? " <span class='pis-tag fixed'>تجهيز — قبل أول بيعة</span>" : "") +
+          (c.cur ? "<span class='sub'>لحد " + esc(dShort(today())) + "</span>" : "") + "</td>" +
         "<td class='num'>" + money(c.revenue) + "</td>" +
         "<td class='num'>" + money(c.cogs) + "</td>" +
         "<td class='num " + ((c.revenue-c.cogs)>=0?"v-gain":"v-due") + "'>" + money(c.revenue-c.cogs) + "</td>" +
@@ -7479,7 +7652,7 @@
           esc(signed(c.net)) + "</td>" +
         "<td class='barcell'>" + miniBar(c.net, max) + "</td>" +
         "<td class='num " + (d === null ? "" : (d>=0?"v-gain":"v-due")) + "'>" +
-          (d === null ? "—" : esc(signed(d))) + "</td></tr>";
+          (d === null ? (why ? "<span style='color:var(--ink-soft)'>— " + esc(why) + "</span>" : "—") : esc(signed(d))) + "</td></tr>";
     });
     var T = stats.reduce(function(a,c){
       a.rev += c.revenue; a.cogs += c.cogs; a.exp += c.expenses; a.net += c.net; return a;
@@ -7645,59 +7818,77 @@
       .concat(["الإجمالي","أقدم دين"]), list, "مفيش مديونيات على العملاء دلوقتي.");
   }
 
-  /* v115 — قايمة الدخل المتوقعة: عمود الفعلي (اللي اتسلّم في الفترة — نفس أرقام
-     periodStats اللي في باقي التقارير)، وعمود الأوردرات اللي لسه ماشية لو اتسلّمت
-     زي ما هي (expProfit — نفس الربح المتوقع في «مع المندوب» ودرج الأوردر)،
-     والإجمالي. المصاريف فعلية بس — مفيش مصاريف متوقعة. والشحن بيتحسب في الفعلي
-     للمسلّم والملغي بس (shipCounts) فمفيش أوردر بيتحسب مرتين. */
+  /* v122 — قايمة الدخل: عمود واحد بزرارين — «لو كله اتسلّم» (الفعلي + الماشي بالمتوقع)
+     و«اتسلّم فعلاً» (نفس periodStats) — وجنبه «على الأوردر» و«من المبيعات».
+     المصاريف بأنواعها (expByCat): المتغيّر فوق «ربح الأوردر بعد مصاريف البيع»
+     والثابت تحته. الأرقام من projStats — نفس اللي في الرئيسية و«ماشي إزاي؟». */
+  var pisMode = "exp";
+  // نسبة الرفض من كل الأوردرات اللي خلصت — بتتحسب من ٥ أوردرات على الأقل
+  function refusalRate(){
+    var d = 0, x = 0;
+    live("sales").forEach(function(s){ if(isDelivered(s)) d++; else if(isCancelled(s)){ d++; x++; } });
+    return d >= 5 ? { p:x / d, n:d, x:x } : null;
+  }
   function renderProjIS(){
     var t = document.getElementById("t-pis"); if(!t) return;
-    var r = periodRange(), c = periodStats(r);
-    var A = { goods:c.revenue, cost:c.cogs, sin:0, sout:0 };
-    c.list.forEach(function(s){ if(shipCounts(s)){ A.sin += shipIn(s); A.sout += shipOut(s); } });
-    var open = c.list.filter(function(s){ return !isDelivered(s) && !isCancelled(s); });
-    var E = { goods:0, cost:0, sin:0, sout:0, net:0 }, nc = 0;
-    open.forEach(function(s){
-      var e = expProfit(s);
-      E.goods += e.goods; E.cost += e.cost; E.sin += e.sin; E.sout += e.sout; E.net += e.net;
-      if(e.noCost.length) nc++;
+    var P = projStats(periodRange()), v = pisMode === "act" ? P.act : P.exp;
+    Array.prototype.forEach.call(document.querySelectorAll("#pis-mode [data-pism]"), function(b){
+      b.classList.toggle("on", b.dataset.pism === pisMode);
+      b.textContent = b.dataset.pism === "act" ? "اتسلّم فعلاً (" + qty(P.nDone) + ")" : "لو كله اتسلّم (" + qty(P.n) + " أوردر)";
     });
-    var col = function(a, e){ return [a, e, a + e]; };
-    var L = [
-      ["المبيعات (الإيرادات)", col(A.goods, E.goods), "b"],
-      ["− تكلفة البضاعة المباعة", col(A.cost, E.cost), ""],
-      ["مجمل الربح", col(c.revenue - c.cogs, E.goods - E.cost), "t"],
-      ["+ شحن محمّل على العملاء", col(A.sin, E.sin), ""],
-      ["− شحن مدفوع لشركات الشحن", col(A.sout, E.sout), ""],
-      ["صافي الشحن", col(c.netShip, E.sin - E.sout), "s"],
-      ["− مصاريف متغيّرة", col(c.varExp, 0), "x"],
-      ["− مصاريف ثابتة", col(c.fixedExp, 0), "x"],
-      ["صافي الربح", col(c.net, E.net), "n"]
-    ];
-    var cell = function(v, k, i){
-      if(k === "x" && i === 1) return "<td class='num' style='color:var(--ink-soft)'>—</td>";
-      var cls = (k === "t" || k === "s" || k === "n") ? (v >= 0 ? " v-gain" : " v-due") : "";
-      return "<td class='num" + cls + "'" + (k === "n" ? " style='font-weight:700'" : "") + ">" + money(v) + "</td>";
+    var n = v.n, g = v.goods;
+    var tag = function(k){ return k ? " <span class='pis-tag " + k + "'>" + (k === "var" ? "متغيّر" : "ثابت") + "</span>" : ""; };
+    // kind "" = بند بيتطرح (أحمر لو فيه مبلغ) · "sum" = إجمالي بلون إشارته
+    var row = function(label, val, kind, cls, sub){
+      var c = kind === "sum" ? (val >= 0 ? "v-gain" : "v-due") : (val > 0.009 ? "v-due" : "");
+      return "<tr" + (cls ? " class='" + cls + "'" : "") + "><td class='wide'>" + label + (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
+        "<td class='num " + c + "'>" + money(val) + "</td>" +
+        "<td class='num " + c + "'>" + (n ? money(val / n) : "—") + "</td>" +
+        "<td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "<span dir='ltr'>" + (val / g * 100).toFixed(1) + "%</span>" : "—") + "</td></tr>";
     };
-    var rows = L.map(function(x){
-      var k = x[2];
-      return "<tr" + (k === "t" || k === "n" ? " class='pis-tot'" : "") + "><td class='wide'" +
-        (k === "t" || k === "n" || k === "b" ? " style='font-weight:700'" : "") + ">" + esc(x[0]) + "</td>" +
-        cell(x[1][0], k, 0) + cell(x[1][1], k, 1) + cell(x[1][2], k, 2) + "</tr>";
+    var rows = [];
+    rows.push("<tr><td class='wide' style='font-weight:700'>المبيعات</td><td class='num'>" + money(g) + "</td>" +
+      "<td class='num'>" + (n ? money(g / n) : "—") + "</td><td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "100%" : "—") + "</td></tr>");
+    rows.push(row("− تكلفة البضاعة", v.cost, "", "", trIdx().total > 0.009 ? "فيها نصيب القطع من انتقالات شراء البضاعة" : ""));
+    rows.push(row("= ربح البضاعة", v.gross, "sum", "pis-tot"));
+    rows.push(v.ship >= 0
+      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)))
+      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout))));
+    rows.push(row("− إعلانات" + tag("var"), v.ads));
+    if(v.pack > 0.009) rows.push(row("− تغليف" + tag("var"), v.pack));
+    if(Math.abs(v.xloss) > 0.009) rows.push(row("− خسارة استبدال مع المورد" + tag("var"), v.xloss));
+    if(Math.abs(v.othervar) > 0.009) rows.push(row("− مصاريف متغيّرة تانية" + tag("var"), v.othervar));
+    rows.push(row("= ربح الأوردر بعد مصاريف البيع", v.contrib, "sum", "pis-tot"));
+    [["subs","اشتراكات"],["salary","مرتبات"],["once","مرة واحدة"],["trans","انتقالات من غير فاتورة"],["other","مصاريف تانية"]].forEach(function(x){
+      if(Math.abs(v[x[0]]) > 0.009) rows.push(row("− " + x[1] + tag("fixed"), v[x[0]]));
     });
-    var tg = A.goods + E.goods, tn = c.net + E.net;
-    rows.push("<tr><td class='wide' style='color:var(--ink-soft)'>صافي الربح ÷ المبيعات</td>" +
-      [c.revenue ? c.net / c.revenue : null, E.goods ? E.net / E.goods : null, tg ? tn / tg : null].map(function(v){
-        return "<td class='num' style='color:var(--ink-soft)'>" + (v === null ? "—" : "<span dir='ltr'>" + (v * 100).toFixed(1) + "%</span>") + "</td>"; }).join("") + "</tr>");
-    table("t-pis", ["البند", "اتسلّم فعلاً", "لسه ماشي (متوقع) · " + qty(open.length) + " أوردر", "الإجمالي لو كله اتسلّم"], rows, "");
+    rows.push(row("= صافي الربح", v.net, "sum", "pis-net"));
+    table("t-pis", ["البند", "المبلغ", "على الأوردر" + (n ? " (÷" + qty(n) + ")" : ""), "من المبيعات"], rows, "");
+
     var sm = document.getElementById("pis-sum");
-    if(sm) sm.innerHTML = "صافي الربح لو كله اتسلّم: <b class='num " + (tn >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(tn)) + "</b>";
+    if(sm) sm.innerHTML = "لو كله اتسلّم: <b class='num " + (P.exp.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.exp.net)) + "</b>" +
+      " · اتسلّم فعلاً: <b class='num " + (P.act.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.act.net)) + "</b>";
+    var rf = refusalRate(), adj = null;
+    if(rf && P.nOpen){
+      adj = P.c.net;
+      P.open.forEach(function(s){ var e = expProfit(s); adj += (1 - rf.p) * e.net - rf.p * e.sout; });
+    }
+    var un = unclassifiedExpenses(), T = trIdx();
     var nt = document.getElementById("pis-note");
-    if(nt) nt.innerHTML = "عمود <b>«اتسلّم فعلاً»</b> هو نفس أرقام باقي التقارير للفترة. عمود <b>«لسه ماشي»</b> = الأوردرات اللي لسه ما اتسلّمتش " +
-      "(جديدة أو مع المندوب) لو العملاء خدوها كلها: البضاعة بسعر بيعها − تكلفتها بمتوسط الشراء + الشحن. " +
-      "المصاريف فعلية بس — مفيش مصاريف متوقعة. الرقم متوقع: المرتجع والرفض بيقلّلوه، والربح بيتسجّل في الحسابات لما الأوردر يتسلّم." +
-      (nc ? " <span class='v-due'>" + esc(qty(nc)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
+    if(nt) nt.innerHTML = (pisMode === "act"
+        ? "<b>«اتسلّم فعلاً»</b> = الأوردرات اللي اتسلّمت أو اتلغت في الفترة بس، ومقابلها كل مصاريف الفترة."
+        : "<b>«لو كله اتسلّم»</b> = اللي اتسلّم فعلاً + الـ" + qty(P.nOpen) + " أوردر اللي لسه ماشيين لو العملاء خدوهم كلهم — <b>قبل أي رفض</b>.") +
+      (adj !== null && pisMode !== "act" ? " لو الرفض فضل " + Math.round(rf.p * 100) + "% زي ما هو (" + qty(rf.x) + " من " + qty(rf.n) + "): <b class='num " + (adj >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(adj)) + "</b>." : "") +
+      " «على الأوردر» = المبلغ ÷ عدد الأوردرات. الإعلان والتغليف <b>متغيّر</b> (بيزيد مع كل أوردر)، والباقي <b>ثابت</b>." +
+      (T.total > 0.009 ? " انتقالات شراء البضاعة (" + esc(money(T.total)) + ") اتحطت على تكلفة القطع اللي اتشرت في المشوار — اللي اتباع منها في التكلفة فوق، والباقي في قيمة المخزون." : "") +
+      (T.unlinked.length ? " <span class='v-due'>" + qty(T.unlinked.length) + " مشوار شراء مالوش فاتورة في نفس الأيام — اتحسب مصروف ثابت.</span>" : "") +
+      (un ? " <span style='color:var(--ink-soft)'>" + qty(un) + " مصروف نوعه اتعرف من البيان — لو فيه غلط عدّله من الخزنة.</span>" : "") +
+      (P.noCost ? " <span class='v-due'>" + esc(qty(P.noCost)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
   }
+  document.getElementById("pis-mode").addEventListener("click", function(e){
+    var b = e.target.closest("[data-pism]"); if(!b) return;
+    pisMode = b.dataset.pism; renderProjIS();
+  });
   function renderReports(){
     clearMonthly();
     renderProjIS();
@@ -8617,7 +8808,7 @@
                return { itemId:l.itemId||"", color:vColor(l), size:vSize(l),
                         qty:Number(l.qty)||"", price:Number(l.price)||"",
                         ret:Number(l.ret)||"", manual:true,
-                        unitCost: l.unitCost };      // التكلفة المثبّتة بتعدّي مع التعديل
+                        unitCost: l.unitCost, trCost: l.trCost };      // التكلفة المثبّتة (ونصيب الانتقالات) بتعدّي مع التعديل
              }) };
   }
   draft = newDraft();
@@ -10289,7 +10480,7 @@
       var worst = null;
       plParts(l).forEach(function(pt){
         if(stockOfV(l.itemId, pt.color, pt.size) <= 0) return;
-        var prev = avgCostV(l.itemId, pt.color, pt.size);
+        var prev = avgCostVB(l.itemId, pt.color, pt.size);   // سعر المورد، من غير الانتقالات
         if(prev > 0 && (!worst || Math.abs(Math.log(landed/prev)) > Math.abs(Math.log(landed/worst))))
           worst = prev;
       });
@@ -10429,7 +10620,7 @@
     var q = pretQty(), u = pretUnit(), mode = document.getElementById("pr-mode").value;
     var c = vColor(rec), z = vSize(rec);
     var st = stockOfV(rec.itemId, c, z), free = freeOfV(rec.itemId, c, z);
-    var avg = avgCostV(rec.itemId, c, z);
+    var avg = avgCostVB(rec.itemId, c, z);
     if(!q){ msg.textContent = ""; msg.className = "note"; updateImpact("pret"); return; }
     if(q > free + 0.0001){
       msg.innerHTML = "<strong>مينفعش ترجّع " + qty(q) + " قطعة.</strong> المتاح " + qty(free) +
@@ -10540,7 +10731,7 @@
         if(!isDelivered(x)) return;
         SL(x).forEach(function(l){ if(keyOf(l) === k) sold += lineSold(l, x); });
       });
-      return { rec:rec, cost:avgCostV(rec.itemId, c, z), stock:stockOfV(rec.itemId, c, z),
+      return { rec:rec, cost:avgCostVB(rec.itemId, c, z), stock:stockOfV(rec.itemId, c, z),
                free:freeOfV(rec.itemId, c, z), sold:sold, price:pPackCost(rec) / pPackQty(rec) };
     });
   }
@@ -11324,7 +11515,13 @@
       if(isCapType(c.type) && CAP[c.type].cash === 0) return;   // حركة رأس مال من غير نقدية
       var isIn = (c.type==="in" || c.type==="settle" || c.type==="opening" ||
                   (isCapType(c.type) && CAP[c.type].cash > 0));
-      L.push({d:c.date, at:c.at, t:cashLabel(c.type), kind:cashKind(c.type), cap:isCapType(c.type),
+      // v122: المصروف بنوعه — والانتقالات بتقول راحت على البضاعة ولا لأ
+      var lab = cashLabel(c.type);
+      if(c.type === "expense"){
+        var ck = expCat(c);
+        lab += " · " + EXP_CAT[ck].label + (ck === "trans" ? (trLinked(c) ? " (على تكلفة البضاعة)" : " (من غير فاتورة)") : "");
+      }
+      L.push({d:c.date, at:c.at, t:lab, kind:cashKind(c.type), cap:isCapType(c.type),
         who:(c.type==="settle" ? (c.shipCo||"شركة شحن") : (c.partyId?partyName(c.partyId):"—")),
         note:((c.note||"") === cashLabel(c.type) ? "" : (c.note||"")), inn:(isIn?a:0), out:(isIn?0:a),
         src:(c.type==="opening" ? "افتتاحي" : "يدوي"), id:c.id});
@@ -12912,7 +13109,6 @@
        الرفض: بيتحسب من 5 أوردرات خلصوا · ✓ أقل من 10% · ✗ 20% أو أكتر */
   var coPer = "all";
   var CO_SHIP_BAD = 25, CO_STOCK_DAYS = 30;
-  function isAdExp(c){ return c.type === "expense" && /[اإأ]علان|ممول|sponsor/i.test(String(c.note || "")); }
   function coShift(d, n){ var x = new Date(d + "T00:00:00Z"); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
   function coDiff(a, b){ return Math.round((new Date(b + "T00:00:00Z") - new Date(a + "T00:00:00Z")) / 864e5); }
   function coRange(){
@@ -12943,23 +13139,24 @@
       SL(s).forEach(function(l){ S.pcs += Math.max(0, Number(l.qty)||0); });
       var g = coGoods(s); S.goods += g.goods; S.cost += g.cost;
     });
-    /* الشحن: كل أوردر خرج فعلاً (اتبعت أو خلص) — والمرفوض والملغي داخلين، لأنهم
-       أكبر خسارة شحن. الأوردر اللي لسه ما اتشحنش بره حتى لو رقم الشحن متكتب. */
-    all.forEach(function(s){
-      if(s.selfDel || !(shipOut(s) > 0) || !(shipCounts(s) || squish(s.shipCode || "") || s.shippedAt)) return;
-      S.shipN++; S.gap += shipOut(s) - shipIn(s);
+    /* v122 — الفلوس (الهامش والإعلان والشحن) من قايمة الدخل نفسها (projStats «لو كله
+       اتسلّم») — فالرقم هنا = الرقم في التقارير والرئيسية بالظبط. الشحن: نفس الأوردرات
+       اللي القايمة بتحسب شحنها — اللي خلص (مسلّم أو مرفوض) واللي لسه ماشي. */
+    var P = projStats(r), V = P.exp;
+    P.c.list.forEach(function(s){
+      var open = !isDelivered(s) && !isCancelled(s);
+      if(!(shipOut(s) > 0) || !(shipCounts(s) || open)) return;
+      S.shipN++;
       if(shipIn(s) <= 0) S.freeShip++; else if(shipIn(s) < shipOut(s)) S.lowShip++;
     });
-    S.ads = live("cash").filter(function(c){ return isAdExp(c) && inRange(c.date, r); })
-      .reduce(function(a, c){ return a + (Number(c.amount)||0); }, 0);
+    S.gap = -V.ship; S.ads = V.ads; S.P = P;
     var done = all.filter(function(s){ return isDelivered(s) || isCancelled(s); });
     S.done = done.length; S.refused = done.filter(isCancelled).length;
     S.perDay = S.n / S.days;
-    S.gp = S.goods - S.cost;
-    S.margin = S.goods > 0 ? S.gp / S.goods : null;
-    S.gpOrder = S.n ? S.gp / S.n : 0;
-    S.adOrder = S.n && S.ads > 0 ? S.ads / S.n : null;
-    S.gapOrder = S.shipN ? S.gap / S.shipN : 0;
+    S.margin = V.margin;
+    S.gpOrder = P.n ? V.gross / P.n : 0;
+    S.adOrder = P.n && S.ads > 0 ? S.ads / P.n : null;
+    S.gapOrder = P.n ? S.gap / P.n : 0;          // زي عمود «على الأوردر» في قايمة الدخل
     return S;
   }
   /* الأصناف: معدّل الطلب (قطع في اليوم من الأوردرات اللي مش ملغية) والمتاح —
@@ -12974,14 +13171,14 @@
     return live("items").map(function(it){
       var buys = live("purchases").filter(function(p){ return p.itemId === it.id; });
       var first = buys.reduce(function(a, p){ return p.date && (!a || p.date < a) ? p.date : a; }, "");
-      var free = Math.max(0, freeOf(it.id)), stock = Math.max(0, stockOf(it.id)), q = ord[it.id] || 0;
+      var fs = freeSplit(it.id), free = fs.pos, stock = Math.max(0, stockOf(it.id)), q = ord[it.id] || 0;
       var rate = q / days, ac = avgCost(it.id);
       var pp = (Number(it.price)||0) > 0 && ac > 0 ? (Number(it.price)||0) - ac : null;
       return { it:it, q:q, rate:rate, free:free, value:stock * ac, pp:pp,
                cover: rate > 0 ? free / rate : null,
                idle: !q && free > 0 && first && coDiff(first, to) >= 7,
                slow: q > 0 && free > 0 && free / rate > CO_STOCK_DAYS && free * ac >= 1000,
-               short: q >= 5 && free <= 3 };
+               short: q >= 5 && free <= 3, neg:fs.neg };
     });
   }
   function coSet(id, html){ var el = document.getElementById(id); if(el) el.innerHTML = html; }
@@ -13016,23 +13213,23 @@
 
     // ٣ هامش البضاعة
     if(S.margin !== null){
-      var mp = Math.round(S.margin * 100), mst = S.margin >= 0.4 ? "ok" : (S.margin >= 0.3 ? "wr" : "bd");
+      var mp = Math.round(S.margin * 1000) / 10, mst = S.margin >= 0.4 ? "ok" : (S.margin >= 0.3 ? "wr" : "bd");
       tile(mst, mst === "ok" ? "✓ كويس" : (mst === "wr" ? "⚠ ضعيف" : "✗ قليل"), "هامش البضاعة", mp + "%", "من سعر البيع · الهدف 40% أو أكتر");
       if(mst === "ok") good.push("هامش البضاعة " + mp + "%" + (top.length ? " — أكسب صنف: " + top[0].it.name + " (" + qty(Math.round(top[0].pp)) + " في القطعة)" : "") + ".");
       else bad.push(["هامش البضاعة " + mp + "% بس.", "راجع أسعار الأصناف اللي ربحها أقل" +
         (top.length > 1 ? " (" + top.slice(-2).map(function(x){ return x.it.name; }).join(" · ") + ")" : "")]);
     }
 
-    // ٤ الإعلان على الأوردر — من مصاريف الخزنة اللي بيانها فيه «اعلان»
-    if(S.adOrder === null) tile("na", "مش متسجّل", "الإعلان على الأوردر", "—", "اكتب كلمة «اعلان» في بيان مصروف الإعلانات في الخزنة");
+    // ٤ الإعلان على الأوردر — مصاريف الخزنة اللي نوعها «إعلانات»
+    if(S.adOrder === null) tile("na", "مش متسجّل", "الإعلان على الأوردر", "—", "سجّل مصروف الإعلانات في الخزنة ونوعه «إعلانات»");
     else if(!(S.gpOrder > 0)){
       // البضاعة نفسها مش بتكسب — مفيش نسبة تتحسب ولا حد للحملة
-      tile("bd", "✗ عالي", "الإعلان على الأوردر", money(S.adOrder), "إعلانات " + money(S.ads) + " ÷ " + qty(S.n) + " أوردر · والبضاعة نفسها مش بتكسب");
+      tile("bd", "✗ عالي", "الإعلان على الأوردر", money(S.adOrder), "إعلانات " + money(S.ads) + " ÷ " + qty(S.P.n) + " أوردر · والبضاعة نفسها مش بتكسب");
       bad.push(["الإعلان بيتكلّف " + money(S.adOrder) + " على الأوردر والبضاعة نفسها مش بتكسب.", "راجع أسعار البيع الأول، وبعدين الإعلان"]);
     } else {
       var share = S.adOrder / S.gpOrder, ast = share <= 1/3 ? "ok" : (share <= 0.5 ? "wr" : "bd");
       tile(ast, ast === "ok" ? "✓ كويس" : (ast === "wr" ? "⚠ عالي" : "✗ عالي"), "الإعلان على الأوردر", money(S.adOrder),
-        "إعلانات " + money(S.ads) + " ÷ " + qty(S.n) + " أوردر · بياكل " + Math.round(share * 100) + "% من ربح بضاعة الأوردر (" + money(S.gpOrder) + ")");
+        "إعلانات " + money(S.ads) + " ÷ " + qty(S.P.n) + " أوردر · بياكل " + Math.round(share * 100) + "% من ربح بضاعة الأوردر (" + money(S.gpOrder) + ")");
       if(ast === "ok") good.push("الإعلان بيتكلّف " + money(S.adOrder) + " على الأوردر — في الحدود.");
       else bad.push(["الإعلان بيتكلّف " + money(S.adOrder) + " على الأوردر — بياكل " + Math.round(share * 100) + "% من ربح البضاعة.",
         "وقّف الحملة اللي الأوردر منها فوق " + qty(Math.round(S.gpOrder / 3)) + (topNames.length ? "، وركّز على " + topNames.join(" · ") : "")]);
@@ -13043,7 +13240,7 @@
       var gst = S.gapOrder <= 0.005 ? "ok" : (S.gapOrder <= CO_SHIP_BAD ? "wr" : "bd");
       tile(gst, gst === "ok" ? "✓ متغطّي" : (gst === "wr" ? "⚠ من جيبك" : "✗ من جيبك"), "الشحن",
         gst === "ok" ? "متغطّي" : "−" + money(S.gapOrder) + " للأوردر",
-        gst === "ok" ? "العميل بيدفع زي الشركة أو أكتر" : money(S.gap) + " في " + qty(S.shipN) + " أوردر · العميل بيدفع أقل من الشركة");
+        gst === "ok" ? "العميل بيدفع زي الشركة أو أكتر" : money(S.gap) + " ÷ " + qty(S.P.n) + " أوردر · العميل بيدفع أقل من الشركة");
       if(gst === "ok") good.push("الشحن متغطّي من العميل.");
       else bad.push([money(S.gap) + " شحن طلعوا من جيبك" + (S.freeShip || S.lowShip ? " (" +
           [S.freeShip ? qty(S.freeShip) + " أوردر العميل ما دفعش فيهم شحن" : "", S.lowShip ? qty(S.lowShip) + " أقل من الشركة" : ""].filter(Boolean).join(" و") + ")" : "") + ".",
@@ -13081,10 +13278,8 @@
     var idle = IT.filter(function(x){ return x.idle; }).map(function(x){ return x.it.name; });
     if(idle.length) bad.push([idle.join(" و") + ": ولا قطعة اتطلبت في آخر أسبوعين.", "اعمل إعلان أو عرض عليهم"]);
 
-    // الحكم — زي «قايمة الدخل المتوقعة» في التقارير بالظبط
-    var c = periodStats(r), en = 0;
-    c.list.forEach(function(s){ if(!isDelivered(s) && !isCancelled(s)) en += expProfit(s).net; });
-    var tn = c.net + en, okBase = S.n > 0 && S.margin !== null && S.margin >= 0.3;
+    // الحكم — نفس «صافي الربح» في قايمة الدخل والرئيسية بالظبط
+    var en = S.P.nOpen, tn = S.P.exp.net, okBase = S.n > 0 && S.margin !== null && S.margin >= 0.3;
     var badNames = T.filter(function(t){ return t.st === "bd"; }).map(function(t){ return t.label; });
     var vd = !S.n ? { ic:"⚪", cls:"na", t:"مفيش أوردرات في الفترة دي", s:"اختار فترة أطول من فوق." }
       : tn >= 0 ? { ic:"🟢", cls:"ok", t:"ماشي كويس وبتكسب", s:"الأرقام كويسة — كمّل وراقب المؤشرات." }
@@ -13128,8 +13323,16 @@
       .sort(function(a, b){ return daysSince(b.date) - daysSince(a.date); });
     if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + qty(daysSince(stale[0].date)) + " أيام", "sales|2", "الأوردرات");
     if(heldOpen().length) add("استلم المرتجع", qty(heldOpenQty()) + " قطعة عند شركة الشحن", "sales|4", "المرتجع");
+    var SH = shortList();
+    if(SH.length){
+      var shn = SH.reduce(function(a, x){ return a + x.n; }, 0);
+      add("اشتري للأوردرات · " + qty(shn) + " قطعة", SH.slice(0, 3).map(function(x){
+          var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : "") + " × " + qty(x.n); }).join(" · ") +
+        (SH.length > 3 ? " و" + qty(SH.length - 3) + " تاني" : "") + " — اتباعت ولسه ما اتشرتش", "purch", "فاتورة شراء");
+    }
     IT.filter(function(x){ return x.short; }).sort(function(a, b){ return b.q - a.q; }).slice(0, 2).forEach(function(x){
-      add("اطلب " + x.it.name + " تاني", "اتطلب منه " + qty(x.q) + " في آخر أسبوعين وفاضل " + qty(x.free), "purch", "فاتورة شراء");
+      add("اطلب " + x.it.name + " تاني", "اتطلب منه " + qty(x.q) + " في آخر أسبوعين وفاضل " + qty(x.free) +
+        (x.neg ? " · وناقص " + qty(x.neg) : ""), "purch", "فاتورة شراء");
     });
     var slow = IT.filter(function(x){ return x.slow; }).sort(function(a, b){ return b.value - a.value; })[0];
     if(slow) add("ما تشتريش " + slow.it.name, "عندك " + qty(slow.free) + " قطعة = حوالي " + qty(Math.round(slow.cover)) + " يوم بيع بالمعدل ده", "inv", "المخزون");
@@ -13473,7 +13676,7 @@
     if(list === "items") showImgPreview("");
     document.getElementById(EDIT_UI[list].form).reset();
     if(list==="purchases"){ pdraft = newPDraft(); clearPOver(); syncPHead(); renderPLines(); }
-    if(list==="cash"){ document.getElementById("c-date").value = today(); fillSelects(); }
+    if(list==="cash"){ document.getElementById("c-date").value = today(); document.getElementById("c-cat").value = ""; syncCatChips(); fillSelects(); }
     setEditUI(list);
   }
 
@@ -13539,7 +13742,7 @@
     if(list==="cash"){
       g("c-date").value=rec.date||today(); g("c-type").value=rec.type||"in"; fillSelects();
       g("c-party").value=rec.partyId||""; g("c-amount").value=rec.amount||""; g("c-note").value=rec.note||"";
-      g("c-kind").value = costKindOf(rec);
+      g("c-cat").value = rec.type === "expense" ? expCat(rec) : ""; syncCatChips(); catPicked = rec.type === "expense";
       fillSelects(); g("c-shipco").value=rec.shipCo||"";
     }
     setEditUI(list);
@@ -13749,7 +13952,7 @@
       if(!l) return;
       if(f === "price") l.manual = true;
       l[f] = v;
-      if(f === "itemId" || f === "color" || f === "size") l.unitCost = null;
+      if(f === "itemId" || f === "color" || f === "size"){ l.unitCost = null; l.trCost = null; }
       if(f === "itemId"){ l.color = ""; l.size = ""; l.manual = false; }
       // أول ما تختار صنف، الكمية الغالبة ١ — بدل ما تكتبها في كل سطر
       if(f === "itemId" && v && !String(l.qty||"").trim()) l.qty = 1;
@@ -14408,7 +14611,7 @@
       return { itemId:l.itemId, color:l.color, size:l.size,
                qty:Number(l.qty)||0, price:Number(l.price)||0,
                ret: status === "delivered" ? (Number(l.ret)||0) : 0,
-               unitCost: l.unitCost };
+               unitCost: l.unitCost, trCost: l.trCost };
     }).filter(function(l){ return l.itemId && l.qty > 0; });
 
     // الفترة المقفولة: لا السجل القديم يتعدّل، ولا سجل جديد يتحط جواها
@@ -15258,6 +15461,37 @@
   });
 
   document.getElementById("c-type").addEventListener("change", fillSelects);
+  // نوع المصروف: زرار واحد متعلّم. لو ما دوستش، النوع بيتخمّن من البيان وإنت بتكتب
+  var CAT_HINT = {
+    ads:"<strong>متغيّر</strong> — بيتقسم على الأوردرات في «الإعلان على الأوردر».",
+    pack:"<strong>متغيّر</strong> — بيزيد مع كل أوردر.",
+    trans:"<strong>على تكلفة البضاعة</strong> — بيتوزّع على القطع اللي في فواتير الشراء بتاعة نفس اليوم (أو لحد ٣ أيام قبل أو بعد). مشاوير تانية مالهاش علاقة بالشراء اختار لها «تاني».",
+    subs:"<strong>ثابت</strong> — بيتدفع كل شهر مهما بعت.", salary:"<strong>ثابت</strong> — بيتدفع مهما بعت.",
+    once:"<strong>ثابت</strong> — حاجة مش بتتكرر مع كل أوردر، حتى لو اشتريتها تاني بعدين.",
+    other:"<strong>ثابت</strong>.",
+    othervar:"<strong>متغيّر</strong> — متسجّل كده من قبل كده. لو تحب، اختار نوعه من فوق."
+  };
+  var catPicked = false;
+  function syncCatChips(){
+    var v = document.getElementById("c-cat").value;
+    if(!v) catPicked = false;
+    var shown = v || expCatGuess(document.getElementById("c-note").value);
+    Array.prototype.forEach.call(document.querySelectorAll("#c-cats [data-ccat]"), function(b){
+      b.classList.toggle("on", b.dataset.ccat === shown);
+      b.setAttribute("aria-pressed", b.dataset.ccat === shown ? "true" : "false");
+    });
+    var h = document.getElementById("c-cat-hint");
+    if(h) h.innerHTML = shown ? CAT_HINT[shown] + (v ? "" : " <span style='color:var(--ink-soft)'>(اتعرف من البيان)</span>")
+                              : "اختار النوع — ده اللي بيفرّق الإعلان والتغليف (متغيّر) عن الباقي (ثابت).";
+  }
+  document.getElementById("c-cats").addEventListener("click", function(e){
+    var b = e.target.closest("[data-ccat]"); if(!b) return;
+    document.getElementById("c-cat").value = b.dataset.ccat; catPicked = true; syncCatChips();
+  });
+  document.getElementById("c-note").addEventListener("input", function(){
+    if(!catPicked) { document.getElementById("c-cat").value = ""; syncCatChips(); }
+  });
+  syncCatChips();
 
   bind("f-cash","b-cash", function(form){
     var fields = {
@@ -15266,11 +15500,14 @@
       partyId: document.getElementById("c-party").value,
       amount: Number(document.getElementById("c-amount").value)||0,
       shipCo: document.getElementById("c-shipco").value,
-      // ثابت/متغيّر — من غيرها نقطة التعادل مالهاش معنى
-      costKind: document.getElementById("c-kind").value || "fixed",
       note: document.getElementById("c-note").value.trim()
     };
-    if(fields.type !== "expense") fields.costKind = "";
+    /* v122 — نوع المصروف. ما اخترتش؟ بنعرفه من البيان، وإلا «تاني».
+       costKind بيتسجّل جنبه (ثابت/متغيّر) عشان النسخ القديمة على أجهزة تانية تفهمه. */
+    if(fields.type === "expense"){
+      fields.cat = document.getElementById("c-cat").value || expCatGuess(fields.note) || "other";
+      fields.costKind = EXP_CAT[fields.cat].kind === "var" ? "var" : "fixed";
+    } else { fields.cat = ""; fields.costKind = ""; }
     if(!fields.amount){ toast("اكتب المبلغ"); return; }
     if(fields.type==="settle"){
       if(!fields.shipCo){ toast("اختر شركة الشحن"); return; }
@@ -15288,6 +15525,7 @@
     if(!cashOutOk(fields)) return;
     commit("cash", fields, form, "اتسجّلت الحركة");
     document.getElementById("c-date").value = today();
+    document.getElementById("c-cat").value = ""; syncCatChips();
     clearOver(); fillSelects(); renderAll();
   });
 
