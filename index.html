@@ -99,6 +99,37 @@
   main > section:not([hidden]){animation:tabIn .18s ease-out}
   .tbtn,.hm-k,.hm-ti,.sg-card,.iv,.pv,.cpc{transition:background-color .15s,border-color .15s,box-shadow .15s,transform .12s}
   .tbtn:active,.hm-k:active,.hm-ti:active,.sg-card:active{transform:scale(.97)}
+  /* ═══ v125 — حركات ═══ كلها أقل من ثلث ثانية، وبتتلغي لوحدها مع «تقليل الحركة» (القاعدة تحت).
+     ١ فتح شاشة: الكروت بتظهر واحد ورا التاني — بس لما الشاشة تتفتح (class enter لحظة)، مش مع كل
+       حفظ، وإلا كانت هتتحرك بعد كل حركة. transform على الكارت نفسه مش على الـsection، والأدراج
+       الثابتة (as-drawer) بره الحركة عشان مكانها ما يتحركش. */
+  @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  main > section.enter :is(.hm-hero,.hm-k,.hm-row2 > .hm-todo,.hm-side > section,.sg-card,.sg-panel,.co-vd,.co-t,.vz-card,.kpi,.iv,.pv,.stats > div):not([hidden]),
+  main > section.enter > .panel:not(.as-drawer):not([hidden]){
+    animation:cardIn .28s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 32ms)}
+  /* ٢ الوقوف على كارت: بيطلع حبة لفوق وضله يبان — على الكمبيوتر بس (الموبايل مالوش hover) */
+  @media (hover:hover){
+    .hm-hero,.hm-k,.sg-card,.co-t,.kpi,.iv,.pv{transition:background-color .15s,border-color .15s,box-shadow .2s,transform .2s}
+    .hm-hero:hover,.hm-k:hover,#s-stagebox .sg-strip .sg-card:hover,.co-t:hover,.kpi:hover,.iv:hover,.pv:hover{
+      transform:translateY(-2px);box-shadow:0 8px 22px rgba(36,30,38,.09)}
+    [data-theme="dark"] :is(.hm-hero,.hm-k,.sg-card,.co-t,.kpi,.iv,.pv):hover{box-shadow:0 8px 22px rgba(0,0,0,.35)}
+    .hm-row2 .hm-ti .ic,.hm-srow em{transition:transform .2s}
+    .hm-row2 .hm-ti:hover .ic{transform:scale(1.08)}
+  }
+  /* ٣ التبديل بين مراحل الأوردرات: اللوحة بتبدّل بنعومة (opacity بس على القايمة — جواها لوحات ثابتة) */
+  @keyframes swapIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  #s-stage-panel.swap{animation:swapIn .22s cubic-bezier(.2,.7,.2,1)}
+  #s-allview.swap{animation:fadeIn .2s ease-out}
+  /* ٤ الأدراج: الخلفية بتغمق مع غشاوة خفيفة وهو داخل */
+  .scrim{backdrop-filter:blur(0);transition:opacity .2s,backdrop-filter .24s}
+  .scrim.on{backdrop-filter:blur(2px)}
+  /* ٥ رسومات: الأعمدة بتطلع من خط الأساس (لفوق أو لتحت، أو من اليمين في الأفقي) */
+  @keyframes vzUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes vzSide{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .vz-plot .vz-gu,.vz-plot .vz-gd,.vz-plot .vz-gx{transform-box:fill-box;animation:vzUp .45s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 28ms)}
+  .vz-plot .vz-gu{transform-origin:bottom} .vz-plot .vz-gd{transform-origin:top}
+  .vz-plot .vz-gx{transform-origin:right;animation-name:vzSide}
 
   header.top{
     background:var(--teal-deep);color:#fff;
@@ -1326,6 +1357,13 @@
   .sg-co-f{display:flex;gap:var(--sp-2);align-items:center;padding:var(--sp-3) var(--sp-4);border-top:1px solid var(--line);flex-wrap:wrap}
   .sg-co-f input{width:130px;padding:7px 10px;border:1px solid var(--line);border-radius:var(--r-sm);font:inherit;background:var(--card);color:var(--ink)}
   .sg-panel .sg-row.done{grid-template-columns:90px 1.2fr 1.4fr 110px auto}
+  /* v125 — سطر فيه خانات (الشركة · البوليصة · اتبعت) كان بيعصر الأصناف في عمود ضيق ٨ سطور.
+     الخانات بقت في سطر لوحدها تحت العميل والأصناف، والأصناف واخدة مكانها */
+  @media (min-width:761px){
+    .sg-panel .sg-row:has(> .sg-inl){grid-template-columns:110px 1.2fr 2.2fr 110px}
+    .sg-panel .sg-row > .sg-inl{grid-column:2 / -1}
+    .sg-panel .sg-row > .sg-inl input{max-width:240px}
+  }
   @media (max-width:760px){
     .sg-panel{padding:var(--sp-3)}
     .sg-row,.sg-co-b .sg-row,.sg-co-b .sg-row.ret,.sg-panel .sg-row.done{grid-template-columns:1fr auto;gap:6px var(--sp-2)}
@@ -3609,8 +3647,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "124";
+  var VERSION = "125";
   var CHANGELOG = [
+    { v:"125", d:"2026-10-07", items:[
+      "حركات خفيفة (أقل من ثلث ثانية): لما تفتح أي شاشة الكروت بتظهر واحد ورا التاني · الكارت بيطلع حبة لفوق لما تقف عليه · لما تختار مرحلة تانية في الأوردرات اللوحة بتبدّل بنعومة · الخلفية بتغمق مع غشاوة خفيفة لما درج يتفتح · أعمدة «رسومات» بتطلع من خط الأساس",
+      "الحركات بتتلغي لوحدها لو الجهاز مضبوط على «تقليل الحركة»، وما بتتكررش مع كل حفظ — بس لما الشاشة تتفتح",
+      "أقل زحمة: في مراحل الأوردرات، خانات الشركة والبوليصة بقت في سطر لوحدها تحت الأوردر — الأصناف كانت بتتعصر في عمود ضيق · كارت «فلوس لسه ما رجعتش» بقى بأرقام صحيحة من غير قروش"
+    ]},
     { v:"124", d:"2026-10-07", items:[
       "الرئيسية بالتصميم الجديد — كل حاجة في مكانها وبنفس الترتيب: التحية والفترة و«+ أوردر جديد» فوق، بعدها صافي الربح كارت كبير لوحده وتحته ربح البضاعة والإعلان على الأوردر والهامش، وجنبه 4 كروت بنفس الحجم (فلوس لسه ما رجعتش · الخزنة · المخزون · عند شركات الشحن)",
       "«محتاج منك النهارده» بقت قايمة: كل سطر فيه أيقونة والرقم واسم اللي هتعمله (كمّلهم · تابعهم · استلمها · فاتورة شراء)",
@@ -6363,7 +6406,12 @@
       (canTab("rep") ? "<button type='button' class='hm-link' data-hgo='rep'>قايمة الدخل كاملة ←</button>" : "") +
     "</div>";
     var K = [
-      ["be", "return", "فلوس لسه ما رجعتش", cashBeTxt(), cashBeCls(), cashBeSubTxt(), 1],
+      ["be", "return", "فلوس لسه ما رجعتش", cashBeTxt(), cashBeCls(), (function(){
+        // نسخة قصيرة لكارت صغير: أرقام صحيحة من غير قروش — التفاصيل كاملة بالدوسة
+        var x = cashBeSplit(); if(x.n <= 0.009) return "رجّعت فلوسك ✓ واللي بعده مكسب";
+        return [x.stock > 0.009 ? "منها " + qty(Math.round(x.stock)) + " بضاعة" : "",
+                x.rest > 0.009 ? (x.isLoss ? "و" + qty(Math.round(x.rest)) + " خسارة" : "والباقي " + qty(Math.round(x.rest))) : ""].filter(Boolean).join(" · ");
+      })(), 1],
       ["cash", "cash", "الخزنة", money(cashBox()), cashBox() >= 0 ? "" : "v-due", "الفلوس اللي في إيدك", 0],
       ["stock", "box", "قيمة المخزون", money(stockBookValue()), "", "بالتكلفة", 1],
       ["wallet", "truck", "عند شركات الشحن", money(walletsTotal()), walletsTotal() > 0.009 ? "v-gain" : "", walletsTotal() > 0.009 ? "لسه ما استلمتهاش — استلمها" : "مفيش فلوس مستنياك", 0]
@@ -10128,10 +10176,12 @@
   var sgNote = null;                    // نتيجة الإجراء الجماعي — بتفضل ظاهرة لحد الحركة الجاية
 
   function setSView(v, keep){
+    var changed = sView !== v;
     sView = v;
     if(!keep){ try{ if(LS) LS.setItem("naya:sview", v); }catch(e){} }
     sgPart = null; sgNote = null;
     renderSales();
+    if(changed){ swapAnim("s-stage-panel"); swapAnim("s-allview"); }
   }
   function daysSince(d){
     if(!d) return 0;
@@ -13694,6 +13744,8 @@
     vzTips[i] = "<b>" + (cls ? "<i class='" + cls + "'></i>" : "") + esc(rows[0]) + "</b>" +
       rows.slice(1).map(function(r){ return "<div class='r'><span>" + esc(r[0]) + "</span><span>" + esc(r[1]) + "</span></div>"; }).join("");
   }
+  // v125: العمود بيطلع من خط الأساس (الـCSS تحت) — dir: vz-gu لفوق · vz-gd لتحت · vz-gx من اليمين
+  function vzGrow(m, dir, i){ m.setAttribute("class", (m.getAttribute("class") || "") + " " + dir); m.style.setProperty("--i", i); }
   function vzSvg(host, w, h, label){
     host.innerHTML = "";
     return vzEl(host, "svg", { width:w, height:h, viewBox:"0 0 " + w + " " + h, role:"img", "aria-label":label });
@@ -13770,6 +13822,7 @@
       if(isT) m = vzCol(svg, X, bw, y(Math.max(0, top1)), y(Math.min(0, bot1)), cls, b >= 0);
       else m = vzEl(svg, "rect", { x:X, y:y(top1), width:bw, height:Math.max(1.5, y(bot1) - y(top1)), rx:3, "class":cls });
       m.setAttribute("data-vt", vzTips.length);
+      vzGrow(m, (isT ? b >= 0 : st.v >= 0) ? "vz-gu" : "vz-gd", i);
       var amt = isT ? run : st.v, sz = isT ? amt : Math.abs(amt);     // البند: قد إيه بياخد · الإجمالي: بإشارته
       vzTip(vzTips.length, isT ? "" : VZ_FILL[st.k], [st.l, ["المبلغ", vzH(amt, 2)], ["على الأوردر", per(sz)], ["من المبيعات", pc(sz)],
         ["النوع", isT ? "إجمالي" : st.grp === "f" ? "ثابت" : st.k === "goods" ? "تكلفة البضاعة" : "متغيّر"]]);
@@ -13833,6 +13886,7 @@
           "Q" + xl + "," + (Y + bh) + " " + (xl + 4) + "," + (Y + bh) + "H" + xr + "Z", "class":sg.c || VZ_FILL[sg.k] });
         else m = vzEl(svg, "rect", { x:xl, y:Y, width:w, height:bh, "class":sg.c || VZ_FILL[sg.k] });
         m.setAttribute("data-vt", vzTips.length);
+        vzGrow(m, "vz-gx", i + (Y > 60 ? 2 : 0));
         vzTip(vzTips.length, sg.c ? "" : VZ_FILL[sg.k], [sg.l, ["على الأوردر", vzH(sg.v, 2)], ["من اللي العميل بيدفعه", tIn > 0.009 ? vzH(sg.v / tIn * 100, 1) + "%" : "—"], ["على الـ" + qty(n) + " أوردر", vzH(sg.v * n, 2)]]);
         var lbl = sg.l.split(" ")[0] + " " + Math.round(sg.v);
         if(w > lbl.length * 7 + 14) vzT(svg, (xl + xr) / 2, Y + bh / 2 + 4.5, lbl, { fw:700, fs:11, c:sg.c === "vz-tot" ? "vz-tt" : (sg.k === "goods" || sg.k === "ship") ? "vz-tw" : "vz-tk" });
@@ -13895,6 +13949,7 @@
         if(!(x[key] > 0)) return;
         var m = vzCol(svg, cx(k) - bw / 2, bw, y(x[key]), y(0), cls, true);
         m.setAttribute("data-vt", vzTips.length);
+        vzGrow(m, "vz-gu", Math.min(k, 30) / 2);
         vzTip(vzTips.length, cls, [dShort(x.d), ["إعلان", vzH(x.ads, 2)], ["أوردرات", qty(x.n)]]);
         if(slot >= 22) vzT(svg, cx(k), y(x[key]) - 6, fmtv(x[key]), { fw:600, fs:10.5, d:"ltr" });
       });
@@ -13985,6 +14040,25 @@
   function showTab(tab){
     activeTab = tab;
     if(dirtyTabs[tab]) renderTab(tab);
+  }
+  /* v125 — الكروت بتظهر واحد ورا التاني لما الشاشة تتفتح. class enter لحظة وبعدها بتتشال،
+     فأي رسم تاني بعد كده (بعد حفظ مثلاً) ما بيتحركش. --i = ترتيب الكارت (لحد ١٢). */
+  var ENTER_SEL = ".hm-hero,.hm-k,.hm-row2 > .hm-todo,.hm-side > section,.sg-card,.sg-panel,.co-vd,.co-t,.vz-card,.kpi,.iv,.pv,.stats > div";
+  function tabEnter(sec){
+    if(!sec) return;
+    var n = 0;
+    Array.prototype.forEach.call(sec.querySelectorAll(ENTER_SEL + ",:scope > .panel"), function(el){
+      if(el.hidden || el.classList.contains("as-drawer")) return;
+      el.style.setProperty("--i", Math.min(n++, 12));
+    });
+    sec.classList.remove("enter"); void sec.offsetWidth; sec.classList.add("enter");
+    clearTimeout(sec._enterT);
+    sec._enterT = setTimeout(function(){ sec.classList.remove("enter"); }, 800);
+  }
+  // اللوحة بتبدّل بنعومة لما تختار مرحلة تانية في الأوردرات
+  function swapAnim(id){
+    var el = document.getElementById(id); if(!el) return;
+    el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap");
   }
 
   /* ---------- تطبيق الصلاحيات على الواجهة ---------- */
@@ -14115,6 +14189,7 @@
       sec.hidden = (sec.id !== "tab-" + b.dataset.tab);
     });
     showTab(b.dataset.tab);          // يترسم دلوقتي لو كان محتاج
+    tabEnter(document.getElementById("tab-" + b.dataset.tab));
     window.scrollTo(0,0);
   });
 
@@ -18357,6 +18432,7 @@
     renderAll();
     renderStorageState();
     hmCountUp();
+    tabEnter(document.querySelector("main > section[id^='tab-']:not([hidden])"));
 
     // المزامنة بتكمّل لوحدها من غير ما حد يشغّلها كل مرة
     if(sync.on && sync.url && sync.key) startSync(true);
