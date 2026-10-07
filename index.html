@@ -1327,7 +1327,9 @@
   .sg-rows > .sg-row:first-child{border-top:0}
   .sg-row .ono{font-weight:700;color:var(--ink);text-decoration:none}
   .sg-ck{display:inline-flex;align-items:center;gap:6px}
-  .sg-ck input{width:18px;height:18px;margin:0}
+  .sg-ck input{width:18px;height:18px;margin:0;accent-color:var(--teal)}
+  /* مربعات الاختيار في الوضع الليلي: غامقة زي الصفحة بدل الأبيض الفاقع */
+  [data-theme="dark"] input[type="checkbox"],[data-theme="dark"] input[type="radio"]{color-scheme:dark}
   .sg-row .ono:hover{color:var(--teal);text-decoration:underline}
   .sg-sub{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
   .sg-amt{font-weight:600;text-align:end}
@@ -3721,8 +3723,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "126";
+  var VERSION = "127";
   var CHANGELOG = [
+    { v:"127", d:"2026-10-07", items:[
+      "الأوردرات: العدد بقى مكتوب صح — «بقاله 6 أيام» بدل «6 يوم» و«قطعتين» و«3 قطع» بدل «2 قطعة» و«3 قطعة»",
+      "مربعات الاختيار جنب الأوردرات بقت بلون الهوية، وفي الوضع الليلي غامقة بدل الأبيض الفاقع"
+    ]},
     { v:"126", d:"2026-10-07", items:[
       "التقارير بقت تبويبات بدل صفحة طويلة: ملخص · الأرباح · الأصناف · العملاء والمحافظات · الشركاء — كل تبويب فيه حاجته بس، وآخر تبويب فتحته بيفضل مفتوح",
       "دوس على أي بند في قايمة الدخل يوريك جاي منين: «إعلانات» بتطلّع المصاريف اللي جواها بتاريخها وبيانها، و«فرق الشحن» بيطلّع الأوردرات (العميل دفع كام والشركة خدت كام)، والمبيعات والتكلفة أوردر أوردر — والإجمالي تحت = رقم البند بالظبط",
@@ -9852,7 +9858,7 @@
       "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){
           return esc(itemName(g.id)) + " <b class='num'>×" + qty(g.q) + "</b>"; }).join(" · ") +
         (grp.length > 2 ? " <span class='more'>و" + qty(grp.length - 2) + " صنف تاني</span>" : "") + "</span>" +
-      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : qty(pcs) + " قطعة") +
+      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : nPcs(pcs)) +
         (shipIn(s) ? " · شحن " + qty(shipIn(s)) : "") +
         (backN ? " · <span class='v-due'>مرتجع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
 
@@ -10135,7 +10141,7 @@
     var retN = retQty(s);
     if(deliv)
       add(true, (via ? "العميل استلم ودفع " + esc(money(m.paid)) : "العميل استلم") +
-                (retN ? " — رجّع " + qty(retN) + " قطعة" : ""), dShort(s.deliveredAt));
+                (retN ? " — رجّع " + nPcs(retN) : ""), dShort(s.deliveredAt));
     else if(canc) add(true, "العميل رفض الأوردر", dShort(s.cancelledAt));
     else if((co && squish(s.shipCode)) || (s.selfDel && s.shippedAt)) add(false, "العميل لسه ما استلمش", "مستني");
     if(deliv || canc){
@@ -10573,7 +10579,7 @@
   function sgItems(s){
     var n = SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
     return "<span class='items'>" + esc(itemsLabel(s)) +
-      "<span class='sg-sub'>" + qty(n) + " قطعة" + (shipIn(s) ? " · شحن " + sgNum(shipIn(s)) : "") + "</span></span>";
+      "<span class='sg-sub'>" + nPcs(n) + (shipIn(s) ? " · شحن " + sgNum(shipIn(s)) : "") + "</span></span>";
   }
   // اللي العميل هيدفعه لو خد كله
   function sgFull(s){
@@ -10644,7 +10650,7 @@
               : sgNo(s)) +
             "<span class='sg-sub num'>" + (s.selfDel ? "🛵 مع " + esc(squish(s.courier) || "المندوب")
               : esc(co) + (squish(s.shipCode) ? " · " + esc(squish(s.shipCode)) : "")) + "</span></span>" +
-          "<span>" + sgCust(s) + (d >= SG_STALE ? " <span class='sg-pill bad'>بقاله " + qty(d) + " يوم</span>" : "") + "</span>" +
+          "<span>" + sgCust(s) + (d >= SG_STALE ? " <span class='sg-pill bad'>بقاله " + nDays(d) + "</span>" : "") + "</span>" +
           sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" + acts + part + "</div>";
       });
@@ -11731,6 +11737,7 @@
   }
   function nInv(n){ return n === 1 ? "فاتورة واحدة" : plural(n, "فاتورة", "فاتورتين", "فواتير"); }
   function nDays(n){ return plural(n, "يوم", "يومين", "أيام"); }
+  function nPcs(n){ return Number(n) === 1 ? "قطعة واحدة" : plural(n, "قطعة", "قطعتين", "قطع"); }
   function monthLabel(d){
     try{
       var t = new Date((d || "").slice(0,7) + "-01T00:00:00");
@@ -13954,7 +13961,7 @@
     });
     var stale = g.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; })
       .sort(function(a, b){ return daysSince(b.date) - daysSince(a.date); });
-    if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + qty(daysSince(stale[0].date)) + " أيام", "sales|2", "الأوردرات");
+    if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + nDays(daysSince(stale[0].date)), "sales|2", "الأوردرات");
     if(heldOpen().length) add("استلم المرتجع", qty(heldOpenQty()) + " قطعة عند شركة الشحن", "sales|4", "المرتجع");
     var SH = shortList();
     if(SH.length){
