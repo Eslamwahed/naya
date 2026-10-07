@@ -121,6 +121,7 @@
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   #s-stage-panel.swap{animation:swapIn .22s cubic-bezier(.2,.7,.2,1)}
   #s-allview.swap{animation:fadeIn .2s ease-out}
+  #tab-rep .swap{animation:swapIn .22s cubic-bezier(.2,.7,.2,1)}
   /* ٤ الأدراج: الخلفية بتغمق مع غشاوة خفيفة وهو داخل */
   .scrim{backdrop-filter:blur(0);transition:opacity .2s,backdrop-filter .24s}
   .scrim.on{backdrop-filter:blur(2px)}
@@ -1326,7 +1327,9 @@
   .sg-rows > .sg-row:first-child{border-top:0}
   .sg-row .ono{font-weight:700;color:var(--ink);text-decoration:none}
   .sg-ck{display:inline-flex;align-items:center;gap:6px}
-  .sg-ck input{width:18px;height:18px;margin:0}
+  .sg-ck input{width:18px;height:18px;margin:0;accent-color:var(--teal)}
+  /* مربعات الاختيار في الوضع الليلي: غامقة زي الصفحة بدل الأبيض الفاقع */
+  [data-theme="dark"] input[type="checkbox"],[data-theme="dark"] input[type="radio"]{color-scheme:dark}
   .sg-row .ono:hover{color:var(--teal);text-decoration:underline}
   .sg-sub{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
   .sg-amt{font-weight:600;text-align:end}
@@ -1492,6 +1495,40 @@
   .panel > .rsec{border-top:1px solid var(--line);margin-top:var(--sp-3)}
   .panel > .rsec > summary{padding-inline:0}
   .panel > .rsec > *:not(summary){padding-inline:0}
+
+  /* v126: تبويبات التقارير — كل تبويب فيه حاجته بس */
+  .rep-tabs{display:flex;gap:var(--sp-1);flex-wrap:wrap;border-bottom:1px solid var(--line);margin:var(--sp-4) 0}
+  .rep-tabs button{font:inherit;font-size:var(--fs-3);color:var(--ink-soft);background:none;border:0;
+    border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 16px;cursor:pointer;min-height:44px;
+    transition:color .15s,border-color .15s}
+  .rep-tabs button:hover{color:var(--ink)}
+  .rep-tabs button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
+  .rep-tabs button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  [data-rt].rt-off,.rsecs.rt-off{display:none}
+  /* v126: دوس على بند في قايمة الدخل يوريك جاي منين */
+  #t-pis tr.pis-click{cursor:pointer}
+  #t-pis tr.pis-click .pis-l::after{content:"‹";display:inline-block;margin-inline-start:8px;color:var(--ink-soft);font-weight:400}
+  #t-pis tr.pis-click.on .pis-l::after{content:"▾";color:var(--teal)}
+  #t-pis tr.pis-click:hover > td{background:var(--teal-soft)}
+  #t-pis tr.pis-click:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  #t-pis tr.pis-dd > td{background:var(--paper);padding:var(--sp-2) var(--sp-3) var(--sp-3)}
+  .pis-dl{display:grid;gap:2px;font-size:var(--fs-2);max-width:620px}
+  .pis-dl > div{display:flex;gap:var(--sp-3);align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .pis-dl > div > span:first-child{flex:0 0 auto;color:var(--ink-soft);min-width:60px}
+  .pis-dl > div > span.t{flex:1 1 auto;min-width:0}
+  .pis-dl > div > b{font-weight:600;white-space:nowrap}
+  .pis-dl > div.tot{border-bottom:0;font-weight:700}
+  .pis-dl .go{font:inherit;font-size:var(--fs-2);color:var(--teal);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline}
+  /* v126: حالة كل صنف */
+  .itp-st{display:inline-block;font-size:var(--fs-1);font-weight:600;border-radius:99px;padding:2px 10px;white-space:nowrap}
+  .itp-st.go{background:rgba(50,123,99,.14);color:var(--gain)}
+  .itp-st.pair{background:rgba(138,98,18,.14);color:var(--warn)}
+  .itp-st.bad{background:rgba(154,19,51,.12);color:var(--due)}
+  .itp-st.idle{background:var(--teal-soft);color:var(--ink-soft)}
+  #t-rep-itp td.num{white-space:nowrap}
+  #t-rep-itp tr.itp-tot td{font-weight:700;background:var(--teal-soft);border-top:2px solid var(--line)}
+  #t-rep-itp .itp-m{display:none}
+  .rep-itp-leg{line-height:2.1}
 
   /* عمود مصغّر جوّه الجدول: خط صفر في النص، ربح يمين وخسارة شمال.
      اللون لوحده ما ينفعش — الأخضر والأحمر متقاربين عند عمى الألوان
@@ -1897,6 +1934,24 @@
     #t-pis tbody td::before{content:none}
     #t-pis th:nth-child(4),#t-pis td:nth-child(4){display:none}
     #t-pis td.num{font-size:var(--fs-2)}
+    .rep-tabs{flex-wrap:nowrap;overflow-x:auto;border-bottom:0;gap:6px;margin:var(--sp-3) 0;scrollbar-width:none}
+    .rep-tabs::-webkit-scrollbar{display:none}
+    .rep-tabs button{flex:0 0 auto;border:1px solid var(--line);border-radius:99px;margin:0;padding:6px 14px;min-height:38px;background:var(--card)}
+    .rep-tabs button.on{background:var(--teal);color:var(--card);border-color:var(--teal)}
+    /* كارت الصنف: الاسم والحالة + ٣ أرقام + سطر صغير بالباقي */
+    #t-rep-itp .itp-m{display:block;line-height:1.7}
+    #t-rep-itp td.itp-x{display:none}
+    #t-rep-itp tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));position:relative;padding:var(--sp-2)}
+    #t-rep-itp tbody td{border:0;padding:4px 6px;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px}
+    #t-rep-itp tbody td::before{font-size:var(--fs-1)}
+    #t-rep-itp tbody td.wide{grid-column:1/-1;order:0;padding-inline-end:120px}
+    #t-rep-itp tbody td.wide::before{content:none}
+    #t-rep-itp tbody td:nth-child(8){order:1;font-size:var(--fs-4)}
+    #t-rep-itp tbody td:nth-child(7){order:2}
+    #t-rep-itp tbody td:nth-child(2){order:3}
+    #t-rep-itp tbody td:nth-child(11){position:absolute;top:var(--sp-2);inset-inline-end:var(--sp-2);padding:4px}
+    #t-rep-itp tbody td:nth-child(11)::before{content:none}
+    #t-rep-itp tbody td:nth-child(11):empty{display:none}
 
     .del{padding:var(--sp-1) var(--sp-2)}
   }
@@ -3090,8 +3145,17 @@
     </div>
   </div>
 
+  <!-- v126: التقارير تبويبات بدل صفحة طويلة — كل تبويب فيه حاجته بس -->
+  <div class="rep-tabs" id="rep-tabs" role="tablist" aria-label="أقسام التقارير">
+    <button type="button" role="tab" data-rtab="sum">ملخص</button>
+    <button type="button" role="tab" data-rtab="profit">الأرباح</button>
+    <button type="button" role="tab" data-rtab="items">الأصناف</button>
+    <button type="button" role="tab" data-rtab="cust">العملاء والمحافظات</button>
+    <button type="button" role="tab" data-rtab="part">الشركاء</button>
+  </div>
+
   <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
-  <div class="panel money-only" id="pis-panel">
+  <div class="panel money-only" id="pis-panel" data-rt="sum">
     <div class="pis-head"><h3>قايمة الدخل <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
       <div class="quick" id="pis-mode" role="group" aria-label="الأوردرات">
         <button type="button" data-pism="exp" class="on">لو كله اتسلّم</button>
@@ -3102,7 +3166,7 @@
   </div>
 
   <!-- السؤال الأهم: أبيع بكام؟ -->
-  <div class="panel">
+  <div class="panel" data-rt="sum">
     <div class="fold-h"><h3>عشان تبدأ تكسب <small id="rep-be-sum"></small></h3>
       <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">عشان أكسب مبلغ معيّن ▾</button></div>
     <div class="money3" id="rep-be"></div>
@@ -3128,38 +3192,50 @@
   </div>
 
   <!-- الأداء -->
-  <div class="panel">
+  <div class="panel" data-rt="sum">
     <h3>تقييم الأداء</h3>
     <div class="stats" id="rep-kpi"></div>
     <p class="hint" id="rep-kpi-wait" hidden style="margin:var(--sp-2) 0 0"></p>
   </div>
 
+  <!-- v126: ربح كل صنف بعد الإعلان والشحن -->
+  <div class="panel money-only" id="rep-itp-panel" data-rt="items">
+    <h3>ربح كل صنف بعد الإعلان والشحن</h3>
+    <p class="hint" id="rep-itp-note" style="margin:0 0 var(--sp-3)"></p>
+    <div class="tbl-wrap"><table id="t-rep-itp"></table></div>
+    <p class="hint rep-itp-leg" style="margin:var(--sp-3) 0 0">
+      <span class="itp-st go">أعلن عليه</span> بيكسب بعد الإعلان والشحن ·
+      <span class="itp-st pair">بيعه مع قطعة تانية</span> بضاعته بتكسب بس الإعلان بياكله لوحده ·
+      <span class="itp-st bad">راجع سعره</span> بيخسر في كل قطعة ·
+      <span class="itp-st idle">واقف</span> عندك منه ومحدش طلبه</p>
+  </div>
+
   <!-- الباقي مطوي -->
   <div class="panel rsecs">
-    <details class="rsec" open>
+    <details class="rsec" open data-rt="profit">
       <summary>الربح شهر بشهر <b>هل بتتحسّن ولا بتتراجع؟</b></summary>
       <div class="tbl-wrap"><table id="t-rep-months"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="items">
       <summary>أنهي صنف بيكسّب وأنهي بيخسّر <b>هامش كل صنف ومساهمته</b></summary>
       <p class="hint">هامش القطعة = سعر بيعها − تكلفتها. الصنف اللي هامشه سالب بتخسر في كل قطعة بتبيعها.</p>
       <div class="tbl-wrap"><table id="t-rep-itembe"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="cust">
       <summary>مين عليه فلوس وبقاله قد إيه <b>أعمار الديون</b></summary>
       <div class="stats" id="age-stats"></div>
       <div class="tbl-wrap"><table id="t-fs-age"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="part">
       <summary>استرداد رأس المال للشركاء <b>كل شريك كسب كام ورجعله كام</b></summary>
       <p class="hint" id="rep-pb-note"></p>
       <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="profit">
       <summary>لو حصل كذا يبقى إيه؟ <b>تحليل الحساسية</b></summary>
       <p class="hint">غيّر النسب وشوف الربح والتعادل بيتحرّكوا إزاي. اكتب <strong>10</strong> لزيادة ١٠٪ و<strong>-10</strong> لنقص ١٠٪. الأرقام تقديرية وما بتتسجّلش.</p>
       <div class="fgrid" id="sens-in">
@@ -3172,22 +3248,22 @@
       <div class="row-actions"><button class="tbtn" type="button" id="b-sens-reset">صفّر الكل</button></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="items">
       <summary>أفضل الأصناف <b>المبيعات والربح والمرتجع لكل صنف</b></summary>
       <div class="tbl-wrap"><table id="t-rep-items"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="cust">
       <summary>أفضل العملاء <b>مين بيشتري أكتر</b></summary>
       <div class="tbl-wrap"><table id="t-rep-cust"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="cust">
       <summary>أداء المحافظات <b>مين بيجيب إلغاءات</b></summary>
       <div class="tbl-wrap"><table id="t-rep-gov"></table></div>
     </details>
 
-    <details class="rsec">
+    <details class="rsec" data-rt="cust">
       <summary>أداء المسؤولين <b>شغل كل واحد في الفريق</b></summary>
       <div class="tbl-wrap"><table id="t-rep-owner"></table></div>
     </details>
@@ -3647,8 +3723,18 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "125";
+  var VERSION = "127";
   var CHANGELOG = [
+    { v:"127", d:"2026-10-07", items:[
+      "الأوردرات: العدد بقى مكتوب صح — «بقاله 6 أيام» بدل «6 يوم» و«قطعتين» و«3 قطع» بدل «2 قطعة» و«3 قطعة»",
+      "مربعات الاختيار جنب الأوردرات بقت بلون الهوية، وفي الوضع الليلي غامقة بدل الأبيض الفاقع"
+    ]},
+    { v:"126", d:"2026-10-07", items:[
+      "التقارير بقت تبويبات بدل صفحة طويلة: ملخص · الأرباح · الأصناف · العملاء والمحافظات · الشركاء — كل تبويب فيه حاجته بس، وآخر تبويب فتحته بيفضل مفتوح",
+      "دوس على أي بند في قايمة الدخل يوريك جاي منين: «إعلانات» بتطلّع المصاريف اللي جواها بتاريخها وبيانها، و«فرق الشحن» بيطلّع الأوردرات (العميل دفع كام والشركة خدت كام)، والمبيعات والتكلفة أوردر أوردر — والإجمالي تحت = رقم البند بالظبط",
+      "تبويب «الأصناف» فيه جدول جديد «ربح كل صنف بعد الإعلان والشحن»: اتباع كام · هامش البضاعة · نصيبه من الإعلان · فرق الشحن · صافي القطعة · صافي الصنف · المخزون يكفي كام يوم — ومجموعه = «ربح الأوردر بعد مصاريف البيع» في القايمة",
+      "كل صنف عليه حالة: «أعلن عليه» (بيكسب بعد كل حاجة) · «بيعه مع قطعة تانية» (بضاعته بتكسب بس الإعلان بياكله لوحده) · «راجع سعره» (بيخسر في كل قطعة) · «واقف» (عندك منه ومحدش طلبه)"
+    ]},
     { v:"125", d:"2026-10-07", items:[
       "حركات خفيفة (أقل من ثلث ثانية): لما تفتح أي شاشة الكروت بتظهر واحد ورا التاني · الكارت بيطلع حبة لفوق لما تقف عليه · لما تختار مرحلة تانية في الأوردرات اللوحة بتبدّل بنعومة · الخلفية بتغمق مع غشاوة خفيفة لما درج يتفتح · أعمدة «رسومات» بتطلع من خط الأساس",
       "الحركات بتتلغي لوحدها لو الجهاز مضبوط على «تقليل الحركة»، وما بتتكررش مع كل حفظ — بس لما الشاشة تتفتح",
@@ -8165,28 +8251,32 @@
     var n = v.n, g = v.goods;
     var tag = function(k){ return k ? " <span class='pis-tag " + k + "'>" + (k === "var" ? "متغيّر" : "ثابت") + "</span>" : ""; };
     // kind "" = بند بيتطرح (أحمر لو فيه مبلغ) · "sum" = إجمالي بلون إشارته
-    var row = function(label, val, kind, cls, sub){
-      var c = kind === "sum" ? (val >= 0 ? "v-gain" : "v-due") : (val > 0.009 ? "v-due" : "");
-      return "<tr" + (cls ? " class='" + cls + "'" : "") + "><td class='wide'>" + label + (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
+    // dd = البند بيتفتح بالدوس ويوريك الأوردرات أو المصاريف اللي جواه (v126)
+    var row = function(label, val, kind, cls, sub, dd){
+      var c = kind === "sum" ? (val >= 0 ? "v-gain" : "v-due") : kind === "base" ? "" : (val > 0.009 ? "v-due" : "");
+      if(dd) cls = (cls ? cls + " " : "") + "pis-click" + (pisOpen === dd ? " on" : "");
+      return "<tr" + (cls ? " class='" + cls + "'" : "") +
+        (dd ? " data-pisdd='" + dd + "' tabindex='0' role='button' aria-expanded='" + (pisOpen === dd) + "'" : "") +
+        "><td class='wide'>" + (dd ? "<span class='pis-l'>" + label + "</span>" : label) + (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
         "<td class='num " + c + "'>" + money(val) + "</td>" +
         "<td class='num " + c + "'>" + (n ? money(val / n) : "—") + "</td>" +
-        "<td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "<span dir='ltr'>" + (val / g * 100).toFixed(1) + "%</span>" : "—") + "</td></tr>";
+        "<td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "<span dir='ltr'>" + (val / g * 100).toFixed(1) + "%</span>" : "—") + "</td></tr>" +
+        (dd && pisOpen === dd ? "<tr class='pis-dd'><td colspan='4'>" + pisDrill(dd, P) + "</td></tr>" : "");
     };
     var rows = [];
-    rows.push("<tr><td class='wide' style='font-weight:700'>المبيعات</td><td class='num'>" + money(g) + "</td>" +
-      "<td class='num'>" + (n ? money(g / n) : "—") + "</td><td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "100%" : "—") + "</td></tr>");
-    rows.push(row("− تكلفة البضاعة", v.cost, "", "", trIdx().total > 0.009 ? "فيها نصيب القطع من انتقالات شراء البضاعة" : ""));
+    rows.push(row("<b>المبيعات</b>", g, "base", "", "", "goods"));
+    rows.push(row("− تكلفة البضاعة", v.cost, "", "", trIdx().total > 0.009 ? "فيها نصيب القطع من انتقالات شراء البضاعة" : "", "cost"));
     rows.push(row("= ربح البضاعة", v.gross, "sum", "pis-tot"));
     rows.push(v.ship >= 0
-      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)))
-      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout))));
-    rows.push(row("− إعلانات" + tag("var"), v.ads));
-    if(v.pack > 0.009) rows.push(row("− تغليف" + tag("var"), v.pack));
-    if(Math.abs(v.xloss) > 0.009) rows.push(row("− خسارة استبدال مع المورد" + tag("var"), v.xloss));
-    if(Math.abs(v.othervar) > 0.009) rows.push(row("− مصاريف متغيّرة تانية" + tag("var"), v.othervar));
+      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship")
+      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship"));
+    rows.push(row("− إعلانات" + tag("var"), v.ads, "", "", "", v.ads > 0.009 ? "ads" : ""));
+    if(v.pack > 0.009) rows.push(row("− تغليف" + tag("var"), v.pack, "", "", "", "pack"));
+    if(Math.abs(v.xloss) > 0.009) rows.push(row("− خسارة استبدال مع المورد" + tag("var"), v.xloss, "", "", "", "xloss"));
+    if(Math.abs(v.othervar) > 0.009) rows.push(row("− مصاريف متغيّرة تانية" + tag("var"), v.othervar, "", "", "", "othervar"));
     rows.push(row("= ربح الأوردر بعد مصاريف البيع", v.contrib, "sum", "pis-tot"));
     [["subs","اشتراكات"],["salary","مرتبات"],["once","مرة واحدة"],["trans","انتقالات من غير فاتورة"],["other","مصاريف تانية"]].forEach(function(x){
-      if(Math.abs(v[x[0]]) > 0.009) rows.push(row("− " + x[1] + tag("fixed"), v[x[0]]));
+      if(Math.abs(v[x[0]]) > 0.009) rows.push(row("− " + x[1] + tag("fixed"), v[x[0]], "", "", "", x[0]));
     });
     rows.push(row("= صافي الربح", v.net, "sum", "pis-net"));
     table("t-pis", ["البند", "المبلغ", "على الأوردر" + (n ? " (÷" + qty(n) + ")" : ""), "من المبيعات"], rows, "");
@@ -8213,11 +8303,232 @@
   }
   document.getElementById("pis-mode").addEventListener("click", function(e){
     var b = e.target.closest("[data-pism]"); if(!b) return;
-    pisMode = b.dataset.pism; renderProjIS();
+    pisMode = b.dataset.pism; renderProjIS(); renderItemProfit();
   });
+  /* v126: كل بند في قايمة الدخل بيتفتح ويوريك جاي منين — نفس الحساب بالظبط،
+     والإجمالي تحت = رقم البند. الأوردرات: المسلّم بإيراده الفعلي، واللي لسه ماشي
+     (في «لو كله اتسلّم» بس) بـ expProfit زي projStats. */
+  var pisOpen = null;
+  var PIS_DD_MAX = 12;
+  function pisDrill(key, P){
+    var r = periodRange(), L = [], go = "", goTxt = "", tot = 0;
+    var act = pisMode === "act";
+    var who = function(s){ return "#" + esc(s.no || "—") + " · " + esc(partyName(s.partyId)); };
+    if(key === "goods" || key === "cost" || key === "ship"){
+      P.c.list.forEach(function(s){
+        var del = isDelivered(s), canc = isCancelled(s), open = !del && !canc, val = 0, t = "";
+        if(open && act) return;
+        var e = open ? expProfit(s) : null;
+        if(key === "goods") val = del ? saleTotal(s) : (e ? e.goods : 0);
+        else if(key === "cost") val = del ? SL(s).reduce(function(b, l){ return b + lineCost(l) * lineSold(l, s); }, 0) : (e ? e.cost : 0);
+        else if(open || shipCounts(s)){
+          var si = shipIn(s), so = shipOut(s); val = si - so;
+          if(Math.abs(si) < 0.009 && Math.abs(so) < 0.009) return;
+          t = "العميل " + esc(money(si)) + " · الشركة " + esc(money(so));
+        }
+        if(Math.abs(val) < 0.009 && key !== "ship") return;
+        if(open) t = (t ? t + " · " : "") + "لسه ماشي";
+        else if(canc) t = (t ? t + " · " : "") + "ملغي";
+        tot += val;
+        L.push({ d:revDate(s) || s.date, t:who(s) + (t ? " <small>(" + t + ")</small>" : ""), v:val });
+      });
+      go = "sales"; goTxt = "افتح الأوردرات";
+    } else if(key === "xloss"){
+      live("purchases").forEach(function(p){
+        if(!p.xloss || !inRange(p.date, r)) return;
+        var a = Number(p.xloss)||0; tot += a;
+        L.push({ d:p.date, t:(a > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + esc(p.pno) : "") + " · " + esc(itemName(p.itemId)), v:a });
+      });
+      go = "purch"; goTxt = "افتح المشتريات";
+    } else {
+      live("cash").forEach(function(c){
+        if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c) || expCat(c) !== key) return;
+        var a = Number(c.amount)||0; tot += a;
+        L.push({ d:c.date, t:esc(c.note || "—"), v:a });
+      });
+      go = "cash"; goTxt = "افتحهم في الخزنة";
+    }
+    L.sort(function(a, b){ return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; });
+    if(!L.length) return "<p class='hint' style='margin:0'>مفيش حاجة في الفترة دي.</p>";
+    var more = L.length - PIS_DD_MAX;
+    return "<div class='pis-dl'>" + L.slice(0, PIS_DD_MAX).map(function(x){
+        return "<div><span class='num'>" + esc(dShort(x.d)) + "</span><span class='t'>" + x.t + "</span><b class='num'>" + esc(money(x.v)) + "</b></div>";
+      }).join("") +
+      (more > 0 ? "<div><span></span><span class='t' style='color:var(--ink-soft)'>و" + qty(more) + " كمان — داخلين في الإجمالي</span><b></b></div>" : "") +
+      "<div class='tot'><span></span><span class='t'>الإجمالي (" + qty(L.length) + ")</span><b class='num'>" + esc(money(tot)) + "</b></div>" +
+      (canTab(go) ? "<div style='border:0'><button type='button' class='go' data-pisgo='" + go + "'>" + goTxt + " ←</button></div>" : "") +
+      "</div>";
+  }
+  (function(){
+    var t = document.getElementById("t-pis");
+    var tog = function(tr){ pisOpen = pisOpen === tr.dataset.pisdd ? null : tr.dataset.pisdd; renderProjIS();
+      var n = t.querySelector("tr[data-pisdd='" + tr.dataset.pisdd + "']"); if(n) n.focus(); };
+    t.addEventListener("click", function(e){
+      var g = e.target.closest("[data-pisgo]");
+      if(g){ goTab(g.dataset.pisgo); if(g.dataset.pisgo === "sales") setSView("all"); return; }
+      var tr = e.target.closest("tr[data-pisdd]"); if(tr) tog(tr);
+    });
+    t.addEventListener("keydown", function(e){
+      if(e.key !== "Enter" && e.key !== " ") return;
+      var tr = e.target.closest("tr[data-pisdd]"); if(!tr || e.target !== tr) return;
+      e.preventDefault(); tog(tr);
+    });
+  })();
+  /* v126: ربح كل صنف بعد الإعلان والشحن — نفس قايمة الدخل بنفس الوضع («لو كله اتسلّم» أو «اتسلّم فعلاً»):
+     البضاعة والتكلفة سطر سطر زي periodStats/expProfit بالظبط، فرق شحن كل أوردر بيتقسم على أصنافه
+     على قد بضاعة كل صنف فيه (ولو الأوردر مالوش بضاعة — ملغي — بالتساوي)، والمصاريف المتغيّرة
+     (إعلان وتغليف واستبدال…) على الأصناف على قد مبيعاتها. مجموع «صافي الصنف» = «ربح الأوردر بعد
+     مصاريف البيع» في القايمة بالظبط. */
+  function itemProfit(P, act){
+    var v = act ? P.act : P.exp, M = {}, G = 0;
+    var bucket = function(id){ return M[id] = M[id] || { q:0, g:0, c:0, sh:0, ads:0, ov:0 }; };
+    P.c.list.forEach(function(s){
+      var del = isDelivered(s), canc = isCancelled(s), open = !del && !canc;
+      if(open && act) return;
+      var rows = [], tot = 0;
+      SL(s).forEach(function(l){
+        var price = Number(l.price)||0, uc = lineCost(l), q = 0;
+        if(del) q = lineSold(l, s);
+        else if(open){
+          q = Number(l.qty)||0;
+          var pinned = l.unitCost != null && l.unitCost !== "";
+          if(!l.itemId || q <= 0 || !(uc > 0 || pinned)) q = 0;          // زي expProfit: صنف ما اتشراش بره الحسبة
+        }
+        rows.push({ id:l.itemId || "", q:q, g:q * price, c:q * uc });
+        tot += q * price;
+      });
+      var ship = shipIn(s) - shipOut(s);                                 // المفتوح والمسلّم والملغي كلهم بيتحسبوا هنا
+      rows.forEach(function(x){
+        var m = bucket(x.id);
+        m.q += x.q; m.g += x.g; m.c += x.c;
+        m.sh += tot > 0.009 ? ship * x.g / tot : ship / rows.length;
+        G += x.g;
+      });
+      if(!rows.length && Math.abs(ship) > 0.009) bucket("").sh += ship;
+    });
+    var ov = v.varExp - v.ads;                                           // تغليف + استبدال + متغيّر تاني
+    if(G > 0.009) Object.keys(M).forEach(function(id){ M[id].ads = v.ads * M[id].g / G; M[id].ov = ov * M[id].g / G; });
+    else if(Math.abs(v.varExp) > 0.009){ var b0 = bucket(""); b0.ads = v.ads; b0.ov = ov; }
+    Object.keys(M).forEach(function(id){ var m = M[id]; m.net = m.g - m.c + m.sh - m.ads - m.ov; });
+    return { M:M, G:G, v:v };
+  }
+  // القطع اللي اتطلبت في آخر ١٤ يوم (من غير الملغي) ÷ عدد الأيام — زي «أكتر الأصناف طلباً»
+  function itemPace(){
+    var from14 = addDays(today(), -13), cnt = {}, first = null;
+    live("sales").forEach(function(x){
+      if(isCancelled(x) || !x.date) return;
+      if(!first || x.date < first) first = x.date;
+      if(!inRange(x.date, { from:from14, to:today() })) return;
+      SL(x).forEach(function(l){ if(l.itemId) cnt[l.itemId] = (cnt[l.itemId] || 0) + Math.max(0, Number(l.qty)||0); });
+    });
+    var days = first ? Math.min(14, Math.max(1, daysBetween(first, today()) + 1)) : 14;
+    var o = {}; Object.keys(cnt).forEach(function(k){ o[k] = cnt[k] / days; });
+    return o;
+  }
+  var ITP_ST = { go:"أعلن عليه", pair:"بيعه مع قطعة تانية", bad:"راجع سعره", idle:"واقف" };
+  function itemStatus(m, stock){
+    if(m.q <= 0) return stock > 0 ? "idle" : "";
+    var gross = m.g - m.c, mg = m.g > 0.009 ? gross / m.g : 0;
+    if(gross <= 0.009 || (m.net <= 0.009 && mg < 0.30)) return "bad";
+    return m.net > 0.009 ? "go" : "pair";
+  }
+  function renderItemProfit(){
+    var t = document.getElementById("t-rep-itp"); if(!t) return;
+    var P = projStats(periodRange()), act = pisMode === "act", R = itemProfit(P, act), M = R.M;
+    var pace = itemPace();
+    var ids = Object.keys(M).filter(function(id){ return id; });
+    live("items").forEach(function(it){ if(!M[it.id] && freeSplit(it.id).pos > 0){ M[it.id] = { q:0, g:0, c:0, sh:0, ads:0, ov:0, net:0 }; ids.push(it.id); } });
+    var X = ids.map(function(id){ var st = freeSplit(id).pos; return { id:id, m:M[id], stock:st, st:itemStatus(M[id], st) }; });
+    X.sort(function(a, b){ return (a.st === "idle") - (b.st === "idle") || b.m.net - a.m.net || a.stock - b.stock; });
+    var maxN = X.reduce(function(a, x){ return Math.max(a, Math.abs(x.m.net)); }, 0);
+    var pctTxt = function(g, c){ return g > 0.009 ? "<span dir='ltr'>" + ((g - c) / g * 100).toFixed(1) + "%</span>" : "—"; };
+    var daysTxt = function(x){
+      if(x.stock <= 0) return "<span class='v-due'>خلص</span>";
+      var r = pace[x.id] || 0;
+      if(r <= 0) return "عندك " + plural(x.stock, "قطعة", "قطعتين", "قطع") + " · مفيش طلب";
+      var d = Math.floor(x.stock / r);
+      if(d > 90) return "يكفي أكتر من 3 شهور";
+      return "<span" + (d < 7 ? " class='v-due'" : "") + ">يكفي " + (d < 1 ? "أقل من يوم" : nDays(d).replace(/^يوم$/, "يوم واحد")) + "</span>";
+    };
+    var rows = X.map(function(x){
+      var m = x.m, z = m.q <= 0 && Math.abs(m.sh) < 0.009 && Math.abs(m.net) < 0.009,   // واقف ومالوش أي رقم
+          nc = m.net > 0.009 ? "v-gain" : m.net < -0.009 ? "v-due" : "";
+      var pp = m.q > 0 ? m.net / m.q : null;
+      return "<tr><td class='wide'><b>" + esc(itemName(x.id)) + "</b>" +
+          (z ? "" : "<span class='sub itp-m'>هامش " + pctTxt(m.g, m.c) + " · إعلان " + sgNum(Math.round(m.ads)) + " · شحن " + sgNum(Math.round(m.sh)) + " · المخزون: " + daysTxt(x) + "</span>") + "</td>" +
+        "<td class='num'>" + qty(m.q) + "</td>" +
+        "<td class='num itp-x'>" + (z ? "—" : money(m.g)) + "</td>" +
+        "<td class='num itp-x'>" + (z ? "—" : pctTxt(m.g, m.c)) + "</td>" +
+        "<td class='num itp-x' style='color:var(--ink-soft)'>" + (z ? "—" : money(m.ads)) + "</td>" +
+        "<td class='num itp-x' style='color:var(--ink-soft)'>" + (z ? "—" : money(m.sh)) + "</td>" +
+        "<td class='num " + nc + "'>" + (pp === null ? "—" : signed(pp)) + "</td>" +
+        "<td class='num " + nc + "' style='font-weight:700'>" + (z ? "—" : signed(m.net)) + "</td>" +
+        "<td class='barcell itp-x'>" + (z ? "" : miniBar(m.net, maxN)) + "</td>" +
+        "<td class='itp-x'>" + daysTxt(x) + "</td>" +
+        "<td>" + (x.st ? "<span class='itp-st " + x.st + "'>" + ITP_ST[x.st] + "</span>" : "") + "</td></tr>";
+    });
+    var T = { q:0, g:0, c:0, sh:0, ads:0, net:0 };
+    Object.keys(M).forEach(function(id){ var m = M[id]; ["q","g","c","sh","ads","net"].forEach(function(k){ T[k] += m[k]; }); });
+    if(rows.length) rows.push("<tr class='itp-tot'><td class='wide'>الإجمالي" +
+        (M[""] ? "<span class='sub'>فيه " + esc(money(M[""].net)) + " من غير صنف</span>" : "") + "</td>" +
+      "<td class='num'>" + qty(T.q) + "</td><td class='num itp-x'>" + money(T.g) + "</td><td class='num itp-x'>" + pctTxt(T.g, T.c) + "</td>" +
+      "<td class='num itp-x'>" + money(T.ads) + "</td><td class='num itp-x'>" + money(T.sh) + "</td>" +
+      "<td class='num'>" + (T.q > 0 ? signed(T.net / T.q) : "—") + "</td>" +
+      "<td class='num " + (T.net >= 0 ? "v-gain" : "v-due") + "'>" + signed(T.net) + "</td><td class='itp-x'></td><td class='itp-x'></td><td></td></tr>");
+    table("t-rep-itp", ["الصنف", act ? "اتباع" : "اتباع + ماشي", "المبيعات", "هامش البضاعة", "نصيبه من الإعلان", "فرق الشحن",
+      "صافي القطعة", "صافي الصنف", "", "المخزون", "الحالة"], rows, "مفيش مبيعات ولا مخزون في الفترة دي.");
+    var nt = document.getElementById("rep-itp-note");
+    if(nt) nt.innerHTML = "نصيب كل صنف من الإعلان والتغليف على قد مبيعاته، وفرق الشحن من الأوردرات اللي هو فيها. " +
+      "المجموع = «ربح الأوردر بعد مصاريف البيع» في قايمة الدخل (<b class='num " + (R.v.contrib >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(R.v.contrib)) + "</b>) — " +
+      (act ? "<b>«اتسلّم فعلاً»</b>." : "<b>«لو كله اتسلّم»</b>: الأوردرات اللي لسه ماشية داخلة كأنها اتسلّمت.") +
+      " «المخزون يكفي» على قد طلبات آخر ١٤ يوم.";
+  }
+
+  /* v126: التقارير تبويبات بدل صفحة طويلة. آخر تبويب بيتفتكر على الجهاز ده بس (naya:rtab) */
+  var REP_TABS = ["sum", "profit", "items", "cust", "part"], repTab = "sum", repTabInit = false;
+  try{ var rt0 = LS && LS.getItem("naya:rtab"); if(REP_TABS.indexOf(rt0) >= 0) repTab = rt0; }catch(e){}
+  function applyRepTab(swap){
+    var sec = document.getElementById("tab-rep"); if(!sec) return;
+    Array.prototype.forEach.call(sec.querySelectorAll("[data-rtab]"), function(b){
+      var on = b.dataset.rtab === repTab;
+      b.classList.toggle("on", on); b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1;
+    });
+    var main = sec.querySelector(".panel[data-rt='" + repTab + "']");
+    Array.prototype.forEach.call(sec.querySelectorAll("[data-rt]"), function(el){
+      var on = el.dataset.rt === repTab;
+      el.classList.toggle("rt-off", !on);
+      // تبويب كله أقسام مطوية بيفتحها لوحده أول ما تدخله. لو فيه لوحة أساسية، المطوي يفضل مطوي
+      if(on && swap && el.tagName === "DETAILS" && !main) el.open = true;
+      if(on && swap){ el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap"); }
+    });
+    var rs = sec.querySelector(".rsecs");
+    if(rs) rs.classList.toggle("rt-off", !rs.querySelector("[data-rt]:not(.rt-off)"));
+  }
+  function setRepTab(t){
+    if(REP_TABS.indexOf(t) < 0) return;
+    repTab = t;
+    try{ if(LS) LS.setItem("naya:rtab", t); }catch(e){}
+    applyRepTab(true);
+  }
+  (function(){
+    var bar = document.getElementById("rep-tabs");
+    bar.addEventListener("click", function(e){
+      var b = e.target.closest("[data-rtab]"); if(b && b.dataset.rtab !== repTab) setRepTab(b.dataset.rtab);
+    });
+    // الأسهم بتنقل بين التبويبات (RTL: السهم الشمال = اللي بعده)
+    bar.addEventListener("keydown", function(e){
+      var d = e.key === "ArrowLeft" ? 1 : e.key === "ArrowRight" ? -1 : 0; if(!d) return;
+      var i = (REP_TABS.indexOf(repTab) + d + REP_TABS.length) % REP_TABS.length;
+      e.preventDefault(); setRepTab(REP_TABS[i]);
+      var nb = bar.querySelector("[data-rtab='" + REP_TABS[i] + "']"); if(nb) nb.focus();
+    });
+  })();
+
   function renderReports(){
     clearMonthly();
     renderProjIS();
+    renderItemProfit();
+    applyRepTab(!repTabInit); repTabInit = true;
     renderAging();
     renderPerf();
     renderBreakEven();
@@ -9547,7 +9858,7 @@
       "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){
           return esc(itemName(g.id)) + " <b class='num'>×" + qty(g.q) + "</b>"; }).join(" · ") +
         (grp.length > 2 ? " <span class='more'>و" + qty(grp.length - 2) + " صنف تاني</span>" : "") + "</span>" +
-      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : qty(pcs) + " قطعة") +
+      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : nPcs(pcs)) +
         (shipIn(s) ? " · شحن " + qty(shipIn(s)) : "") +
         (backN ? " · <span class='v-due'>مرتجع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
 
@@ -9830,7 +10141,7 @@
     var retN = retQty(s);
     if(deliv)
       add(true, (via ? "العميل استلم ودفع " + esc(money(m.paid)) : "العميل استلم") +
-                (retN ? " — رجّع " + qty(retN) + " قطعة" : ""), dShort(s.deliveredAt));
+                (retN ? " — رجّع " + nPcs(retN) : ""), dShort(s.deliveredAt));
     else if(canc) add(true, "العميل رفض الأوردر", dShort(s.cancelledAt));
     else if((co && squish(s.shipCode)) || (s.selfDel && s.shippedAt)) add(false, "العميل لسه ما استلمش", "مستني");
     if(deliv || canc){
@@ -10268,7 +10579,7 @@
   function sgItems(s){
     var n = SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
     return "<span class='items'>" + esc(itemsLabel(s)) +
-      "<span class='sg-sub'>" + qty(n) + " قطعة" + (shipIn(s) ? " · شحن " + sgNum(shipIn(s)) : "") + "</span></span>";
+      "<span class='sg-sub'>" + nPcs(n) + (shipIn(s) ? " · شحن " + sgNum(shipIn(s)) : "") + "</span></span>";
   }
   // اللي العميل هيدفعه لو خد كله
   function sgFull(s){
@@ -10339,7 +10650,7 @@
               : sgNo(s)) +
             "<span class='sg-sub num'>" + (s.selfDel ? "🛵 مع " + esc(squish(s.courier) || "المندوب")
               : esc(co) + (squish(s.shipCode) ? " · " + esc(squish(s.shipCode)) : "")) + "</span></span>" +
-          "<span>" + sgCust(s) + (d >= SG_STALE ? " <span class='sg-pill bad'>بقاله " + qty(d) + " يوم</span>" : "") + "</span>" +
+          "<span>" + sgCust(s) + (d >= SG_STALE ? " <span class='sg-pill bad'>بقاله " + nDays(d) + "</span>" : "") + "</span>" +
           sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" + acts + part + "</div>";
       });
@@ -11426,6 +11737,7 @@
   }
   function nInv(n){ return n === 1 ? "فاتورة واحدة" : plural(n, "فاتورة", "فاتورتين", "فواتير"); }
   function nDays(n){ return plural(n, "يوم", "يومين", "أيام"); }
+  function nPcs(n){ return Number(n) === 1 ? "قطعة واحدة" : plural(n, "قطعة", "قطعتين", "قطع"); }
   function monthLabel(d){
     try{
       var t = new Date((d || "").slice(0,7) + "-01T00:00:00");
@@ -13649,7 +13961,7 @@
     });
     var stale = g.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; })
       .sort(function(a, b){ return daysSince(b.date) - daysSince(a.date); });
-    if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + qty(daysSince(stale[0].date)) + " أيام", "sales|2", "الأوردرات");
+    if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + nDays(daysSince(stale[0].date)), "sales|2", "الأوردرات");
     if(heldOpen().length) add("استلم المرتجع", qty(heldOpenQty()) + " قطعة عند شركة الشحن", "sales|4", "المرتجع");
     var SH = shortList();
     if(SH.length){
