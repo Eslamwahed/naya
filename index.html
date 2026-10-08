@@ -2805,7 +2805,7 @@
       <div style="grid-column:span 2"><label for="pt-address">العنوان</label><input id="pt-address" autocomplete="off"></div>
       <div><label for="pt-fb">اسم فيسبوك</label><input id="pt-fb" autocomplete="off"></div>
       <div><label for="pt-note">ملاحظة</label><input id="pt-note" autocomplete="off"></div>
-      <div><button class="act" type="button" id="b-party">إضافة</button> <button class="act ghost" type="button" id="x-party" hidden>إلغاء</button></div>
+      <div><button class="act" type="button" id="b-party">إضافة</button> <button class="act ghost" type="button" id="x-pty" hidden>إلغاء</button></div>
     </form>
     </div>
   </div>
@@ -3729,8 +3729,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "128";
+  var VERSION = "129";
   var CHANGELOG = [
+    { v:"129", d:"2026-10-08", items:[
+      "إصلاح: قايمة «المورد» في «استبدال مع مورد» كانت بتختفي بعد ما تفتح شاشة الجهات — زرار «إلغاء» هناك كان واخد نفس اسمها"
+    ]},
     { v:"128", d:"2026-10-08", items:[
       "استبدال مع مورد: «الصنف كله» — ترجّع كل الألوان والمقاسات اللي لسه عندك من موديل مرة واحدة بدل استبدال لكل لون ومقاس",
       "البضاعة الجديدة في الاستبدال تقدر ترفعها من «شيت الفاتورة» نفسه بدل ما تكتبها سطر سطر",
@@ -14757,7 +14760,8 @@
 
   var EDIT_UI = {
     items:   { btn:"b-item",  cancel:"x-item",  add:"إضافة صنف",  save:"حفظ التعديل", tab:"items",   form:"f-item"  },
-    parties: { btn:"b-party", cancel:"x-party", add:"إضافة",      save:"حفظ التعديل", tab:"parties", form:"f-party" },
+    // v129: كان "x-party" — نفس id قايمة الموردين في الاستبدال، فإخفاء زرار الإلغاء كان بيخفي القايمة
+    parties: { btn:"b-party", cancel:"x-pty", add:"إضافة",      save:"حفظ التعديل", tab:"parties", form:"f-party" },
     purchases:{btn:"b-purch", cancel:"x-purch", add:"حفظ الشراء", save:"حفظ التعديل", tab:"purch",   form:"f-purch" },
     cash:    { btn:"b-cash",  cancel:"x-cash",  add:"حفظ الحركة", save:"حفظ التعديل", tab:"cash",    form:"f-cash"  }
   };
