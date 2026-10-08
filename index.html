@@ -1043,6 +1043,7 @@
   .xg-diff .big b{font-size:var(--fs-6);color:#5B4A9A}
   [data-theme="dark"] .xg-diff .big b{color:var(--teal)}
   .xg-pay{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+  .xg-btns{display:flex;gap:var(--sp-2);flex-wrap:wrap}
   .xg-pay:empty{display:none}
   .pill.xg,.pt-flag.xg{background:#ECE8F7;color:#5B4A9A}
   [data-theme="dark"] .pill.xg,[data-theme="dark"] .pt-flag.xg{background:var(--teal-soft);color:var(--teal)}
@@ -2520,7 +2521,12 @@
       <div class="fset xg-in">
         <h3>↪ اللي هتاخده بداله <small>بيدخل المخزون</small></h3>
         <div id="x-lines"></div>
-        <button class="addline" type="button" id="b-xaddline">+ صنف تاني</button>
+        <div class="xg-btns">
+          <button class="addline" type="button" id="b-xaddline">+ صنف تاني</button>
+          <button class="addline" type="button" id="b-xsheet">⇪ ارفع شيت بالبضاعة الجديدة</button>
+          <input type="file" id="x-file" accept=".csv,text/csv" hidden>
+        </div>
+        <p class="hintline" id="x-sheetmsg">عندك ألوان ومقاسات كتير؟ املا «شيت الفاتورة» (من «نزّل شيت الفاتورة» فوق) وارفعه هنا بدل ما تكتبهم سطر سطر.</p>
       </div>
 
       <div class="xg-diff" id="x-diff"></div>
@@ -3723,8 +3729,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "127";
+  var VERSION = "128";
   var CHANGELOG = [
+    { v:"128", d:"2026-10-08", items:[
+      "استبدال مع مورد: «الصنف كله» — ترجّع كل الألوان والمقاسات اللي لسه عندك من موديل مرة واحدة بدل استبدال لكل لون ومقاس",
+      "البضاعة الجديدة في الاستبدال تقدر ترفعها من «شيت الفاتورة» نفسه بدل ما تكتبها سطر سطر",
+      "كارت الاستبدال بيلم الصنف اللي ليه ألوان ومقاسات كتير في سطر واحد: «جزمه موكا × 15 (15 لون ومقاس)»"
+    ]},
     { v:"127", d:"2026-10-07", items:[
       "الأوردرات: العدد بقى مكتوب صح — «بقاله 6 أيام» بدل «6 يوم» و«قطعتين» و«3 قطع» بدل «2 قطعة» و«3 قطعة»",
       "مربعات الاختيار جنب الأوردرات بقت بلون الهوية، وفي الوضع الليلي غامقة بدل الأبيض الفاقع"
@@ -11341,27 +11352,66 @@
     try { return fn(); } finally { rs.forEach(function(r){ delete r.deleted; }); clearStockIdx(); }
   }
   function xSrcRec(){ return xd && xd.srcId ? db.purchases.find(function(p){ return p.id === xd.srcId; }) : null; }
+  // آخر فاتورة من المورد ده لكل لون/مقاس (من غير المرتجعات)
+  function xLatestBy(partyId){
+    var byK = {};
+    live("purchases").forEach(function(p){
+      if(p.partyId !== partyId || p.opening || isPRet(p)) return;
+      var k = keyOf(p);
+      if(!byK[k] || (p.date||"") > (byK[k].date||"") || ((p.date||"") === (byK[k].date||"") && (p.at||0) > (byK[k].at||0))) byK[k] = p;
+    });
+    return byK;
+  }
+  /* v128: «الصنف كله» — srcId = "all:<itemId>" بيرجّع كل لون ومقاس لسه عندك منه من المورد ده
+     مرة واحدة. موديل ما اتباعش = ١٥ لون ومقاس، وكان لازم ١٥ استبدال منفصلين. */
+  var X_ALL = "all:";
+  function xAllId(srcId){ return srcId && srcId.indexOf(X_ALL) === 0 ? srcId.slice(X_ALL.length) : ""; }
+  function xAllVars(partyId, itemId){
+    var byK = xLatestBy(partyId), out = [];
+    Object.keys(byK).forEach(function(k){
+      var p = byK[k]; if(p.itemId !== itemId) return;
+      var c = vColor(p), z = vSize(p), free = freeOfV(itemId, c, z);
+      if(free > 0) out.push({ rec:p, c:c, z:z, free:free, stock:stockOfV(itemId, c, z), cost:avgCostVB(itemId, c, z), price:pPackCost(p) / pPackQty(p) });
+    });
+    return out;
+  }
   // الأصناف اللي اشتريتها من المورد ده ولسه عندك منها — تركيبة واحدة لكل لون/مقاس (آخر فاتورة)
   function xSrcOptions(partyId){
     if(!partyId) return [];
     return withoutX(xd && xd.editId, function(){
-      var byK = {}, out = [];
-      live("purchases").forEach(function(p){
-        if(p.partyId !== partyId || p.opening || isPRet(p)) return;
-        var k = keyOf(p);
-        if(!byK[k] || (p.date||"") > (byK[k].date||"") || ((p.date||"") === (byK[k].date||"") && (p.at||0) > (byK[k].at||0))) byK[k] = p;
-      });
+      var byK = xLatestBy(partyId), out = [], per = {};
       Object.keys(byK).forEach(function(k){
         var p = byK[k], c = vColor(p), z = vSize(p);
         var free = freeOfV(p.itemId, c, z);
+        if(free > 0){ var g = per[p.itemId] = per[p.itemId] || { n:0, q:0 }; g.n++; g.q += free; }
         if(free <= 0 && !(xd && xd.srcId === p.id)) return;
-        out.push({ id:p.id, free:free, label:itemName(p.itemId) + (vLabel(c, z) ? " · " + vLabel(c, z) : "") + " — عندك " + qty(free) });
+        out.push({ id:p.id, item:itemName(p.itemId), free:free, label:itemName(p.itemId) + (vLabel(c, z) ? " · " + vLabel(c, z) : "") + " — عندك " + qty(free) });
       });
-      return out.sort(function(a, b){ return a.label < b.label ? -1 : 1; });
+      Object.keys(per).forEach(function(id){
+        if(per[id].n < 2) return;
+        out.push({ id:X_ALL + id, item:itemName(id), all:true, free:per[id].q,
+          label:itemName(id) + " — كل الألوان والمقاسات (" + qty(per[id].n) + ") — عندك " + qty(per[id].q) });
+      });
+      return out.sort(function(a, b){
+        return a.item !== b.item ? (a.item < b.item ? -1 : 1) : (!!b.all - !!a.all) || (a.label < b.label ? -1 : 1); });
     });
   }
   // تكلفة القطعة عندك دلوقتي (المتوسط شامل النقل) واللي اتباع منها
   function xSrcFacts(){
+    var allId = xd ? xAllId(xd.srcId) : "";
+    if(allId) return withoutX(xd.editId, function(){
+      var vars = xAllVars(xd.partyId, allId);
+      if(!vars.length) return null;
+      var free = 0, stock = 0, cv = 0, pv = 0, sold = 0, keys = {};
+      vars.forEach(function(v){ free += v.free; stock += v.stock; cv += v.free * v.cost; pv += v.free * v.price; keys[keyOf(v.rec)] = 1; });
+      live("sales").forEach(function(x){
+        if(!isDelivered(x)) return;
+        SL(x).forEach(function(l){ if(keys[keyOf(l)]) sold += lineSold(l, x); });
+      });
+      var pnos = {}; vars.forEach(function(v){ pnos["#" + (v.rec.pno || "—") + " · " + dShort(v.rec.date)] = 1; });
+      // التكلفة والسعر متوسط مرجّح بالقطع — نفس مجموع الأسطر بالظبط
+      return { all:true, itemId:allId, vars:vars, rec:vars[0].rec, pnos:Object.keys(pnos), cost:cv / free, stock:stock, free:free, sold:sold, price:pv / free };
+    });
     var rec = xSrcRec();
     if(!rec) return null;
     return withoutX(xd.editId, function(){
@@ -11375,7 +11425,7 @@
     });
   }
   function xCalc(){
-    var f = xSrcFacts(), q = Number(xd.qty)||0;
+    var f = xSrcFacts(), q = f && f.all ? f.free : (Number(xd.qty)||0);
     var u = xd.uAuto && f ? f.price : (Number(xd.unit)||0);
     var cost = f ? f.cost : 0;
     var lines = xd.lines.filter(function(l){ return l.itemId && (Number(l.qty)||0) > 0; });
@@ -11390,20 +11440,22 @@
            lines:[xNewLine()], paid:0, paidAuto:true, mode:"cash" };
     if(opt.editId){
       var rs = xRecs(opt.editId);
-      var ret = rs.find(isPRet);
+      var rets = rs.filter(isPRet), ret = rets[0];
       if(!ret){ toast("الاستبدال ده مش كامل — احذفه وسجّله من جديد"); return; }
       if(isLocked(ret.date)){ toast("الاستبدال ده في فترة مقفولة — مينفعش يتعدّل"); return; }
       var ins = rs.filter(function(r){ return !isPRet(r); });
       var paidIn = ins.reduce(function(a, r){ return a + (Number(r.paid)||0); }, 0);
-      xd.editId = opt.editId; xd.date = ret.date; xd.partyId = ret.partyId; xd.srcId = ret.srcId;
-      xd.qty = -(Number(ret.qty)||0); xd.unit = ret.credit != null ? ret.credit : ret.cost; xd.uAuto = false;
+      xd.editId = opt.editId; xd.date = ret.date; xd.partyId = ret.partyId;
+      xd.srcId = rets.length > 1 ? X_ALL + ret.itemId : ret.srcId;
+      xd.qty = -rets.reduce(function(a, r){ return a + (Number(r.qty)||0); }, 0);
+      xd.unit = ret.credit != null ? ret.credit : ret.cost; xd.uAuto = false;
       xd.note = ret.note || "";
       xd.lines = ins.map(function(r){ return { itemId:r.itemId, color:vColor(r), size:vSize(r), qty:Number(r.qty)||0, price:Number(r.cost)||0 }; });
       if(!xd.lines.length) xd.lines = [xNewLine()];
       var G0 = xd.lines.reduce(function(a, l){ return a + l.qty * l.price; }, 0);
       var D0 = G0 - xd.qty * xd.unit;
       if(D0 >= 0){ xd.paid = paidIn; xd.paidAuto = Math.abs(paidIn - D0) < 0.01; }
-      else { xd.mode = (Number(ret.paid)||0) < -0.009 ? "cash" : "credit"; }
+      else { xd.mode = rets.some(function(r){ return (Number(r.paid)||0) < -0.009; }) ? "cash" : "credit"; }
     } else if(opt.srcId){
       var src = db.purchases.find(function(p){ return p.id === opt.srcId; });
       if(src){ xd.partyId = src.partyId; xd.srcId = src.id; }
@@ -11416,6 +11468,9 @@
     document.getElementById("x-note").value = xd.note;
     var fz = document.getElementById("x-force"); if(fz) fz.checked = false;
     document.getElementById("x-over").hidden = true;
+    var sm = document.getElementById("x-sheetmsg");
+    if(!sm.dataset.def) sm.dataset.def = sm.innerHTML;
+    sm.className = "hintline"; sm.innerHTML = sm.dataset.def;
     goTab("purch"); openEntry("xchg");
     document.getElementById("title-xchg").textContent = xd.editId ? "⇄ تعديل استبدال" : "⇄ استبدال مع مورد";
     xFillSrc(); xRenderLines(); xRender();
@@ -11435,7 +11490,9 @@
       opts.map(function(o){ return "<option value='" + esc(o.id) + "'>" + esc(o.label) + "</option>"; }).join("");
     el.value = xd.srcId || "";
     el.disabled = !xd.partyId;
-    document.getElementById("x-qty").value = xd.qty === "" ? "" : xd.qty;
+    var all = opts.find(function(o){ return o.all && o.id === xd.srcId; }), qe = document.getElementById("x-qty");
+    qe.disabled = !!all;
+    qe.value = all ? all.free : (xd.qty === "" ? "" : xd.qty);
   }
 
   function xRenderLines(){
@@ -11462,7 +11519,14 @@
     var k = xCalc(), f = k.f;
     // اللي هترجّعه
     var info = document.getElementById("x-srcinfo");
-    if(f){
+    if(f && f.all){
+      info.hidden = false;
+      info.innerHTML =
+        "<div><span>من " + (f.pnos.length > 1 ? "فواتير" : "فاتورة") + "</span><b>" + esc(f.pnos.join(" · ")) + " · بـ" + esc(money(f.price)) + " للقطعة</b></div>" +
+        "<div><span>هترجّع</span><b>" + esc(qty(f.free)) + " قطعة في " + esc(qty(f.vars.length)) + " لون ومقاس</b></div>" +
+        "<div><span>اتباع منه</span><b class='" + (f.sold ? "" : "v-due") + "'>" + (f.sold ? esc(qty(f.sold)) + " قطعة" : "ولا قطعة") + "</b></div>" +
+        "<div><span>تكلفة القطعة عندك</span><b>" + esc(money(f.cost)) + "</b></div>";
+    } else if(f){
       info.hidden = false;
       info.innerHTML =
         "<div><span>من فاتورة</span><b>#" + esc(f.rec.pno || "—") + " · " + esc(dShort(f.rec.date)) + " · بـ" + esc(money(f.price)) + " للقطعة</b></div>" +
@@ -11509,10 +11573,21 @@
     var back = k.D < -0.009 && xd.mode === "cash" ? -k.D : 0;
     var bal = k.D > 0.009 ? P - k.D : (xd.mode === "cash" ? 0 : -k.D);   // موجب = ليك عنده
     var eff = [];
-    if(f && k.q > 0) eff.push(["المخزون: " + itemName(f.rec.itemId) + (vLabel(vColor(f.rec), vSize(f.rec)) ? " " + vLabel(vColor(f.rec), vSize(f.rec)) : ""),
+    if(f && f.all) eff.push(["المخزون: " + itemName(f.itemId) + " (" + qty(f.vars.length) + " لون ومقاس)", qty(f.stock) + " ← " + qty(f.stock - k.q), ""]);
+    else if(f && k.q > 0) eff.push(["المخزون: " + itemName(f.rec.itemId) + (vLabel(vColor(f.rec), vSize(f.rec)) ? " " + vLabel(vColor(f.rec), vSize(f.rec)) : ""),
       qty(f.stock) + " ← " + qty(f.stock - k.q), ""]);
-    k.lines.forEach(function(l){
-      eff.push(["المخزون: " + itemName(l.itemId) + (vLabel(squish(l.color), squish(l.size)) ? " " + vLabel(squish(l.color), squish(l.size)) : ""), "+" + qty(Number(l.qty)||0), "v-gain"]);
+    // صنف جديد فيه أكتر من ٣ ألوان ومقاسات بيتلم في سطر — الشيت ممكن يبقى ٢٠ سطر
+    var byIt = {}, itOrder = [];
+    k.lines.forEach(function(l){ if(!byIt[l.itemId]){ byIt[l.itemId] = []; itOrder.push(l.itemId); } byIt[l.itemId].push(l); });
+    itOrder.forEach(function(id){
+      var ls = byIt[id];
+      if(ls.length > 3){
+        eff.push(["المخزون: " + itemName(id) + " (" + qty(ls.length) + " لون ومقاس)", "+" + qty(ls.reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0)), "v-gain"]);
+        return;
+      }
+      ls.forEach(function(l){
+        eff.push(["المخزون: " + itemName(l.itemId) + (vLabel(squish(l.color), squish(l.size)) ? " " + vLabel(squish(l.color), squish(l.size)) : ""), "+" + qty(Number(l.qty)||0), "v-gain"]);
+      });
     });
     eff.push(["الخزنة", P > 0.009 ? "− " + money(P) : (back > 0.009 ? "+ " + money(back) : "مفيش حركة"), P > 0.009 ? "v-due" : (back > 0.009 ? "v-gain" : "")]);
     if(Math.abs(k.loss) >= 0.01) eff.push([k.loss > 0 ? "خسارة استبدال (مصروف)" : "مكسب استبدال", money(Math.abs(k.loss)), k.loss > 0 ? "v-due" : "v-gain"]);
@@ -11526,7 +11601,7 @@
     xd.partyId = this.value; xd.srcId = ""; xd.uAuto = true; xFillSrc(); xRender();
   });
   document.getElementById("x-src").addEventListener("change", function(){
-    xd.srcId = this.value; xd.uAuto = true; xRender();
+    xd.srcId = this.value; xd.uAuto = true; xFillSrc(); xRender();
   });
   document.getElementById("x-date").addEventListener("change", function(){ xd.date = this.value || today(); });
   document.getElementById("x-note").addEventListener("input", function(){ xd.note = this.value; });
@@ -11540,6 +11615,49 @@
   });
   document.getElementById("b-xaddline").addEventListener("click", function(){
     xd.lines.push(xNewLine()); xRenderLines(); xRender();
+  });
+  /* v128: البضاعة الجديدة من «شيت الفاتورة» نفسه (puParse) — سطر لكل لون ومقاس.
+     الكرتونة بتتحوّل لسعر قطعة (سعر الكراتين ÷ قطعها). المورد والتاريخ من الفورم مش من الشيت. */
+  function xSheetLines(text){
+    var res = puParse(text);
+    if(res.errs) return res;
+    var lines = [], warn = [];
+    res.lines.forEach(function(g){
+      var pcs = g.mix.reduce(function(a, m){ return a + (Number(m.qty)||0); }, 0);
+      var unit = g.byPack ? (pcs > 0 ? (Number(g.packs)||0) * (Number(g.packCost)||0) / pcs : 0) : (Number(g.packCost)||0);
+      g.mix.forEach(function(m){ lines.push({ itemId:g.itemId, color:squish(m.color), size:squish(m.size), qty:Number(m.qty)||0, price:Math.round(unit * 100) / 100 }); });
+    });
+    if(res.partyId && xd && xd.partyId && res.partyId !== xd.partyId)
+      warn.push("المورد اللي في الشيت (" + partyName(res.partyId) + ") غير اللي في الاستبدال (" + partyName(xd.partyId) + ") — اتسجّل على اللي في الاستبدال.");
+    if((Number(res.freight)||0) > 0) warn.push("مصاريف النقل اللي في الشيت مش بتتحسب في الاستبدال.");
+    return { lines:lines, warn:warn };
+  }
+  function xSheetImport(text){
+    var msg = document.getElementById("x-sheetmsg"), r = xSheetLines(text);
+    if(r.errs){
+      msg.className = "hintline bad";
+      msg.innerHTML = "<strong>الشيت ما اترفعش:</strong><br>" + r.errs.slice(0, 8).map(esc).join("<br>");
+      return false;
+    }
+    // السطور الفاضية بتتشال، واللي متكتب بإيدك بيفضل وبيتزوّد عليه
+    xd.lines = xd.lines.filter(function(l){ return l.itemId || (Number(l.qty)||0) > 0; }).concat(r.lines);
+    if(!xd.lines.length) xd.lines = [xNewLine()];
+    var pcs = r.lines.reduce(function(a, l){ return a + l.qty; }, 0);
+    msg.className = "hintline";
+    msg.innerHTML = "اترفع الشيت: " + esc(qty(r.lines.length)) + " سطر · " + esc(nPcs(pcs)) + " — راجعهم تحت قبل ما تحفظ." +
+      (r.warn.length ? "<br><span class='v-due'>" + r.warn.map(esc).join("<br>") + "</span>" : "");
+    xRenderLines(); xRender();
+    return true;
+  }
+  document.getElementById("b-xsheet").addEventListener("click", function(){ document.getElementById("x-file").click(); });
+  document.getElementById("x-file").addEventListener("change", function(){
+    var fl = this.files && this.files[0];
+    this.value = "";
+    if(!fl || !xd) return;
+    var reader = new FileReader();
+    reader.onload = function(){ try{ xSheetImport(String(reader.result)); }
+      catch(e){ var m = document.getElementById("x-sheetmsg"); m.className = "hintline bad"; m.textContent = "الملف مش مقروء: " + String(e && e.message || e); } };
+    reader.readAsText(fl, "utf-8");
   });
   var xLineEdit = function(e){
     var row = e.target.closest("[data-xli]"), fld = e.target.dataset.xf;
@@ -11597,12 +11715,17 @@
       old.forEach(function(r){ r.deleted = true; r.at = now; });
     }
     var note = squish(document.getElementById("x-note").value || "");
-    var src = f.rec, recs = [];
-    var ret = stamp({ date:date, partyId:xd.partyId, inv:"", itemId:src.itemId, color:vColor(src), size:vSize(src),
-      packName:"قطعة", packs:-k.q, packQty:1, packCost:k.cost, qty:-k.q, cost:k.cost, freight:0,
-      paid: back ? -back : 0, isReturn:true, srcId:src.id, batchId:xid, xchg:xid, credit:k.u,
-      xloss: Math.abs(k.loss) >= 0.005 ? k.loss : 0, note: note || "استبدال مع المورد" });
-    recs.push(ret);
+    var recs = [];
+    // «الصنف كله»: سطر مرتجع لكل لون ومقاس بتكلفته هو — المتوسط المرجّح للفورم بس
+    var outs = f.all ? f.vars.map(function(v){ return { src:v.rec, q:v.free, cost:v.cost }; })
+                     : [{ src:f.rec, q:k.q, cost:k.cost }];
+    outs.forEach(function(o, i){
+      var xl = o.q * (o.cost - k.u);
+      recs.push(stamp({ date:date, partyId:xd.partyId, inv:"", itemId:o.src.itemId, color:vColor(o.src), size:vSize(o.src),
+        packName:"قطعة", packs:-o.q, packQty:1, packCost:o.cost, qty:-o.q, cost:o.cost, freight:0,
+        paid: back && i === 0 ? -back : 0, isReturn:true, srcId:o.src.id, batchId:xid, xchg:xid, credit:k.u,
+        xloss: Math.abs(xl) >= 0.005 ? xl : 0, note: note || "استبدال مع المورد" }));
+    });
     // المدفوع بيتوزّع على البضاعة الجديدة بنسبة قيمتها، والباقي على آخر سطر
     var left = P;
     k.lines.forEach(function(l, i){
@@ -11816,6 +11939,16 @@
     var loss = outs.reduce(function(a, r){ return a + (Number(r.xloss)||0); }, 0);
     var D = take - credit, isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
     var lbl = function(r){ var v = vLabel(vColor(r), vSize(r)); return itemName(r.itemId) + (v ? " · " + v : "") + " × " + qty(Math.abs(Number(r.qty)||0)); };
+    // صنف فيه أكتر من ٣ ألوان ومقاسات بيتلم: «جزمه موكا × 15 (15 لون ومقاس)»
+    var lbls = function(rows){
+      var by = {}, order = [];
+      rows.forEach(function(r){ if(!by[r.itemId]){ by[r.itemId] = []; order.push(r.itemId); } by[r.itemId].push(r); });
+      return order.map(function(id){
+        var rs = by[id];
+        if(rs.length <= 3) return rs.map(lbl).join(" · ");
+        return itemName(id) + " × " + qty(rs.reduce(function(a, r){ return a + Math.abs(Number(r.qty)||0); }, 0)) + " (" + qty(rs.length) + " لون ومقاس)";
+      }).join(" · ");
+    };
     var st;
     if(D > 0.009) st = paid >= D - 0.009 ? "<span class='pill ok'>✓ دفعت الفرق " + esc(money(paid)) + "</span>"
       : "<span class='pill due'>باقي للمورد " + esc(money(D - paid)) + "</span>";
@@ -11827,15 +11960,15 @@
         "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
           "<span class='pt-flag xg'>⇄ استبدال</span><span class='sub'>" + esc(dShort(h.date)) +
           (r0.note && r0.note !== "استبدال مع المورد" ? " · " + esc(r0.note) : "") + "</span></span>" +
-        "<span class='it sub'>" + esc(outs.map(lbl).join(" · ")) + " ← " + esc(ins.map(lbl).join(" · ")) + "</span>" +
+        "<span class='it sub'>" + esc(lbls(outs)) + " ← " + esc(lbls(ins)) + "</span>" +
         "<span class='pay money-only'>" + st + "</span>" +
         "<span class='tot'><b class='num money-only'>" + esc(money(Math.abs(D))) + "</b><small>" + (D >= 0 ? "الفرق" : "الفرق ليك") + "</small></span>" +
         "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
       "</button>" +
       (open ? "<div class='pv-flow'>" +
-          "<div class='side'><small>↩ رجّعت</small>" + esc(outs.map(lbl).join(" · ")) + "<b class='num v-due money-only'>− " + esc(money(credit)) + "</b></div>" +
+          "<div class='side'><small>↩ رجّعت</small>" + esc(lbls(outs)) + "<b class='num v-due money-only'>− " + esc(money(credit)) + "</b></div>" +
           "<div class='arr' aria-hidden='true'>⇠</div>" +
-          "<div class='side'><small>↪ خدت</small>" + esc(ins.map(lbl).join(" · ")) + "<b class='num v-gain money-only'>+ " + esc(money(take)) + "</b></div>" +
+          "<div class='side'><small>↪ خدت</small>" + esc(lbls(ins)) + "<b class='num v-gain money-only'>+ " + esc(money(take)) + "</b></div>" +
         "</div><div class='pv-b'>" +
           (Math.abs(loss) >= 0.01 ? "<p class='hintline' style='margin:0 0 6px'>" + (loss > 0 ? "خسارة استبدال (مصروف): " : "مكسب استبدال: ") +
             "<b class='num money-only'>" + esc(money(Math.abs(loss))) + "</b> — المورد حسب القطعة بـ" + esc(money(Number(r0.credit)||0)) +
