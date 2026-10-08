@@ -1319,7 +1319,9 @@
   .pis-na span{display:block;font-size:var(--fs-2);color:var(--ink-soft)}
   .pis-na b{display:block;font-size:var(--fs-6);font-weight:700}
   .pis-na small{font-size:var(--fs-1);color:var(--ink-soft);font-weight:400}
-  @media (max-width:760px){ .pis-na{grid-template-columns:1fr 1fr} .pis-na > div:last-child{grid-column:1/-1} .pis-na b{font-size:var(--fs-5)} }
+  .pis-na > .pis-nab{grid-column:1/-1;border:0;background:none;padding:0;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+  .pis-na > .pis-nab > span:first-child{display:inline;font-size:var(--fs-2)}
+  @media (max-width:760px){ .pis-na{grid-template-columns:1fr 1fr} .pis-na > div:nth-child(3){grid-column:1/-1} .pis-na b{font-size:var(--fs-5)} }
   .pis-tag{font-size:10.5px;font-weight:600;border-radius:99px;padding:1px 7px;margin-inline-start:6px;white-space:nowrap}
   .c-cats{margin:0} .c-cats button{font-size:var(--fs-2);padding:5px 12px}
   .pis-tag.var{background:rgba(138,98,18,.14);color:var(--warn)} .pis-tag.fixed{background:var(--teal-soft);color:var(--ink-soft)}
@@ -3740,8 +3742,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "130";
+  var VERSION = "131";
   var CHANGELOG = [
+    { v:"131", d:"2026-10-08", items:[
+      "«من غير إعلانات» بقت نفس قايمة الدخل بالظبط — نفس البنود والأعمدة (المبلغ · على الأوردر · من المبيعات) والإعلانات بس صفر، والبنود بتتفتح زي الأصل",
+      "تحت الكروت تختار القايمة على «لو كله اتسلّم» ولا «اتسلّم فعلاً»"
+    ]},
     { v:"130", d:"2026-10-08", items:[
       "قايمة الدخل: تبويب جديد «من غير إعلانات» جنب «اتسلّم فعلاً» — نفس القايمة كاملة والإعلانات صفر، بالحسبتين جنب بعض («لو كله اتسلّم» و«اتسلّم فعلاً»)",
       "فوقها صافي الربح من غير إعلانات في الحالتين وجنبه اللي بالإعلانات، والإعلان خد منك كام وعلى الأوردر كام"
@@ -8272,7 +8278,11 @@
   }
   function renderProjIS(){
     var t = document.getElementById("t-pis"); if(!t) return;
-    var P = projStats(periodRange()), v = pisMode === "act" ? P.act : P.exp;
+    // v131: «من غير إعلانات» = نفس القايمة بالظبط (نفس البنود والأعمدة) والإعلانات صفر،
+    // على «لو كله اتسلّم» أو «اتسلّم فعلاً» حسب الاختيار اللي تحت الكروت
+    var P = projStats(periodRange()), noAds = pisMode === "noads";
+    var base = (pisMode === "act" || (noAds && pisNaBase === "act")) ? P.act : P.exp;
+    var v = noAds ? pisNoAds(base) : base;
     Array.prototype.forEach.call(document.querySelectorAll("#pis-mode [data-pism]"), function(b){
       b.classList.toggle("on", b.dataset.pism === pisMode);
       b.textContent = b.dataset.pism === "act" ? "اتسلّم فعلاً (" + qty(P.nDone) + ")"
@@ -8280,7 +8290,7 @@
     });
     var na = document.getElementById("pis-na");
     if(na) na.hidden = pisMode !== "noads";
-    if(pisMode === "noads"){ renderPisNoAds(P); return; }
+    if(noAds) renderPisNoAds(P);
     var n = v.n, g = v.goods;
     var tag = function(k){ return k ? " <span class='pis-tag " + k + "'>" + (k === "var" ? "متغيّر" : "ثابت") + "</span>" : ""; };
     // kind "" = بند بيتطرح (أحمر لو فيه مبلغ) · "sum" = إجمالي بلون إشارته
@@ -8303,7 +8313,9 @@
     rows.push(v.ship >= 0
       ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship")
       : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship"));
-    rows.push(row("− إعلانات" + tag("var"), v.ads, "", "", "", v.ads > 0.009 ? "ads" : ""));
+    rows.push(noAds
+      ? row("− إعلانات" + tag("var"), 0, "", "", v.adsOff > 0.009 ? "متشالة من الحسبة — اتصرف فعلاً " + esc(money(v.adsOff)) : "")
+      : row("− إعلانات" + tag("var"), v.ads, "", "", "", v.ads > 0.009 ? "ads" : ""));
     if(v.pack > 0.009) rows.push(row("− تغليف" + tag("var"), v.pack, "", "", "", "pack"));
     if(Math.abs(v.xloss) > 0.009) rows.push(row("− خسارة استبدال مع المورد" + tag("var"), v.xloss, "", "", "", "xloss"));
     if(Math.abs(v.othervar) > 0.009) rows.push(row("− مصاريف متغيّرة تانية" + tag("var"), v.othervar, "", "", "", "othervar"));
@@ -8324,7 +8336,9 @@
     }
     var un = unclassifiedExpenses(), T = trIdx();
     var nt = document.getElementById("pis-note");
-    if(nt) nt.innerHTML = (pisMode === "act"
+    if(nt) nt.innerHTML = (noAds
+        ? "<b>«من غير إعلانات»</b> = نفس قايمة <b>«" + (pisNaBase === "act" ? "اتسلّم فعلاً" : "لو كله اتسلّم") + "»</b> بالظبط بس الإعلانات صفر — بيوريك البضاعة والشحن والمصاريف التانية بيكسبوا لوحدهم ولا لأ. <b>مش معناه</b> إن الأوردرات كانت هتيجي من غير إعلان."
+        : pisMode === "act"
         ? "<b>«اتسلّم فعلاً»</b> = الأوردرات اللي اتسلّمت أو اتلغت في الفترة بس، ومقابلها كل مصاريف الفترة."
         : "<b>«لو كله اتسلّم»</b> = اللي اتسلّم فعلاً + الـ" + qty(P.nOpen) + " أوردر اللي لسه ماشيين لو العملاء خدوهم كلهم — <b>قبل أي رفض</b>.") +
       (adj !== null && pisMode !== "act" ? " لو الرفض فضل " + Math.round(rf.p * 100) + "% زي ما هو (" + qty(rf.x) + " من " + qty(rf.n) + "): <b class='num " + (adj >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(adj)) + "</b>." : "") +
@@ -8342,43 +8356,25 @@
     o.varExp = v.varExp - v.ads; o.contrib = v.contrib + v.ads; o.net = v.net + v.ads;
     return o;
   }
+  // الكروت فوق القايمة: صافي الربح من غير إعلانات في الحالتين، وتحتها القايمة على أنهي واحدة
+  var pisNaBase = "exp";
   function renderPisNoAds(P){
     var E = pisNoAds(P.exp), A = pisNoAds(P.act), off = E.adsOff;
-    var cell = function(val, kind){
-      var c = kind === "sum" ? (val >= 0 ? "v-gain" : "v-due") : kind === "base" ? "" : (val > 0.009 ? "v-due" : "");
-      return "<td class='num " + c + "'>" + money(val) + "</td>";
-    };
-    var row = function(label, k, kind, cls, sub){
-      return "<tr" + (cls ? " class='" + cls + "'" : "") + "><td class='wide'>" + label + (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
-        cell(E[k], kind) + cell(A[k], kind) + "</tr>";
-    };
-    var tag = function(k){ return " <span class='pis-tag " + k + "'>" + (k === "var" ? "متغيّر" : "ثابت") + "</span>"; };
-    var any = function(k){ return Math.abs(E[k]) > 0.009 || Math.abs(A[k]) > 0.009; };
-    E.shipCost = -E.ship; A.shipCost = -A.ship;                         // فرق الشحن بيتطرح زي القايمة
-    var rows = [row("<b>المبيعات</b>", "goods", "base"), row("− تكلفة البضاعة", "cost"), row("= ربح البضاعة", "gross", "sum", "pis-tot"),
-      row("− فرق الشحن", "shipCost"), row("− إعلانات" + tag("var"), "ads", "", "", off > 0.009 ? "متشالة من الحسبة — اتصرف فعلاً " + esc(money(off)) : "")];
-    if(any("pack")) rows.push(row("− تغليف" + tag("var"), "pack"));
-    if(any("xloss")) rows.push(row("− خسارة استبدال مع المورد" + tag("var"), "xloss"));
-    if(any("othervar")) rows.push(row("− مصاريف متغيّرة تانية" + tag("var"), "othervar"));
-    rows.push(row("= ربح الأوردر بعد مصاريف البيع", "contrib", "sum", "pis-tot"));
-    [["subs","اشتراكات"],["salary","مرتبات"],["once","مرة واحدة"],["trans","انتقالات من غير فاتورة"],["other","مصاريف تانية"]].forEach(function(x){
-      if(any(x[0])) rows.push(row("− " + x[1] + tag("fixed"), x[0]));
-    });
-    rows.push(row("= صافي الربح", "net", "sum", "pis-net"));
-    table("t-pis", ["البند", "لو كله اتسلّم (" + qty(P.n) + ")", "اتسلّم فعلاً (" + qty(P.nDone) + ")"], rows, "");
     var b = function(v){ return "<b class='num " + (v >= 0 ? "v-gain" : "v-due") + "'>" + esc(signed(v)) + "</b>"; };
+    var on = function(k){ return pisNaBase === k ? " class='on'" : ""; };
     document.getElementById("pis-na").innerHTML =
       "<div class='hi'><span>من غير إعلانات — لو كله اتسلّم</span>" + b(E.net) + "<small>بالإعلانات: " + esc(signed(P.exp.net)) + "</small></div>" +
       "<div class='hi'><span>من غير إعلانات — اتسلّم فعلاً</span>" + b(A.net) + "<small>بالإعلانات: " + esc(signed(P.act.net)) + "</small></div>" +
       "<div><span>الإعلان خد منك</span><b class='num'>" + esc(money(off)) + "</b>" +
-        (P.n ? "<small>" + esc(money(off / P.n)) + " على الأوردر (÷" + qty(P.n) + ")</small>" : "") + "</div>";
-    var sm = document.getElementById("pis-sum");
-    if(sm) sm.innerHTML = "لو كله اتسلّم: <b class='num " + (P.exp.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.exp.net)) + "</b>" +
-      " · اتسلّم فعلاً: <b class='num " + (P.act.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.act.net)) + "</b>";
-    var nt = document.getElementById("pis-note");
-    if(nt) nt.innerHTML = "<b>«من غير إعلانات»</b> = نفس القايمة بالظبط بس الإعلانات صفر، بالوضعين: <b>«لو كله اتسلّم»</b> (" + qty(P.n) + " أوردر) و<b>«اتسلّم فعلاً»</b> (" + qty(P.nDone) + "). " +
-      "بيوريك البضاعة والشحن والمصاريف التانية بيكسبوا لوحدهم ولا لأ — <b>مش معناه</b> إن الأوردرات كانت هتيجي من غير إعلان.";
+        (P.n ? "<small>" + esc(money(off / P.n)) + " على الأوردر (÷" + qty(P.n) + ")</small>" : "") + "</div>" +
+      "<div class='pis-nab'><span>القايمة تحت على:</span><span class='quick' role='group' aria-label='القايمة على'>" +
+        "<button type='button' data-pisnab='exp'" + on("exp") + ">لو كله اتسلّم (" + qty(P.n) + ")</button>" +
+        "<button type='button' data-pisnab='act'" + on("act") + ">اتسلّم فعلاً (" + qty(P.nDone) + ")</button></span></div>";
   }
+  document.getElementById("pis-na").addEventListener("click", function(e){
+    var x = e.target.closest("[data-pisnab]"); if(!x) return;
+    pisNaBase = x.dataset.pisnab; pisOpen = null; renderProjIS();
+  });
   document.getElementById("pis-mode").addEventListener("click", function(e){
     var b = e.target.closest("[data-pism]"); if(!b) return;
     pisMode = b.dataset.pism; renderProjIS(); renderItemProfit();
@@ -8390,7 +8386,7 @@
   var PIS_DD_MAX = 12;
   function pisDrill(key, P){
     var r = periodRange(), L = [], go = "", goTxt = "", tot = 0;
-    var act = pisMode === "act";
+    var act = pisMode === "act" || (pisMode === "noads" && pisNaBase === "act");
     var who = function(s){ return "#" + esc(s.no || "—") + " · " + esc(partyName(s.partyId)); };
     if(key === "goods" || key === "cost" || key === "ship"){
       P.c.list.forEach(function(s){
