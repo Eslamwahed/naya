@@ -37,6 +37,7 @@
     /* خلفيات الحالات: ليك · عليك · تنبيه · التبديل مع المورد.
        كانت أرقام ثابتة في ٢٠ مكان، وفي الليلي كانت بقع فاتحة أو كلها نفس اللون. */
     --gain-soft:#E3F1EA; --due-soft:#F6E3E8; --warn-soft:#F7EEDB;
+    --gain-ink:#28644F;     /* أخضر الكلام فوق خلفية خضرا فاتحة (≥٤٫٥:١) */
     --xg:#5B4A9A; --xg-soft:#ECE8F7;
 
     /* ═══ سلّم الخطوط ═══
@@ -78,9 +79,11 @@
     --shadow:none;
     --on-accent:#1A141C;
     --gain-soft:#303636; --due-soft:#402D3B; --warn-soft:#3E3328;
+    --gain-ink:var(--gain);
     --xg:#A99BE0; --xg-soft:#383042;
   }
   *{box-sizing:border-box}
+  html{scrollbar-color:color-mix(in srgb,var(--ink-soft) 40%,transparent) transparent}
   html,body{margin:0;padding:0}
   body{
     background:var(--paper);
@@ -101,8 +104,9 @@
   .m{font-size:1em!important;white-space:nowrap}
   .m-n{unicode-bidi:isolate;direction:ltr;display:inline-block!important;color:inherit!important;margin:0!important;padding:0!important;font-size:1em!important}
   .m-i{font-size:1em!important}
-  .m-d{opacity:.55;font-size:.8em!important}
-  .m-c{opacity:.6;font-size:.7em!important;font-weight:500!important}
+  /* v138 (polish): الكسور و«ج.م» أخف بالحجم والوزن بس، بنفس لون الرقم — الـopacity كانت بتنزّل التباين لـ٢–٣:١ */
+  .m-d{font-size:max(11px,.8em)!important;font-weight:400!important}
+  .m-c{font-size:max(11px,.7em)!important;font-weight:400!important}
   /* v109 — شارات الحالة بنقطة لون قبل الكلمة، نفس الشكل في كل الشاشات */
   span.st::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;
     margin-inline-end:5px;vertical-align:middle}
@@ -1114,6 +1118,7 @@
   .cd-mv{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:var(--sp-3);align-items:center;
     padding:10px var(--sp-4);border-top:1px solid var(--line)}
   .cd-h + .cd-mv{border-top:0}
+  .cd-h .v-gain{color:var(--gain-ink)}   /* إجمالي اليوم على خلفية برقوقي فاتح */
   .cd-mv .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:var(--teal-soft)}
   .cd-mv.in .ic{background:var(--gain-soft)} .cd-mv.out .ic{background:var(--due-soft)}
   .cd-t b{display:block;font-weight:600}
@@ -1319,7 +1324,8 @@
   .vz-st b{display:inline-block;font-size:var(--fs-6);font-weight:600;direction:ltr;unicode-bidi:isolate;margin:2px 0}
   .vz-st em{display:block;font-style:normal;font-size:var(--fs-1);color:var(--ink-soft)}
   .vz-plot{width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
-  .vz-plot svg{display:block;direction:rtl} .vz-plot svg text{font-family:inherit}
+  .vz-plot svg{display:block;direction:rtl}
+  .vz-plot:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:var(--r-sm)} .vz-plot svg text{font-family:inherit}
   .vz-empty{color:var(--ink-soft);padding:var(--sp-5) 0;text-align:center}
   .vz-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:var(--fs-2);color:var(--ink-soft);margin-top:var(--sp-2)}
   .vz-legend span{display:inline-flex;align-items:center;gap:6px} .vz-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
@@ -1670,7 +1676,7 @@
   .pis-dl .go{font:inherit;font-size:var(--fs-2);color:var(--teal);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline}
   /* v126: حالة كل صنف */
   .itp-st{display:inline-block;font-size:var(--fs-1);font-weight:600;border-radius:99px;padding:2px 10px;white-space:nowrap}
-  .itp-st.go{background:rgba(50,123,99,.14);color:var(--gain)}
+  .itp-st.go{background:rgba(50,123,99,.14);color:var(--gain-ink)}
   .itp-st.pair{background:rgba(138,98,18,.14);color:var(--warn)}
   .itp-st.bad{background:rgba(154,19,51,.12);color:var(--due)}
   .itp-st.idle{background:var(--teal-soft);color:var(--ink-soft)}
@@ -2194,7 +2200,7 @@
   .co-t small{display:block;color:var(--ink-soft);font-size:var(--fs-1)} .co-t b{display:block;font-size:var(--fs-5);margin:2px 0}
   .co-sub{display:block;font-size:var(--fs-1);color:var(--ink-soft);line-height:1.5}
   .co-st{position:absolute;top:9px;inset-inline-end:10px;font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px}
-  .co-t.ok .co-st{background:rgba(50,123,99,.14);color:var(--gain)} .co-t.wr .co-st{background:rgba(138,98,18,.14);color:var(--warn)}
+  .co-t.ok .co-st{background:rgba(50,123,99,.14);color:var(--gain-ink)} .co-t.wr .co-st{background:rgba(138,98,18,.14);color:var(--warn)}
   .co-t.bd .co-st{background:rgba(154,19,51,.12);color:var(--due)} .co-t.na .co-st{background:var(--teal-soft);color:var(--ink-soft)}
   .co-t.bd{border-color:rgba(154,19,51,.35)} .co-t.wr{border-color:rgba(138,98,18,.35)}
   .co-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)} .co-two .panel h3{margin-top:0}
@@ -2206,7 +2212,7 @@
   .co-bal{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .co-p{background:var(--teal-soft);border-radius:var(--r-sm);padding:6px 10px} .co-p small{display:block;color:var(--ink-soft);font-size:11px}
   .co-op{color:var(--ink-soft);font-size:var(--fs-4)}
-  .co-okb{background:rgba(50,123,99,.14);color:var(--gain);border-radius:99px;padding:2px 10px;font-weight:700;font-size:var(--fs-1)}
+  .co-okb{background:rgba(50,123,99,.14);color:var(--gain-ink);border-radius:99px;padding:2px 10px;font-weight:700;font-size:var(--fs-1)}
   .co-badb{border:0;background:rgba(154,19,51,.12);color:var(--due);border-radius:99px;padding:2px 10px;font:inherit;font-weight:700;font-size:var(--fs-1);cursor:pointer}
   @media (max-width:760px){ .co-two{grid-template-columns:1fr} .co-vd{flex-wrap:wrap} .co-exp{margin-inline-start:0;width:100%} }
 </style>
@@ -3520,7 +3526,7 @@
         <button type="button" data-vzm="act">اتسلّم فعلاً</button>
       </div></div>
     <div class="vz-stats" id="vz1-stats"></div>
-    <div class="vz-plot vz-wide" id="vz-wf"></div>
+    <div class="vz-plot vz-wide" id="vz-wf" tabindex="0" role="region" aria-label="رسمة فلوسك راحت فين — بتتسحب بالعرض"></div>
     <div class="vz-foot"><span>نفس أرقام «قايمة الدخل» · بتتحدّث بعد كل حركة</span><button type="button" class="vz-go" data-vzgo="rep">قايمة الدخل ←</button></div>
   </div>
 
@@ -3945,8 +3951,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "137";
+  var VERSION = "138";
   var CHANGELOG = [
+    { v:"138", d:"2026-10-09", items:[
+      "مراجعة Impeccable (polish): الكسور و«ج.م» في كل المبالغ بقت مقروءة — نفس لون الرقم وأخف بالحجم والوزن بس، ومش أصغر من 11px (كانت باهتة ومش مقروءة في 593 مكان)",
+      "شارة «كويس» الخضرا وإجمالي اليوم في الخزنة بأخضر أغمق يتقري على خلفيته",
+      "رسمة «فلوسك راحت فين» بتتوصل بالكيبورد، وشريط التمرير بلون الثيم"
+    ]},
     { v:"137", d:"2026-10-09", items:[
       "حركات من React Bits (منقولة لكود عادي من غير React): الأرقام الكبيرة بتعدّ لحد قيمتها لما تفتح أي شاشة أو قسم في التحليل — الرئيسية، المدير المالي، رسومات، ماشي إزاي؟، المخزون",
       "المدير المالي: قرارات زيادة الربح بتدخل واحدة ورا التانية من غشاوة لوضوح",
