@@ -200,6 +200,8 @@
   .nav-sub.solo{display:none}
   .nav-sub button{border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card);padding:4px 13px;font-size:var(--fs-2)}
   .nav-sub button.grp-off{display:none}
+  .nav-sub button.nav-alias{display:none !important}
+  .ip-sw{margin:0 0 var(--sp-3)}
   .nav-sub button[aria-current="true"]{background:var(--teal);border-color:var(--teal);color:var(--card);font-weight:600}
   nav button{
     background:none;border:none;border-bottom:3px solid transparent;
@@ -1311,6 +1313,18 @@
   .pis-head h3{margin:0} .pis-head .quick{margin:0}
   #t-pis tr.pis-net td{border-top:2px solid var(--line);background:var(--teal-soft);font-weight:700;font-size:var(--fs-4)}
   #t-pis tr.pis-tot td:first-child,#t-pis tr.pis-net td:first-child{font-weight:700}
+  /* v132: القوايم المالية */
+  .fin-head{display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap}
+  .fin-head h3,#fin-panel h3{margin:0 0 var(--sp-2)}
+  #fin-panel h3 small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)}
+  .fin-ok{margin-inline-start:auto;font-size:var(--fs-2);font-weight:600;border-radius:99px;padding:3px 12px}
+  .fin-ok.ok{background:rgba(50,123,99,.14);color:var(--gain)} .fin-ok.bad{background:rgba(154,19,51,.12);color:var(--due)}
+  .fin-t td.num{white-space:nowrap}
+  .fin-t tr.fs-sec td{font-weight:700;background:var(--paper);color:var(--teal)}
+  .fin-t tr.fs-sub td{font-weight:600;border-top:1px solid var(--line)}
+  .fin-t tr.fs-tot td{font-weight:700;background:var(--teal-soft);border-top:2px solid var(--line)}
+  .fin-t tr.fs-grand td{font-weight:700;font-size:var(--fs-4);background:var(--teal-soft);border-top:2px solid var(--line)}
+  .fin-t td.ind{padding-inline-start:var(--sp-5)}
   /* v130: «من غير إعلانات» — ٣ أرقام فوق القايمة */
   .pis-na{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2);margin:0 0 var(--sp-3)}
   .pis-na[hidden]{display:none}
@@ -1509,6 +1523,8 @@
   .panel > .rsec > *:not(summary){padding-inline:0}
 
   /* v126: تبويبات التقارير — كل تبويب فيه حاجته بس */
+  /* v132: أقسام التحليل في الشريط الفرعي فوق — الشريط ده بقى مخفي */
+  #rep-tabs{display:none}
   .rep-tabs{display:flex;gap:var(--sp-1);flex-wrap:wrap;border-bottom:1px solid var(--line);margin:var(--sp-4) 0}
   .rep-tabs button{font:inherit;font-size:var(--fs-3);color:var(--ink-soft);background:none;border:0;
     border-bottom:3px solid transparent;margin-bottom:-1px;padding:10px 16px;cursor:pointer;min-height:44px;
@@ -1946,6 +1962,12 @@
     #t-pis tbody td::before{content:none}
     #t-pis th:nth-child(4),#t-pis td:nth-child(4){display:none}
     #t-pis td.num{font-size:var(--fs-2)}
+    .fin-t thead{display:table-header-group}
+    .fin-t tbody tr{display:table-row;background:none;border:0;border-radius:0;margin:0;padding:0}
+    .fin-t th,.fin-t tbody td,.fin-t tbody td.wide{display:table-cell;padding:8px 6px;border-bottom:1px solid var(--line)}
+    .fin-t tbody td::before{content:none}
+    .fin-t td.num{font-size:var(--fs-2)}
+    .fin-t td.ind{padding-inline-start:var(--sp-3)}
     .rep-tabs{flex-wrap:nowrap;overflow-x:auto;border-bottom:0;gap:6px;margin:var(--sp-3) 0;scrollbar-width:none}
     .rep-tabs::-webkit-scrollbar{display:none}
     .rep-tabs button{flex:0 0 auto;border:1px solid var(--line);border-radius:99px;margin:0;padding:6px 14px;min-height:38px;background:var(--card)}
@@ -2100,7 +2122,7 @@
     <button type="button" data-group="orders"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-box"/></svg></span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
     <button type="button" data-group="goods"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-hanger"/></svg></span><span class="lb">البضاعة</span></button>
     <button type="button" data-group="money"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-wallet"/></svg></span><span class="lb">الفلوس</span></button>
-    <button type="button" data-group="more"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-menu"/></svg></span><span class="lb">المزيد</span></button>
+    <button type="button" data-group="more"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-receipt"/></svg></span><span class="lb">التحليل</span></button>
   </div>
   <div class="who">
     <span id="save-pill" class="savep" role="status">محفوظ</span>
@@ -2112,6 +2134,8 @@
         <input id="me" placeholder="اسمك" autocomplete="off">
         <button type="button" class="me-it" id="b-theme" title="الوضع الليلي">ليلي</button>
         <button type="button" class="me-it" id="b-refresh">تحديث</button>
+        <button type="button" class="me-it" data-navgo="backup">الإعدادات</button>
+        <button type="button" class="me-it" data-navgo="log">سجل الحركات</button>
       </div>
     </div>
   </div>
@@ -2123,21 +2147,28 @@
 <!-- التنقل: ٥ أقسام، وكل قسم تحته شاشاته. على الموبايل الأقسام شريط ثابت تحت. -->
 <nav id="nav">
   <div class="nav-sub" id="nav-sub">
+    <!-- v132: كل قسم بيجاوب على سؤال واحد. data-sub = جزء من شاشة (عملاء/موردين · أقسام التحليل)،
+         data-also = شاشة تانية بتتحسب على نفس الزرار، nav-alias = زرار مخفي عشان goTab بس -->
     <button data-tab="dash" data-grp="home" aria-current="true">الرئيسية</button>
     <button data-tab="sales" data-grp="orders">الأوردرات</button>
-    <button data-tab="items" data-grp="goods">الأصناف</button>
-    <button data-tab="price" data-grp="goods">التسعير</button>
+    <button data-tab="parties" data-grp="orders" data-sub="customer">العملاء</button>
+    <button data-tab="ship" data-grp="orders">شركات الشحن</button>
     <button data-tab="inv" data-grp="goods">المخزون</button>
+    <button data-tab="items" data-grp="goods" data-also="price">الأصناف والتسعير</button>
+    <button data-tab="price" data-grp="goods" class="nav-alias">التسعير</button>
     <button data-tab="purch" data-grp="goods">المشتريات</button>
+    <button data-tab="parties" data-grp="goods" data-sub="supplier">الموردين</button>
     <button data-tab="cash" data-grp="money">الخزنة</button>
-    <button data-tab="ship" data-grp="money">شركات الشحن</button>
-    <button data-tab="capital" data-grp="money">رأس المال</button>
-    <button data-tab="parties" data-grp="more">العملاء والموردين</button>
-    <button data-tab="rep" data-grp="more">تقارير</button>
+    <button data-tab="capital" data-grp="money">الشركاء</button>
+    <button data-tab="rep" data-grp="more" data-sub="sum">قايمة الدخل</button>
+    <button data-tab="rep" data-grp="more" data-sub="fin" class="money-only">القوايم المالية</button>
+    <button data-tab="rep" data-grp="more" data-sub="items">الأصناف</button>
+    <button data-tab="rep" data-grp="more" data-sub="cust">العملاء والمحافظات</button>
+    <button data-tab="rep" data-grp="more" data-sub="team">الفريق</button>
     <button data-tab="viz" data-grp="more">رسومات</button>
-    <button data-tab="log" data-grp="more">سجل الحركات</button>
     <button data-tab="coach" data-grp="more">ماشي إزاي؟</button>
-    <button data-tab="backup" data-grp="more">الإعدادات</button>
+    <button data-tab="log" data-grp="menu" class="nav-alias">سجل الحركات</button>
+    <button data-tab="backup" data-grp="menu" class="nav-alias">الإعدادات</button>
   </div>
 </nav>
 
@@ -2715,6 +2746,7 @@
 
 <!-- الأصناف -->
 <section id="tab-items" hidden>
+  <div class="quick ip-sw" role="group" aria-label="الأصناف والتسعير"><button type="button" class="on" data-navgo="items">الأصناف</button><button type="button" class="money-only" data-navgo="price">التسعير</button></div>
   <h2>الأصناف<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
   <p class="hint" data-infotxt hidden>سعر البيع هنا بيتحط تلقائي في شاشة البيع، وتقدر تغيّره في أي عملية.</p>
   <div class="tbar">
@@ -3002,10 +3034,19 @@
   </div>
   </details>
 
+  <!-- v132: استرداد رأس المال اتنقل هنا من التقارير — كل حاجة عن الشركاء في مكان واحد -->
+  <div class="panel rsecs" style="margin-top:var(--sp-3)">
+    <details class="rsec" open>
+      <summary>استرداد رأس المال للشركاء <b>كل شريك كسب كام ورجعله كام</b></summary>
+      <p class="hint" id="rep-pb-note"></p>
+      <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
+    </details>
+  </div>
 </section>
 
 <!-- التسعير -->
 <section id="tab-price" hidden>
+  <div class="quick ip-sw" role="group" aria-label="الأصناف والتسعير"><button type="button" data-navgo="items">الأصناف</button><button type="button" class="on" data-navgo="price">التسعير</button></div>
   <h2>التسعير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
   <p class="hint" data-infotxt hidden>الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
 
@@ -3165,10 +3206,19 @@
   <!-- v126: التقارير تبويبات بدل صفحة طويلة — كل تبويب فيه حاجته بس -->
   <div class="rep-tabs" id="rep-tabs" role="tablist" aria-label="أقسام التقارير">
     <button type="button" role="tab" data-rtab="sum">ملخص</button>
-    <button type="button" role="tab" data-rtab="profit">الأرباح</button>
+    <button type="button" role="tab" data-rtab="fin" class="money-only">القوايم المالية</button>
     <button type="button" role="tab" data-rtab="items">الأصناف</button>
     <button type="button" role="tab" data-rtab="cust">العملاء والمحافظات</button>
-    <button type="button" role="tab" data-rtab="part">الشركاء</button>
+    <button type="button" role="tab" data-rtab="team">الفريق</button>
+  </div>
+
+  <!-- v132: القوايم المالية — الميزانية العمومية وقايمة الدخل على أساس التسليم (IFRS 15) -->
+  <div class="panel money-only" id="fin-panel" data-rt="fin">
+    <div class="fin-head"><h3>الميزانية العمومية <small id="fin-asof"></small></h3><span class="fin-ok" id="fin-ok"></span></div>
+    <div class="tbl-wrap"><table id="t-fin-bs" class="fin-t"></table></div>
+    <h3 style="margin-top:var(--sp-5)">قايمة الدخل <small id="fin-per"></small></h3>
+    <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div>
+    <p class="hint" id="fin-note" style="margin:var(--sp-3) 0 0"></p>
   </div>
 
   <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
@@ -3231,7 +3281,7 @@
 
   <!-- الباقي مطوي -->
   <div class="panel rsecs">
-    <details class="rsec" open data-rt="profit">
+    <details class="rsec" open data-rt="sum">
       <summary>الربح شهر بشهر <b>هل بتتحسّن ولا بتتراجع؟</b></summary>
       <div class="tbl-wrap"><table id="t-rep-months"></table></div>
     </details>
@@ -3248,13 +3298,8 @@
       <div class="tbl-wrap"><table id="t-fs-age"></table></div>
     </details>
 
-    <details class="rsec" data-rt="part">
-      <summary>استرداد رأس المال للشركاء <b>كل شريك كسب كام ورجعله كام</b></summary>
-      <p class="hint" id="rep-pb-note"></p>
-      <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
-    </details>
 
-    <details class="rsec" data-rt="profit">
+    <details class="rsec" data-rt="sum">
       <summary>لو حصل كذا يبقى إيه؟ <b>تحليل الحساسية</b></summary>
       <p class="hint">غيّر النسب وشوف الربح والتعادل بيتحرّكوا إزاي. اكتب <strong>10</strong> لزيادة ١٠٪ و<strong>-10</strong> لنقص ١٠٪. الأرقام تقديرية وما بتتسجّلش.</p>
       <div class="fgrid" id="sens-in">
@@ -3282,7 +3327,7 @@
       <div class="tbl-wrap"><table id="t-rep-gov"></table></div>
     </details>
 
-    <details class="rsec" data-rt="cust">
+    <details class="rsec" data-rt="team">
       <summary>أداء المسؤولين <b>شغل كل واحد في الفريق</b></summary>
       <div class="tbl-wrap"><table id="t-rep-owner"></table></div>
     </details>
@@ -3742,8 +3787,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "131";
+  var VERSION = "132";
   var CHANGELOG = [
+    { v:"132", d:"2026-10-09", items:[
+      "ترتيب جديد للشاشات — كل زرار تحت بيجاوب على سؤال واحد: الرئيسية · الأوردرات (الأوردرات · العملاء · شركات الشحن) · البضاعة (المخزون · الأصناف والتسعير · المشتريات · الموردين) · الفلوس (الخزنة · الشركاء) · التحليل (بدل «المزيد»)",
+      "التحليل: قايمة الدخل · القوايم المالية · الأصناف · العملاء والمحافظات · الفريق · رسومات · ماشي إزاي؟ — أداء المسؤولين بقى «الفريق» في شاشة لوحده",
+      "الإعدادات وسجل الحركات في قايمة اسمك فوق · استرداد رأس المال للشركاء بقى في «الشركاء» · الربح شهر بشهر والحساسية تحت «قايمة الدخل»",
+      "جديد: «القوايم المالية» — الميزانية العمومية كاملة (الأصول · الالتزامات · حقوق الملكية بكل شريك) وقايمة الدخل (الإيرادات · مجمل الربح · مصروفات البيع والتسويق · المصروفات الإدارية · صافي الربح) للفترة ومن البداية",
+      "القوايم على أساس التسليم: الإيراد بيتسجّل لما العميل يستلم والأوردرات اللي لسه ماشية بضاعتها مخزون. الميزانية بتتأكد إن الأصول = الالتزامات + حقوق الملكية، وصافي الربح من البداية = الأرباح المحتجزة"
+    ]},
     { v:"131", d:"2026-10-08", items:[
       "«من غير إعلانات» بقت نفس قايمة الدخل بالظبط — نفس البنود والأعمدة (المبلغ · على الأوردر · من المبيعات) والإعلانات بس صفر، والبنود بتتفتح زي الأصل",
       "تحت الكروت تختار القايمة على «لو كله اتسلّم» ولا «اتسلّم فعلاً»"
@@ -5958,17 +6010,21 @@
   }
   /* الجهة المحذوفة اللي لسه عليها أو ليها فلوس بتفضل في الميزانية.
      الحذف بيخفيها من الكشوف، بس المديونية بتاعتها فلوس حقيقية. */
-  function duesNet(){
-    var seen = {}, net = 0;
+  // v132: أرصدة الجهات متقسّمة للميزانية — نفس اللفة اللي duesNet بيجمعها
+  function partyDues(){
+    var seen = {}, o = { recv:0, custAdv:0, supAdv:0, pay:0, net:0 };
     db.parties.forEach(function(p){
       if(!p || seen[p.id] || isPartner(p)) return;
       seen[p.id] = 1;
       var b = partyBalance(p.id);
       if(p.deleted && Math.abs(b) < 0.009) return;
-      net += b;
+      o.net += b;
+      if(p.type === "supplier"){ if(b > 0) o.supAdv += b; else o.pay -= b; }
+      else { if(b > 0) o.recv += b; else o.custAdv -= b; }      // عميل: موجب عليه · سالب عربون عندك
     });
-    return net;
+    return o;
   }
+  function duesNet(){ return partyDues().net; }
   // صافي الأصول لازم يساوي حقوق الملكية. الفرق معناه حاجة مش مسجّلة.
   function netAssets(){
     return cashBox() + walletsTotal() + stockBookValue() + duesNet();
@@ -8559,10 +8615,11 @@
   }
 
   /* v126: التقارير تبويبات بدل صفحة طويلة. آخر تبويب بيتفتكر على الجهاز ده بس (naya:rtab) */
-  var REP_TABS = ["sum", "profit", "items", "cust", "part"], repTab = "sum", repTabInit = false;
+  var REP_TABS = ["sum", "fin", "items", "cust", "team"], repTab = "sum", repTabInit = false;
   try{ var rt0 = LS && LS.getItem("naya:rtab"); if(REP_TABS.indexOf(rt0) >= 0) repTab = rt0; }catch(e){}
   function applyRepTab(swap){
     var sec = document.getElementById("tab-rep"); if(!sec) return;
+    if(repTab === "fin" && !canMoney()) repTab = "sum";        // القوايم كلها أرقام ربح وتكلفة
     Array.prototype.forEach.call(sec.querySelectorAll("[data-rtab]"), function(b){
       var on = b.dataset.rtab === repTab;
       b.classList.toggle("on", on); b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1;
@@ -8578,11 +8635,19 @@
     var rs = sec.querySelector(".rsecs");
     if(rs) rs.classList.toggle("rt-off", !rs.querySelector("[data-rt]:not(.rt-off)"));
   }
+  var REP_TITLE = { sum:"قايمة الدخل", fin:"القوايم المالية", items:"الأصناف", cust:"العملاء والمحافظات", team:"الفريق" };
+  function repTitle(){
+    var h = document.querySelector("#tab-rep > h2");
+    if(h && h.firstChild && h.firstChild.nodeType === 3) h.firstChild.nodeValue = REP_TITLE[repTab] || "تقارير";
+  }
   function setRepTab(t){
     if(REP_TABS.indexOf(t) < 0) return;
+    if(t === "fin" && !canMoney()) t = "sum";
     repTab = t;
     try{ if(LS) LS.setItem("naya:rtab", t); }catch(e){}
-    applyRepTab(true);
+    applyRepTab(true); repTitle();
+    if(repTab === "fin") renderFin();
+    if(activeTab === "rep") navMark();
   }
   (function(){
     var bar = document.getElementById("rep-tabs");
@@ -8598,15 +8663,131 @@
     });
   })();
 
+  /* v132: القوايم المالية — على أساس التسليم: الإيراد بيتسجّل لما العميل يستلم (IFRS 15)،
+     والأوردرات اللي لسه ماشية بضاعتها لسه مخزون. ده نفس أساس «اتسلّم فعلاً» و«الأرباح المحتجزة».
+     الميزانية «كما في النهارده» (كل الحركات)، وقايمة الدخل للفترة اللي فوق ومن البداية.
+     الأصول = الالتزامات + حقوق الملكية لازم تطلع بالقرش — الفرق بيبان لو فيه. */
+  function finIS(r){
+    var c = periodStats(r), X = expByCat(r), xl = xLossIn(r), sin = 0, sout = 0;
+    c.list.forEach(function(s){ if(shipCounts(s)){ sin += shipIn(s); sout += shipOut(s); } });
+    var o = { rev:c.revenue, sin:sin, cogs:c.cogs, sout:sout, ads:X.ads, pack:X.pack, xloss:xl, othervar:X.othervar,
+              subs:X.subs, salary:X.salary, once:X.once, trans:X.trans, other:X.other, n:c.deliv.length };
+    o.totRev = o.rev + o.sin; o.gross = o.totRev - o.cogs;
+    o.sell = o.ads + o.sout + o.pack + o.xloss + o.othervar;
+    o.admin = o.subs + o.salary + o.once + o.trans + o.other;
+    o.net = o.gross - o.sell - o.admin;
+    o.check = c.net;                       // لازم يساوي o.net — نفس أرقام السيستم
+    return o;
+  }
+  function finBS(){
+    var D = partyDues(), cr = D.recv, ca = D.custAdv, sa = D.supAdv, sp = D.pay;
+    var inOrders = 0;
+    live("sales").forEach(function(s){
+      if(isDelivered(s) || isCancelled(s)) return;
+      SL(s).forEach(function(l){ inOrders += (Number(l.qty)||0) * lineCost(l); });
+    });
+    var o = { cash:cashBox(), wallets:walletsTotal(), recv:cr, supAdv:sa, stock:stockBookValue(), inOrders:inOrders,
+              pay:sp, custAdv:ca, partners:partners().map(function(p){ return { n:p.name, cap:capitalOf(p.id), cur:currentOf(p.id) }; }),
+              re:retainedEarnings(), dist:distributedTotal(), opening:openingEquity() };
+    o.assets = o.cash + o.wallets + o.recv + o.supAdv + o.stock;
+    o.liab = o.pay + o.custAdv;
+    o.cap = o.partners.reduce(function(a, x){ return a + x.cap; }, 0);
+    o.cur = o.partners.reduce(function(a, x){ return a + x.cur; }, 0);
+    o.equity = o.cap + o.cur + o.re + o.opening;
+    o.diff = o.assets - (o.liab + o.equity);
+    o.recon = netAssets() - totalEquity();            // نفس «توفيق الميزانية» في الشركاء — لازم الاتنين يتفقوا
+    return o;
+  }
+  function renderFin(){
+    var tb = document.getElementById("t-fin-bs"); if(!tb) return;
+    var B = finBS(), r = periodRange(), A = finIS(null), Pd = r ? finIS(r) : null;
+    var m = function(v){ return v < -0.004 ? "(" + money(-v) + ")" : money(v); };
+    var cls = function(v){ return v < -0.004 ? " v-due" : ""; };
+    var R = function(label, v, kind, sub){
+      var c = kind === "sec" ? "fs-sec" : kind === "sub" ? "fs-sub" : kind === "tot" ? "fs-tot" : kind === "grand" ? "fs-grand" : "";
+      return "<tr" + (c ? " class='" + c + "'" : "") + "><td class='wide" + (kind === "ind" ? " ind" : "") + "'>" + label +
+        (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td><td class='num" + (v === null ? "" : cls(v)) + "'>" + (v === null ? "" : m(v)) + "</td></tr>";
+    };
+    var bs = [];
+    // كل البنود متداولة (IAS 1.66 و1.69) — مفيش أصول ثابتة متسجّلة
+    bs.push(R("الأصول المتداولة", null, "sec"));
+    bs.push(R("النقدية في الخزنة", B.cash, "ind"));
+    bs.push(R("مستحقات عند شركات الشحن", B.wallets, "ind", "فلوس العملاء اللي المندوب حصّلها ولسه ما وصلتكش"));
+    if(B.recv > 0.009) bs.push(R("مديونيات العملاء", B.recv, "ind"));
+    if(B.supAdv > 0.009) bs.push(R("دفعات مقدّمة للموردين", B.supAdv, "ind"));
+    bs.push(R("المخزون (بالتكلفة)", B.stock, "ind", B.inOrders > 0.009 ? "منه حوالي " + esc(money(B.inOrders)) + " في أوردرات لسه ما اتسلّمتش" : ""));
+    bs.push(R("إجمالي الأصول", B.assets, "tot"));
+    bs.push(R("الالتزامات المتداولة", null, "sec"));
+    bs.push(R("مستحق للموردين", B.pay, "ind"));
+    bs.push(R("عرابين عملاء — التزامات عقود (IFRS 15.106)", B.custAdv, "ind", "فلوس دفعها عملاء على أوردرات لسه ما اتسلّمتش"));
+    bs.push(R("إجمالي الالتزامات", B.liab, "tot"));
+    bs.push(R("حقوق الملكية", null, "sec"));
+    B.partners.forEach(function(x){ if(Math.abs(x.cap) > 0.009) bs.push(R("رأس مال " + esc(x.n), x.cap, "ind")); });
+    bs.push(R("إجمالي رأس المال", B.cap, "sub"));
+    if(Math.abs(B.cur) > 0.009) bs.push(R("أرباح اتوزّعت على الشركاء ولسه ما اتصرفتش", B.cur, "ind"));
+    if(Math.abs(B.opening) > 0.009) bs.push(R("صافي الأرصدة الافتتاحية", B.opening, "ind"));
+    bs.push(R("الأرباح المحتجزة", B.re, "ind", "صافي الربح من البداية " + esc(m(A.net)) + (B.dist > 0.009 ? " − اللي اتوزّع " + esc(money(B.dist)) : "")));
+    bs.push(R("إجمالي حقوق الملكية", B.equity, "tot"));
+    bs.push(R("إجمالي الالتزامات وحقوق الملكية", B.liab + B.equity, "grand"));
+    table("t-fin-bs", ["البند", "المبلغ"], bs, "");
+    var ok = Math.abs(B.diff) < 0.01 && Math.abs(B.recon) < 0.01;
+    var okEl = document.getElementById("fin-ok");
+    okEl.className = "fin-ok " + (ok ? "ok" : "bad");
+    okEl.textContent = ok ? "✓ متوازنة: الأصول = الالتزامات + حقوق الملكية" : "⚠ فيه فرق " + money(Math.abs(B.diff)) + " — راجع «توفيق الميزانية» في رأس المال";
+    document.getElementById("fin-asof").textContent = "كما في " + today();
+
+    var cols = Pd ? [Pd, A] : [A];
+    var I = function(label, k, kind, sub){
+      var c = kind === "sec" ? "fs-sec" : kind === "sub" ? "fs-sub" : kind === "tot" ? "fs-tot" : kind === "grand" ? "fs-grand" : "";
+      return "<tr" + (c ? " class='" + c + "'" : "") + "><td class='wide" + (kind === "ind" ? " ind" : "") + "'>" + label +
+        (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
+        cols.map(function(o){ var v = k ? o[k] : null; if(v === null) return "<td class='num'></td>";
+          // «neg» = مصروف بيتطرح: موجب → بين قوسين · سالب (مكسب استبدال مثلاً) → مكسب عادي
+          var shown = kind === "neg" ? -v : v;
+          return "<td class='num" + cls(shown) + "'>" + m(shown) + "</td>"; }).join("") + "</tr>";
+    };
+    var any = function(k){ return cols.some(function(o){ return Math.abs(o[k]) > 0.009; }); };
+    var is = [];
+    is.push(I("الإيرادات", null, "sec"));
+    is.push(I("مبيعات البضاعة (المسلّمة)", "rev", "ind"));
+    is.push(I("رسوم شحن محصّلة من العملاء", "sin", "ind"));
+    is.push(I("إجمالي الإيرادات", "totRev", "sub"));
+    is.push(I("تكلفة البضاعة المباعة", "cogs", "neg"));
+    is.push(I("مجمل الربح", "gross", "tot"));
+    is.push(I("مصروفات البيع والتسويق", null, "sec"));
+    is.push(I("إعلانات", "ads", "neg"));
+    is.push(I("شحن مدفوع لشركات الشحن", "sout", "neg"));
+    if(any("pack")) is.push(I("تغليف", "pack", "neg"));
+    if(any("xloss")) is.push(I("خسارة استبدال مع الموردين", "xloss", "neg"));
+    if(any("othervar")) is.push(I("مصاريف بيع تانية", "othervar", "neg"));
+    is.push(I("إجمالي مصروفات البيع والتسويق", "sell", "sub"));
+    is.push(I("مصروفات إدارية وعمومية", null, "sec"));
+    if(any("subs")) is.push(I("اشتراكات", "subs", "neg"));
+    if(any("salary")) is.push(I("مرتبات", "salary", "neg"));
+    if(any("once")) is.push(I("مصاريف مرة واحدة / تأسيس", "once", "neg"));
+    if(any("trans")) is.push(I("انتقالات من غير فاتورة", "trans", "neg"));
+    if(any("other")) is.push(I("مصاريف تانية", "other", "neg"));
+    is.push(I("إجمالي المصروفات الإدارية", "admin", "sub"));
+    is.push(I("صافي الربح (الخسارة)", "net", "grand"));
+    table("t-fin-is", ["البند"].concat(Pd ? ["الفترة", "من البداية"] : ["من البداية"]), is, "");
+    var rf = r && r.from !== "0000-01-01" ? r.from : "", rtt = r && r.to !== "9999-12-31" ? r.to : "";
+    document.getElementById("fin-per").textContent = Pd ? "(" + (rf && rtt ? rf + " لـ " + rtt : rf ? "من " + rf : "لحد " + rtt) + " · ومن البداية)" : "(من البداية)";
+    var bad = cols.some(function(o){ return Math.abs(o.net - o.check) > 0.01; });
+    document.getElementById("fin-note").innerHTML = "على <b>أساس التسليم</b> (IFRS 15.38 — السيطرة على البضاعة بتنتقل للعميل وقت الاستلام): الإيراد بيتسجّل لما العميل يستلم، والأوردرات اللي لسه ماشية (" +
+      qty(projStats(null).nOpen) + " أوردر) بضاعتها لسه في المخزون بالتكلفة — زي «اتسلّم فعلاً». الأرقام اللي بين قوسين بالسالب. " +
+      "صافي الربح من البداية = اللي في «الأرباح المحتجزة» + اللي اتوزّع. المخزون بمتوسط التكلفة شامل نقل الشراء (IAS 2.10 و2.25)، وشحن العملاء مصروف بيع مش تكلفة مخزون (IAS 2.16)." +
+      (bad ? " <span class='v-due'>⚠ فيه فرق بين القايمة وحسابات السيستم — بلّغ عنه.</span>" : "");
+  }
+
   function renderReports(){
     clearMonthly();
     renderProjIS();
+    if(repTab === "fin") renderFin();
     renderItemProfit();
-    applyRepTab(!repTabInit); repTabInit = true;
+    applyRepTab(!repTabInit); repTabInit = true; repTitle();
     renderAging();
     renderPerf();
     renderBreakEven();
-    renderPayback();
     renderMonths();
     renderSens();
     renderItemBE();
@@ -13639,6 +13820,7 @@
   document.getElementById("pt-tabs").addEventListener("click", function(e){
     var b = e.target.closest("[data-pttab]"); if(!b) return;
     ptTab = b.dataset.pttab; ptOnly = "all"; ptOpen = null; renderPartyCards();
+    if(activeTab === "parties"){ navSync("parties"); navMark(); }     // عملاء ↔ موردين = قسم تاني
   });
   document.getElementById("pt-chips").addEventListener("click", function(e){
     var b = e.target.closest("[data-ptonly]"); if(!b) return;
@@ -14502,7 +14684,11 @@
         renderVzAds(); return;
       }
       b = e.target.closest("[data-vzgo]");
-      if(b){ if(canTab(b.dataset.vzgo)) goTab(b.dataset.vzgo); else toast("مالكش صلاحية الشاشة دي"); }
+      if(b){
+        if(!canTab(b.dataset.vzgo)){ toast("مالكش صلاحية الشاشة دي"); return; }
+        if(b.dataset.vzgo === "rep") repTab = "sum";      // الزرار اسمه «قايمة الدخل»
+        goTab(b.dataset.vzgo);
+      }
     });
     window.addEventListener("scroll", vzHideTip, { passive:true });
   })();
@@ -14578,9 +14764,12 @@
     // القفل اتفعّل ومحدش داخل: شاشة الدخول هي اللي تظهر، مش شاشة فاضية
     if(lockOn() && !curUser()){ lockShow(); return; }
     document.body.classList.toggle("no-money", !canMoney());
-    Array.prototype.forEach.call(document.querySelectorAll("#nav button[data-tab]"), function(b){
-      b.hidden = !canTab(b.dataset.tab);
+    Array.prototype.forEach.call(document.querySelectorAll("#nav button[data-tab], [data-navgo]"), function(b){
+      b.hidden = !canTab(b.dataset.tab || b.dataset.navgo) || (b.classList.contains("money-only") && !canMoney());
     });
+    // التسعير صلاحية لوحدها: لو الأصناف مقفولة والتسعير مسموح، زرار التسعير بيظهر لوحده
+    var pa = document.querySelector('#nav-sub button.nav-alias[data-tab="price"], #nav-sub button[data-tab="price"][data-wasalias]');
+    if(pa){ var solo = !canTab("items") && canTab("price"); pa.classList.toggle("nav-alias", !solo); if(solo) pa.setAttribute("data-wasalias", "1"); }
     navPerms();
     // لو إنت واقف على شاشة مش من حقك، ارجع لأول شاشة مسموحة
     if(!canTab(activeTab)){
@@ -14689,14 +14878,21 @@
     if(!b) return;
     if(openEntryKey) closeEntry(true);      // درج مفتوح؟ يتقفل مع تغيير التبويب
     if(SD_OPEN) closeDrawer();
-    Array.prototype.forEach.call(this.querySelectorAll("button"), function(x){ x.setAttribute("aria-current","false"); });
-    b.setAttribute("aria-current","true");
+    // جزء من شاشة (عملاء/موردين · قسم تحليل): بيتحدد قبل ما الشاشة تترسم وقبل القسم
+    // نفس الجزء المفتوح (openPartyCard مثلاً) → الكارت المفتوح يفضل مفتوح
+    var ptChanged = false;
+    if(b.dataset.sub && b.dataset.tab === "parties" && ptTab !== b.dataset.sub){ ptTab = b.dataset.sub; ptOnly = "all"; ptOpen = null; ptChanged = true; }
+    if(b.dataset.sub && b.dataset.tab === "rep" && REP_TABS.indexOf(b.dataset.sub) >= 0) repTab = b.dataset.sub;
+    activeTab = b.dataset.tab;
     navSync(b.dataset.tab);
     // بتتقرا من الـDOM بدل قايمة ثابتة بتتنسى مع كل تبويب جديد
     Array.prototype.forEach.call(document.querySelectorAll("main > section[id^='tab-']"), function(sec){
       sec.hidden = (sec.id !== "tab-" + b.dataset.tab);
     });
     showTab(b.dataset.tab);          // يترسم دلوقتي لو كان محتاج
+    if(ptChanged && !dirtyTabs.parties) renderPartyCards();
+    if(b.dataset.sub && b.dataset.tab === "rep") setRepTab(b.dataset.sub);
+    navMark();
     tabEnter(document.getElementById("tab-" + b.dataset.tab));
     window.scrollTo(0,0);
   });
@@ -14706,14 +14902,37 @@
      بس، والقسم اللي فيه شاشة واحدة (الرئيسية · الأوردرات) مالوش شريط
      فرعي. دوسة على قسم بترجّعك لآخر شاشة كنت فيها جوّاه. */
   var navLast = {};
+  /* v132: زرار الشاشة في الشريط — نفس الشاشة ممكن يبقى ليها أكتر من زرار (العملاء والموردين
+     نفس الشاشة · أقسام التحليل)، فبنختار حسب الجزء المفتوح دلوقتي. */
+  function navSubOf(tab){ return tab === "rep" ? repTab : tab === "parties" ? ptTab : ""; }
+  function navBtnFor(tab){
+    var bs = Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-tab]")), sub = navSubOf(tab);
+    return bs.find(function(b){ return b.dataset.tab === tab && b.dataset.sub && b.dataset.sub === sub; })
+        || bs.find(function(b){ return b.dataset.tab === tab && !b.dataset.sub && !b.classList.contains("nav-alias"); })
+        || bs.find(function(b){ return b.dataset.also === tab; })
+        || bs.find(function(b){ return b.dataset.tab === tab; });
+  }
+  // الزرار اللي بيفتح الشاشة نفسها (حتى لو مخفي زي التسعير والإعدادات) — للـgoTab وللرجوع لآخر شاشة
+  function navGoBtn(tab){
+    var bs = Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-tab]")), sub = navSubOf(tab);
+    return bs.find(function(b){ return b.dataset.tab === tab && b.dataset.sub && b.dataset.sub === sub; })
+        || bs.find(function(b){ return b.dataset.tab === tab && !b.dataset.sub; })
+        || bs.find(function(b){ return b.dataset.tab === tab; });
+  }
+  function navMark(){
+    var cur = navBtnFor(activeTab);
+    Array.prototype.forEach.call(document.querySelectorAll("#nav button[data-tab]"), function(x){
+      x.setAttribute("aria-current", x === cur ? "true" : "false");
+    });
+  }
   function grpOf(tab){
-    var b = document.querySelector('#nav-sub button[data-tab="' + tab + '"]');
+    var b = navBtnFor(tab);
     return b ? b.dataset.grp : "home";
   }
   function navSync(tab){
     tab = tab || activeTab;
     var g = grpOf(tab);
-    navLast[g] = tab;
+    navLast[g] = navGoBtn(tab);
     Array.prototype.forEach.call(document.querySelectorAll("#nav-groups button[data-group]"), function(x){
       x.classList.toggle("on", x.dataset.group === g);
       x.setAttribute("aria-selected", x.dataset.group === g ? "true" : "false");
@@ -14722,7 +14941,7 @@
     Array.prototype.forEach.call(document.querySelectorAll("#nav-sub button[data-tab]"), function(x){
       var mine = x.dataset.grp === g;
       x.classList.toggle("grp-off", !mine);
-      if(mine && !x.hidden) shown++;
+      if(mine && !x.hidden && !x.classList.contains("nav-alias")) shown++;
     });
     var sub = document.getElementById("nav-sub");
     if(sub) sub.classList.toggle("solo", shown <= 1);
@@ -14730,7 +14949,7 @@
   // القسم بيختفي لو ولا شاشة فيه من حقك
   function navPerms(){
     Array.prototype.forEach.call(document.querySelectorAll("#nav-groups button[data-group]"), function(x){
-      x.hidden = !document.querySelector('#nav-sub button[data-grp="' + x.dataset.group + '"]:not([hidden])');
+      x.hidden = !document.querySelector('#nav-sub button[data-grp="' + x.dataset.group + '"]:not([hidden]):not(.nav-alias)');
     });
     navSync(activeTab);
   }
@@ -14745,8 +14964,10 @@
   document.getElementById("nav-groups").addEventListener("click", function(e){
     var gb = e.target.closest("button[data-group]"); if(!gb) return;
     var g = gb.dataset.group, want = navLast[g];
-    var btn = want && document.querySelector('#nav-sub button[data-tab="' + want + '"]:not([hidden])');
-    if(!btn) btn = document.querySelector('#nav-sub button[data-grp="' + g + '"]:not([hidden])');
+    var btn = want && !want.hidden && want.dataset.grp === g ? want : null;
+    if(!btn) btn = document.querySelector('#nav-sub button[data-grp="' + g + '"]:not([hidden]):not(.nav-alias)');
+    // أول مرة تفتح «التحليل» بعد ما تفتح السيستم: آخر قسم كنت فيه (naya:rtab) مش أول قسم
+    if(btn && btn.dataset.sub && btn.dataset.tab === "rep"){ var rb = navBtnFor("rep"); if(rb && !rb.hidden) btn = rb; }
     if(btn) btn.click();
   });
 
@@ -14846,9 +15067,15 @@
   }
 
   function goTab(tab){
-    var btn = document.querySelector('#nav button[data-tab="'+tab+'"]');
+    var btn = navGoBtn(tab);
     if(btn) btn.click();
   }
+  // الإعدادات وسجل الحركات من قايمة الاسم · مفتاح الأصناف/التسعير
+  document.addEventListener("click", function(e){
+    var b = e.target.closest("[data-navgo]"); if(!b) return;
+    if(b.closest("#me-menu")) meMenu(false);
+    goTab(b.dataset.navgo);
+  });
 
   function startEdit(list, id){
     if(list === "sales"){ startEditSale(id); return; }
@@ -17836,6 +18063,7 @@
   }
 
   function renderCapital(){
+    renderPayback();
     renderCapStats(); renderPartners(); renderRecon(); renderCapLog(); renderCapHint();
     renderCapRecon(); renderCapCards(); renderCapShare();
     var df = document.getElementById("dist-from"), dt = document.getElementById("dist-to");
