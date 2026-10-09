@@ -131,6 +131,37 @@
     .hm-row2 .hm-ti .ic,.hm-srow em{transition:transform .2s}
     .hm-row2 .hm-ti:hover .ic{transform:scale(1.08)}
   }
+  /* ═══ v137 — من React Bits (منقولة لـCSS عادي) ═══
+     ShinyText: لمعة ذهبي بتعدّي على الاسم مرة لما السيستم يفتح، وتاني لما تقف عليه.
+     SpotlightCard: نور خفيف بلون الثيم بيمشي ورا الماوس على الكروت اللي بتتداس — على الكمبيوتر بس.
+     AnimatedList/FadeContent: اللحظة الوحيدة اللي ليها حركة مقصودة — قرارات «المدير المالي» بتدخل
+       واحدة ورا التانية من غشاوة لوضوح (الخطة بتتجمّع قدامك). باقي الشاشات دخولها سريع وهادي زي ما هو.
+     كلهم بيتلغوا مع «تقليل الحركة» (القاعدة العامة تحت). */
+  header.top{--h1c:#fff} [data-theme="dark"] header.top{--h1c:var(--teal-deep)}
+  /* مرة واحدة لما السيستم يفتح، وتاني لو وقفت على الاسم — مش لفّة على طول (حركة أطول من ٥ ثواني محتاجة زرار يوقفها) */
+  @keyframes shine{from{background-position:100% 0}to{background-position:0 0}}
+  @keyframes shine2{from{background-position:100% 0}to{background-position:0 0}}
+  @supports (background-clip:text) or (-webkit-background-clip:text){
+    header.top h1 .shiny{background:linear-gradient(110deg,var(--h1c) 0 42%,var(--lp-gold) 50%,var(--h1c) 58% 100%);
+      background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;animation:shine 1.6s cubic-bezier(.16,1,.3,1) 1s both}
+    header.top h1:hover .shiny{animation:shine2 1.6s cubic-bezier(.16,1,.3,1) both}
+  }
+  /* التباين العالي في الويندوز بيشيل الخلفيات — الاسم يرجع لونه العادي عشان ما يختفيش */
+  @media (forced-colors:active){ header.top h1 .shiny{background:none;-webkit-text-fill-color:currentColor;animation:none} }
+  @media (hover:hover){
+    :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card){--spot:color-mix(in srgb,var(--teal) 7%,transparent)}
+    [data-theme="dark"] :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card){--spot:color-mix(in srgb,var(--teal) 13%,transparent)}
+    /* :is(...) عشان يغلب background اللي على الكروت نفسها تحت في الملف */
+    :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card).spot-on,
+    body .sg-strip .sg-card.spot-on,#s-stagebox .sg-strip .sg-card.spot-on{background-image:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),var(--spot),transparent 70%)}   /* كروت المراحل ليها :hover و.on أقوى */
+  }
+  @keyframes listIn{from{opacity:0;transform:translateY(6px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+  #cfo-acts.in > .cfo-act{animation:listIn .36s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(120ms + var(--k,0) * 50ms)}
+  /* أرقام رسومات وماشي إزاي؟ مالهاش .num — عرض الأرقام ثابت عشان ما تترجّش وهي بتعدّ */
+  :is(.vz-st b,.co-t b){font-variant-numeric:tabular-nums}
+  ::selection{background:color-mix(in srgb,var(--teal) 24%,transparent)}
+  input,textarea{caret-color:var(--teal)}
   /* ٣ التبديل بين مراحل الأوردرات: اللوحة بتبدّل بنعومة (opacity بس على القايمة — جواها لوحات ثابتة) */
   @keyframes swapIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -2204,7 +2235,7 @@
      الأقسام كانت صف لوحدها تحت الهيدر، وخانة الاسم والوضع الليلي والتحديث
      صف تاني — ٣ صفوف قبل ما الشغل يبان. على الموبايل الأقسام شريط تحت زي ما هي. -->
 <header class="top">
-  <h1>Lora Collection <span id="ver-badge" class="ver-b"></span></h1>
+  <h1><span class="shiny">Lora Collection</span> <span id="ver-badge" class="ver-b"></span></h1>
   <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
     <button type="button" data-group="home"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-home"/></svg></span><span class="lb">الرئيسية</span></button>
     <button type="button" data-group="orders"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-box"/></svg></span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
@@ -3914,8 +3945,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "136";
+  var VERSION = "137";
   var CHANGELOG = [
+    { v:"137", d:"2026-10-09", items:[
+      "حركات من React Bits (منقولة لكود عادي من غير React): الأرقام الكبيرة بتعدّ لحد قيمتها لما تفتح أي شاشة أو قسم في التحليل — الرئيسية، المدير المالي، رسومات، ماشي إزاي؟، المخزون",
+      "المدير المالي: قرارات زيادة الربح بتدخل واحدة ورا التانية من غشاوة لوضوح",
+      "نور خفيف بلون الثيم بيمشي ورا الماوس على الكروت اللي بتتداس (على الكمبيوتر)، ولمعة ذهبي على «Lora Collection» فوق",
+      "كل الحركات بتقف مع «تقليل الحركة» في إعدادات الجهاز، والاسم بيفضل باين في وضع التباين العالي"
+    ]},
     { v:"136", d:"2026-10-09", items:[
       "المدير المالي: «أسعار البيع الجديدة لكل صنف» — قسم مطوي تحت القرارات بالسعر اللي تحطه على كل صنف عشان الخطة تتنفذ، وكام هيفضل لك من القطعة قبل وبعد",
       "السعر الجديد = سعر الصنف + فرق الشحن على القطعة + زيادة الهامش للأصناف الضعيفة (لحد 40% بحد أقصى 10%)، مقرّب لأقرب 5 — وبيشمل الأصناف اللي لسه ما اتباعتش",
@@ -8796,8 +8833,8 @@
     try{ if(LS) LS.setItem("naya:rtab", t); }catch(e){}
     applyRepTab(true); repTitle();
     if(repTab === "fin") renderFin();
-    if(repTab === "cfo") renderCfo();
-    if(activeTab === "rep") navMark();
+    if(repTab === "cfo"){ renderCfo(); cfoListIn(); }
+    if(activeTab === "rep"){ navMark(); countIn(document.getElementById("tab-rep")); }
   }
   (function(){
     var bar = document.getElementById("rep-tabs");
@@ -9077,11 +9114,11 @@
     document.getElementById("cfo-acts-sum").textContent = o.gain > 0.5 ? "— الإجمالي +" + nn(o.gain) + " على نفس الأوردرات" : "";
     var h = acts.map(function(x, i){
       var done = x.imp < 0.5;
-      return "<div class='cfo-act" + (done ? " done" : "") + "'><span class='no'>" + (done ? "✓" : i + 1) + "</span>" +
+      return "<div class='cfo-act" + (done ? " done" : "") + "' style='--k:" + Math.min(i, 6) + "'><span class='no'>" + (done ? "✓" : i + 1) + "</span>" +
         "<div><h4>" + esc(x.t) + "</h4><p>" + x.d + "</p></div>" +
         "<div class='imp'>" + (done ? "<small>تمام</small>" : "<b class='num'>+" + nn(x.imp) + "</b><small>+" + nn(x.imp / n) + " على الأوردر</small>") + "</div></div>";
     }).join("");
-    if(o.thin.length) h += "<div class='cfo-act'><span class='no'>!</span><div><h4>أصناف بتتباع بس مش بتكسب</h4><p>" +
+    if(o.thin.length) h += "<div class='cfo-act' style='--k:" + Math.min(acts.length, 6) + "'><span class='no'>!</span><div><h4>أصناف بتتباع بس مش بتكسب</h4><p>" +
       o.thin.map(function(x){ return esc(itemName(x.id)) + ": بيفضل لك " + nn(x.per) + " جنيه من القطعة بعد البضاعة والإعلان والشحن (" + nPcs(x.q) + ")"; }).join("<br>") +
       "<br>← ارفع سعرها، أو بيع اللي عندك منها وما تشتريش تاني.</p></div><div class='imp'><small>تنبيه بس — مش داخل في الإجمالي<br>عشان ما يتحسبش مرتين</small></div></div>";
     document.getElementById("cfo-acts").innerHTML = h;
@@ -15327,6 +15364,7 @@
       el.style.setProperty("--i", Math.min(n++, 12));
     });
     sec.classList.remove("enter"); void sec.offsetWidth; sec.classList.add("enter");
+    countIn(sec);
     clearTimeout(sec._enterT);
     sec._enterT = setTimeout(function(){ sec.classList.remove("enter"); }, 800);
   }
@@ -17868,32 +17906,86 @@
     scan(document.body);
   })();
 
-  /* v109 — أرقام الرئيسية بتعدّ لحد قيمتها أول ما السيستم يفتح (مرة واحدة بس) */
-  var hmCounted = false;
-  function hmCountUp(){
-    if(hmCounted) return;
-    var sec = document.getElementById("tab-dash"); if(!sec || sec.hidden) return;
-    hmCounted = true;
+  /* ═══ v137 — من React Bits (منقولة لـJavaScript عادي، من غير React) ═══
+     CountUp: الأرقام الكبيرة بتعدّ لحد قيمتها لما الشاشة أو قسم التحليل يتفتح — مش مع كل حفظ.
+     بتحافظ على شكل الرقم: الفاصلة والكسور، ولو الرقم مقسوم (m-i / m-d) الجزء الصحيح بس هو اللي بيعدّ.
+     ease-out أسّي في ٧٠٠ms — قريب من الـspring بتاع React Bits. مع «تقليل الحركة» الرقم بيبان على طول.
+     بتشتغل في أول frame: بعد ما مراقب العملة (v109) يقسّم الرقم لأجزاء، ومرة واحدة لو اتطلبت مرتين ورا بعض. */
+  var COUNT_SEL = ".kpi strong,.hm-k strong,.hm-hmain strong,.vz-st b,.cfo-hero b,.cfo-sc b,.co-t b,.mbig";
+  function countIn(sec){
+    if(!sec || sec.hidden || sec._cuPend) return;
     if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    var items = Array.prototype.map.call(document.querySelectorAll("#hm-big .hm-k strong, #hm-big .hm-hmain strong"), function(el){
-      var t = el.textContent, m = /[\d,]+(?:\.\d+)?/.exec(t);
-      if(!m) return null;
-      return { el:el, t:t, n:m[0], v:Number(m[0].replace(/,/g, "")), dec:(m[0].split(".")[1] || "").length };
-    }).filter(function(x){ return x && x.v > 0; });
+    sec._cuPend = true;
+    requestAnimationFrame(function(){ sec._cuPend = false; countRun(sec); });
+  }
+  function countRun(sec){
+    if(sec.hidden) return;
+    var items = [], boxes = [];
+    Array.prototype.forEach.call(sec.querySelectorAll(COUNT_SEL), function(el){
+      if(!el.offsetParent) return;
+      var parts = el.querySelectorAll(".m-i");
+      var list = parts.length ? Array.prototype.slice.call(parts) : (el.children.length ? [] : [el]);
+      var any = false;
+      list.forEach(function(t){
+        // عدّ قديم لسه شغال ومحدش غيّر الرقم من بره: نبدأ من الرقم الأصلي مش من نص العدّ
+        var prev = t._cu, txt = prev && t.textContent === prev.last ? prev.t : t.textContent;
+        if(prev) prev.stop = true;
+        var m = /\d[\d,]*(?:\.\d+)?/.exec(txt); if(!m) return;
+        var v = Number(m[0].replace(/,/g, "")); if(!(v > 0) || !isFinite(v)) return;
+        var it = { el:t, t:txt, n:m[0], v:v, dec:(m[0].split(".")[1] || "").length, comma:m[0].indexOf(",") >= 0, last:txt };
+        t._cu = it; items.push(it); any = true;
+      });
+      // العرض بيفضل على قد الرقم النهائي وهو بيعدّ — اللي جنبه ما يتزحزحش
+      if(any && !el.style.minWidth){ el.style.minWidth = Math.ceil(el.getBoundingClientRect().width) + "px"; boxes.push(el); }
+    });
     if(!items.length) return;
-    var t0 = 0, D = 650;
+    var t0 = 0, D = 700;
+    function fmt(it, x){
+      it.nf = it.nf || new Intl.NumberFormat("en-US", { minimumFractionDigits:it.dec, maximumFractionDigits:it.dec, useGrouping:it.comma });
+      return it.nf.format(x);
+    }
     function step(now){
       if(!t0) t0 = now;
-      var k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3);
+      var k = Math.min(1, (now - t0) / D), e = k >= 1 ? 1 : 1 - Math.pow(2, -10 * k), live = 0;
       items.forEach(function(it){
-        if(!it.el.isConnected) return;
-        it.el.textContent = k >= 1 ? it.t : it.t.replace(it.n,
-          (it.v * e).toLocaleString("en-US", { minimumFractionDigits:it.dec, maximumFractionDigits:it.dec }));
+        if(it.stop || !it.el.isConnected) return;
+        if(it.el.textContent !== it.last){ it.stop = true; it.el._cu = null; return; }   // اترسم من بره: سيبه
+        live++;
+        it.last = k >= 1 ? it.t : it.t.replace(it.n, fmt(it, it.v * e));
+        it.el.textContent = it.last;
+        if(k >= 1) it.el._cu = null;
       });
-      if(k < 1) requestAnimationFrame(step);
+      if(k < 1 && live) requestAnimationFrame(step);
+      else boxes.forEach(function(el){ el.style.minWidth = ""; });
     }
     requestAnimationFrame(step);
   }
+  // AnimatedList: قرارات «المدير المالي» بتدخل واحدة ورا التانية لما القسم يتفتح (class لحظة وبتتشال)
+  function cfoListIn(){
+    var el = document.getElementById("cfo-acts"); if(!el) return;
+    el.classList.remove("in"); void el.offsetWidth; el.classList.add("in");
+    clearTimeout(el._inT); el._inT = setTimeout(function(){ el.classList.remove("in"); }, 1000);
+  }
+  // SpotlightCard: مستمع واحد للصفحة كلها. على الكروت اللي بتتداس بس — النور معناه «ده بيتداس»
+  (function(){
+    if(!window.matchMedia || !window.matchMedia("(hover:hover)").matches) return;
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var SEL = ".hm-k,.hm-hmain,.iv,.pv,.sg-card", cur = null, last = null;
+    function off(){ if(cur){ cur.classList.remove("spot-on"); cur = null; } }
+    document.addEventListener("pointermove", function(e){
+      var el = e.target && e.target.closest ? e.target.closest(SEL) : null;
+      if(el !== cur){ off(); if(el){ cur = el; el.classList.add("spot-on"); } }
+      if(!el) return;
+      last = e;
+      if(el._spRaf) return;
+      el._spRaf = requestAnimationFrame(function(){
+        el._spRaf = 0; var r = el.getBoundingClientRect();
+        el.style.setProperty("--mx", (last.clientX - r.left) + "px"); el.style.setProperty("--my", (last.clientY - r.top) + "px");
+      });
+    }, { passive:true });
+    document.documentElement.addEventListener("pointerleave", off);   // الماوس خرج من الصفحة
+    window.addEventListener("blur", off);
+  })();
 
   /* الكروت اللي فوق كل شاشة: السطر الصغير بيبان لما تقف على الكارت (title).
      بنراقب بدل ما نعدّل كل دالة بترسم كروت — أي كارت جديد بياخدها لوحده. */
@@ -19757,7 +19849,6 @@
     if(lockOn() && !curUser()) lockShow();
     renderAll();
     renderStorageState();
-    hmCountUp();
     tabEnter(document.querySelector("main > section[id^='tab-']:not([hidden])"));
 
     // المزامنة بتكمّل لوحدها من غير ما حد يشغّلها كل مرة
