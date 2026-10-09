@@ -9,23 +9,35 @@
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
+    /* ═══ ثيم Lora Plum ═══ ألوان البراند الثابتة — كل لون في السيستم بييجي من هنا.
+       دول مابيتغيروش في الوضع الليلي، فالتقارير المطبوعة بتاخد منهم على طول. */
+    --lp-plum:#4A2545; --lp-night:#2F1530; --lp-petal:#C9A7C4; --lp-mist:#F6F2F5;
+    --lp-gold:#D4A93F; --lp-ink:#241E26; --lp-soft:#6E6472; --lp-line:#E4DDE6;
+    --lp-card:#FBFAFB; --lp-gain:#327B63; --lp-wine:#9A1333;
+    --font:"Alexandria","Segoe UI",Tahoma,sans-serif;
+
     /* برقوقي البوتيك — أساس التصميم */
-    --ink:#241E26;          /* حبر مائل للبرقوقي بدل الأسود الميت */
-    --ink-soft:#6E6472;
+    --ink:var(--lp-ink);    /* حبر مائل للبرقوقي بدل الأسود الميت */
+    --ink-soft:var(--lp-soft);
     --paper:#F6F3F7;        /* ورق ليلكي فاتح */
     --card:#FFFFFF;
-    --line:#E4DDE6;
-    --teal:#4A2545;         /* البرقوقي العميق: الهوية */
+    --line:var(--lp-line);
+    --teal:var(--lp-plum);  /* البرقوقي العميق: الهوية */
     --teal-deep:#361A33;
     --teal-soft:#F0E8F0;
+    --on-accent:#FFFFFF;    /* النص فوق الزرار البرقوقي */
     /* الاتنين دول بيفرّقوا بين «ليك» و«عليك». واحد من كل ١٢ راجل عنده
        عمى ألوان، فمش كفاية إنهم مختلفين بالنسبالنا — لازم يفضلوا مختلفين
        بعد محاكاة deutan/protan/tritan. القياس: أسوأ ΔE بقى 16.1 بعد ما
        كان 8.2، والتباين مع الخلفية 5.06 و8.35 (المطلوب ≥4.5). */
-    --gain:#327B63;         /* أخضر مطفي متناغم مع البرقوقي */
-    --due:#9A1333;          /* نبيذي بدل الأحمر الصارخ */
+    --gain:var(--lp-gain);  /* أخضر مطفي متناغم مع البرقوقي */
+    --due:var(--lp-wine);   /* نبيذي بدل الأحمر الصارخ */
     --warn:#8A6212;
     --shadow:0 1px 2px rgba(36,30,38,.05);
+    /* خلفيات الحالات: ليك · عليك · تنبيه · التبديل مع المورد.
+       كانت أرقام ثابتة في ٢٠ مكان، وفي الليلي كانت بقع فاتحة أو كلها نفس اللون. */
+    --gain-soft:#E3F1EA; --due-soft:#F6E3E8; --warn-soft:#F7EEDB;
+    --xg:#5B4A9A; --xg-soft:#ECE8F7;
 
     /* ═══ سلّم الخطوط ═══
        كان في ٣١ قيمة خط مختلفة في الـCSS و١٣ مقاس ظاهر على الشاشة
@@ -64,6 +76,9 @@
     --due:#DC89B5;
     --warn:#D4A93F;
     --shadow:none;
+    --on-accent:#1A141C;
+    --gain-soft:#303636; --due-soft:#402D3B; --warn-soft:#3E3328;
+    --xg:#A99BE0; --xg-soft:#383042;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -72,7 +87,7 @@
     color:var(--ink);
     /* v104: رجعنا لـ Alexandria — جرّبنا IBM Plex Sans Arabic في v100 وما عجبش.
        المقاسات الأصغر من v100 فاضلة زي ما هي. */
-    font-family:"Alexandria","Segoe UI",Tahoma,sans-serif;
+    font-family:var(--font);
     line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
@@ -146,7 +161,7 @@
   /* حالة الحفظ: نقطة ملوّنة بدل شارة — أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ */
   .savep{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;opacity:.85}
   .savep::before{content:"";width:8px;height:8px;border-radius:50%;background:#78BF92;flex:0 0 auto}
-  .savep.warn::before{background:#D4A93F}
+  .savep.warn::before{background:var(--lp-gold)}
   .savep.bad{opacity:1;font-weight:700}
   .savep.bad::before{background:#E5484D}
   /* قايمة «اسمك ▾»: الاسم والوضع الليلي والتحديث */
@@ -282,12 +297,11 @@
   input:disabled{background:var(--paper);color:var(--ink-soft)}
   input:focus,select:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:-1px;border-color:var(--teal)}
   button.act{
-    background:var(--teal);color:#fff;border:none;border-radius:var(--r-sm);
+    background:var(--teal);color:var(--on-accent);border:none;border-radius:var(--r-sm);
     padding:var(--sp-2) var(--sp-4);font:inherit;font-size:var(--fs-3);font-weight:600;cursor:pointer;
     transition:background .12s;
   }
   button.act:hover{background:var(--teal-deep)}
-  [data-theme="dark"] button.act{color:#1A141C}
   button.ghost{background:#fff;color:var(--teal);border:1px solid var(--teal)}
   button.ghost:hover{background:var(--teal-soft)}
   button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
@@ -304,11 +318,11 @@
   .st-proposed{background:#EDE9EE;color:#6E6472}
   .st-progress{background:#FAEFD6;color:#8A6212}
   .st-delivered{background:#DCEDE4;color:#2F6D53}
-  .st-cancelled{background:#F7E4E8;color:#9E2B3F}
+  .st-cancelled{background:var(--due-soft);color:#9E2B3F}
   [data-theme="dark"] .st-proposed{background:#332B36;color:#B9AFBD}
   [data-theme="dark"] .st-progress{background:#3A3018;color:#E3C169}
   [data-theme="dark"] .st-delivered{background:#1E3A2C;color:#7FCBA2}
-  [data-theme="dark"] .st-cancelled{background:#3D2028;color:#EE97AA}
+  [data-theme="dark"] .st-cancelled{color:#EE97AA}
   select.stsel{font:inherit;font-size:var(--fs-2);font-weight:600;padding:var(--sp-1) var(--sp-2);
     cursor:pointer;border-radius:var(--r-sm);max-width:150px}
   .sub{display:block;font-size:var(--fs-1);color:var(--ink-soft);margin-top:var(--sp-1)}
@@ -338,8 +352,7 @@
   .empty{padding:var(--sp-6) var(--sp-4);color:var(--ink-soft);font-size:var(--fs-3);text-align:center;line-height:1.8}
 
   .pill{display:inline-block;padding:var(--sp-1) var(--sp-2);border-radius:var(--r-pill);font-size:var(--fs-2);background:var(--teal-soft);color:var(--teal)}
-  .pill.due{background:#F7E4E8;color:var(--due)}
-  [data-theme="dark"] .pill.due{background:#3D2028}
+  .pill.due{background:var(--due-soft);color:var(--due)}
 
   #toast{
     position:fixed;inset-block-end:20px;inset-inline-start:50%;transform:translateX(50%);
@@ -369,9 +382,8 @@
   }
   .tbtn:hover{border-color:var(--teal);color:var(--teal)}
   .tbtn[aria-expanded="true"]{background:var(--teal-soft);border-color:var(--teal);color:var(--teal)}
-  .tbtn.primary{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:600}
-  .tbtn.primary:hover{background:var(--teal-deep);border-color:var(--teal-deep);color:#fff}
-  [data-theme="dark"] .tbtn.primary{color:#1A141C}
+  .tbtn.primary{background:var(--teal);color:var(--on-accent);border-color:var(--teal);font-weight:600}
+  .tbtn.primary:hover{background:var(--teal-deep);border-color:var(--teal-deep);color:var(--on-accent)}
   .fcount{background:var(--teal);color:var(--card);border-radius:var(--r-pill);
     font-size:var(--fs-1);font-weight:700;padding:var(--sp-1) var(--sp-1);min-width:18px;text-align:center}
 
@@ -392,8 +404,7 @@
     display:inline-flex;align-items:center;gap:var(--sp-2);transition:.15s;
   }
   .stabs button:hover{border-color:var(--teal);color:var(--teal)}
-  .stabs button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
-  [data-theme="dark"] .stabs button.on{color:#1A141C}
+  .stabs button.on{background:var(--teal);border-color:var(--teal);color:var(--on-accent);font-weight:600}
   .stabs b{font-weight:700;font-size:var(--fs-2);opacity:.65}
   .stabs button.on b{opacity:.9}
   @media (max-width:560px){
@@ -487,8 +498,7 @@
     .hm-ti .tx{grid-area:tx}
     #hm-todo .hm-ti b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:var(--fs-2);line-height:1.35}
   }
-  .hm-ti.bad .ic{background:#F6E3E8} .hm-ti.money .ic{background:#E3F1EA} .hm-ti.warn .ic{background:#F7EEDB}
-  [data-theme="dark"] .hm-ti.bad .ic,[data-theme="dark"] .hm-ti.money .ic,[data-theme="dark"] .hm-ti.warn .ic{background:var(--teal-soft)}
+  .hm-ti.bad .ic{background:var(--due-soft)} .hm-ti.money .ic{background:var(--gain-soft)} .hm-ti.warn .ic{background:var(--warn-soft)}
   .hm-ti b{display:block;font-weight:600}
   .hm-ti .s{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
   .hm-ti .s.red{color:var(--due);font-weight:600}
@@ -539,8 +549,7 @@
   .hm-hmain:focus-visible{outline:2px solid var(--teal);outline-offset:4px}
   .hm-hmain .lb{display:flex;align-items:center;gap:8px;font-size:var(--fs-3);color:var(--ink-soft)}
   .hm-pill{margin-inline-start:auto;font-style:normal;font-size:var(--fs-1);font-weight:600;border-radius:999px;padding:3px 10px}
-  .hm-pill.bad{color:var(--due);background:#FBE9EC} .hm-pill.good{color:var(--gain);background:#E3F2EA}
-  [data-theme="dark"] .hm-pill.bad,[data-theme="dark"] .hm-pill.good{background:var(--teal-soft)}
+  .hm-pill.bad{color:var(--due);background:var(--due-soft)} .hm-pill.good{color:var(--gain);background:var(--gain-soft)}
   .hm-hmain strong{font-size:46px;font-weight:700;line-height:1.05;direction:ltr;text-align:right;white-space:nowrap}
   .hm-hmain small{font-size:var(--fs-2);color:var(--ink-soft);line-height:1.7}
   .hm-hmain small b{color:var(--ink);font-weight:600;unicode-bidi:isolate}
@@ -616,7 +625,7 @@
   .iv-n b{font-size:var(--fs-4);font-weight:700}
   .iv-n .sub{display:block}
   .iv-pill{display:inline-block;font-size:10px;font-weight:600;padding:1px 8px;border-radius:var(--r-pill);margin-inline-start:6px;vertical-align:middle}
-  .iv-pill.w{background:#F7EEDB;color:var(--warn)} .iv-pill.r{background:#F6E3E8;color:var(--due)}
+  .iv-pill.w{background:var(--warn-soft);color:var(--warn)} .iv-pill.r{background:var(--due-soft);color:var(--due)}
   .iv-cs{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
   .iv-cs small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
   .iv-cs b{font-size:var(--fs-4)}
@@ -634,14 +643,13 @@
   table.iv-mx td button:hover{outline:2px solid var(--teal)}
   table.iv-mx td b{display:block;font-size:var(--fs-4)}
   table.iv-mx td small{display:block;font-size:10px;color:var(--ink-soft)}
-  table.iv-mx td.ok{background:#E3F1EA;color:var(--gain)}
-  table.iv-mx td.low{background:#F7EEDB;color:var(--warn)}
-  table.iv-mx td.out{background:#F6E3E8;color:var(--due)}
+  table.iv-mx td.ok{background:var(--gain-soft);color:var(--gain)}
+  table.iv-mx td.low{background:var(--warn-soft);color:var(--warn)}
+  table.iv-mx td.out{background:var(--due-soft);color:var(--due)}
   table.iv-mx td.none{background:var(--paper);color:var(--ink-soft);padding:10px 8px}
-  [data-theme="dark"] table.iv-mx td.ok,[data-theme="dark"] table.iv-mx td.low,[data-theme="dark"] table.iv-mx td.out{background:var(--teal-soft)}
   .iv-lg{display:flex;gap:var(--sp-3);font-size:var(--fs-1);color:var(--ink-soft);margin-top:var(--sp-2);flex-wrap:wrap}
   .iv-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle;border:1px solid var(--line)}
-  .iv-lg i.ok{background:#E3F1EA} .iv-lg i.low{background:#F7EEDB} .iv-lg i.out{background:#F6E3E8} .iv-lg i.none{background:var(--paper)}
+  .iv-lg i.ok{background:var(--gain-soft)} .iv-lg i.low{background:var(--warn-soft)} .iv-lg i.out{background:var(--due-soft)} .iv-lg i.none{background:var(--paper)}
   @media (max-width:760px){
     .iv-h{grid-template-columns:52px minmax(0,1fr) 18px;gap:6px var(--sp-3);padding:var(--sp-3)}
     .iv-chev{grid-row:1;grid-column:3}
@@ -671,8 +679,7 @@
   .pt-tabs button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
   .pt-tabs button b,#pt-chips button b{font-weight:700;margin-inline-start:4px}
   .pt-flag{display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:var(--r-pill);
-    background:#F6E3E8;color:var(--due);margin-inline-start:6px;vertical-align:middle;white-space:nowrap}
-  [data-theme="dark"] .pt-flag{background:var(--teal-soft)}
+    background:var(--due-soft);color:var(--due);margin-inline-start:6px;vertical-align:middle;white-space:nowrap}
   .pc{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3)}
   .pc-h{display:grid;grid-template-columns:44px minmax(0,1.3fr) minmax(0,2fr) auto;gap:var(--sp-3);align-items:center;padding:var(--sp-3) var(--sp-4)}
   .pc .av{width:44px;height:44px;border-radius:50%;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-weight:700;font-size:var(--fs-4)}
@@ -758,9 +765,8 @@
 
   /* ================= رأس المال: شارة الميزانية وكارت لكل شريك ================= */
   .cap-recon{display:flex;align-items:center;gap:var(--sp-3);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-2);flex-wrap:wrap}
-  .cap-recon.ok{background:#E3F1EA;color:var(--gain)}
-  .cap-recon.bad{background:#F6E3E8;color:var(--due)}
-  [data-theme="dark"] .cap-recon.ok,[data-theme="dark"] .cap-recon.bad{background:var(--teal-soft)}
+  .cap-recon.ok{background:var(--gain-soft);color:var(--gain)}
+  .cap-recon.bad{background:var(--due-soft);color:var(--due)}
   .cap-recon .ic{font-size:22px;font-weight:700;line-height:1}
   .cap-recon .t{flex:1;min-width:200px}
   .cap-recon .t b{font-size:var(--fs-4)}
@@ -808,7 +814,7 @@
   .dsteps span::before{counter-increment:ds;content:counter(ds);display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;
     background:var(--line);color:var(--ink);font-weight:700;font-size:var(--fs-1);margin-inline-end:6px}
   .dsteps span.on{color:var(--teal);font-weight:700;border-bottom-color:var(--teal)}
-  .dsteps span.on::before{background:var(--teal);color:#fff}
+  .dsteps span.on::before{background:var(--teal);color:var(--on-accent)}
   .dsteps span.done{color:var(--gain);border-bottom-color:var(--gain)}
   .dsteps span.done::before{content:"✓";background:var(--gain);color:#fff}
   #dist-per{margin-bottom:var(--sp-2)}
@@ -856,7 +862,7 @@
   .pv-h .tot small{font-size:var(--fs-1);color:var(--ink-soft)}
   .pv-h .chev{grid-row:1 / span 2;grid-column:4;color:var(--ink-soft)}
   .pv-h .pay{display:block;min-width:0}
-  .pv-bar{display:block;height:6px;border-radius:var(--r-pill);background:#F6E3E8;overflow:hidden;margin:2px 0 3px}
+  .pv-bar{display:block;height:6px;border-radius:var(--r-pill);background:var(--due-soft);overflow:hidden;margin:2px 0 3px}
   .pv-bar i{display:block;height:100%;background:var(--gain)}
   .pv-pay{display:flex;justify-content:space-between;gap:6px;font-size:var(--fs-1);color:var(--ink-soft)}
   .pv-pay .g{color:var(--gain);font-weight:600} .pv-pay .r{color:var(--due)}
@@ -1038,24 +1044,21 @@
   .xl-row label{font-size:var(--fs-1)}
   .xl-row .tt{text-align:end;font-weight:700;padding-bottom:8px;white-space:nowrap}
   .xl-row .rm{border:0;background:none;color:var(--due);font-size:18px;cursor:pointer;padding-bottom:6px}
-  .xg-diff{background:#ECE8F7;border-radius:var(--r-md);padding:var(--sp-3);margin:var(--sp-3) 0}
-  [data-theme="dark"] .xg-diff{background:var(--teal-soft)}
+  .xg-diff{background:var(--xg-soft);border-radius:var(--r-md);padding:var(--sp-3);margin:var(--sp-3) 0}
   .xg-diff .eq{font-size:var(--fs-2);color:var(--ink-soft)}
   .xg-diff .big{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);margin-top:4px;flex-wrap:wrap}
-  .xg-diff .big b{font-size:var(--fs-6);color:#5B4A9A}
-  [data-theme="dark"] .xg-diff .big b{color:var(--teal)}
+  .xg-diff .big b{font-size:var(--fs-6);color:var(--xg)}
   .xg-pay{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-3)}
   .xg-btns{display:flex;gap:var(--sp-2);flex-wrap:wrap}
   .xg-pay:empty{display:none}
-  .pill.xg,.pt-flag.xg{background:#ECE8F7;color:#5B4A9A}
-  [data-theme="dark"] .pill.xg,[data-theme="dark"] .pt-flag.xg{background:var(--teal-soft);color:var(--teal)}
-  .pv.xg{border-inline-start:4px solid #5B4A9A}
+  .pill.xg,.pt-flag.xg{background:var(--xg-soft);color:var(--xg)}
+  .pv.xg{border-inline-start:4px solid var(--xg)}
   .pv-flow{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--sp-3);align-items:center;padding:0 var(--sp-4) var(--sp-3)}
   .pv-flow .side{background:var(--paper);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-2)}
   .pv-flow .side small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
   .pv-flow .side b{font-size:var(--fs-4);display:block}
-  .pv-flow .arr{font-size:22px;color:#5B4A9A}
-  .pv-ln .xgd{display:block;font-size:var(--fs-1);color:#5B4A9A}
+  .pv-flow .arr{font-size:22px;color:var(--xg)}
+  .pv-ln .xgd{display:block;font-size:var(--fs-1);color:var(--xg)}
   @media (max-width:760px){
     .xl-row{grid-template-columns:1fr 1fr 1fr;row-gap:4px}
     .xl-row > :first-child{grid-column:1 / -1}
@@ -1081,8 +1084,7 @@
     padding:10px var(--sp-4);border-top:1px solid var(--line)}
   .cd-h + .cd-mv{border-top:0}
   .cd-mv .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:var(--teal-soft)}
-  .cd-mv.in .ic{background:#E3F1EA} .cd-mv.out .ic{background:#F6E3E8}
-  [data-theme="dark"] .cd-mv.in .ic,[data-theme="dark"] .cd-mv.out .ic{background:var(--teal-soft)}
+  .cd-mv.in .ic{background:var(--gain-soft)} .cd-mv.out .ic{background:var(--due-soft)}
   .cd-t b{display:block;font-weight:600}
   .cd-t .sub{display:block}
   .cd-tag{font-size:10px;font-weight:400;color:var(--ink-soft);border:1px solid var(--line);border-radius:var(--r-pill);padding:0 6px;margin-inline-start:6px}
@@ -1264,13 +1266,18 @@
   .sg-exp:hover{color:var(--teal)}
   #t-pis tr.pis-tot td{border-top:1px solid var(--line);background:var(--teal-soft)}
   #t-pis td.num{white-space:nowrap}
-  /* ═══ v123 — رسومات ═══ ألوان البنود متجرّبة لعمى الألوان (ΔE ≥ 9 بين أي اتنين جنب بعض)،
-     وكل بند ليه نفس اللون في كل الرسومات. الكلام دايماً بلون الكلام مش بلون البند. */
-  :root{ --s-goods:#2a78d6; --s-ship:#eb6834; --s-ads:#1baf7a; --s-pack:#eda100; --s-fixed:#e87ba4;
-          --vz-tot:#4A2545; --vz-tot-t:#fff; --vz-neg:#9A1333 }
-  /* الليلي: البرقوقي والنبيذي بيبقوا وردي فاتح — كانوا هيتلخبطوا مع «ثابت». الإجمالي رمادي بنفسجي والسالب أحمر صريح */
-  [data-theme="dark"]{ --s-goods:#3987e5; --s-ship:#d95926; --s-ads:#199e70; --s-pack:#c98500; --s-fixed:#d55181;
-          --vz-tot:#A08AA6; --vz-tot-t:#1d1720; --vz-neg:#e5534b }
+  /* ═══ v134 — ألوان الرسومات من ثيم Lora Plum ═══ البرقوقي = المبيعات والإجماليات، النبيذي = الخسارة،
+     وكل بند ليه نفس اللون في كل الرسومات. الكلام دايماً بلون الكلام مش بلون البند.
+     متقاسة بأداة فحص الألوان (dataviz · OKLab · Machado) على كل اتنين بيقفوا جنب بعض
+     في «فلوسك راحت فين» و«الأوردر الواحد» — البنود والإجماليات والخسارة:
+     عمى الألوان أسوأ ΔE 9.7 فاتح / 8.2 ليلي (المطلوب ≥8) · التباين مع الكارت ≥3:1.
+     --s-*-t = لون الرقم جوه العمود: الأبيض أو الغامق، اللي تباينه أعلى مع لون البند. */
+  :root{ --s-goods:#4075AA; --s-ship:#B68028; --s-ads:#B8476E; --s-pack:#68448D; --s-fixed:#C16D45;
+          --s-goods-t:#fff; --s-ship-t:#1d1720; --s-ads-t:#fff; --s-pack-t:#fff; --s-fixed-t:#1d1720;
+          --vz-tot:var(--teal); --vz-tot-t:var(--on-accent); --vz-neg:var(--due) }
+  /* الليلي: الإجمالي بتلة والخسارة وردي أحمر صريح — النبيذي الليلي (#DC89B5) كان شبه البتلة عند عمى الألوان (ΔE 3.6) */
+  [data-theme="dark"]{ --s-goods:#4984BF; --s-ship:#C08933; --s-ads:#B14168; --s-pack:#9970C4; --s-fixed:#C26D32;
+          --s-goods-t:#1d1720; --s-ads-t:#fff; --s-pack-t:#1d1720; --vz-neg:#FF6889 }
   .vz-card{position:relative}
   .vz-hd{display:flex;align-items:flex-start;gap:var(--sp-3);flex-wrap:wrap;margin-bottom:var(--sp-3)}
   .vz-hd h3{margin:0 0 4px} .vz-lead{margin:0;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.7;max-width:640px}
@@ -1294,8 +1301,10 @@
   .vz-tip i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-end:6px}
   .vz-tip .r span:last-child{direction:ltr;unicode-bidi:isolate}
   .vz-goods{fill:var(--s-goods)} .vz-ship{fill:var(--s-ship)} .vz-ads{fill:var(--s-ads)} .vz-pack{fill:var(--s-pack)} .vz-fixed{fill:var(--s-fixed)}
-  .vz-tot{fill:var(--vz-tot)} .vz-sub{fill:var(--vz-tot);opacity:.72} .vz-neg{fill:var(--vz-neg)} .vz-tt{fill:var(--vz-tot-t)} .vz-band{fill:var(--s-ads);opacity:.08}
+  .vz-tot{fill:var(--vz-tot)} .vz-sub{fill:var(--vz-tot)} .vz-neg{fill:var(--vz-neg)} .vz-tt{fill:var(--vz-tot-t)} .vz-band{fill:var(--s-ads);opacity:.08}
+  [data-theme="dark"] .vz-band{opacity:.2}
   .vz-gl{stroke:var(--line);stroke-width:1} .vz-bl{stroke:var(--ink-soft);stroke-width:1.5} .vz-cn{stroke:var(--ink-soft);stroke-width:1;opacity:.6}
+  .vz-tl-goods{fill:var(--s-goods-t)} .vz-tl-ship{fill:var(--s-ship-t)} .vz-tl-ads{fill:var(--s-ads-t)} .vz-tl-pack{fill:var(--s-pack-t)} .vz-tl-fixed{fill:var(--s-fixed-t)}
   .vz-tx{fill:var(--ink)} .vz-ts{fill:var(--ink-soft)} .vz-td{fill:var(--due)} .vz-tg{fill:var(--gain)} .vz-tw{fill:#fff} .vz-tk{fill:#1d1720}
   .vz-dl{stroke:var(--due)} .vz-dlf{fill:var(--due)} .vz-gn{stroke:var(--gain)} .vz-gnf{fill:var(--gain)}
   .vz-oth{fill:var(--ink-soft)}
@@ -1336,39 +1345,40 @@
   .pis-na > .pis-nab{grid-column:1/-1;border:0;background:none;padding:0;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
   .pis-na > .pis-nab > span:first-child{display:inline;font-size:var(--fs-2)}
   @media (max-width:760px){ .pis-na{grid-template-columns:1fr 1fr} .pis-na > div:nth-child(3){grid-column:1/-1} .pis-na b{font-size:var(--fs-5)} }
-  /* v133: تقرير الشركاء — ثيم Lora Plum (برقوقي #4A2545 · ليلي #2F1530 · وردي #C9A7C4 · فاتح #F6F2F5) */
+  /* v133: تقرير الشركاء — ثيم Lora Plum. ألوانه من --lp-* الثابتة: التقرير بيتطبع فاتح حتى لو السيستم ليلي */
   #prt{position:fixed;inset:0;z-index:60;background:#E9E3E8;overflow:auto;direction:rtl}
   #prt[hidden]{display:none}
-  .prt-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:10px 16px;background:#2F1530;color:#F6F2F5}
+  .prt-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:10px 16px;background:var(--lp-night);color:var(--lp-mist)}
   .prt-bar b{font-size:var(--fs-4);margin-inline-end:auto}
   .prt-bar select{width:auto;min-width:150px}
-  .prt-pg{width:794px;max-width:calc(100% - 24px);min-height:1123px;margin:18px auto;background:#FBFAFB;color:#241E26;box-shadow:0 6px 24px rgba(47,21,48,.18);
-    font-family:"Alexandria",Tahoma,sans-serif;display:flex;flex-direction:column;box-sizing:border-box}
-  .prt-hd{background:#2F1530;color:#F6F2F5;padding:28px 40px 24px}
-  .prt-hd small{display:block;color:#C9A7C4;font-size:13px;letter-spacing:1px;margin-bottom:6px}
+  .prt-pg{width:794px;max-width:calc(100% - 24px);min-height:1123px;margin:18px auto;background:var(--lp-card);color:var(--lp-ink);box-shadow:0 6px 24px rgba(47,21,48,.18);
+    font-family:var(--font);display:flex;flex-direction:column;box-sizing:border-box}
+  .prt-hd{background:var(--lp-night);color:var(--lp-mist);padding:28px 40px 24px}
+  .prt-hd small{display:block;color:var(--lp-petal);font-size:13px;letter-spacing:1px;margin-bottom:6px}
   .prt-hd h1{margin:0;font-size:30px;font-weight:700}
-  .prt-hd p{margin:6px 0 0;color:#C9A7C4;font-size:14px}
+  .prt-hd p{margin:6px 0 0;color:var(--lp-petal);font-size:14px}
   .prt-in{padding:24px 40px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
-  .prt-in h2{margin:0;font-size:18px;font-weight:700;color:#4A2545;border-bottom:2px solid #E4DDE6;padding-bottom:6px}
+  .prt-in h2{margin:0;font-size:18px;font-weight:700;color:var(--lp-plum);border-bottom:2px solid var(--lp-line);padding-bottom:6px}
   .prt-kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .prt-kp > div{border:1px solid #E4DDE6;border-radius:12px;padding:12px 14px;background:#FFFFFF}
-  .prt-kp > div.hi{background:#4A2545;color:#F6F2F5;border-color:#4A2545}
-  .prt-kp span{display:block;font-size:12px;color:#6E6472} .prt-kp .hi span{color:#E5D3E2}
+  .prt-kp > div{border:1px solid var(--lp-line);border-radius:12px;padding:12px 14px;background:#FFFFFF}
+  .prt-kp > div.hi{background:var(--lp-plum);color:var(--lp-mist);border-color:var(--lp-plum)}
+  .prt-kp span{display:block;font-size:12px;color:var(--lp-soft)} .prt-kp .hi span{color:#E5D3E2}
   .prt-kp b{display:block;font-size:26px;font-weight:700;margin:4px 0 2px;font-variant-numeric:tabular-nums}
-  .prt-kp small{font-size:11.5px;color:#6E6472} .prt-kp .hi small{color:#E5D3E2}
+  .prt-kp small{font-size:11.5px;color:var(--lp-soft)} .prt-kp .hi small{color:#E5D3E2}
   .prt-t{width:100%;border-collapse:collapse;font-size:13px}
-  .prt-t th{font-weight:600;color:#6E6472;text-align:start;padding:6px 8px;border-bottom:1px solid #E4DDE6;background:#F6F2F5}
+  .prt-t th{font-weight:600;color:var(--lp-soft);text-align:start;padding:6px 8px;border-bottom:1px solid var(--lp-line);background:var(--lp-mist)}
   .prt-t td{padding:6px 8px;border-bottom:1px solid #F0EAF0;font-variant-numeric:tabular-nums}
   .prt-t td.n,.prt-t th.n{text-align:left;white-space:nowrap}
-  .prt-t tr.tot td{font-weight:700;background:#F3ECF2;border-top:1px solid #E4DDE6}
-  .prt-t tr.sec td{font-weight:700;color:#4A2545;background:#FBF7FA}
-  .prt-t .g{color:#327B63} .prt-t .r{color:#9A1333}
+  .prt-t tr.tot td{font-weight:700;background:#F3ECF2;border-top:1px solid var(--lp-line)}
+  .prt-t tr.sec td{font-weight:700;color:var(--lp-plum);background:#FBF7FA}
+  .prt-t .g{color:var(--lp-gain)} .prt-t .r{color:var(--lp-wine)}
   .prt-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
-  .prt-ok{font-size:12.5px;color:#327B63;font-weight:600} .prt-ok.bad{color:#9A1333}
+  #prt .v-due{color:var(--lp-wine)} #prt .v-gain{color:var(--lp-gain)} #prt tbody tr:hover{background:none}
+  .prt-ok{font-size:12.5px;color:var(--lp-gain);font-weight:600} .prt-ok.bad{color:var(--lp-wine)}
   .prt-nt{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
-  .prt-nt li{border-inline-start:4px solid #C9A7C4;background:#FFFFFF;border-radius:8px;padding:8px 12px;font-size:13px;line-height:1.7}
-  .prt-nt li.w{border-color:#D4A93F} .prt-nt li.b{border-color:#9A1333}
-  .prt-ft{padding:10px 40px;font-size:11px;color:#6E6472;border-top:1px solid #E4DDE6;display:flex;justify-content:space-between}
+  .prt-nt li{border-inline-start:4px solid var(--lp-petal);background:#FFFFFF;border-radius:8px;padding:8px 12px;font-size:13px;line-height:1.7}
+  .prt-nt li.w{border-color:var(--lp-gold)} .prt-nt li.b{border-color:var(--lp-wine)}
+  .prt-ft{padding:10px 40px;font-size:11px;color:var(--lp-soft);border-top:1px solid var(--lp-line);display:flex;justify-content:space-between}
   @media print{
     @page{size:A4;margin:0}
     body.prt-open > *:not(#prt){display:none !important}
@@ -1478,9 +1488,9 @@
   .bulkbar .tbtn.primary:hover{background:var(--paper);color:var(--teal-deep)}
   .bulkbar .ghostx{background:none;border-color:transparent;text-decoration:underline}
   .bulkbar select{padding:var(--sp-1) var(--sp-2);font-size:var(--fs-2);border-radius:var(--r-sm)}
-  [data-theme="dark"] .bulkbar{color:#1A141C}
-  [data-theme="dark"] .bulkbar .tbtn{color:#1A141C;background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.2)}
-  [data-theme="dark"] .bulkbar .tbtn:hover{background:rgba(0,0,0,.2);border-color:#1A141C;color:#1A141C}
+  [data-theme="dark"] .bulkbar{color:var(--on-accent)}
+  [data-theme="dark"] .bulkbar .tbtn{color:var(--on-accent);background:rgba(0,0,0,.1);border-color:rgba(0,0,0,.2)}
+  [data-theme="dark"] .bulkbar .tbtn:hover{background:rgba(0,0,0,.2);border-color:var(--on-accent);color:var(--on-accent)}
   td.selcell,th.selcell{width:34px;text-align:center;padding-inline:var(--sp-1)}
   td.selcell input,th.selcell input{width:17px;height:17px;cursor:pointer;accent-color:var(--teal)}
   tr.order.sel > td{background:var(--teal-soft)}
@@ -1797,8 +1807,7 @@
   .seg button{flex:1;background:none;border:none;font:inherit;font-size:var(--fs-3);
     padding:var(--sp-2) var(--sp-1);color:var(--ink-soft);cursor:pointer;transition:background .12s,color .12s}
   .seg button+button{border-inline-start:1px solid var(--line)}
-  .seg button.on{background:var(--teal);color:#fff;font-weight:600}
-  [data-theme="dark"] .seg button.on{color:#1A141C}
+  .seg button.on{background:var(--teal);color:var(--on-accent);font-weight:600}
   .lmix-cols,.lmix-row{display:grid;gap:var(--sp-1);
     grid-template-columns:1.1fr 1fr 92px 26px}
   .lmix-cols{align-items:end;font-size:var(--fs-1);color:var(--ink-soft);font-weight:500;padding-bottom:1px}
@@ -1814,8 +1823,7 @@
     color:var(--ink-soft);font:inherit;font-size:var(--fs-2);font-weight:500;
     padding:var(--sp-1) var(--sp-3);cursor:pointer;transition:background .12s,color .12s,border-color .12s}
   .quick button:hover{border-color:var(--teal);color:var(--teal)}
-  .quick button.on{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
-  [data-theme="dark"] .quick button.on{color:#1A141C}
+  .quick button.on{background:var(--teal);border-color:var(--teal);color:var(--on-accent);font-weight:600}
   .more-wrap{margin-top:var(--sp-2);text-align:center}
   .more-wrap[hidden],.more-wrap button[hidden]{display:none}
   td.acts{white-space:nowrap}
@@ -3426,7 +3434,7 @@
   </div>
 
   <div class="panel vz-card" id="vz3">
-    <div class="vz-hd"><div><h3>الإعلان بيجيب أوردرات؟</h3><p class="vz-lead">أيام الإعلان متعلّمة بالأخضر الفاتح في الرسمتين. الإعلان بيتسجّل يوم الدفع، فالأوردرات ممكن تيجي بعده بيوم أو اتنين.</p></div>
+    <div class="vz-hd"><div><h3>الإعلان بيجيب أوردرات؟</h3><p class="vz-lead">أيام الإعلان متعلّمة بخلفية وردي في الرسمتين. الإعلان بيتسجّل يوم الدفع، فالأوردرات ممكن تيجي بعده بيوم أو اتنين.</p></div>
       <div class="quick vz-seg" id="vz-days" role="group" aria-label="الأيام">
         <button type="button" data-vzd="7">آخر 7 أيام</button>
         <button type="button" data-vzd="30" class="on">آخر 30 يوم</button>
@@ -3839,8 +3847,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "133";
+  var VERSION = "134";
   var CHANGELOG = [
+    { v:"134", d:"2026-10-09", items:[
+      "ثيم Lora Plum في السيستم كله: ألوان البراند والخط بقوا في مكان واحد، والشاشات وتقرير الشركاء بياخدوا منهم",
+      "ألوان الرسومات من الثيم: المبيعات برقوقي، الخسارة نبيذي، والبنود (بضاعة · شحن · إعلانات · تغليف · ثابتة) بألوان متقاسة لعمى الألوان في الوضعين — ونفس الألوان في شريط حاسبة التسعير",
+      "الإعلانات مابقتش خضرا — الأخضر بقى للمكسب بس",
+      "الوضع الليلي: «قرب يخلص» و«خلص» و«ليك/عليك» والتبديل مابقوش بقع فاتحة، وكل حالة ليها لونها"
+    ]},
     { v:"133", d:"2026-10-09", items:[
       "جديد: «⎙ تقرير الشهر للشركاء» في التحليل — 3 صفحات A4 بثيم Lora Plum لأي شهر: الخلاصة والأوردر الواحد · القوايم المالية (الشهر ومن البداية) والميزانية · حق كل شريك والأصناف والفريق",
       "ملاحظات بتطلع لوحدها من أرقام الشهر: الأوردر بيكسب كام بعد الإعلان، الإعلان فوق 100، الشحن من جيبنا، صنف صافي قطعته قليل، نسبة الرفض",
@@ -7889,9 +7903,9 @@
     el.innerHTML = ncw + "<div class='hint' style='margin:0'>صافي ربح الأوردر</div>" +
       "<div class='big'><span class='hint' style='margin:0'>" + (c.mg !== null ? "هامش " + (c.mg * 100).toFixed(1) + "%" : "") + "</span>" +
         "<b class='num " + (c.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(c.profit)) + "</b></div>" +
-      "<div class='pc-bar'>" + seg(c.cogs, "#7E5A78") + seg(c.extra, "#C8963E") + seg(c.sout, "#9A1333") + seg(pos, "#5E9E78") + "</div>" +
-      "<div class='pc-lg'><span><em style='background:#7E5A78'></em>البضاعة</span><span><em style='background:#C8963E'></em>مصاريف</span>" +
-        "<span><em style='background:#9A1333'></em>شحن</span><span><em style='background:#5E9E78'></em>ربحك</span></div>" +
+      "<div class='pc-bar'>" + seg(c.cogs, "var(--s-goods)") + seg(c.extra, "var(--ink-soft)") + seg(c.sout, "var(--s-ship)") + seg(pos, "var(--gain)") + "</div>" +
+      "<div class='pc-lg'><span><em style='background:var(--s-goods)'></em>البضاعة</span><span><em style='background:var(--ink-soft)'></em>مصاريف</span>" +
+        "<span><em style='background:var(--s-ship)'></em>شحن</span><span><em style='background:var(--gain)'></em>ربحك</span></div>" +
       "<div style='margin-top:10px'>" +
         R("البضاعة (" + qty(c.pcs) + " قطعة)", c.goods) +
         (c.disc ? R("− خصم", c.disc, "v-due") : "") +
@@ -8889,7 +8903,7 @@
         (M.xloss || A.xloss ? isr("خسارة استبدال", "xloss", true) : "") +
         isr("إجمالي مصروفات البيع والتسويق", "sell", true, "tot") +
         isr("مصروفات إدارية وعمومية", "admin", true) + isr("صافي الربح (الخسارة)", "net", false, "tot") + "</table>" +
-      "<h2>الميزانية العمومية <span style='font-weight:400;font-size:13px;color:#6E6472'>— كما في " + esc(today()) + "</span></h2>" +
+      "<h2>الميزانية العمومية <span style='font-weight:400;font-size:13px;color:var(--lp-soft)'>— كما في " + esc(today()) + "</span></h2>" +
       "<div class='prt-2'><table class='prt-t'><tr class='sec'><td>الأصول المتداولة</td><td class='n'></td></tr>" +
         "<tr><td>الخزنة</td><td class='n'>" + nm(B.cash) + "</td></tr><tr><td>عند شركات الشحن</td><td class='n'>" + nm(B.wallets) + "</td></tr>" +
         (B.recv > 0.5 ? "<tr><td>مديونيات العملاء</td><td class='n'>" + nm(B.recv) + "</td></tr>" : "") +
@@ -8927,7 +8941,7 @@
     if(fin.length) notes.push([rx / fin.length > 0.15 ? "b" : "", "نسبة الرفض في الشهر " + Math.round(rx / fin.length * 100) + "% (" + qty(rx) + " من " + qty(fin.length) + " خلصوا)"]);
     var p3 = "<section class='prt-pg'>" + head("الشركاء والأصناف والفريق", esc(prtMonthName(ym))) + "<div class='prt-in'>" +
       "<h2>حق كل شريك</h2><table class='prt-t'><tr><th>الشريك</th><th class='n'>رأس ماله</th><th class='n'>نسبته</th><th class='n'>نصيبه من الأرباح المحتجزة</th><th class='n'>حقه النهارده</th></tr>" + prow + "</table>" +
-      "<p style='margin:-8px 0 0;font-size:11.5px;color:#6E6472'>الأرباح المحتجزة من البداية (مش الشهر بس) بنسبة رأس المال للتوضيح — مش توزيع أرباح.</p>" +
+      "<p style='margin:-8px 0 0;font-size:11.5px;color:var(--lp-soft)'>الأرباح المحتجزة من البداية (مش الشهر بس) بنسبة رأس المال للتوضيح — مش توزيع أرباح.</p>" +
       "<div class='prt-2'><div><h2>الأصناف — صافي القطعة</h2><table class='prt-t'><tr><th>الصنف</th><th class='n'>اتباع</th><th class='n'>صافي</th><th class='n'>للقطعة</th></tr>" +
         (its.length ? its.slice(0, 8).map(irow).join("") : "<tr><td colspan='4'>مفيش مبيعات</td></tr>") + "</table></div>" +
       "<div><h2>الفريق</h2><table class='prt-t'><tr><th>المسؤول</th><th class='n'>أوردرات</th><th class='n'>مسلّم</th><th class='n'>مبيعات</th><th class='n'>صافي</th></tr>" +
@@ -12481,7 +12495,7 @@
               "<span class='n num tt money-only'>" + esc(money(goodsTotal(x))) + "</span>" +
               "<span class='x'>" + (isRet ? "" :
                 "<button class='del' type='button' style='color:var(--due)' data-pret='" + x.id + "'>رجّعه للمورد</button>" +
-                "<button class='del' type='button' style='color:#5B4A9A' data-xsrc='" + x.id + "'>⇄ بدّله</button>") +
+                "<button class='del' type='button' style='color:var(--xg)' data-xsrc='" + x.id + "'>⇄ بدّله</button>") +
                 (xOut[x.id] ? "<span class='xgd'>⇄ اتبدّل منها " + qty(xOut[x.id]) + "</span>" : "") + "</span></div>";
           }).join("") +
           "<div class='pv-sum money-only'><span>بضاعة <b class='num'>" + esc(money(t.goods)) + "</b></span>" +
@@ -14761,7 +14775,7 @@
         vzGrow(m, "vz-gx", i + (Y > 60 ? 2 : 0));
         vzTip(vzTips.length, sg.c ? "" : VZ_FILL[sg.k], [sg.l, ["على الأوردر", vzH(sg.v, 2)], ["من اللي العميل بيدفعه", tIn > 0.009 ? vzH(sg.v / tIn * 100, 1) + "%" : "—"], ["على الـ" + qty(n) + " أوردر", vzH(sg.v * n, 2)]]);
         var lbl = sg.l.split(" ")[0] + " " + Math.round(sg.v);
-        if(w > lbl.length * 7 + 14) vzT(svg, (xl + xr) / 2, Y + bh / 2 + 4.5, lbl, { fw:700, fs:11, c:sg.c === "vz-tot" ? "vz-tt" : (sg.k === "goods" || sg.k === "ship") ? "vz-tw" : "vz-tk" });
+        if(w > lbl.length * 7 + 14) vzT(svg, (xl + xr) / 2, Y + bh / 2 + 4.5, lbl, { fw:700, fs:11, c:sg.c === "vz-tot" ? "vz-tt" : VZ_SW[sg.k] && sg.k !== "oth" ? "vz-tl-" + sg.k : "vz-tk" });
         a = b;
       });
       vzT(svg, x(total) - 8, Y + bh / 2 + 5, vzN(total, 2), { a:"end", d:"ltr", fw:700, fs:12.5 });
