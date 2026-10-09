@@ -1336,6 +1336,47 @@
   .pis-na > .pis-nab{grid-column:1/-1;border:0;background:none;padding:0;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
   .pis-na > .pis-nab > span:first-child{display:inline;font-size:var(--fs-2)}
   @media (max-width:760px){ .pis-na{grid-template-columns:1fr 1fr} .pis-na > div:nth-child(3){grid-column:1/-1} .pis-na b{font-size:var(--fs-5)} }
+  /* v133: تقرير الشركاء — ثيم Lora Plum (برقوقي #4A2545 · ليلي #2F1530 · وردي #C9A7C4 · فاتح #F6F2F5) */
+  #prt{position:fixed;inset:0;z-index:60;background:#E9E3E8;overflow:auto;direction:rtl}
+  #prt[hidden]{display:none}
+  .prt-bar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:10px 16px;background:#2F1530;color:#F6F2F5}
+  .prt-bar b{font-size:var(--fs-4);margin-inline-end:auto}
+  .prt-bar select{width:auto;min-width:150px}
+  .prt-pg{width:794px;max-width:calc(100% - 24px);min-height:1123px;margin:18px auto;background:#FBFAFB;color:#241E26;box-shadow:0 6px 24px rgba(47,21,48,.18);
+    font-family:"Alexandria",Tahoma,sans-serif;display:flex;flex-direction:column;box-sizing:border-box}
+  .prt-hd{background:#2F1530;color:#F6F2F5;padding:28px 40px 24px}
+  .prt-hd small{display:block;color:#C9A7C4;font-size:13px;letter-spacing:1px;margin-bottom:6px}
+  .prt-hd h1{margin:0;font-size:30px;font-weight:700}
+  .prt-hd p{margin:6px 0 0;color:#C9A7C4;font-size:14px}
+  .prt-in{padding:24px 40px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
+  .prt-in h2{margin:0;font-size:18px;font-weight:700;color:#4A2545;border-bottom:2px solid #E4DDE6;padding-bottom:6px}
+  .prt-kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .prt-kp > div{border:1px solid #E4DDE6;border-radius:12px;padding:12px 14px;background:#FFFFFF}
+  .prt-kp > div.hi{background:#4A2545;color:#F6F2F5;border-color:#4A2545}
+  .prt-kp span{display:block;font-size:12px;color:#6E6472} .prt-kp .hi span{color:#E5D3E2}
+  .prt-kp b{display:block;font-size:26px;font-weight:700;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+  .prt-kp small{font-size:11.5px;color:#6E6472} .prt-kp .hi small{color:#E5D3E2}
+  .prt-t{width:100%;border-collapse:collapse;font-size:13px}
+  .prt-t th{font-weight:600;color:#6E6472;text-align:start;padding:6px 8px;border-bottom:1px solid #E4DDE6;background:#F6F2F5}
+  .prt-t td{padding:6px 8px;border-bottom:1px solid #F0EAF0;font-variant-numeric:tabular-nums}
+  .prt-t td.n,.prt-t th.n{text-align:left;white-space:nowrap}
+  .prt-t tr.tot td{font-weight:700;background:#F3ECF2;border-top:1px solid #E4DDE6}
+  .prt-t tr.sec td{font-weight:700;color:#4A2545;background:#FBF7FA}
+  .prt-t .g{color:#327B63} .prt-t .r{color:#9A1333}
+  .prt-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  .prt-ok{font-size:12.5px;color:#327B63;font-weight:600} .prt-ok.bad{color:#9A1333}
+  .prt-nt{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+  .prt-nt li{border-inline-start:4px solid #C9A7C4;background:#FFFFFF;border-radius:8px;padding:8px 12px;font-size:13px;line-height:1.7}
+  .prt-nt li.w{border-color:#D4A93F} .prt-nt li.b{border-color:#9A1333}
+  .prt-ft{padding:10px 40px;font-size:11px;color:#6E6472;border-top:1px solid #E4DDE6;display:flex;justify-content:space-between}
+  @media print{
+    @page{size:A4;margin:0}
+    body.prt-open > *:not(#prt){display:none !important}
+    body.prt-open #prt{position:static;overflow:visible;background:none}
+    .prt-bar{display:none}
+    .prt-pg{margin:0;box-shadow:none;width:210mm;max-width:none;min-height:297mm;page-break-after:always;break-after:page}
+    .prt-pg:last-child{page-break-after:auto;break-after:auto}
+  }
   .pis-tag{font-size:10.5px;font-weight:600;border-radius:99px;padding:1px 7px;margin-inline-start:6px;white-space:nowrap}
   .c-cats{margin:0} .c-cats button{font-size:var(--fs-2);padding:5px 12px}
   .pis-tag.var{background:rgba(138,98,18,.14);color:var(--warn)} .pis-tag.fixed{background:var(--teal-soft);color:var(--ink-soft)}
@@ -2172,6 +2213,16 @@
   </div>
 </nav>
 
+<!-- v133: تقرير الشهر للشركاء — صفحات A4 بثيم Lora Plum، بتتطبع أو تتحفظ PDF -->
+<div id="prt" hidden>
+  <div class="prt-bar">
+    <b>تقرير الشهر للشركاء</b>
+    <select id="prt-month" aria-label="الشهر"></select>
+    <button class="tbtn primary" type="button" id="b-prt-print">⎙ اطبع / احفظ PDF</button>
+    <button class="tbtn" type="button" id="b-prt-close">قفل</button>
+  </div>
+  <div id="prt-body"></div>
+</div>
 <main>
 
 <!-- لوحة المتابعة -->
@@ -3200,6 +3251,7 @@
       <div class="per-cust" hidden><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
       <div class="per-cust" hidden><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
       <div style="grid-column:1/-1"><p class="note ok" id="per-label-rep" style="margin:0"></p></div>
+      <div class="money-only" style="grid-column:1/-1;display:flex;justify-content:flex-start"><button class="tbtn primary" type="button" id="b-prt">⎙ تقرير الشهر للشركاء</button></div>
     </div>
   </div>
 
@@ -3787,8 +3839,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "132";
+  var VERSION = "133";
   var CHANGELOG = [
+    { v:"133", d:"2026-10-09", items:[
+      "جديد: «⎙ تقرير الشهر للشركاء» في التحليل — 3 صفحات A4 بثيم Lora Plum لأي شهر: الخلاصة والأوردر الواحد · القوايم المالية (الشهر ومن البداية) والميزانية · حق كل شريك والأصناف والفريق",
+      "ملاحظات بتطلع لوحدها من أرقام الشهر: الأوردر بيكسب كام بعد الإعلان، الإعلان فوق 100، الشحن من جيبنا، صنف صافي قطعته قليل، نسبة الرفض",
+      "زرار «اطبع / احفظ PDF» بيطلّع التقرير بس من غير باقي السيستم — جاهز للواتساب"
+    ]},
     { v:"132", d:"2026-10-09", items:[
       "ترتيب جديد للشاشات — كل زرار تحت بيجاوب على سؤال واحد: الرئيسية · الأوردرات (الأوردرات · العملاء · شركات الشحن) · البضاعة (المخزون · الأصناف والتسعير · المشتريات · الموردين) · الفلوس (الخزنة · الشركاء) · التحليل (بدل «المزيد»)",
       "التحليل: قايمة الدخل · القوايم المالية · الأصناف · العملاء والمحافظات · الفريق · رسومات · ماشي إزاي؟ — أداء المسؤولين بقى «الفريق» في شاشة لوحده",
@@ -8780,6 +8837,138 @@
       (bad ? " <span class='v-due'>⚠ فيه فرق بين القايمة وحسابات السيستم — بلّغ عنه.</span>" : "");
   }
 
+  /* v133: تقرير الشهر للشركاء — نفس دوال القوايم (finIS · finBS · projStats · itemProfit) لشهر واحد،
+     ٣ صفحات A4: الخلاصة والأوردر · القوايم · الشركاء والأصناف والفريق والملاحظات */
+  var MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  function prtMonthName(ym){ var p = ym.split("-"); return MONTHS_AR[Number(p[1]) - 1] + " " + p[0]; }
+  function prtMonths(){
+    var first = live("sales").concat(live("purchases"), live("cash")).reduce(function(a, x){ return x.date && (!a || x.date < a) ? x.date : a; }, "");
+    var out = [], cur = today().slice(0, 7), m = (first || today()).slice(0, 7);
+    while(m <= cur && out.length < 120){ out.push(m); var y = Number(m.slice(0, 4)), mo = Number(m.slice(5, 7)) + 1; if(mo > 12){ mo = 1; y++; } m = y + "-" + ("0" + mo).slice(-2); }
+    return out.reverse();
+  }
+  function partnerReport(ym){
+    var last = new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0).getDate();
+    var r = { from:ym + "-01", to:ym + "-" + ("0" + last).slice(-2) };
+    var P = projStats(r), v = P.exp, ue = unitEcon(v), M = finIS(r), A = finIS(null), B = finBS();
+    // أرقام صحيحة من غير «ج.م» في كل خانة — العملة مكتوبة مرة في الرأس
+    var nm = function(x){ return (Math.round(x) || 0).toLocaleString("en-US"); };      // || 0: من غير «-0»
+    var sg = function(x){ return x < -0.5 ? "(" + nm(-x) + ")" : nm(x); };
+    var cl = function(x){ return x < -0.5 ? " r" : x > 0.5 ? " g" : ""; };
+    var toDay = r.to > today() ? today() : r.to, partial = r.to > today();
+    var setup = v.once || 0, netNoSetup = v.net + setup;
+    var foot = function(pg){ return "<div class='prt-ft'><span>Lora Collection · تقرير الشركاء · " + esc(prtMonthName(ym)) + "</span><span>صفحة " + pg + " · اتطبع " + esc(today()) + "</span></div>"; };
+    var head = function(t, sub){ return "<div class='prt-hd'><small>LORA COLLECTION</small><h1>" + t + "</h1><p>" + sub + "</p></div>"; };
+    var per = "من " + esc(r.from) + " لـ " + esc(toDay) + (partial ? " (الشهر لسه ماخلصش)" : "") + " · المبالغ بالجنيه المصري";
+    // ١ الخلاصة
+    var p1 = "<section class='prt-pg'>" + head("تقرير الشركاء — " + esc(prtMonthName(ym)), per) + "<div class='prt-in'>" +
+      "<h2>الخلاصة</h2><div class='prt-kp'>" +
+        "<div><span>أوردرات الشهر</span><b>" + qty(P.n) + "</b><small>" + qty(P.nDone) + " اتسلّموا أو اتلغوا · " + qty(P.nOpen) + " لسه ماشيين</small></div>" +
+        "<div><span>صافي الربح المتوقع (لو كل أوردرات الشهر اتسلّمت)</span><b class='" + (v.net < 0 ? "r" : "") + "'>" + sg(v.net) + "</b><small>" +
+          (setup > 0.5 ? "منه " + nm(setup) + " مصاريف مرة واحدة — من غيرها " + sg(netNoSetup) + " · " : "") + "المسلّم فعلاً " + sg(M.net) + " (صفحة 2)</small></div>" +
+        "<div class='hi'><span>الأوردر بيكسب بعد الإعلان</span><b>" + (ue ? sg(ue.cu) : "—") + "</b><small>" + (ue ? "الإعلان " + nm(ue.ad) + " على الأوردر" : "") + "</small></div></div>" +
+      "<h2>الأوردر الواحد بيكسب كام؟</h2>" +
+      (ue ? "<table class='prt-t'><tr><th>البند</th><th class='n'>على الأوردر</th></tr>" +
+        "<tr><td>متوسط الأوردر</td><td class='n'>" + nm(v.goods / v.n) + "</td></tr>" +
+        "<tr><td>تكلفة البضاعة</td><td class='n r'>(" + nm(v.cost / v.n) + ")</td></tr>" +
+        "<tr><td>" + (v.ship < 0 ? "شحن من جيبنا" : "مكسب الشحن") + "</td><td class='n" + cl(v.ship) + "'>" + sg(v.ship / v.n) + "</td></tr>" +
+        "<tr><td>تغليف ومصاريف بيع تانية</td><td class='n r'>(" + nm((v.varExp - v.ads) / v.n) + ")</td></tr>" +
+        "<tr class='tot'><td>الأوردر بيكسب قبل الإعلان</td><td class='n'>" + sg(ue.pre) + "</td></tr>" +
+        "<tr><td>إعلان على الأوردر</td><td class='n r'>(" + nm(ue.ad) + ")</td></tr>" +
+        "<tr class='tot'><td>الأوردر بيكسب بعد الإعلان</td><td class='n" + cl(ue.cu) + "'>" + sg(ue.cu) + "</td></tr></table>" : "<p>مفيش أوردرات في الشهر ده.</p>") +
+      "</div>" + foot(1) + "</section>";
+    // ٢ القوايم
+    var isr = function(t, k, neg, c){ var a = M[k], b = A[k]; var f = function(x){ return neg ? (x > 0.5 ? "(" + nm(x) + ")" : nm(-x)) : sg(x); };
+      return "<tr" + (c ? " class='" + c + "'" : "") + "><td>" + t + "</td><td class='n" + (neg ? (a > 0.5 ? " r" : "") : cl(a)) + "'>" + f(a) + "</td><td class='n" + (neg ? (b > 0.5 ? " r" : "") : cl(b)) + "'>" + f(b) + "</td></tr>"; };
+    var ok = Math.abs(B.diff) < 0.01 && Math.abs(B.recon) < 0.01;
+    var p2 = "<section class='prt-pg'>" + head("القوايم المالية", "على أساس التسليم — الإيراد بيتسجّل لما العميل يستلم (IFRS 15)") + "<div class='prt-in'>" +
+      "<h2>قايمة الدخل</h2><table class='prt-t'><tr><th>البند</th><th class='n'>" + esc(prtMonthName(ym)) + "</th><th class='n'>من البداية</th></tr>" +
+        isr("مبيعات البضاعة المسلّمة", "rev") + isr("رسوم شحن من العملاء", "sin") + isr("إجمالي الإيرادات", "totRev", false, "tot") +
+        isr("تكلفة البضاعة المباعة", "cogs", true) + isr("مجمل الربح", "gross", false, "tot") +
+        isr("إعلانات", "ads", true) + isr("شحن مدفوع لشركات الشحن", "sout", true) + isr("تغليف", "pack", true) +
+        (M.xloss || A.xloss ? isr("خسارة استبدال", "xloss", true) : "") +
+        isr("إجمالي مصروفات البيع والتسويق", "sell", true, "tot") +
+        isr("مصروفات إدارية وعمومية", "admin", true) + isr("صافي الربح (الخسارة)", "net", false, "tot") + "</table>" +
+      "<h2>الميزانية العمومية <span style='font-weight:400;font-size:13px;color:#6E6472'>— كما في " + esc(today()) + "</span></h2>" +
+      "<div class='prt-2'><table class='prt-t'><tr class='sec'><td>الأصول المتداولة</td><td class='n'></td></tr>" +
+        "<tr><td>الخزنة</td><td class='n'>" + nm(B.cash) + "</td></tr><tr><td>عند شركات الشحن</td><td class='n'>" + nm(B.wallets) + "</td></tr>" +
+        (B.recv > 0.5 ? "<tr><td>مديونيات العملاء</td><td class='n'>" + nm(B.recv) + "</td></tr>" : "") +
+        (B.supAdv > 0.5 ? "<tr><td>دفعات مقدّمة للموردين</td><td class='n'>" + nm(B.supAdv) + "</td></tr>" : "") +
+        "<tr><td>المخزون بالتكلفة</td><td class='n'>" + nm(B.stock) + "</td></tr><tr class='tot'><td>إجمالي الأصول</td><td class='n'>" + nm(B.assets) + "</td></tr></table>" +
+      "<table class='prt-t'><tr class='sec'><td>الالتزامات وحقوق الملكية</td><td class='n'></td></tr>" +
+        "<tr><td>مستحق للموردين</td><td class='n'>" + nm(B.pay) + "</td></tr><tr><td>عرابين عملاء</td><td class='n'>" + nm(B.custAdv) + "</td></tr>" +
+        "<tr><td>رأس مال الشركاء</td><td class='n'>" + nm(B.cap) + "</td></tr>" +
+        (Math.abs(B.cur) > 0.5 ? "<tr><td>أرباح ليهم لسه ما اتصرفتش</td><td class='n'>" + nm(B.cur) + "</td></tr>" : "") +
+        (Math.abs(B.opening) > 0.5 ? "<tr><td>صافي الأرصدة الافتتاحية</td><td class='n" + cl(B.opening) + "'>" + sg(B.opening) + "</td></tr>" : "") +
+        "<tr><td>الأرباح المحتجزة</td><td class='n" + cl(B.re) + "'>" + sg(B.re) + "</td></tr>" +
+        "<tr class='tot'><td>الإجمالي</td><td class='n'>" + nm(B.liab + B.equity) + "</td></tr></table></div>" +
+      "<p class='prt-ok" + (ok ? "" : " bad") + "'>" + (ok ? "✓ الميزانية متوازنة: الأصول = الالتزامات + حقوق الملكية" : "⚠ فيه فرق في الميزانية — راجع «توفيق الميزانية»") + "</p>" +
+      "</div>" + foot(2) + "</section>";
+    // ٣ الشركاء والأصناف والفريق والملاحظات
+    var ps = partners(), tot = ps.reduce(function(a, x){ return a + capitalOf(x.id); }, 0);
+    var prow = ps.map(function(x){ var c = capitalOf(x.id), k = tot > 0 ? c / tot : 0, sh = (B.re + B.opening) * k;
+      return "<tr><td>" + esc(x.name) + "</td><td class='n'>" + nm(c) + "</td><td class='n'>" + (k * 100).toFixed(1) + "%</td><td class='n" + cl(sh) + "'>" + sg(sh) + "</td><td class='n'>" + nm(c + currentOf(x.id) + sh) + "</td></tr>"; }).join("");
+    var IP = itemProfit(P, false).M, its = Object.keys(IP).filter(function(id){ return id && IP[id].q > 0; })
+      .map(function(id){ var m = IP[id]; return { n:itemName(id), q:m.q, net:m.net, pp:m.net / m.q }; }).sort(function(a, b){ return b.pp - a.pp; });
+    var irow = function(x){ return "<tr><td>" + esc(x.n) + "</td><td class='n'>" + qty(x.q) + "</td><td class='n" + cl(x.net) + "'>" + sg(x.net) + "</td><td class='n" + cl(x.pp) + "'>" + sg(x.pp) + "</td></tr>"; };
+    var om = ownerStats(salesIn(r));
+    var trow = Object.keys(om).sort(function(a, b){ return om[b].rev - om[a].rev; }).slice(0, 6).map(function(o){ var m = om[o];
+      return "<tr><td>" + esc(o) + "</td><td class='n'>" + qty(m.n) + "</td><td class='n'>" + qty(m.d) + "</td><td class='n'>" + nm(m.rev) + "</td><td class='n" + cl(m.net) + "'>" + sg(m.net) + "</td></tr>"; }).join("");
+    // ملاحظات بتطلع لوحدها من الأرقام — نفس حدود «عشان تبدأ تكسب»
+    var notes = [];
+    if(ue){
+      notes.push(ue.cu > 0 ? ["", "الأوردر بيكسب " + nm(ue.cu) + " بعد الإعلان" + (ue.need ? " — محتاجين " + qty(ue.need) + " أوردر يغطّوا الثابت" : "")] : ["b", "الأوردر بيخسر " + nm(-ue.cu) + " بعد الإعلان — الإعلان على الأوردر (" + nm(ue.ad) + ") أكبر من ربحه قبل الإعلان (" + nm(ue.pre) + ")"]);
+      if(ue.ad > 100) notes.push(["w", "الإعلان " + nm(ue.ad) + " على الأوردر — الهدف تحت 100"]);
+      if(v.ship < 0 && -v.ship / v.n > 25) notes.push(["w", "بندفع " + nm(-v.ship / v.n) + " شحن من جيبنا على الأوردر (" + nm(-v.ship) + " في الشهر)"]);
+    }
+    its.filter(function(x){ return x.q >= 5 && x.pp < 15; }).forEach(function(x){ notes.push(["w", esc(x.n) + ": اتباع " + nPcs(x.q) + " وصافي القطعة " + sg(x.pp) + " بس — راجع سعره"]); });
+    if(setup > 0.5) notes.push(["", "مصاريف مرة واحدة " + nm(setup) + " مش هتتكرر"]);
+    var fin = P.c.list.filter(function(s){ return isDelivered(s) || isCancelled(s); }), rx = fin.filter(isCancelled).length;
+    if(fin.length) notes.push([rx / fin.length > 0.15 ? "b" : "", "نسبة الرفض في الشهر " + Math.round(rx / fin.length * 100) + "% (" + qty(rx) + " من " + qty(fin.length) + " خلصوا)"]);
+    var p3 = "<section class='prt-pg'>" + head("الشركاء والأصناف والفريق", esc(prtMonthName(ym))) + "<div class='prt-in'>" +
+      "<h2>حق كل شريك</h2><table class='prt-t'><tr><th>الشريك</th><th class='n'>رأس ماله</th><th class='n'>نسبته</th><th class='n'>نصيبه من الأرباح المحتجزة</th><th class='n'>حقه النهارده</th></tr>" + prow + "</table>" +
+      "<p style='margin:-8px 0 0;font-size:11.5px;color:#6E6472'>الأرباح المحتجزة من البداية (مش الشهر بس) بنسبة رأس المال للتوضيح — مش توزيع أرباح.</p>" +
+      "<div class='prt-2'><div><h2>الأصناف — صافي القطعة</h2><table class='prt-t'><tr><th>الصنف</th><th class='n'>اتباع</th><th class='n'>صافي</th><th class='n'>للقطعة</th></tr>" +
+        (its.length ? its.slice(0, 8).map(irow).join("") : "<tr><td colspan='4'>مفيش مبيعات</td></tr>") + "</table></div>" +
+      "<div><h2>الفريق</h2><table class='prt-t'><tr><th>المسؤول</th><th class='n'>أوردرات</th><th class='n'>مسلّم</th><th class='n'>مبيعات</th><th class='n'>صافي</th></tr>" +
+        (trow || "<tr><td colspan='5'>مفيش أوردرات</td></tr>") + "</table></div></div>" +
+      "<h2>ملاحظات</h2><ul class='prt-nt'>" + notes.slice(0, 6).map(function(n){ return "<li class='" + n[0] + "'>" + n[1] + "</li>"; }).join("") + "</ul>" +
+      "</div>" + foot(3) + "</section>";
+    return p1 + p2 + p3;
+  }
+  function openPrt(ym){
+    var sel = document.getElementById("prt-month"), ms = prtMonths();
+    ym = ym || ms[0];
+    sel.innerHTML = ms.map(function(m){ return "<option value='" + m + "'" + (m === ym ? " selected" : "") + ">" + esc(prtMonthName(m)) + "</option>"; }).join("");
+    document.getElementById("prt-body").innerHTML = partnerReport(ym);
+    document.getElementById("prt").hidden = false;
+    document.body.classList.add("prt-open");
+    document.getElementById("b-prt-close").focus();
+  }
+  function closePrt(){
+    var el = document.getElementById("prt"); if(!el || el.hidden) return;
+    el.hidden = true; document.body.classList.remove("prt-open");
+    var b = document.getElementById("b-prt"); if(b && b.offsetParent) b.focus();
+  }
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") closePrt(); });
+  document.getElementById("b-prt").addEventListener("click", function(){ openPrt(); });
+  document.getElementById("prt-month").addEventListener("change", function(){ openPrt(this.value); });
+  document.getElementById("b-prt-close").addEventListener("click", closePrt);
+  document.getElementById("b-prt-print").addEventListener("click", function(){ window.print(); });
+
+  // أداء المسؤولين — نفس الحسبة في «الفريق» وفي تقرير الشركاء
+  function ownerStats(list){
+    var om = {};
+    list.forEach(function(s){
+      var o = (s.owner||"").trim() || "غير محدد";
+      if(!om[o]) om[o] = { n:0, d:0, c:0, rev:0, net:0 };
+      var m = om[o]; m.n++;
+      if(isDelivered(s)){ m.d++; m.rev += saleTotal(s); }
+      if(isCancelled(s)) m.c++;
+      m.net += saleProfit(s);
+    });
+    return om;
+  }
   function renderReports(){
     clearMonthly();
     renderProjIS();
@@ -8879,15 +9068,7 @@
       "مفيش عملاء في الفترة دي.");
 
     // المسؤولين
-    var om = {};
-    list.forEach(function(s){
-      var o = (s.owner||"").trim() || "غير محدد";
-      if(!om[o]) om[o] = { n:0, d:0, c:0, rev:0, net:0 };
-      var m = om[o]; m.n++;
-      if(isDelivered(s)){ m.d++; m.rev += saleTotal(s); }
-      if(isCancelled(s)) m.c++;
-      m.net += saleProfit(s);
-    });
+    var om = ownerStats(list);
     var orows = Object.keys(om).map(function(o){ return [o, om[o]]; })
       .sort(function(a,b){ return b[1].rev - a[1].rev; })
       .map(function(x){
@@ -14789,6 +14970,7 @@
     if(!box) return;
     if(!lockOn()){ box.hidden = true; document.body.classList.remove("no-money"); return; }
     if(curUser()){ box.hidden = true; return; }
+    if(typeof closePrt === "function") closePrt();          // تقرير الشركاء ما يفضلش مفتوح ورا القفل
     box.hidden = false;
     document.getElementById("lock-first").hidden = true;
     document.getElementById("lock-pin").hidden = true;
