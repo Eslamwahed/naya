@@ -1345,6 +1345,42 @@
   .pis-na > .pis-nab{grid-column:1/-1;border:0;background:none;padding:0;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
   .pis-na > .pis-nab > span:first-child{display:inline;font-size:var(--fs-2)}
   @media (max-width:760px){ .pis-na{grid-template-columns:1fr 1fr} .pis-na > div:nth-child(3){grid-column:1/-1} .pis-na b{font-size:var(--fs-5)} }
+  /* v135: المدير المالي */
+  .cfo-vd{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;justify-content:space-between;
+    border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4);background:var(--warn-soft)}
+  .cfo-vd.good{background:var(--gain-soft)} .cfo-vd.bad{background:var(--due-soft)}
+  .cfo-vd h3{margin:0;font-size:var(--fs-5)} .cfo-vd p{margin:4px 0 0;color:var(--ink-soft);font-size:var(--fs-2)}
+  .cfo-hero{display:flex;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
+  .cfo-hero b{font-size:var(--fs-7);line-height:1} .cfo-hero .ar{color:var(--ink-soft);font-size:var(--fs-5)}
+  .cfo-hero small{display:block;width:100%;color:var(--ink-soft);font-size:var(--fs-2)}
+  table.cfo-unit th{font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);text-align:start;padding:6px 8px}
+  table.cfo-unit td.tg{color:var(--ink-soft);font-size:var(--fs-2)}
+  table.cfo-score th{font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);text-align:start;padding:6px 8px}
+  table.cfo-score tr.grp td{font-weight:700;color:var(--teal);background:var(--teal-soft);font-size:var(--fs-2)}
+  table.cfo-score td.cm{color:var(--ink-soft);font-size:var(--fs-2);line-height:1.6;min-width:220px}
+  table.cfo-score td.bm{color:var(--ink-soft);font-size:var(--fs-2);white-space:nowrap}
+  .cfo-sc{display:inline-flex;align-items:baseline;gap:4px;border-radius:var(--r-pill);padding:4px 12px;background:var(--card);font-weight:700}
+  .cfo-sc b{font-size:var(--fs-5)} .cfo-sc span{font-size:var(--fs-2);color:var(--ink-soft);font-weight:400}
+  .cfo-acts{display:flex;flex-direction:column;gap:var(--sp-2)}
+  .cfo-act{display:grid;grid-template-columns:28px 1fr auto;gap:var(--sp-3);align-items:start;border:1px solid var(--line);
+    border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);background:var(--card)}
+  .cfo-act .no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:var(--fs-2);
+    background:var(--teal-soft);color:var(--teal)}
+  .cfo-act h4{margin:0;font-size:var(--fs-4)} .cfo-act p{margin:4px 0 0;font-size:var(--fs-2);color:var(--ink-soft);line-height:1.7}
+  .cfo-act .imp{text-align:end;white-space:nowrap} .cfo-act .imp b{display:block;font-size:var(--fs-5);color:var(--gain)}
+  .cfo-act .imp small{font-size:var(--fs-1);color:var(--ink-soft)}
+  .cfo-act.done{opacity:.75} .cfo-act.done .no{background:var(--gain-soft);color:var(--gain)}
+  .cfo-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)} .cfo-two > .panel{margin:0}
+  @media (max-width:760px){ .cfo-two{grid-template-columns:1fr} table.cfo-unit th:last-child,table.cfo-unit td.tg{display:none} table.cfo-score thead,table.cfo-score .bm{display:none}
+    table.cfo-score tr:not(.grp){display:grid;grid-template-columns:1fr auto auto;align-items:center;column-gap:var(--sp-2)}
+    table.cfo-score tr.grp,table.cfo-score tr.grp td{display:block}
+    #t-cfo-score td{border:0} #t-cfo-score tr:not(.grp){border-bottom:1px solid var(--line)}
+    table.cfo-score td.cm{grid-column:1/-1;min-width:0;padding-top:0} .cfo-act{grid-template-columns:24px 1fr} .cfo-act .imp{grid-column:2;text-align:start} }
+  .cfo-ln{padding:var(--sp-2) 0;border-bottom:1px solid var(--line);font-size:var(--fs-3);line-height:1.7}
+  .cfo-ln:last-child{border-bottom:0} .cfo-ln small{display:block;color:var(--ink-soft);font-size:var(--fs-2)}
+  .cfo-notes{margin:0;padding-inline-start:18px;font-size:var(--fs-3);line-height:1.8}
+  .cfo-notes small{color:var(--ink-soft);font-size:var(--fs-2)}
+
   /* v133: تقرير الشركاء — ثيم Lora Plum. ألوانه من --lp-* الثابتة: التقرير بيتطبع فاتح حتى لو السيستم ليلي */
   #prt{position:fixed;inset:0;z-index:60;background:#E9E3E8;overflow:auto;direction:rtl}
   #prt[hidden]{display:none}
@@ -2211,6 +2247,7 @@
     <button data-tab="capital" data-grp="money">الشركاء</button>
     <button data-tab="rep" data-grp="more" data-sub="sum">قايمة الدخل</button>
     <button data-tab="rep" data-grp="more" data-sub="fin" class="money-only">القوايم المالية</button>
+    <button data-tab="rep" data-grp="more" data-sub="cfo" class="money-only">المدير المالي</button>
     <button data-tab="rep" data-grp="more" data-sub="items">الأصناف</button>
     <button data-tab="rep" data-grp="more" data-sub="cust">العملاء والمحافظات</button>
     <button data-tab="rep" data-grp="more" data-sub="team">الفريق</button>
@@ -3267,6 +3304,7 @@
   <div class="rep-tabs" id="rep-tabs" role="tablist" aria-label="أقسام التقارير">
     <button type="button" role="tab" data-rtab="sum">ملخص</button>
     <button type="button" role="tab" data-rtab="fin" class="money-only">القوايم المالية</button>
+    <button type="button" role="tab" data-rtab="cfo" class="money-only">المدير المالي</button>
     <button type="button" role="tab" data-rtab="items">الأصناف</button>
     <button type="button" role="tab" data-rtab="cust">العملاء والمحافظات</button>
     <button type="button" role="tab" data-rtab="team">الفريق</button>
@@ -3279,6 +3317,27 @@
     <h3 style="margin-top:var(--sp-5)">قايمة الدخل <small id="fin-per"></small></h3>
     <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div>
     <p class="hint" id="fin-note" style="margin:var(--sp-3) 0 0"></p>
+  </div>
+
+  <!-- v135: المدير المالي — تقييم الأداء وخطة زيادة الربح. كله محسوب من الحركات وبيتحدّث لوحده -->
+  <div class="panel money-only cfo-top" id="cfo-panel" data-rt="cfo">
+    <div id="cfo-verdict"></div>
+    <h3>تقييم الأداء <small id="cfo-score-s"></small></h3>
+    <div class="tbl-wrap"><table id="t-cfo-score" class="fin-t cfo-score"></table></div>
+    <h3 style="margin-top:var(--sp-5)">الأوردر الواحد — دلوقتي وبعد الخطة</h3>
+    <div class="tbl-wrap"><table id="t-cfo-unit" class="fin-t cfo-unit"></table></div>
+    <p class="hint" id="cfo-basis" style="margin:var(--sp-3) 0 0"></p>
+  </div>
+  <div class="panel money-only" data-rt="cfo">
+    <h3 style="margin-top:0">القرارات اللي بتزوّد الربح <small id="cfo-acts-sum"></small></h3>
+    <div class="cfo-acts" id="cfo-acts"></div>
+  </div>
+  <div class="cfo-two money-only" data-rt="cfo">
+    <div class="panel"><h3 style="margin-top:0">المخاطر</h3><div id="cfo-risk"></div></div>
+    <div class="panel"><h3 style="margin-top:0">المخزون والكاش</h3><div id="cfo-stock"></div></div>
+  </div>
+  <div class="panel money-only" data-rt="cfo">
+    <h3 style="margin-top:0">ملاحظات محاسبية</h3><ul class="cfo-notes" id="cfo-notes"></ul>
   </div>
 
   <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
@@ -3847,8 +3906,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "134";
+  var VERSION = "135";
   var CHANGELOG = [
+    { v:"135", d:"2026-10-09", items:[
+      "جديد: «المدير المالي» في التحليل — تقييم الأداء من 10 على 11 مؤشر (الربحية · البيع والعملاء · الفلوس والمخزون)، كل مؤشر بمعياره وتقييمه ورأي المدير المالي",
+      "الأوردر الواحد دلوقتي وبعد الخطة، والقرارات اللي بتزوّد الربح مترتبة بالأثر بالجنيه — كارت القرار بيتعلّم «تمام» لوحده لما الأرقام تتظبط",
+      "المخاطر (لو الأوردرات اللي ماشية رجعت)، قرارات المخزون والكاش، وملاحظات محاسبية — كله محسوب من الحركات وبيتحدّث لوحده"
+    ]},
     { v:"134", d:"2026-10-09", items:[
       "ثيم Lora Plum في السيستم كله: ألوان البراند والخط بقوا في مكان واحد، والشاشات وتقرير الشركاء بياخدوا منهم",
       "ألوان الرسومات من الثيم: المبيعات برقوقي، الخسارة نبيذي، والبنود (بضاعة · شحن · إعلانات · تغليف · ثابتة) بألوان متقاسة لعمى الألوان في الوضعين — ونفس الألوان في شريط حاسبة التسعير",
@@ -8687,11 +8751,11 @@
   }
 
   /* v126: التقارير تبويبات بدل صفحة طويلة. آخر تبويب بيتفتكر على الجهاز ده بس (naya:rtab) */
-  var REP_TABS = ["sum", "fin", "items", "cust", "team"], repTab = "sum", repTabInit = false;
+  var REP_TABS = ["sum", "fin", "cfo", "items", "cust", "team"], repTab = "sum", repTabInit = false;
   try{ var rt0 = LS && LS.getItem("naya:rtab"); if(REP_TABS.indexOf(rt0) >= 0) repTab = rt0; }catch(e){}
   function applyRepTab(swap){
     var sec = document.getElementById("tab-rep"); if(!sec) return;
-    if(repTab === "fin" && !canMoney()) repTab = "sum";        // القوايم كلها أرقام ربح وتكلفة
+    if((repTab === "fin" || repTab === "cfo") && !canMoney()) repTab = "sum";   // أرقام ربح وتكلفة
     Array.prototype.forEach.call(sec.querySelectorAll("[data-rtab]"), function(b){
       var on = b.dataset.rtab === repTab;
       b.classList.toggle("on", on); b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1;
@@ -8707,18 +8771,19 @@
     var rs = sec.querySelector(".rsecs");
     if(rs) rs.classList.toggle("rt-off", !rs.querySelector("[data-rt]:not(.rt-off)"));
   }
-  var REP_TITLE = { sum:"قايمة الدخل", fin:"القوايم المالية", items:"الأصناف", cust:"العملاء والمحافظات", team:"الفريق" };
+  var REP_TITLE = { sum:"قايمة الدخل", fin:"القوايم المالية", cfo:"المدير المالي", items:"الأصناف", cust:"العملاء والمحافظات", team:"الفريق" };
   function repTitle(){
     var h = document.querySelector("#tab-rep > h2");
     if(h && h.firstChild && h.firstChild.nodeType === 3) h.firstChild.nodeValue = REP_TITLE[repTab] || "تقارير";
   }
   function setRepTab(t){
     if(REP_TABS.indexOf(t) < 0) return;
-    if(t === "fin" && !canMoney()) t = "sum";
+    if((t === "fin" || t === "cfo") && !canMoney()) t = "sum";
     repTab = t;
     try{ if(LS) LS.setItem("naya:rtab", t); }catch(e){}
     applyRepTab(true); repTitle();
     if(repTab === "fin") renderFin();
+    if(repTab === "cfo") renderCfo();
     if(activeTab === "rep") navMark();
   }
   (function(){
@@ -8769,6 +8834,262 @@
     o.diff = o.assets - (o.liab + o.equity);
     o.recon = netAssets() - totalEquity();            // نفس «توفيق الميزانية» في الشركاء — لازم الاتنين يتفقوا
     return o;
+  }
+  /* ═══ v135: المدير المالي ═══
+     تقييم الأداء وخطة زيادة الربح من نفس أرقام «قايمة الدخل» (لو كله اتسلّم) للفترة المختارة.
+     الأثر محسوب على نفس عدد الأوردرات — مش بيفترض زيادة في البيع. المعايير هنا في مكان واحد: */
+  var CFO_T = {
+    margin:0.55,     // هامش البضاعة الكويس لمحل أحذية أونلاين
+    itemMin:0.40,    // صنف هامشه أقل من كده = سعره محتاج يتراجع
+    raiseCap:0.10,   // أقصى زيادة سعر بنقترحها مرة واحدة (١٠٪) عشان البيع ما يقعش
+    adShare:0.40,    // الإعلان ما يزيدش عن ٤٠٪ من ربح الأوردر قبل الإعلان
+    discMax:0.03,    // الخصومات ما تزيدش عن ٣٪ من المبيعات
+    weakNet:15,      // صنف القطعة منه بتكسب أقل من كده بعد كل حاجة
+    refuse:[0.10, 0.20]
+  };
+  /* تقييم الأداء: كل مؤشر ليه ٣ حدود — ممتاز / كويس / محتاج شغل، واللي بعدهم ضعيف.
+     hi = كل ما يزيد أحسن. الدرجة: ممتاز ١٠ · كويس ٧٫٥ · محتاج شغل ٥ · ضعيف ٢٫٥ — والتقييم العام متوسطهم */
+  var CFO_G = {
+    margin: { hi:true,  c:[0.55, 0.45, 0.35] },   // هامش البضاعة
+    cu:     { hi:true,  c:[0.20, 0.12, 0.05] },   // ربح الأوردر ÷ اللي العميل بيدفعه
+    ads:    { hi:false, c:[0.30, 0.40, 0.55] },   // الإعلان ÷ ربح الأوردر قبل الإعلان
+    ship:   { hi:false, c:[0, 0.03, 0.08] },      // الشحن من جيبك ÷ متوسط الأوردر
+    disc:   { hi:false, c:[0.02, 0.03, 0.06] },   // الخصم ÷ المبيعات
+    pace:   { hi:true,  c:[5, 3, 1] },            // أوردر في اليوم
+    pcs:    { hi:true,  c:[1.8, 1.4, 1.1] },      // قطع في الأوردر
+    refuse: { hi:false, c:[0.08, 0.15, 0.25] },   // الرفض والإلغاء
+    cash:   { hi:true,  c:[2, 1, 0.5] },          // الكاش ÷ مصروف شهر (مشتريات وإعلانات)
+    stock:  { hi:false, c:[45, 75, 120] },        // المخزون يكفي كام يوم
+    fixed:  { hi:true,  c:[3, 1.5, 1] }           // ربح الأوردرات ÷ المصاريف الثابتة المتكررة
+  };
+  var CFO_GL = [["ممتاز", "go", 10], ["كويس", "go", 7.5], ["محتاج شغل", "pair", 5], ["ضعيف", "bad", 2.5]];
+  function cfoGrade(k, x){
+    var g = CFO_G[k], i = 0;
+    while(i < 3 && (g.hi ? x < g.c[i] - 1e-9 : x > g.c[i] + 1e-9)) i++;
+    return i;
+  }
+  function cfoData(r){
+    var P = projStats(r), v = P.exp, n = v.n, R = itemProfit(P, false), M = R.M;
+    var up5 = function(x){ return Math.ceil(x / 5 - 1e-9) * 5; };
+    var o = { P:P, v:v, n:n, M:M, acts:[], pcs:0 };
+    if(!n) return o;
+    Object.keys(M).forEach(function(id){ o.pcs += M[id].q; });
+    var pre = (v.gross + v.ship - (v.varExp - v.ads)) / n;            // ربح الأوردر قبل الإعلان
+    o.u = { aov:v.goods / n, gross:v.gross / n, ship:v.ship / n, ads:v.ads / n, oth:(v.varExp - v.ads) / n, pre:pre, cu:v.contrib / n,
+            margin:v.goods > 0.009 ? v.gross / v.goods : 0 };
+    // ١) أصناف هامشها ضعيف حتى بسعرها الكامل: نرفع السعر لحد ٤٠٪ هامش، بحد أقصى ١٠٪.
+    //    بنقيس على سعر الصنف مش السعر اللي اتباع بيه — البيع تحت السعر بيتحسب في الخصم (٤) بس، فمفيش حاجة بتتعد مرتين
+    var weak = [], a1 = 0, price = {};
+    live("items").forEach(function(it){ price[it.id] = Number(it.price)||0; });
+    Object.keys(M).forEach(function(id){
+      var m = M[id]; if(!id || m.q < 1 || m.g < 0.009) return;
+      var p = price[id] || m.g / m.q, c = m.c / m.q, mg = (p - c) / p;
+      if(mg >= CFO_T.itemMin) return;
+      // لحد ٤٠٪ هامش مقرّب لفوق لأقرب ٥، بس مايعدّيش ١٠٪ من السعر (مقرّب لتحت)
+      var need = c / (1 - CFO_T.itemMin) - p, raise = Math.min(up5(need), Math.floor(p * CFO_T.raiseCap / 5) * 5);
+      if(raise < 5) return;
+      weak.push({ id:id, q:m.q, p:p, avg:m.g / m.q, mg:mg, raise:raise }); a1 += raise * m.q;
+    });
+    weak.sort(function(a, b){ return b.raise * b.q - a.raise * a.q; });
+    o.acts.push({ k:"price", imp:a1, w:weak,
+      t:"زوّد سعر الأصناف اللي هامشها ضعيف",
+      d:weak.length ? weak.map(function(x){ return esc(itemName(x.id)) + " +" + x.raise + " على سعره " + Math.round(x.p) + " (هامشه بالسعر الكامل " + Math.round(x.mg * 100) + "% · " + qty(x.q) + " قطعة · بيتباع بمتوسط " + Math.round(x.avg) + ")"; }).join(" · ")
+        : "كل الأصناف هامشها بسعرها الكامل " + Math.round(CFO_T.itemMin * 100) + "% أو أكتر" });
+    // ٢) الشحن من جيبنا: يدخل في سعر القطعة والشحن قدام العميل زي ما هو
+    var sub = Math.max(0, -v.ship), per = o.pcs > 0 ? up5(sub / o.pcs) : 0;
+    o.acts.push({ k:"ship", imp:sub,
+      t:"دخّل فرق الشحن في سعر القطعة",
+      d:sub > 0.009 ? "الشحن طالع من جيبك " + money(sub) + " (" + Math.round(sub / n) + " على الأوردر). زوّد كل قطعة " + per + " والشحن قدام العميل يفضل زي ما هو."
+        : "العميل بيغطّي الشحن كله" });
+    // ٣) الإعلان على الأوردر
+    var adT = Math.max(0, Math.floor(pre * CFO_T.adShare / 5) * 5), a3 = o.u.ads > adT ? (o.u.ads - adT) * n : 0;
+    var best = Object.keys(M).filter(function(id){ return id && M[id].q >= 2; })
+      .sort(function(a, b){ return M[b].net / M[b].q - M[a].net / M[a].q; }).slice(0, 3);
+    o.adT = adT;
+    o.acts.push({ k:"ads", imp:a3,
+      t:"نزّل الإعلان على الأوردر لـ" + adT + " أو أقل",
+      d:"دلوقتي " + Math.round(o.u.ads) + " على الأوردر — بياكل " + Math.round(o.u.ads / Math.max(1, pre) * 100) + "% من ربح الأوردر قبل الإعلان (" + Math.round(pre) + ")." +
+        (best.length ? " ركّز الإعلان على: " + best.map(function(id){ return esc(itemName(id)) + " (" + Math.round(M[id].net / M[id].q) + " في القطعة)"; }).join(" · ") : "") });
+    // ٤) الخصومات: الفرق بين سعر الصنف والسعر اللي اتباع بيه
+    // الخصم = سعر الصنف الحالي − السعر اللي اتباع بيه، على القطع اللي اتباعت فعلاً (من غير المرتجع)
+    var disc = 0;
+    P.c.list.forEach(function(sl){ if(isCancelled(sl)) return;
+      var del = isDelivered(sl);
+      SL(sl).forEach(function(l){ var lp = price[l.itemId] || 0, q = del ? lineSold(l, sl) : Number(l.qty)||0;
+        if(lp > 0 && q > 0) disc += Math.max(0, lp - (Number(l.price)||0)) * q; }); });
+    var a4 = Math.max(0, disc - v.goods * CFO_T.discMax);
+    o.disc = disc;
+    o.acts.push({ k:"disc", imp:a4,
+      t:"الخصم بسبب بس — حد أقصى " + Math.round(CFO_T.discMax * 100) + "% من المبيعات",
+      d:"اتخصم " + money(disc) + " = " + (v.goods > 0.009 ? (disc / v.goods * 100).toFixed(1) : "0") + "% من المبيعات (بالمقارنة بسعر الصنف الحالي)." });
+    // ٥) أصناف القطعة منها بتكسب قليل جداً بعد كل حاجة (للعلم — مش داخلة في الإجمالي عشان ما تتحسبش مرتين)
+    o.thin = Object.keys(M).filter(function(id){ var m = M[id]; return id && m.q >= 3 && m.net / m.q < CFO_T.weakNet; })
+      .map(function(id){ return { id:id, q:M[id].q, per:M[id].net / M[id].q }; });
+    o.gain = o.acts.reduce(function(a, x){ return a + x.imp; }, 0);
+    // بعد الخطة
+    o.after = { gross:o.u.gross + (a1 + a4) / n, ship:o.u.ship + sub / n, ads:o.u.ads - a3 / n, oth:o.u.oth };
+    o.after.cu = o.after.gross + o.after.ship - o.after.ads - o.after.oth;
+    o.after.aov = o.u.aov + (a1 + a4 + sub) / n;
+    // الوتيرة
+    var ds = P.c.list.map(function(x){ return x.date; }).filter(Boolean).sort();
+    o.first = ds[0]; o.last = ds[ds.length - 1];
+    var end = r && r.to && r.to < today() ? r.to : today();               // فترة فاتت: لآخرها مش للنهارده
+    o.days = o.first ? Math.max(1, daysBetween(o.first, end) + 1) : 1;
+    // تقييم الأداء
+    var B = finBS(), X = expByCat(r), fin = 0, cx = 0;
+    P.c.list.forEach(function(sl){ if(isDelivered(sl)) fin++; else if(isCancelled(sl)){ fin++; cx++; } });
+    var rr = fin >= 5 ? { p:cx / fin, n:fin, x:cx } : null;                 // نفس refusalRate بس على الفترة
+    o.rr = rr;
+    var day = (v.cost + v.ads) / o.days, rec = X.subs + X.salary + X.trans + X.other;
+    o.B = B; o.need = day * 60; o.free = Math.max(0, B.stock - B.inOrders);   // المخزون من غير اللي في أوردرات ماشية
+    var pc = function(x){ return (x * 100).toFixed(1) + "%"; }, nn0 = function(x){ return (Math.round(x)||0).toLocaleString("en-US"); };
+    var sc = [];
+    var add = function(grp, k, lbl, x, val, bm, cm){ sc.push({ grp:grp, k:k, l:lbl, x:x, val:val, bm:bm, cm:cm, g:x === null ? null : cfoGrade(k, x) }); };
+    var u = o.u;
+    add("الربحية", "margin", "هامش البضاعة", u.margin, pc(u.margin), "55%+",
+      u.margin >= CFO_T.margin ? "تسعير البضاعة سليم." : "البضاعة متسعّرة أقل من اللازم — أول حاجة بتاكل الربح.");
+    add("الربحية", "cu", "الأوردر بيكسب من كل جنيه", u.cu / Math.max(1, u.aov), pc(u.cu / Math.max(1, u.aov)), "20%+",
+      "من كل 100 جنيه العميل بيدفعها بيفضل " + Math.round(u.cu / Math.max(1, u.aov) * 100) + " بعد البضاعة والشحن والإعلان.");
+    add("الربحية", "ads", "الإعلان من ربح الأوردر", u.ads / Math.max(1, u.pre), pc(u.ads / Math.max(1, u.pre)), "40% أو أقل",
+      "الإعلان " + nn0(u.ads) + " على الأوردر من " + nn0(u.pre) + " ربح قبل الإعلان" + (u.ads > o.adT + 0.5 ? " — أكبر بند محتاج يتظبط." : "."));
+    add("الربحية", "ship", "الشحن من جيبك", Math.max(0, -u.ship) / Math.max(1, u.aov), u.ship < -0.5 ? nn0(-u.ship) + " على الأوردر" : "0", "0",
+      u.ship < -0.5 ? "العميل بيدفع أقل من تكلفة الشركة — الفرق يدخل في سعر القطعة." : "العميل بيغطّي الشحن.");
+    add("الربحية", "disc", "الخصومات", v.goods > 0.009 ? o.disc / v.goods : 0, v.goods > 0.009 ? pc(o.disc / v.goods) : "0%", "3% أو أقل",
+      "اتخصم " + nn0(o.disc) + (o.disc / Math.max(1, v.goods) > CFO_T.discMax ? " — خصم من غير سبب بيروح من الصافي على طول." : "."));
+    add("البيع والعملاء", "pace", "الطلب", n / o.days, (n / o.days).toFixed(1) + " أوردر/يوم", "3+",
+      qty(n) + " أوردر في " + qty(o.days) + " يوم" + (o.days < 30 ? " — لسه بدري نحكم على الاستمرار." : "."));
+    add("البيع والعملاء", "pcs", "القطع في الأوردر", o.pcs / n, (o.pcs / n).toFixed(1) + " قطعة", "1.4+",
+      o.pcs / n >= 1.8 ? "العميل بياخد أكتر من قطعة — نقطة قوة." : "اعرض قطعة تانية مع كل أوردر.");
+    add("البيع والعملاء", "refuse", "الرفض والإلغاء", rr ? rr.p : null, rr ? pc(rr.p) : "لسه بدري", "8% أو أقل",
+      rr ? rr.x + " من " + rr.n + " أوردر خلصوا — " + qty(P.nOpen) + " لسه ماشيين، ودول اللي هيحددوا الرقم الحقيقي." : "محتاج ٥ أوردرات خلصوا على الأقل.");
+    add("الفلوس والمخزون", "cash", "السيولة", day > 0.009 ? B.cash / (day * 30) : null, day > 0.009 ? (B.cash / (day * 30)).toFixed(1) + " شهر" : "—", "شهرين+",
+      "الخزنة " + nn0(B.cash) + " تكفي " + (day > 0.009 ? (B.cash / (day * 30)).toFixed(1) : "—") + " شهر مشتريات وإعلانات على الوتيرة الحالية.");
+    var cogsDay = v.cost / o.days;
+    add("الفلوس والمخزون", "stock", "المخزون يكفي", cogsDay > 0.009 ? o.free / cogsDay : null, cogsDay > 0.009 ? qty(Math.round(o.free / cogsDay)) + " يوم" : "—", "45 يوم أو أقل",
+      "بضاعة بـ" + nn0(o.free) + " بالتكلفة من غير اللي في أوردرات ماشية" + (cogsDay > 0.009 && o.free / cogsDay > 75 ? " — فلوس واقفة على الرف." : " — على قد البيع."));
+    add("الفلوس والمخزون", "fixed", "تغطية المصاريف الثابتة", rec > 0.009 ? v.contrib / rec : null, rec > 0.009 ? (v.contrib / rec).toFixed(1) + " مرة" : "مفيش ثابت", "1.5+ مرة",
+      rec > 0.009 ? "ربح الأوردرات " + nn0(v.contrib) + " قدام ثابت متكرر " + nn0(rec) + " (من غير مصاريف التأسيس)." : "مفيش مصاريف ثابتة متكررة متسجّلة.");
+    o.sc = sc;
+    var gs = sc.filter(function(x){ return x.g !== null; });
+    o.score = gs.length ? gs.reduce(function(a, x){ return a + CFO_GL[x.g][2]; }, 0) / gs.length : null;
+    return o;
+  }
+  function renderCfo(){
+    var vd = document.getElementById("cfo-verdict"); if(!vd) return;
+    var o = cfoData(periodRange()), v = o.v, n = o.n;
+    var nn = function(x){ return (Math.round(x)||0).toLocaleString("en-US"); };
+    var sg = function(x){ return x < -0.5 ? "(" + nn(-x) + ")" : nn(x); };
+    var ids = ["t-cfo-score", "t-cfo-unit", "cfo-acts", "cfo-risk", "cfo-stock", "cfo-notes"];
+    if(!n){
+      vd.innerHTML = "<div class='cfo-vd'><div><h3>لسه مفيش أوردرات في الفترة دي</h3><p>اختار فترة فيها بيع، أو «كل الفترات».</p></div></div>";
+      ids.forEach(function(id){ var e = document.getElementById(id); if(e) e.innerHTML = ""; });
+      document.getElementById("cfo-basis").textContent = ""; document.getElementById("cfo-acts-sum").textContent = ""; document.getElementById("cfo-score-s").textContent = "";
+      return;
+    }
+    var u = o.u, A = o.after;
+    // الحكم
+    var weakU = u.margin < CFO_T.margin || u.ads > o.adT + 0.5;
+    var cls = u.cu <= 0 ? "bad" : weakU ? "" : "good";
+    var head = u.cu <= 0 ? "الأوردر بيخسر — لازم السعر أو الإعلان يتظبط"
+      : weakU ? "البيع ماشي — بس ربح الأوردر ضعيف" : "ماشي صح — الأوردر بيكسب كويس";
+    var why = [];
+    if(u.margin < CFO_T.margin) why.push("هامش البضاعة " + (u.margin * 100).toFixed(1) + "% والكويس " + Math.round(CFO_T.margin * 100) + "% أو أكتر");
+    if(u.ads > o.adT + 0.5) why.push("الإعلان " + nn(u.ads) + " على الأوردر والحد " + o.adT);
+    if(u.ship < -0.5) why.push("الشحن من جيبك " + nn(-u.ship) + " على الأوردر");
+    vd.innerHTML = "<div class='cfo-vd " + cls + "'><div>" +
+      (o.score !== null ? "<span class='cfo-sc'><span>تقييم المدير المالي</span><b class='num'>" + o.score.toFixed(1) + "</b><span>من 10</span></span>" : "") +
+      "<h3 style='margin-top:var(--sp-2)'>" + head + "</h3><p>" + (why.join(" · ") || "كل المؤشرات في الحدود") + "</p></div>" +
+      "<div class='cfo-hero'><b class='num " + (u.cu < 0 ? "v-due" : "") + "'>" + sg(u.cu) + "</b><span class='ar'>←</span><b class='num " + (A.cu < -0.5 ? "v-due" : A.cu > 0.5 ? "v-gain" : "") + "'>" + sg(A.cu) + "</b>" +
+      "<small>الأوردر بيكسب دلوقتي ← بعد الخطة</small></div></div>";
+    // تقييم الأداء
+    var sh = "<thead><tr><th>المؤشر</th><th class='num'>القيمة</th><th class='bm'>المعيار</th><th>التقييم</th><th>رأي المدير المالي</th></tr></thead><tbody>", lg = "";
+    o.sc.forEach(function(x){
+      if(x.grp !== lg){ sh += "<tr class='grp'><td colspan='5'>" + x.grp + "</td></tr>"; lg = x.grp; }
+      var G = x.g === null ? null : CFO_GL[x.g];
+      sh += "<tr><td class='wide'>" + x.l + "</td><td class='num'>" + x.val + "</td><td class='bm'>" + x.bm + "</td>" +
+        "<td>" + (G ? "<span class='itp-st " + G[1] + "'>" + G[0] + "</span>" : "<span class='itp-st idle'>لسه بدري</span>") + "</td>" +
+        "<td class='cm'>" + x.cm + "</td></tr>";
+    });
+    document.getElementById("t-cfo-score").innerHTML = sh + "</tbody>";
+    var cnt = [0, 0, 0, 0]; o.sc.forEach(function(x){ if(x.g !== null) cnt[x.g]++; });
+    document.getElementById("cfo-score-s").textContent = "— " + [cnt[0] + cnt[1] ? (cnt[0] + cnt[1]) + " كويس" : "", cnt[2] ? cnt[2] + " محتاج شغل" : "", cnt[3] ? cnt[3] + " ضعيف" : ""].filter(Boolean).join(" · ");
+    // جدول الأوردر الواحد
+    var row = function(lbl, a, b, tg, kind){
+      return "<tr" + (kind ? " class='" + kind + "'" : "") + "><td class='wide'>" + lbl + "</td><td class='num" + (a < -0.5 ? " v-due" : "") + "'>" + sg(a) + "</td>" +
+        "<td class='num" + (b < -0.5 ? " v-due" : "") + "'>" + sg(b) + "</td><td class='tg'>" + (tg || "") + "</td></tr>";
+    };
+    document.getElementById("t-cfo-unit").innerHTML =
+      "<thead><tr><th>البند</th><th class='num'>دلوقتي</th><th class='num'>بعد الخطة</th><th>المعيار</th></tr></thead><tbody>" +
+      row("العميل بيدفع (متوسط الأوردر)", u.aov, A.aov, (o.pcs / n).toFixed(1) + " قطعة في الأوردر") +
+      row("ربح البضاعة", u.gross, A.gross, "الهامش " + (u.margin * 100).toFixed(1) + "% · الكويس " + Math.round(CFO_T.margin * 100) + "%+") +
+      row("الشحن", u.ship, A.ship, u.ship < -0.5 ? "طالع من جيبك" : "العميل بيغطيه") +
+      row("الإعلان", -u.ads, -A.ads, "الحد " + o.adT + " (" + Math.round(CFO_T.adShare * 100) + "% من ربح الأوردر قبل الإعلان)") +
+      row("تغليف ومتغيّر تاني", -u.oth, -A.oth, "") +
+      row("الأوردر بيكسب", u.cu, A.cu, "قبل المصاريف الثابتة", "fs-tot") + "</tbody>";
+    document.getElementById("cfo-basis").textContent = "محسوب على «لو كله اتسلّم» — " + qty(n) + " أوردر" +
+      (o.first ? " من " + o.first + " لـ " + o.last : "") + ". «بعد الخطة» على نفس عدد الأوردرات، من غير ما نفترض زيادة في البيع. بيتحدّث لوحده بعد كل حركة.";
+    // القرارات
+    var acts = o.acts.slice().sort(function(a, b){ return b.imp - a.imp; });
+    document.getElementById("cfo-acts-sum").textContent = o.gain > 0.5 ? "— الإجمالي +" + nn(o.gain) + " على نفس الأوردرات" : "";
+    var h = acts.map(function(x, i){
+      var done = x.imp < 0.5;
+      return "<div class='cfo-act" + (done ? " done" : "") + "'><span class='no'>" + (done ? "✓" : i + 1) + "</span>" +
+        "<div><h4>" + esc(x.t) + "</h4><p>" + x.d + "</p></div>" +
+        "<div class='imp'>" + (done ? "<small>تمام</small>" : "<b class='num'>+" + nn(x.imp) + "</b><small>+" + nn(x.imp / n) + " على الأوردر</small>") + "</div></div>";
+    }).join("");
+    if(o.thin.length) h += "<div class='cfo-act'><span class='no'>!</span><div><h4>أصناف القطعة منها بتكسب أقل من " + CFO_T.weakNet + " بعد كل حاجة</h4><p>" +
+      o.thin.map(function(x){ return esc(itemName(x.id)) + " " + nn(x.per) + " في القطعة (" + qty(x.q) + " قطعة)"; }).join(" · ") +
+      " — ارفع سعرها أو صفّيها وما تعيدش شراها.</p></div><div class='imp'><small>مش محسوبة في الإجمالي</small></div></div>";
+    document.getElementById("cfo-acts").innerHTML = h;
+    // المخاطر
+    var P = o.P, rr = o.rr, lossOpen = 0, rk = [];
+    P.open.forEach(function(sl){ var e = expProfit(sl); lossOpen += e.goods - e.cost + e.sin; });
+    var lossPer = P.nOpen ? lossOpen / P.nOpen : 0;
+    rk.push("<div class='cfo-ln'><b>" + qty(P.nOpen) + " أوردر لسه ما اتسلّمش</b> — الحسبة فوق مفترضة إنهم كلهم هيتسلّموا." +
+      "<small>كل أوردر بيرجع بيضيّع حوالي " + nn(lossPer) + " (ربح البضاعة + الشحن اللي العميل كان هيدفعه)، والإعلان والشحن بيكونوا اتصرفوا.</small></div>");
+    if(P.nOpen) CFO_T.refuse.forEach(function(p){
+      var k = P.nOpen * p;
+      rk.push("<div class='cfo-ln'>لو رجع " + Math.round(p * 100) + "% منهم" + (k >= 1 ? " (حوالي " + qty(Math.round(k)) + " أوردر)" : "") +
+        ": الربح ينزل حوالي <b class='v-due num'>" + nn(k * lossPer) + "</b></div>");
+    });
+    rk.push("<div class='cfo-ln'>الرفض والإلغاء في الفترة: <b>" + (rr ? Math.round(rr.p * 100) + "%" : "لسه بدري") + "</b>" +
+      "<small>" + (rr ? rr.x + " من " + rr.n + " أوردر خلصوا" : "محتاج ٥ أوردرات خلصوا على الأقل") + " · أكّد كل أوردر بمكالمة أو واتساب قبل الشحن</small></div>");
+    document.getElementById("cfo-risk").innerHTML = rk.join("");
+    // المخزون والكاش
+    var st = [], sold = {}, B = o.B;
+    live("sales").forEach(function(sl){ if(isCancelled(sl)) return; SL(sl).forEach(function(l){ if(l.itemId) sold[l.itemId] = (sold[l.itemId] || 0) + (Number(l.qty)||0); }); });
+    var val = function(id){ var t = 0; variantsOf(id).forEach(function(x){ var k = stockOfV(id, x.color, x.size); if(k > 0) t += k * avgCostVB(id, x.color, x.size); }); return t; };
+    var wk = o.acts[0].w || [];
+    if(wk.length){
+      var wv = wk.reduce(function(a, x){ return a + val(x.id); }, 0);
+      st.push("<div class='cfo-ln'><b>ما تعيدش شرا:</b> " + wk.map(function(x){ return esc(itemName(x.id)); }).join(" · ") + " قبل ما سعرهم يتظبط" +
+        "<small>عندك منهم بضاعة بـ" + nn(wv) + " بالتكلفة" + (o.free > 0.009 ? " (" + Math.round(Math.min(1, wv / o.free) * 100) + "% من المخزون)" : "") + "</small></div>");
+    }
+    var idle = live("items").filter(function(it){ return !sold[it.id] && stockOf(it.id) > 0; })
+      .map(function(it){ return { n:it.name, q:stockOf(it.id), v:val(it.id) }; }).sort(function(a, b){ return b.v - a.v; });
+    if(idle.length){
+      var iv = idle.reduce(function(a, x){ return a + x.v; }, 0);
+      st.push("<div class='cfo-ln'><b>لسه ما اتباعش منها حاجة:</b> " + idle.slice(0, 5).map(function(x){ return esc(x.n) + " (" + qty(x.q) + ")"; }).join(" · ") +
+        (idle.length > 5 ? " و" + qty(idle.length - 5) + " تانيين" : "") +
+        "<small>بضاعة بـ" + nn(iv) + " بالتكلفة — اعمل إعلان تجريبي صغير قبل ما تشتري منها تاني</small></div>");
+    }
+    var need = o.need;
+    if(B.cap > 0.009) st.push("<div class='cfo-ln'><b>الكاش في الخزنة " + nn(B.cash) + "</b> = " + Math.round(B.cash / B.cap * 100) + "% من رأس المال" +
+      "<small>احتياطي شهرين مشتريات وإعلانات على الوتيرة الحالية ≈ " + nn(need) +
+      (B.cash > need * 1.5 ? " — الباقي (" + nn(B.cash - need) + ") ممكن يتصرف على الأصناف اللي هامشها عالي لما تثبت إنها بتتباع" : "") + "</small></div>");
+    document.getElementById("cfo-stock").innerHTML = st.join("") || "<p class='hint' style='margin:0'>مفيش ملاحظات على المخزون.</p>";
+    // ملاحظات محاسبية
+    var X = expByCat(null), nt = [];
+    if(P.noCost) nt.push("<b>" + qty(P.noCost) + " أوردر ماشي فيه أصناف لسه ما اتشرتش</b> — تكلفتها مش معروفة فهي بره الحسبة. سجّل فاتورة المشتريات عشان الأرقام تكمل.");
+    if(!(X.salary > 0.009)) nt.push("الربح ده <b>قبل أي مرتبات</b> — مفيش مرتبات متسجّلة. لو حد بيشتغل من غير مرتب، الربح الحقيقي أقل لما تحسب تمن شغله.");
+    if(X.subs > 0.009){
+      var mon = today().slice(0, 7), last = "";
+      live("cash").forEach(function(c){ if(c.type === "expense" && !trLinked(c) && expCat(c) === "subs" && c.date > last) last = c.date; });
+      if(last && last.slice(0, 7) < mon) nt.push("آخر اشتراكات اتسجّلت " + esc(last) + ". لو شهرية، سجّل الشهر ده عشان قايمة الدخل تبقى مظبوطة.");
+    }
+    if(P.nOpen) nt.push("«اتسلّم فعلاً» بيبان أقل من «لو كله اتسلّم» لحد ما الأوردرات تتسلّم: الإيراد بيتحسب عند التسليم <small>(IFRS 15.38)</small> والإعلان بيتحسب أول ما يتدفع <small>(IAS 38.69(c))</small>.");
+    nt.push("المعايير اللي الشاشة بتقيس عليها: هامش البضاعة " + Math.round(CFO_T.margin * 100) + "% · صنف أقل من " + Math.round(CFO_T.itemMin * 100) + "% سعره يتراجع (بحد أقصى +" + Math.round(CFO_T.raiseCap * 100) + "%) · الإعلان ≤ " + Math.round(CFO_T.adShare * 100) + "% من ربح الأوردر قبل الإعلان · الخصم ≤ " + Math.round(CFO_T.discMax * 100) + "% من المبيعات.");
+    document.getElementById("cfo-notes").innerHTML = nt.map(function(x){ return "<li>" + x + "</li>"; }).join("");
   }
   function renderFin(){
     var tb = document.getElementById("t-fin-bs"); if(!tb) return;
@@ -8986,7 +9307,8 @@
   function renderReports(){
     clearMonthly();
     renderProjIS();
-    if(repTab === "fin") renderFin();
+    if(repTab === "cfo" && canMoney()) renderCfo();
+    if(repTab === "fin" && canMoney()) renderFin();
     renderItemProfit();
     applyRepTab(!repTabInit); repTabInit = true; repTitle();
     renderAging();
