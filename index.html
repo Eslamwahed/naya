@@ -1362,6 +1362,9 @@
   .cfo-sc{display:inline-flex;align-items:baseline;gap:4px;border-radius:var(--r-pill);padding:4px 12px;background:var(--card);font-weight:700}
   .cfo-sc b{font-size:var(--fs-5)} .cfo-sc span{font-size:var(--fs-2);color:var(--ink-soft);font-weight:400}
   .cfo-acts{display:flex;flex-direction:column;gap:var(--sp-2)}
+  table.cfo-prices th{font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);text-align:start;padding:6px 8px}
+  table.cfo-prices td.np{font-weight:700;font-size:var(--fs-4)} table.cfo-prices td.why{color:var(--ink-soft);font-size:var(--fs-2)}
+  table.cfo-prices .arr{color:var(--ink-soft);margin:0 4px}
   .cfo-act{display:grid;grid-template-columns:28px 1fr auto;gap:var(--sp-3);align-items:start;border:1px solid var(--line);
     border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);background:var(--card)}
   .cfo-act .no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:var(--fs-2);
@@ -1371,7 +1374,7 @@
   .cfo-act .imp small{font-size:var(--fs-1);color:var(--ink-soft)}
   .cfo-act.done{opacity:.75} .cfo-act.done .no{background:var(--gain-soft);color:var(--gain)}
   .cfo-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)} .cfo-two > .panel{margin:0}
-  @media (max-width:760px){ .cfo-two{grid-template-columns:1fr} table.cfo-unit th:last-child,table.cfo-unit td.tg{display:none} table.cfo-score thead,table.cfo-score .bm{display:none}
+  @media (max-width:760px){ .cfo-two{grid-template-columns:1fr} table.cfo-unit th:last-child,table.cfo-unit td.tg{display:none} table.cfo-score thead,table.cfo-score .bm{display:none} table.cfo-prices .cst,table.cfo-prices .why{display:none}
     table.cfo-score tr:not(.grp){display:grid;grid-template-columns:1fr auto auto;align-items:center;column-gap:var(--sp-2)}
     table.cfo-score tr.grp,table.cfo-score tr.grp td{display:block}
     #t-cfo-score td{border:0} #t-cfo-score tr:not(.grp){border-bottom:1px solid var(--line)}
@@ -3331,6 +3334,11 @@
   <div class="panel money-only" data-rt="cfo">
     <h3 style="margin-top:0">القرارات اللي بتزوّد الربح <small id="cfo-acts-sum"></small></h3>
     <div class="cfo-acts" id="cfo-acts"></div>
+    <details class="rsec" id="cfo-prices-d">
+      <summary>أسعار البيع الجديدة لكل صنف <b id="cfo-prices-s"></b></summary>
+      <p class="hint" id="cfo-prices-h" style="margin:0 0 var(--sp-3)"></p>
+      <div class="tbl-wrap"><table id="t-cfo-prices" class="cfo-prices"></table></div>
+    </details>
   </div>
   <div class="cfo-two money-only" data-rt="cfo">
     <div class="panel"><h3 style="margin-top:0">المخاطر</h3><div id="cfo-risk"></div></div>
@@ -3906,8 +3914,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "135";
+  var VERSION = "136";
   var CHANGELOG = [
+    { v:"136", d:"2026-10-09", items:[
+      "المدير المالي: «أسعار البيع الجديدة لكل صنف» — قسم مطوي تحت القرارات بالسعر اللي تحطه على كل صنف عشان الخطة تتنفذ، وكام هيفضل لك من القطعة قبل وبعد",
+      "السعر الجديد = سعر الصنف + فرق الشحن على القطعة + زيادة الهامش للأصناف الضعيفة (لحد 40% بحد أقصى 10%)، مقرّب لأقرب 5 — وبيشمل الأصناف اللي لسه ما اتباعتش",
+      "كارت «أصناف بتتباع بس مش بتكسب» بكلام أوضح: كام بيفضل لك من القطعة بعد البضاعة والإعلان والشحن"
+    ]},
     { v:"135", d:"2026-10-09", items:[
       "جديد: «المدير المالي» في التحليل — تقييم الأداء من 10 على 11 مؤشر (الربحية · البيع والعملاء · الفلوس والمخزون)، كل مؤشر بمعياره وتقييمه ورأي المدير المالي",
       "الأوردر الواحد دلوقتي وبعد الخطة، والقرارات اللي بتزوّد الربح مترتبة بالأثر بالجنيه — كارت القرار بيتعلّم «تمام» لوحده لما الأرقام تتظبط",
@@ -8868,6 +8881,12 @@
     while(i < 3 && (g.hi ? x < g.c[i] - 1e-9 : x > g.c[i] + 1e-9)) i++;
     return i;
   }
+  // زيادة السعر لصنف هامشه بسعره الكامل أقل من ٤٠٪: لحد ٤٠٪ مقرّبة لفوق لأقرب ٥، بس ما تعدّيش ١٠٪ (مقرّبة لتحت)
+  function cfoRaise(p, c){
+    if(!(p > 0) || (p - c) / p >= CFO_T.itemMin) return 0;
+    var r = Math.min(Math.ceil((c / (1 - CFO_T.itemMin) - p) / 5 - 1e-9) * 5, Math.floor(p * CFO_T.raiseCap / 5) * 5);
+    return r >= 5 ? r : 0;
+  }
   function cfoData(r){
     var P = projStats(r), v = P.exp, n = v.n, R = itemProfit(P, false), M = R.M;
     var up5 = function(x){ return Math.ceil(x / 5 - 1e-9) * 5; };
@@ -8883,18 +8902,15 @@
     live("items").forEach(function(it){ price[it.id] = Number(it.price)||0; });
     Object.keys(M).forEach(function(id){
       var m = M[id]; if(!id || m.q < 1 || m.g < 0.009) return;
-      var p = price[id] || m.g / m.q, c = m.c / m.q, mg = (p - c) / p;
-      if(mg >= CFO_T.itemMin) return;
-      // لحد ٤٠٪ هامش مقرّب لفوق لأقرب ٥، بس مايعدّيش ١٠٪ من السعر (مقرّب لتحت)
-      var need = c / (1 - CFO_T.itemMin) - p, raise = Math.min(up5(need), Math.floor(p * CFO_T.raiseCap / 5) * 5);
-      if(raise < 5) return;
+      var p = price[id] || m.g / m.q, c = m.c / m.q, mg = (p - c) / p, raise = cfoRaise(p, c);
+      if(!raise) return;
       weak.push({ id:id, q:m.q, p:p, avg:m.g / m.q, mg:mg, raise:raise }); a1 += raise * m.q;
     });
     weak.sort(function(a, b){ return b.raise * b.q - a.raise * a.q; });
     o.acts.push({ k:"price", imp:a1, w:weak,
       t:"زوّد سعر الأصناف اللي هامشها ضعيف",
-      d:weak.length ? weak.map(function(x){ return esc(itemName(x.id)) + " +" + x.raise + " على سعره " + Math.round(x.p) + " (هامشه بالسعر الكامل " + Math.round(x.mg * 100) + "% · " + qty(x.q) + " قطعة · بيتباع بمتوسط " + Math.round(x.avg) + ")"; }).join(" · ")
-        : "كل الأصناف هامشها بسعرها الكامل " + Math.round(CFO_T.itemMin * 100) + "% أو أكتر" });
+      d:(weak.length ? weak.map(function(x){ return esc(itemName(x.id)) + " +" + x.raise + " على سعره " + Math.round(x.p) + " (هامشه بالسعر الكامل " + Math.round(x.mg * 100) + "% · " + qty(x.q) + " قطعة · بيتباع بمتوسط " + Math.round(x.avg) + ")"; }).join(" · ")
+        : "كل الأصناف اللي اتباعت هامشها بسعرها الكامل " + Math.round(CFO_T.itemMin * 100) + "% أو أكتر") });
     // ٢) الشحن من جيبنا: يدخل في سعر القطعة والشحن قدام العميل زي ما هو
     var sub = Math.max(0, -v.ship), per = o.pcs > 0 ? up5(sub / o.pcs) : 0;
     o.acts.push({ k:"ship", imp:sub,
@@ -8926,6 +8942,34 @@
     o.thin = Object.keys(M).filter(function(id){ var m = M[id]; return id && m.q >= 3 && m.net / m.q < CFO_T.weakNet; })
       .map(function(id){ return { id:id, q:M[id].q, per:M[id].net / M[id].q }; });
     o.gain = o.acts.reduce(function(a, x){ return a + x.imp; }, 0);
+    /* أسعار البيع الجديدة: سعر الصنف + زيادة الهامش الضعيف (قرار ٣) + فرق الشحن على القطعة (قرار ٢)، مقرّب لفوق لأقرب ٥.
+       «بيفضل لك من القطعة» بعد السعر الجديد = السعر − التكلفة − نصيبها من الإعلان (على الحد المقترح) − نصيبها من الشحن والتغليف.
+       صنف ما اتباعش في الفترة: تكلفته من المخزون، ونصيبه من الإعلان والشحن = متوسط القطعة. */
+    o.shipPer = per;
+    var raiseOf = {}; weak.forEach(function(x){ raiseOf[x.id] = x.raise; });
+    var adK = o.u.ads > adT && o.u.ads > 0.009 ? adT / o.u.ads : 1;
+    var avgAd = o.pcs ? v.ads / o.pcs : 0, avgSh = o.pcs ? v.ship / o.pcs : 0, avgOv = o.pcs ? (v.varExp - v.ads) / o.pcs : 0;
+    o.prices = []; o.unsoldRaise = 0;
+    live("items").forEach(function(it){
+      var m = M[it.id], sold = m && m.q > 0, c, ad, sh, ov, now = null, dsc = 0;
+      var lp = Number(it.price)||0 || (sold ? m.g / m.q : 0);                // من غير سعر أساسي: متوسط اللي اتباع بيه (زي قرار ٣)
+      if(sold){ c = m.c / m.q; ad = m.ads / m.q; sh = m.sh / m.q; ov = m.ov / m.q; now = m.net / m.q; dsc = Math.max(0, lp - m.g / m.q); }
+      else {
+        // ما اتباعش في الفترة: تكلفته من المخزون (شاملة نقل المشتريات زي stockAtAvg) — القطع الموجبة بس
+        var sq = 0, sv = 0;
+        variantsOf(it.id).forEach(function(x){ var k = stockOfVi(it.id, x.color, x.size); if(k > 0){ sq += k; sv += k * avgCostV(it.id, x.color, x.size); } });
+        if(sq <= 0) return;                                                  // مش في المخزون ومش متباع: مالوش لازمة هنا
+        c = sv / sq; ad = avgAd; sh = avgSh; ov = avgOv;
+        if(!raiseOf[it.id]){ raiseOf[it.id] = cfoRaise(lp, c); if(raiseOf[it.id]) o.unsoldRaise++; }
+      }
+      if(!(lp > 0) || !(c > 0)) return;
+      var add = (raiseOf[it.id] || 0) + per, np = lp + add;                  // الزيادات مضاعفات ٥ — السعر نفسه ما بيتقرّبش
+      // بعد السعر الجديد بنفس الخصم اللي بتعمله دلوقتي على الصنف، والإعلان على الحد المقترح
+      var after = np - dsc - c + sh - ad * adK - ov;
+      o.prices.push({ id:it.id, n:it.name || "", lp:lp, np:np, add:add, c:c, now:now, after:after, q:sold ? m.q : 0, dsc:dsc,
+        why:[raiseOf[it.id] ? "+" + raiseOf[it.id] + " هامش" : "", per ? "+" + per + " شحن" : ""].filter(Boolean).join(" · ") });
+    });
+    o.prices.sort(function(a, b){ return b.q - a.q || a.n.localeCompare(b.n, "ar"); });
     // بعد الخطة
     o.after = { gross:o.u.gross + (a1 + a4) / n, ship:o.u.ship + sub / n, ads:o.u.ads - a3 / n, oth:o.u.oth };
     o.after.cu = o.after.gross + o.after.ship - o.after.ads - o.after.oth;
@@ -8979,11 +9023,11 @@
     var o = cfoData(periodRange()), v = o.v, n = o.n;
     var nn = function(x){ return (Math.round(x)||0).toLocaleString("en-US"); };
     var sg = function(x){ return x < -0.5 ? "(" + nn(-x) + ")" : nn(x); };
-    var ids = ["t-cfo-score", "t-cfo-unit", "cfo-acts", "cfo-risk", "cfo-stock", "cfo-notes"];
+    var ids = ["t-cfo-score", "t-cfo-unit", "cfo-acts", "t-cfo-prices", "cfo-prices-h", "cfo-risk", "cfo-stock", "cfo-notes"];
     if(!n){
       vd.innerHTML = "<div class='cfo-vd'><div><h3>لسه مفيش أوردرات في الفترة دي</h3><p>اختار فترة فيها بيع، أو «كل الفترات».</p></div></div>";
       ids.forEach(function(id){ var e = document.getElementById(id); if(e) e.innerHTML = ""; });
-      document.getElementById("cfo-basis").textContent = ""; document.getElementById("cfo-acts-sum").textContent = ""; document.getElementById("cfo-score-s").textContent = "";
+      document.getElementById("cfo-basis").textContent = ""; document.getElementById("cfo-acts-sum").textContent = ""; document.getElementById("cfo-score-s").textContent = ""; document.getElementById("cfo-prices-s").textContent = "";
       return;
     }
     var u = o.u, A = o.after;
@@ -9037,10 +9081,29 @@
         "<div><h4>" + esc(x.t) + "</h4><p>" + x.d + "</p></div>" +
         "<div class='imp'>" + (done ? "<small>تمام</small>" : "<b class='num'>+" + nn(x.imp) + "</b><small>+" + nn(x.imp / n) + " على الأوردر</small>") + "</div></div>";
     }).join("");
-    if(o.thin.length) h += "<div class='cfo-act'><span class='no'>!</span><div><h4>أصناف القطعة منها بتكسب أقل من " + CFO_T.weakNet + " بعد كل حاجة</h4><p>" +
-      o.thin.map(function(x){ return esc(itemName(x.id)) + " " + nn(x.per) + " في القطعة (" + qty(x.q) + " قطعة)"; }).join(" · ") +
-      " — ارفع سعرها أو صفّيها وما تعيدش شراها.</p></div><div class='imp'><small>مش محسوبة في الإجمالي</small></div></div>";
+    if(o.thin.length) h += "<div class='cfo-act'><span class='no'>!</span><div><h4>أصناف بتتباع بس مش بتكسب</h4><p>" +
+      o.thin.map(function(x){ return esc(itemName(x.id)) + ": بيفضل لك " + nn(x.per) + " جنيه من القطعة بعد البضاعة والإعلان والشحن (" + nPcs(x.q) + ")"; }).join("<br>") +
+      "<br>← ارفع سعرها، أو بيع اللي عندك منها وما تشتريش تاني.</p></div><div class='imp'><small>تنبيه بس — مش داخل في الإجمالي<br>عشان ما يتحسبش مرتين</small></div></div>";
     document.getElementById("cfo-acts").innerHTML = h;
+    // أسعار البيع الجديدة
+    var pr = o.prices, pt = document.getElementById("t-cfo-prices");
+    document.getElementById("cfo-prices-s").textContent = pr.length ? qty(pr.length) + " صنف" : "";
+    document.getElementById("cfo-prices-h").innerHTML = pr.length ?
+      "حط السعر الجديد على كل صنف عشان قرارات الهامش والشحن تتنفذ. الزيادة = " +
+      (o.shipPer ? o.shipPer + " فرق شحن على كل قطعة" : "مفيش فرق شحن") + " + زيادة الهامش للأصناف الضعيفة. " +
+      "«بيفضل لك» بعد السعر الجديد محسوب بنفس الخصم اللي بتعمله دلوقتي على كل صنف، والإعلان على الحد المقترح (" + o.adT + " على الأوردر)." +
+      (o.unsoldRaise ? " وفيه " + qty(o.unsoldRaise) + " صنف ما اتباعش في الفترة هامشه ضعيف — زيادته هنا بس، مش في إجمالي القرارات لأنه مالوش بيع يتحسب عليه." : "") : "";
+    pt.innerHTML = pr.length ? "<thead><tr><th>الصنف</th><th class='num'>سعره دلوقتي</th><th class='num'>السعر الجديد</th><th class='cst num'>التكلفة</th>" +
+      "<th class='num'>بيفضل لك من القطعة</th><th class='why'>الزيادة</th></tr></thead><tbody>" +
+      pr.map(function(x){
+        var cl = function(v){ return v < -0.5 ? " v-due" : v > 0.5 ? " v-gain" : ""; };
+        // data-l = اسم الخانة في كروت الموبايل
+        return "<tr><td class='wide'><b>" + esc(x.n) + "</b>" + (x.q ? "" : " <span class='itp-st idle'>ما اتباعش في الفترة</span>") + "</td>" +
+          "<td class='num' data-l='سعره دلوقتي'>" + nn(x.lp) + "</td><td class='num np' data-l='السعر الجديد'>" + nn(x.np) + "</td><td class='cst num' data-l='التكلفة'>" + nn(x.c) + "</td>" +
+          "<td class='num' data-l='بيفضل لك من القطعة'><span>" + (x.now === null ? "—" : "<span class='" + cl(x.now).trim() + "'>" + sg(x.now) + "</span>") +
+          "<span class='arr'>←</span><b class='" + cl(x.after).trim() + "'>" + sg(x.after) + "</b></span></td>" +
+          "<td class='why' data-l='الزيادة'>+" + nn(x.add) + (x.why ? " (" + x.why + ")" : "") + "</td></tr>";
+      }).join("") + "</tbody>" : "";
     // المخاطر
     var P = o.P, rr = o.rr, lossOpen = 0, rk = [];
     P.open.forEach(function(sl){ var e = expProfit(sl); lossOpen += e.goods - e.cost + e.sin; });
