@@ -4072,8 +4072,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "143";
+  var VERSION = "144";
   var CHANGELOG = [
+    { v:"144", d:"2026-10-10", items:[
+      "تفاصيل «صافي الربح — أوردر أوردر»: صف الإجمالي بقى فيه إجمالي المبيعات وتكلفة البضاعة والشحن وعدد الأوردرات — وبيتحسب على الأوردرات اللي ظاهرة بالبحث والفلتر"
+    ]},
     { v:"143", d:"2026-10-10", items:[
       "تكلفة التشغيل على القطعة: مصاريف الفترة (إعلانات فيسبوك الفعلية · تغليف · اشتراكات · التأسيس على ٣ شهور) ÷ القطع اللي اتباعت في نفس الفترة — رقم واحد في الحاسبة والمدير المالي وتقرير الأصناف",
       "حاسبة التسعير: «− تكلفة التشغيل» و«صافي بعد تكلفة التشغيل» — دوس على السطر يفصّلهولك — و«أقصى خصم من غير خسارة» بقى بعد تكلفة التشغيل",
@@ -11785,15 +11788,16 @@
     net: function(L){
       var d = L.filter(function(s){ return Math.abs(saleProfit(s)) > 0.009; })
         .sort(function(a,b){ return saleProfit(b) - saleProfit(a); });
-      var t = 0;
+      var t = 0, tg = 0, tc = 0, tp = 0;                                  // v144: إجمالي كل عمود
       var rows = d.map(function(s){
-        var m = saleMoney(s), pr = saleProfit(s); t += pr;
+        var m = saleMoney(s), pr = saleProfit(s); t += pr; tg += m.goods; tc += m.cost; tp += m.pocket || 0;
         return "<tr><td class='num'>" + sRowLink(s) + "</td><td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
           "<td class='num'>" + money(m.goods) + "</td><td class='num'>" + money(m.cost) + "</td>" +
           "<td class='num'>" + (m.pocket ? (m.pocket > 0 ? "−" : "+") + money(Math.abs(m.pocket)) : "—") + "</td>" +
           "<td class='num " + (pr >= 0 ? "v-gain" : "v-due") + "'>" + money(pr) + "</td></tr>";
       });
-      if(rows.length) rows.push(sumRow(["الإجمالي","","","","","<b>"+money(t)+"</b>"]));
+      if(rows.length) rows.push(sumRow(["الإجمالي (" + qty(d.length) + " أوردر)","","<b>"+money(tg)+"</b>","<b>"+money(tc)+"</b>",
+        "<b>" + (Math.abs(tp) > 0.009 ? (tp > 0 ? "−" : "+") + money(Math.abs(tp)) : "—") + "</b>","<b>"+money(t)+"</b>"]));
       return { note:"ربح كل أوردر = المبيعات − تكلفة البضاعة − اللي طلع من جيبك في الشحن. الأكبر ربح فوق، والخسران تحت بالأحمر.",
                head:["الأوردر","العميل","المبيعات","تكلفة البضاعة","الشحن","صافي الربح"], rows:rows };
     }
