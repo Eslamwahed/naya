@@ -3808,6 +3808,18 @@
     </div>
   </div>
 
+  <div class="panel" id="fix-panel">
+    <h3>المصاريف الثابتة في الشهر <small>— للتسعير والتحليل بس</small></h3>
+    <p class="hint" style="margin-top:0">بيتقسم على القطع اللي بتبيعها في الشهر عشان تعرف كل قطعة لازم تشيل كام من الثابت.
+      القوايم المالية وقايمة الدخل مش بتتغيّر — الثابت فيها مصروف زي ما هو.</p>
+    <p class="hint" id="fix-auto"></p>
+    <form class="grid" id="f-fixed" onsubmit="return false">
+      <div><label for="fx-month">الثابت الشهري اللي هتحسب عليه</label>
+        <input type="number" id="fx-month" min="0" step="any" autocomplete="off"></div>
+      <div><button class="act" type="button" id="b-fixed">حفظ</button></div>
+    </form>
+    <p class="hint" id="fix-per" style="margin-bottom:0"></p>
+  </div>
   <div class="panel">
     <h3>الإعدادات</h3>
     <form class="grid" id="f-settings">
@@ -3997,8 +4009,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "139";
+  var VERSION = "140";
   var CHANGELOG = [
+    { v:"140", d:"2026-10-10", items:[
+      "جديد: «المصاريف الثابتة في الشهر» في الإعدادات — السيستم بيقترح الرقم من المسجّل في الخزنة (الثابت المتكرر في آخر ٣٠ يوم + «مرة واحدة» ÷ ١٢) أو تكتب رقمك، وبيقسمه على القطع اللي بتبيعها في الشهر",
+      "حاسبة التسعير: «نصيب المصاريف الثابتة» و«صافي بعد الثابت» تحت صافي ربحك",
+      "المدير المالي: نصيب الثابت في «الأوردر الواحد»، «أسعار البيع الجديدة» بعد الثابت، «تغطية المصاريف الثابتة» بقت تقولك محتاج كام قطعة في الشهر، وتنبيه لو الثابت الحقيقي أكتر من رقمك",
+      "تقرير الأصناف: «بعد الثابت» تحت صافي القطعة",
+      "القوايم المالية وقايمة الدخل زي ما هي — الثابت فيها مصروف الفترة (IAS 2.16)"
+    ]},
     { v:"139", d:"2026-10-10", items:[
       "جديد: «جه منين؟» في كل أوردر (إعلان فيسبوك · إنستجرام · تيك توك · واتساب · عميل قديم · ترشيح) واسم الحملة — ونفس الاختيار في مصروف الإعلانات",
       "المدير المالي: «الإعلان حسب المصدر» — كل مصدر جاب كام أوردر، اتلغى منهم كام، صرفنا عليه كام، وربح الأوردر بعد الإعلان",
@@ -8195,6 +8214,7 @@
     if(!c.pcs){ el.innerHTML = ncw + "<p class='hint' style='margin:0'>اختار صنف واكتب العدد — والربح هيظهر هنا.</p>"; return; }
     var pos = Math.max(0, c.profit), tot = c.cogs + c.extra + c.sout + pos;
     var seg = function(v, col){ return tot > 0 && v > 0 ? "<i style='width:" + (v / tot * 100).toFixed(2) + "%;background:" + col + "'></i>" : ""; };
+    var FX = fixedPlan();
     var R = function(t, v, cls, sign){ return "<div class='pc-row" + (cls === "t" ? " t" : "") + "'><span>" + esc(t) + "</span><b class='num" + (cls && cls !== "t" ? " " + cls : "") + "'>" + (sign || "") + esc(money(v)) + "</b></div>"; };
     el.innerHTML = ncw + "<div class='hint' style='margin:0'>صافي ربح الأوردر</div>" +
       "<div class='big'><span class='hint' style='margin:0'>" + (c.mg !== null ? "هامش " + (c.mg * 100).toFixed(1) + "%" : "") + "</span>" +
@@ -8211,6 +8231,10 @@
         (c.extra ? R("− مصاريف إضافية", c.extra, "v-due") : "") +
         (c.sout ? R("− شحن للشركة", c.sout, "v-due") : "") +
         "<div class='pc-row t'><span>صافي ربحك</span><b class='num " + (c.profit >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(c.profit)) + "</b></div>" +
+        (FX.perPc > 0.009 ? R("− نصيب المصاريف الثابتة (" + FX.perPc.toFixed(1) + " للقطعة)", c.pcs * FX.perPc, "v-due") +
+          "<div class='pc-row t'><span>صافي بعد الثابت</span><b class='num " + (c.profit - c.pcs * FX.perPc >= 0 ? "v-gain" : "v-due") + "'>" +
+          esc(money(c.profit - c.pcs * FX.perPc)) + "</b></div>"
+          : FX.monthly > 0.009 ? "<p class='hintline' style='margin:4px 0 0'>نصيب المصاريف الثابتة مش محسوب — مفيش بيع في آخر ١٤ يوم نقسم عليه.</p>" : "") +
       "</div>" +
       "<div class='pc-floor'>" + (c.floor > 0.009
         ? "أقصى خصم من غير خسارة: <b class='num'>" + esc(money(c.floor)) + "</b> — يعني العميل يدفع <b class='num'>" + esc(money(c.pays + c.disc - c.floor)) + "</b> بس."
@@ -8948,6 +8972,7 @@
       if(d > 90) return "يكفي أكتر من 3 شهور";
       return "<span" + (d < 7 ? " class='v-due'" : "") + ">يكفي " + (d < 1 ? "أقل من يوم" : nDays(d).replace(/^يوم$/, "يوم واحد")) + "</span>";
     };
+    var FXi = fixedPlan();
     var rows = X.map(function(x){
       var m = x.m, z = m.q <= 0 && Math.abs(m.sh) < 0.009 && Math.abs(m.net) < 0.009,   // واقف ومالوش أي رقم
           nc = m.net > 0.009 ? "v-gain" : m.net < -0.009 ? "v-due" : "";
@@ -8959,7 +8984,7 @@
         "<td class='num itp-x'>" + (z ? "—" : pctTxt(m.g, m.c)) + "</td>" +
         "<td class='num itp-x' style='color:var(--ink-soft)'>" + (z ? "—" : money(m.ads)) + "</td>" +
         "<td class='num itp-x' style='color:var(--ink-soft)'>" + (z ? "—" : money(m.sh)) + "</td>" +
-        "<td class='num " + nc + "'>" + (pp === null ? "—" : signed(pp)) + "</td>" +
+        "<td class='num " + nc + "'>" + (pp === null ? "—" : signed(pp) + (FXi.perPc > 0.009 ? "<span class='sub" + (pp - FXi.perPc < -0.009 ? " v-due" : "") + "'>بعد الثابت " + signed(pp - FXi.perPc) + "</span>" : "")) + "</td>" +
         "<td class='num " + nc + "' style='font-weight:700'>" + (z ? "—" : signed(m.net)) + "</td>" +
         "<td class='barcell itp-x'>" + (z ? "" : miniBar(m.net, maxN)) + "</td>" +
         "<td class='itp-x'>" + daysTxt(x) + "</td>" +
@@ -8979,7 +9004,8 @@
     if(nt) nt.innerHTML = "نصيب كل صنف من الإعلان والتغليف على قد مبيعاته، وفرق الشحن من الأوردرات اللي هو فيها. " +
       "المجموع = «ربح الأوردر بعد مصاريف البيع» في قايمة الدخل (<b class='num " + (R.v.contrib >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(R.v.contrib)) + "</b>) — " +
       (act ? "<b>«اتسلّم فعلاً»</b>." : "<b>«لو كله اتسلّم»</b>: الأوردرات اللي لسه ماشية داخلة كأنها اتسلّمت.") +
-      " «المخزون يكفي» على قد طلبات آخر ١٤ يوم.";
+      " «المخزون يكفي» على قد طلبات آخر ١٤ يوم." +
+      (FXi.perPc > 0.009 ? " «بعد الثابت» = صافي القطعة − نصيبها من المصاريف الثابتة على وتيرة البيع دلوقتي (" + FXi.perPc.toFixed(1) + " — من الإعدادات)، حتى لو الفترة اللي فوق قديمة." : "");
   }
 
   /* v126: التقارير تبويبات بدل صفحة طويلة. آخر تبويب بيتفتكر على الجهاز ده بس (naya:rtab) */
@@ -9164,7 +9190,7 @@
     /* أسعار البيع الجديدة: سعر الصنف + زيادة الهامش الضعيف (قرار ٣) + فرق الشحن على القطعة (قرار ٢)، مقرّب لفوق لأقرب ٥.
        «بيفضل لك من القطعة» بعد السعر الجديد = السعر − التكلفة − نصيبها من الإعلان (على الحد المقترح) − نصيبها من الشحن والتغليف.
        صنف ما اتباعش في الفترة: تكلفته من المخزون، ونصيبه من الإعلان والشحن = متوسط القطعة. */
-    o.shipPer = per;
+    o.shipPer = per; o.fx = fixedPlan();
     var raiseOf = {}; weak.forEach(function(x){ raiseOf[x.id] = x.raise; });
     var adK = o.u.ads > adT && o.u.ads > 0.009 ? adT / o.u.ads : 1;
     var avgAd = o.pcs ? v.ads / o.pcs : 0, avgSh = o.pcs ? v.ship / o.pcs : 0, avgOv = o.pcs ? (v.varExp - v.ads) / o.pcs : 0;
@@ -9172,7 +9198,7 @@
     live("items").forEach(function(it){
       var m = M[it.id], sold = m && m.q > 0, c, ad, sh, ov, now = null, dsc = 0;
       var lp = Number(it.price)||0 || (sold ? m.g / m.q : 0);                // من غير سعر أساسي: متوسط اللي اتباع بيه (زي قرار ٣)
-      if(sold){ c = m.c / m.q; ad = m.ads / m.q; sh = m.sh / m.q; ov = m.ov / m.q; now = m.net / m.q; dsc = Math.max(0, lp - m.g / m.q); }
+      if(sold){ c = m.c / m.q; ad = m.ads / m.q; sh = m.sh / m.q; ov = m.ov / m.q; now = m.net / m.q - o.fx.perPc; dsc = Math.max(0, lp - m.g / m.q); }
       else {
         // ما اتباعش في الفترة: تكلفته من المخزون (شاملة نقل المشتريات زي stockAtAvg) — القطع الموجبة بس
         var sq = 0, sv = 0;
@@ -9184,7 +9210,7 @@
       if(!(lp > 0) || !(c > 0)) return;
       var add = (raiseOf[it.id] || 0) + per, np = lp + add;                  // الزيادات مضاعفات ٥ — السعر نفسه ما بيتقرّبش
       // بعد السعر الجديد بنفس الخصم اللي بتعمله دلوقتي على الصنف، والإعلان على الحد المقترح
-      var after = np - dsc - c + sh - ad * adK - ov;
+      var after = np - dsc - c + sh - ad * adK - ov - o.fx.perPc;         // وبعد نصيبها من الثابت
       o.prices.push({ id:it.id, n:it.name || "", lp:lp, np:np, add:add, c:c, now:now, after:after, q:sold ? m.q : 0, dsc:dsc,
         why:[raiseOf[it.id] ? "+" + raiseOf[it.id] + " هامش" : "", per ? "+" + per + " شحن" : ""].filter(Boolean).join(" · ") });
     });
@@ -9203,7 +9229,7 @@
     P.c.list.forEach(function(sl){ if(isDelivered(sl)) fin++; else if(isCancelled(sl)){ fin++; cx++; } });
     var rr = fin >= 5 ? { p:cx / fin, n:fin, x:cx } : null;                 // نفس refusalRate بس على الفترة
     o.rr = rr;
-    var day = (v.cost + v.ads) / o.days, rec = X.subs + X.salary + X.trans + X.other;
+    var day = (v.cost + v.ads) / o.days;
     o.B = B; o.need = day * 60; o.free = Math.max(0, B.stock - B.inOrders);   // المخزون من غير اللي في أوردرات ماشية
     var pc = function(x){ return (x * 100).toFixed(1) + "%"; }, nn0 = function(x){ return (Math.round(x)||0).toLocaleString("en-US"); };
     var sc = [];
@@ -9230,8 +9256,14 @@
     var cogsDay = v.cost / o.days;
     add("الفلوس والمخزون", "stock", "المخزون يكفي", cogsDay > 0.009 ? o.free / cogsDay : null, cogsDay > 0.009 ? qty(Math.round(o.free / cogsDay)) + " يوم" : "—", "45 يوم أو أقل",
       "بضاعة بـ" + nn0(o.free) + " بالتكلفة من غير اللي في أوردرات ماشية" + (cogsDay > 0.009 && o.free / cogsDay > 75 ? " — فلوس واقفة على الرف." : " — على قد البيع."));
-    add("الفلوس والمخزون", "fixed", "تغطية المصاريف الثابتة", rec > 0.009 ? v.contrib / rec : null, rec > 0.009 ? (v.contrib / rec).toFixed(1) + " مرة" : "مفيش ثابت", "1.5+ مرة",
-      rec > 0.009 ? "ربح الأوردرات " + nn0(v.contrib) + " قدام ثابت متكرر " + nn0(rec) + " (من غير مصاريف التأسيس)." : "مفيش مصاريف ثابتة متكررة متسجّلة.");
+    /* التعادل: كام قطعة في الشهر بتغطي الثابت الشهري — ربح القطعة من الفترة اللي فوق، والثابت والوتيرة بتوع دلوقتي
+       (زي «نصيب القطعة» في الإعدادات). من غير بيع في آخر ١٤ يوم مفيش وتيرة نقارن بيها — مش «ضعيف». */
+    var FXs = o.fx, cpp = o.pcs ? v.contrib / o.pcs : 0, be = cpp > 0.009 ? FXs.monthly / cpp : null;
+    var cov = !(FXs.monthly > 0.009) ? [null, "مفيش ثابت", "مفيش مصاريف ثابتة متكررة."]
+      : be === null ? [0, "مش متغطّي", "القطعة مش بتكسب قبل الثابت — مفيش عدد يغطيه."]
+      : FXs.pcsM < 1 ? [null, "مفيش بيع دلوقتي", "محتاج " + nn0(Math.ceil(be)) + " قطعة في الشهر تغطي الثابت (" + nn0(FXs.monthly) + ") — ومفيش بيع في آخر ١٤ يوم."]
+      : [FXs.pcsM / be, (FXs.pcsM / be).toFixed(1) + " مرة", "محتاج " + nn0(Math.ceil(be)) + " قطعة في الشهر تغطي الثابت (" + nn0(FXs.monthly) + ") — ماشي على " + nn0(FXs.pcsM) + "."];
+    add("الفلوس والمخزون", "fixed", "تغطية المصاريف الثابتة", cov[0], cov[1], "1.5+ مرة", cov[2]);
     o.sc = sc;
     var gs = sc.filter(function(x){ return x.g !== null; });
     o.score = gs.length ? gs.reduce(function(a, x){ return a + CFO_GL[x.g][2]; }, 0) / gs.length : null;
@@ -9342,7 +9374,9 @@
       row("الشحن", u.ship, A.ship, u.ship < -0.5 ? "طالع من جيبك" : "العميل بيغطيه") +
       row("الإعلان", -u.ads, -A.ads, "الحد " + o.adT + " (" + Math.round(CFO_T.adShare * 100) + "% من ربح الأوردر قبل الإعلان)") +
       row("تغليف ومتغيّر تاني", -u.oth, -A.oth, "") +
-      row("الأوردر بيكسب", u.cu, A.cu, "قبل المصاريف الثابتة", "fs-tot") + "</tbody>";
+      row("الأوردر بيكسب", u.cu, A.cu, "قبل المصاريف الثابتة", "fs-tot") +
+      (o.fx.perPc > 0.009 ? row("نصيب المصاريف الثابتة", -o.fx.perPc * o.pcs / n, -o.fx.perPc * o.pcs / n, o.fx.perPc.toFixed(1) + " للقطعة · " + (o.fx.manual > 0 ? "من الإعدادات" : "من المسجّل في الخزنة")) +
+        row("صافي الأوردر بعد الثابت", u.cu - o.fx.perPc * o.pcs / n, A.cu - o.fx.perPc * o.pcs / n, "", "fs-tot") : "") + "</tbody>";
     document.getElementById("cfo-basis").textContent = "محسوب على «لو كله اتسلّم» — " + qty(n) + " أوردر" +
       (o.first ? " من " + o.first + " لـ " + o.last : "") + ". «بعد الخطة» على نفس عدد الأوردرات، من غير ما نفترض زيادة في البيع. بيتحدّث لوحده بعد كل حركة.";
     // القرارات
@@ -9364,7 +9398,8 @@
     document.getElementById("cfo-prices-h").innerHTML = pr.length ?
       "حط السعر الجديد على كل صنف عشان قرارات الهامش والشحن تتنفذ. الزيادة = " +
       (o.shipPer ? o.shipPer + " فرق شحن على كل قطعة" : "مفيش فرق شحن") + " + زيادة الهامش للأصناف الضعيفة. " +
-      "«بيفضل لك» بعد السعر الجديد محسوب بنفس الخصم اللي بتعمله دلوقتي على كل صنف، والإعلان على الحد المقترح (" + o.adT + " على الأوردر)." +
+      "«بيفضل لك» بعد السعر الجديد محسوب بنفس الخصم اللي بتعمله دلوقتي على كل صنف، والإعلان على الحد المقترح (" + o.adT + " على الأوردر)" +
+      (o.fx.perPc > 0.009 ? "، وبعد نصيب القطعة من المصاريف الثابتة (" + o.fx.perPc.toFixed(1) + ")" : "") + "." +
       (o.unsoldRaise ? " وفيه " + qty(o.unsoldRaise) + " صنف ما اتباعش في الفترة هامشه ضعيف — زيادته هنا بس، مش في إجمالي القرارات لأنه مالوش بيع يتحسب عليه." : "") : "";
     pt.innerHTML = pr.length ? "<thead><tr><th>الصنف</th><th class='num'>سعره دلوقتي</th><th class='num'>السعر الجديد</th><th class='cst num'>التكلفة</th>" +
       "<th class='num'>بيفضل لك من القطعة</th><th class='why'>الزيادة</th></tr></thead><tbody>" +
@@ -9425,6 +9460,9 @@
     // ملاحظات محاسبية
     var X = expByCat(null), nt = [];
     if(P.noCost) nt.push("<b>" + qty(P.noCost) + " أوردر ماشي فيه أصناف لسه ما اتشرتش</b> — تكلفتها مش معروفة فهي بره الحسبة. سجّل فاتورة المشتريات عشان الأرقام تكمل.");
+    var FXn = o.fx;
+    if(FXn.manual > 0 && FXn.auto.total > FXn.manual * 1.1)
+      nt.push("<b>الثابت المسجّل فعلاً (" + nn(FXn.auto.total) + " في الشهر) أكتر من اللي حاطه في الإعدادات (" + nn(FXn.manual) + ")</b> — الأسعار المقترحة محسوبة على رقم أقل من الحقيقي. حدّث الرقم أو قلّل المصروف.");
     if(!(X.salary > 0.009)) nt.push("الربح ده <b>قبل أي مرتبات</b> — مفيش مرتبات متسجّلة. لو حد بيشتغل من غير مرتب، الربح الحقيقي أقل لما تحسب تمن شغله.");
     if(X.subs > 0.009){
       var mon = today().slice(0, 7), last = "";
@@ -15575,7 +15613,7 @@
     log:     function(){ renderLog(); },
     coach:   function(){ renderCoach(); },
     viz:     function(){ syncPeriodUI(); renderViz(); },
-    backup:  function(){ foldSettings(); renderOpening(); renderLock(); renderSnoState(); renderUsers(); }
+    backup:  function(){ foldSettings(); renderOpening(); renderLock(); renderSnoState(); renderUsers(); renderFixedPanel(); }
   };
   var dirtyTabs = {};          // تبويبات محتاجة رسم لما تتفتح
   var activeTab = "dash";
@@ -15587,10 +15625,64 @@
     delete dirtyTabs[tab];
   }
   // بتتنادى بعد أي تغيير في البيانات
+  /* ═══ v140 — تحميل المصاريف الثابتة على القطعة ═══
+     للتسعير والتحليل بس. القوايم المالية وقايمة الدخل زي ما هي: الثابت مصروف الفترة اللي اتصرف فيها
+     ومش بيدخل في تكلفة البضاعة (IAS 2.16). المقترح من المسجّل: الثابت المتكرر (اشتراكات · مرتبات · تاني)
+     متوسط آخر شهور كاملة (لحد ٣) — عشان مرتب بيتدفع أول الشهر يتحسب مرة واحدة في الشهر مهما كان طوله —
+     ولو لسه مفيش شهر كامل من أول حركة: آخر ٣٠ يوم. + «مرة واحدة» في آخر سنة ÷ ١٢. ولو كتبت رقمك في الإعدادات بيتحسب هو. */
+  var fxMemo = null;                                                         // بيتصفّر في renderAll مع أي تغيير في الداتا
+  function fixedAuto(){
+    var t = today(), d30 = addDays(t, -29), d365 = addDays(t, -364), start = "";
+    live("cash").concat(live("sales")).forEach(function(x){ if(x.date && (!start || x.date < start)) start = x.date; });
+    // الشهور الكاملة اللي فاتت (لحد ٣) اللي البيزنس كان شغال فيها من أولها
+    var months = [], y = Number(t.slice(0, 4)), m = Number(t.slice(5, 7));
+    for(var i = 0; i < 3; i++){
+      m--; if(m < 1){ m = 12; y--; }
+      var k = y + "-" + (m < 10 ? "0" : "") + m;
+      if(start && start <= k + "-01") months.push(k);
+    }
+    var inM = function(d){ return months.indexOf(d.slice(0, 7)) > -1; };
+    var rec = 0, once = 0, parts = {};
+    live("cash").forEach(function(c){
+      if(c.type !== "expense" || trLinked(c) || !c.date || c.date > t) return;
+      var k = expCat(c); if(!EXP_CAT[k] || EXP_CAT[k].kind !== "fixed") return;
+      var a = Number(c.amount)||0;
+      if(k === "once"){ if(c.date >= d365) once += a; return; }
+      if(months.length ? inM(c.date) : c.date >= d30){ rec += a; parts[k] = (parts[k] || 0) + a; }
+    });
+    var div = months.length || 1;
+    Object.keys(parts).forEach(function(k){ parts[k] /= div; });
+    return { rec:rec / div, months:months.length, once:once, once12:once / 12, parts:parts, total:rec / div + once / 12 };
+  }
+  function fixedPlan(){
+    var man = Number(settings.fixedMonthly) || 0, key = today() + "|" + man;
+    if(fxMemo && fxMemo.k === key) return fxMemo.v;
+    var A = fixedAuto(), pace = itemPace();
+    var pcsM = Object.keys(pace).reduce(function(a, k){ return a + pace[k]; }, 0) * 30;   // القطع في الشهر على وتيرة آخر ١٤ يوم
+    var monthly = man > 0 ? man : A.total;
+    var v = { auto:A, manual:man, monthly:monthly, pcsM:pcsM, perPc:pcsM >= 1 ? monthly / pcsM : 0 };
+    fxMemo = { k:key, v:v }; return v;
+  }
+  function renderFixedPanel(){
+    var el = document.getElementById("fix-auto"); if(!el) return;
+    var F = fixedPlan(), A = F.auto, nn = function(x){ return (Math.round(x)||0).toLocaleString("en-US"); };
+    var parts = Object.keys(A.parts).sort(function(a, b){ return A.parts[b] - A.parts[a]; }).map(function(k){ return EXP_CAT[k].label + " " + nn(A.parts[k]); });
+    var when = A.months ? (A.months === 1 ? "الشهر اللي فات" : "متوسط آخر " + A.months + " شهور كاملة") : "آخر ٣٠ يوم";
+    el.innerHTML = "المقترح من المسجّل عندك: " + (parts.length ? parts.join(" + ") + " (" + when + ")" : "مفيش ثابت متكرر (" + when + ")") +
+      (A.once ? " + «مرة واحدة» " + nn(A.once) + " ÷ ١٢ = " + nn(A.once12) : "") + " ← <b class='num'>" + nn(A.total) + "</b> في الشهر.";
+    var inp = document.getElementById("fx-month");
+    if(inp && document.activeElement !== inp) inp.value = F.manual > 0 ? F.manual : "";
+    if(inp) inp.placeholder = "فاضية = " + nn(A.total) + " (المقترح)";
+    document.getElementById("fix-per").innerHTML = F.pcsM >= 1
+      ? "على وتيرة البيع دلوقتي (حوالي <b class='num'>" + nn(F.pcsM) + "</b> قطعة في الشهر) نصيب القطعة من الثابت ≈ <b class='num'>" + F.perPc.toFixed(1) + "</b> جنيه" +
+        (F.manual > 0 ? " — محسوب على رقمك (" + nn(F.manual) + ")" : "") + ". الرقم ده بيظهر في حاسبة التسعير والمدير المالي وتقرير الأصناف."
+      : "لسه مفيش بيع في آخر ١٤ يوم نحسب عليه نصيب القطعة.";
+  }
   function renderAll(){
     clearStockIdx();                     // أضمن حتة: أي رسم كامل بيبدأ بفهرس جديد
     clearMonthly();                      // نفس السبب: أرباح الشهور مش تفضل قديمة
     pendCache = null;                    // فلوسك عند الشركة بالأوردر
+    fxMemo = null;                       // v140: نصيب القطعة من الثابت
     fillSelects();                       // القوايم بتتغذّى في كل الأدراج
     Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
     renderTab(activeTab);
@@ -18305,6 +18397,12 @@
     this.disabled = false; toast("البيانات اتحدّثت");
   });
 
+  bind("f-fixed","b-fixed", function(){
+    var v = Number(document.getElementById("fx-month").value) || 0;
+    settings.fixedMonthly = v > 0 ? v : 0;
+    saveSettings(); renderAll();
+    toast(v > 0 ? "الثابت الشهري بقى " + money(v) : "رجعنا للرقم المقترح من المسجّل");
+  });
   bind("f-settings","b-settings", function(form){
     settings.currency = document.getElementById("cur").value.trim() || "ج.م";
     renderAll(); toast("اتحفظت الإعدادات"); saveSettings();
