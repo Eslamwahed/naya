@@ -4009,10 +4009,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "140";
+  var VERSION = "141";
   var CHANGELOG = [
+    { v:"141", d:"2026-10-10", items:[
+      "الإلغاء قبل الشحن ما بقاش بيمسح مصاريف الشحن من الأوردر — بتفضل مكتوبة ومش بتتحسب طول ما هو ملغي، ولو رجّعته (اتلغى بالغلط أو العميل رجع في كلامه) بترجع تتحسب لوحدها",
+      "أوردر اتلغى قبل كده على نسخة قديمة ورجّعته: بيظهرلك تنبيه إن الشحن عليه صفر عشان تكتبه"
+    ]},
     { v:"140", d:"2026-10-10", items:[
-      "جديد: «المصاريف الثابتة في الشهر» في الإعدادات — السيستم بيقترح الرقم من المسجّل في الخزنة (الثابت المتكرر في آخر ٣٠ يوم + «مرة واحدة» ÷ ١٢) أو تكتب رقمك، وبيقسمه على القطع اللي بتبيعها في الشهر",
+      "جديد: «المصاريف الثابتة في الشهر» في الإعدادات — السيستم بيقترح الرقم من المسجّل في الخزنة (متوسط الثابت المتكرر في آخر شهور كاملة — أو آخر ٣٠ يوم لو البيزنس أقل من شهر — + «مرة واحدة» ÷ ١٢) أو تكتب رقمك، وبيقسمه على القطع اللي بتبيعها في الشهر",
       "حاسبة التسعير: «نصيب المصاريف الثابتة» و«صافي بعد الثابت» تحت صافي ربحك",
       "المدير المالي: نصيب الثابت في «الأوردر الواحد»، «أسعار البيع الجديدة» بعد الثابت، «تغطية المصاريف الثابتة» بقت تقولك محتاج كام قطعة في الشهر، وتنبيه لو الثابت الحقيقي أكتر من رقمك",
       "تقرير الأصناف: «بعد الثابت» تحت صافي القطعة",
@@ -5399,7 +5403,7 @@
     if(!rec) return;
     // توصيل بنفسك: «خرج للتوصيل» هو اللي بيحط التاريخ، ولو اتسلّم من غيرها ياخد يوم التسليم
     if(rec.selfDel){
-      if(!rec.shippedAt && (isDelivered(rec) || isCancelled(rec))) rec.shippedAt = rec.deliveredAt || rec.cancelledAt || today();
+      if(!rec.shippedAt && (isDelivered(rec) || (isCancelled(rec) && !rec.preCancel))) rec.shippedAt = rec.deliveredAt || rec.cancelledAt || today();
       return;
     }
     if(squish(rec.shipCo) && squish(rec.shipCode)){ if(!rec.shippedAt) rec.shippedAt = today(); }
@@ -5667,12 +5671,23 @@
     return " <span class='cf-tag " + (s.cf === "nr" ? "nr" : "wait") + "'>" + ORD_CF_LABEL[s.cf || ""] + "</span>";
   }
   /* إلغاء قبل الشحن: الأوردر ما خرجش (لا بوليصة ولا «خرج للتوصيل») — مفيش مصاريف شحن ولا بضاعة عند الشركة.
-     preCancel بيتسجّل على الأوردر عشان المرتجع والمحافظ ما يحسبوهوش. */
+     preCancel بيتسجّل على الأوردر عشان المرتجع والمحافظ ما يحسبوهوش.
+     v141: الشحن ما بيتمسحش — بيفضل مكتوب على الأوردر، وshipIn()/shipOut() بيرجّعوا صفر طول ما preCancel.
+     فلو الأوردر رجع من الإلغاء (اتلغى بالغلط أو العميل رجع في كلامه) الشحن بيرجع يتحسب لوحده.
+     shipKept = اتلغى على v141 أو بعدها (الشحن محفوظ). preCancel من غيرها = نسخة قديمة كانت بتمسح الشحن. */
   function preShip(rec, shippedAt){ return !squish(rec.shipCode) && !(shippedAt !== undefined ? shippedAt : rec.shippedAt); }
-  function preCancelFix(rec){
-    if(stOf(rec) === "cancelled" && preShip(rec)){ rec.preCancel = true; rec.shipIn = 0; rec.shipOut = 0; }
-    else if(rec.preCancel) rec.preCancel = false;
+  function preCancelFix(rec){                       // بترجّع true لو رجع من إلغاء قديم والشحن عليه كان اتمسح
+    var was = !!rec.preCancel, kept = !!rec.shipKept;
+    if(stOf(rec) === "cancelled" && preShip(rec)){
+      if(!was) rec.shipKept = true;
+      rec.preCancel = true; return false;
+    }
+    if(!was) return false;
+    rec.preCancel = false; delete rec.shipKept;
+    return shipWiped(rec, kept);
   }
+  function shipWiped(rec, kept){ return !kept && !(Number(rec.shipIn)||0) && !(Number(rec.shipOut)||0); }
+  var SHIP_WIPED = "الشحن عليه صفر — لو كان عليه شحن قبل الإلغاء اكتبه من زرار تعديل (النسخ القديمة كانت بتمسحه)";
   function srcName(k){ return SRC_LABEL[k] || "مش متحدد"; }
   // رقم مصري لواتساب: 01xxxxxxxxx → 201xxxxxxxxx
   function waNum(ph){
@@ -5995,8 +6010,9 @@
   function isReserved(s){ return stOf(s) === "progress"; }
   function isCancelled(s){ return stOf(s) === "cancelled"; }
 
-  function shipIn(s){ return Number(s.shipIn)||0; }    // محصّل من العميل
-  function shipOut(s){ return Number(s.shipOut)||0; }  // مدفوع لشركة الشحن
+  // v141: الملغي قبل الشحن مالوش شحن — الأرقام فاضلة مكتوبة على الأوردر لو رجع
+  function shipIn(s){ return s.preCancel ? 0 : Number(s.shipIn)||0; }    // محصّل من العميل
+  function shipOut(s){ return s.preCancel ? 0 : Number(s.shipOut)||0; }  // مدفوع لشركة الشحن
   // الشحن بيتحسب على المسلّم والملغي بس — الباقي لسه ما اتشحنش
   function shipCounts(s){ return isDelivered(s) || isCancelled(s); }
   // السجلات القديمة كانت بتعتبر التحصيل مباشر، فبنحافظ على أرقامها
@@ -10864,6 +10880,7 @@
     });
 
     var sin = Number(draft.shipIn)||0, sout = Number(draft.shipOut)||0, paid = Number(draft.paid)||0;
+    if(draftPreShip(st)){ sin = 0; sout = 0; }                     // v141: ملغي قبل الشحن — الشحن مش متحسب
     var hasItem = draft.lines.some(function(l){ return !!l.itemId; });
     if(st === "cancelled"){ sin = 0; }             // الملغي: مفيش بضاعة ولا شحن على العميل
     var owed = goods + sin;                        // المطلوب من العميل
@@ -16364,10 +16381,19 @@
      والملغي مش مصدر: مصاريفه مش بتاعت توصيل ناجح. */
   /* الفرق بين اللي بتدفعه واللي بتحمّله بيطلع من جيبك في كل أوردر،
      فبيتقال وإنت بتكتب مش بعد ما تحفظ. */
+  // الدرج: الأوردر ده ملغي قبل الشحن؟ نفس قاعدة preCancelFix (الشحن مكتوب بس مش متحسب)
+  function draftPreShip(st){
+    if(st !== "cancelled" || (!draft.selfDel && squish(draft.shipCode))) return false;
+    var o = editing.sales ? db.sales.find(function(x){ return x.id === editing.sales; }) : null;
+    return !o || !o.shippedAt || !!o.preCancel;
+  }
   function shipHint(){
     var el = document.getElementById("e-pocket");
     if(!el) return;
     var out = Number(draft.shipOut)||0, inn = Number(draft.shipIn)||0;
+    if((out || inn) && draftPreShip(draft.status)){
+      el.textContent = "ملغي قبل الشحن — الشحن ده مش متحسب، وهيرجع يتحسب لو الأوردر رجع."; el.hidden = false; return;
+    }
     if(!out && !inn){ el.textContent = ""; el.hidden = true; return; }
     var gap = out - inn;
     el.innerHTML = "بتدفع <strong>" + esc(money(out)) + "</strong> · بتحمّل العميل <strong>" +
@@ -16909,7 +16935,7 @@
     /* الأوردر ممكن جزء منه ينفع وجزء لأ: يتسلّم بس تحصيله يتوقف لأن
        مفيش اسم شركة شحن. فالعدّ لازم يفصل بين الحركتين، والرسالة تقول
        بالظبط أنهي حركة اتخطّت على أنهي أوردر — مش رقم مبهم. */
-    var nDeliv = 0, nPay = 0, money_ = 0, nShip = 0, shipMoney = 0, skip = {};
+    var nDeliv = 0, nPay = 0, money_ = 0, nShip = 0, shipMoney = 0, skip = {}, nLost = [];
     // أوردر الشركة: «استلم» = دفع للمندوب — بيتعدّ لوحده عشان الرسالة تقول الفلوس فين
     var shipPaid = function(rec, before){
       var inc = (Number(rec.paid)||0) - before;
@@ -16936,7 +16962,7 @@
         }
         var b0 = Number(rec.paid)||0;
         rec.rsn = ""; if(want !== "progress" && rec.cf === "nr"){ rec.cf = ""; rec.cfAt = ""; }
-        rec.status = want; preCancelFix(rec); stampDelivery(rec); syncShipPaid(rec); touched = true; nDeliv++;
+        rec.status = want; if(preCancelFix(rec)) nLost.push("#" + (rec.no || "")); stampDelivery(rec); syncShipPaid(rec); touched = true; nDeliv++;
         shipPaid(rec, b0);
       }
 
@@ -16964,6 +16990,7 @@
     if(nPay)   parts.push("اتحصّل " + qty(nPay) + " أوردر بـ" + money(money_));
     if(nShip)  parts.push("عملاء " + qty(nShip) + " أوردر دفعوا للمندوب " + money(shipMoney) +
                           " — الفلوس عند شركة الشحن");
+    if(nLost.length) parts.push(nLost.join(" و") + " رجع من إلغاء قديم — " + SHIP_WIPED);
     var skips = Object.keys(skip);
     skips.forEach(function(w){ parts.push(skip[w].join(" و") + " اتخطّى — " + w); });
 
@@ -17078,19 +17105,23 @@
       itemId:"", color:"", size:"", qty:0, price:0, ret:0
     };
 
-    var shippedB4 = editing.sales ? ((db.sales.find(function(x){ return x.id === editing.sales; }) || {}).shippedAt || "") : "";
-    if(status === "cancelled" && preShip(fields, shippedB4)){ fields.preCancel = true; fields.shipIn = 0; fields.shipOut = 0; }
+    var old = editing.sales ? (db.sales.find(function(x){ return x.id === editing.sales; }) || null) : null;
+    var wasPre = !!(old && old.preCancel), shipLost = false;
+    if(status === "cancelled" && draftPreShip(status)){
+      fields.preCancel = true; fields.shipKept = wasPre ? !!old.shipKept : true;
+    } else if(wasPre) shipLost = shipWiped(fields, !!old.shipKept);
     if(editing.sales){
       var rec = db.sales.find(function(x){ return x.id === editing.sales; });
       if(rec){
         var paid0 = Number(rec.paid)||0;
         Object.keys(fields).forEach(function(k){ rec[k] = fields[k]; });
+        if(!fields.preCancel) delete rec.shipKept;                      // v141: العلامة على الملغي قبل الشحن بس
         rec.editedBy = me || "غير محدد"; rec.at = Date.now();
         stampDelivery(rec);
         syncSelfPaid(rec, paid0);
       }
       freshId = editing.sales; editing.sales = null; clearEditBase("sales");
-      toast("اتعدّل الأوردر");
+      toast(shipLost ? "اتعدّل الأوردر — " + SHIP_WIPED : "اتعدّل الأوردر", shipLost ? 5200 : undefined);
     } else {
       fields.no = nextSaleNo();
       var rec2 = stamp(fields);
@@ -18020,14 +18051,16 @@
     if(next === "cancelled") rsnAsk = rec.id;                         // اسأل عن السبب فوق لوحة المراحل
     if(next !== "progress" && rec.cf === "nr"){ rec.cf = ""; rec.cfAt = ""; }
     rec.status = next; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
-    preCancelFix(rec);
+    var shipLost = preCancelFix(rec);
     stampDelivery(rec);
     syncShipPaid(rec);             // أوردر الشركة: استلم = دفع للمندوب
     syncSelfPaid(rec, paidBefore); // توصيل بنفسك: استلم = دفع والفلوس دخلت الخزنة
     renderAll(); saveSoon("sales");
     var via = viaShip(rec), co = squish(rec.shipCo) || "شركة الشحن";
     // لما الملغي يرجع مسلّم، خانة المحصّل بتكون اتصفّرت وقت الإلغاء
-    if(rec.preCancel && next === "cancelled")
+    if(shipLost)
+      toast("#" + (rec.no || "") + " رجع «" + (ST_LABEL[next] || next) + "» — " + SHIP_WIPED, 5200);
+    else if(rec.preCancel && next === "cancelled")
       toast("#" + (rec.no || "") + " اتلغى قبل الشحن — من غير مصاريف شحن" + ((Number(rec.paid)||0) ? " · كان دافع " + money(Number(rec.paid)||0) + "، رجّعهوله من الخزنة" : ""), 4200);
     else if(!via && prev === "cancelled" && next === "delivered" && !(Number(rec.paid)||0))
       toast("الحالة بقت مسلّم — راجع خانة المحصّل من زرار تعديل");
