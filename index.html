@@ -37,6 +37,7 @@
     /* خلفيات الحالات: ليك · عليك · تنبيه · التبديل مع المورد.
        كانت أرقام ثابتة في ٢٠ مكان، وفي الليلي كانت بقع فاتحة أو كلها نفس اللون. */
     --gain-soft:#E3F1EA; --due-soft:#F6E3E8; --warn-soft:#F7EEDB;
+    --gain-ink:#28644F;     /* أخضر الكلام فوق خلفية خضرا فاتحة (≥٤٫٥:١) */
     --xg:#5B4A9A; --xg-soft:#ECE8F7;
 
     /* ═══ سلّم الخطوط ═══
@@ -78,9 +79,11 @@
     --shadow:none;
     --on-accent:#1A141C;
     --gain-soft:#303636; --due-soft:#402D3B; --warn-soft:#3E3328;
+    --gain-ink:var(--gain);
     --xg:#A99BE0; --xg-soft:#383042;
   }
   *{box-sizing:border-box}
+  html{scrollbar-color:color-mix(in srgb,var(--ink-soft) 40%,transparent) transparent}
   html,body{margin:0;padding:0}
   body{
     background:var(--paper);
@@ -101,8 +104,9 @@
   .m{font-size:1em!important;white-space:nowrap}
   .m-n{unicode-bidi:isolate;direction:ltr;display:inline-block!important;color:inherit!important;margin:0!important;padding:0!important;font-size:1em!important}
   .m-i{font-size:1em!important}
-  .m-d{opacity:.55;font-size:.8em!important}
-  .m-c{opacity:.6;font-size:.7em!important;font-weight:500!important}
+  /* v138 (polish): الكسور و«ج.م» أخف بالحجم والوزن بس، بنفس لون الرقم — الـopacity كانت بتنزّل التباين لـ٢–٣:١ */
+  .m-d{font-size:max(11px,.8em)!important;font-weight:400!important}
+  .m-c{font-size:max(11px,.7em)!important;font-weight:400!important}
   /* v109 — شارات الحالة بنقطة لون قبل الكلمة، نفس الشكل في كل الشاشات */
   span.st::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;
     margin-inline-end:5px;vertical-align:middle}
@@ -131,6 +135,37 @@
     .hm-row2 .hm-ti .ic,.hm-srow em{transition:transform .2s}
     .hm-row2 .hm-ti:hover .ic{transform:scale(1.08)}
   }
+  /* ═══ v137 — من React Bits (منقولة لـCSS عادي) ═══
+     ShinyText: لمعة ذهبي بتعدّي على الاسم مرة لما السيستم يفتح، وتاني لما تقف عليه.
+     SpotlightCard: نور خفيف بلون الثيم بيمشي ورا الماوس على الكروت اللي بتتداس — على الكمبيوتر بس.
+     AnimatedList/FadeContent: اللحظة الوحيدة اللي ليها حركة مقصودة — قرارات «المدير المالي» بتدخل
+       واحدة ورا التانية من غشاوة لوضوح (الخطة بتتجمّع قدامك). باقي الشاشات دخولها سريع وهادي زي ما هو.
+     كلهم بيتلغوا مع «تقليل الحركة» (القاعدة العامة تحت). */
+  header.top{--h1c:#fff} [data-theme="dark"] header.top{--h1c:var(--teal-deep)}
+  /* مرة واحدة لما السيستم يفتح، وتاني لو وقفت على الاسم — مش لفّة على طول (حركة أطول من ٥ ثواني محتاجة زرار يوقفها) */
+  @keyframes shine{from{background-position:100% 0}to{background-position:0 0}}
+  @keyframes shine2{from{background-position:100% 0}to{background-position:0 0}}
+  @supports (background-clip:text) or (-webkit-background-clip:text){
+    header.top h1 .shiny{background:linear-gradient(110deg,var(--h1c) 0 42%,var(--lp-gold) 50%,var(--h1c) 58% 100%);
+      background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;animation:shine 1.6s cubic-bezier(.16,1,.3,1) 1s both}
+    header.top h1:hover .shiny{animation:shine2 1.6s cubic-bezier(.16,1,.3,1) both}
+  }
+  /* التباين العالي في الويندوز بيشيل الخلفيات — الاسم يرجع لونه العادي عشان ما يختفيش */
+  @media (forced-colors:active){ header.top h1 .shiny{background:none;-webkit-text-fill-color:currentColor;animation:none} }
+  @media (hover:hover){
+    :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card){--spot:color-mix(in srgb,var(--teal) 7%,transparent)}
+    [data-theme="dark"] :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card){--spot:color-mix(in srgb,var(--teal) 13%,transparent)}
+    /* :is(...) عشان يغلب background اللي على الكروت نفسها تحت في الملف */
+    :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card).spot-on,
+    body .sg-strip .sg-card.spot-on,#s-stagebox .sg-strip .sg-card.spot-on{background-image:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),var(--spot),transparent 70%)}   /* كروت المراحل ليها :hover و.on أقوى */
+  }
+  @keyframes listIn{from{opacity:0;transform:translateY(6px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+  #cfo-acts.in > .cfo-act{animation:listIn .36s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(120ms + var(--k,0) * 50ms)}
+  /* أرقام رسومات وماشي إزاي؟ مالهاش .num — عرض الأرقام ثابت عشان ما تترجّش وهي بتعدّ */
+  :is(.vz-st b,.co-t b){font-variant-numeric:tabular-nums}
+  ::selection{background:color-mix(in srgb,var(--teal) 24%,transparent)}
+  input,textarea{caret-color:var(--teal)}
   /* ٣ التبديل بين مراحل الأوردرات: اللوحة بتبدّل بنعومة (opacity بس على القايمة — جواها لوحات ثابتة) */
   @keyframes swapIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -1083,6 +1118,7 @@
   .cd-mv{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:var(--sp-3);align-items:center;
     padding:10px var(--sp-4);border-top:1px solid var(--line)}
   .cd-h + .cd-mv{border-top:0}
+  .cd-h .v-gain{color:var(--gain-ink)}   /* إجمالي اليوم على خلفية برقوقي فاتح */
   .cd-mv .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:var(--teal-soft)}
   .cd-mv.in .ic{background:var(--gain-soft)} .cd-mv.out .ic{background:var(--due-soft)}
   .cd-t b{display:block;font-weight:600}
@@ -1288,7 +1324,8 @@
   .vz-st b{display:inline-block;font-size:var(--fs-6);font-weight:600;direction:ltr;unicode-bidi:isolate;margin:2px 0}
   .vz-st em{display:block;font-style:normal;font-size:var(--fs-1);color:var(--ink-soft)}
   .vz-plot{width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
-  .vz-plot svg{display:block;direction:rtl} .vz-plot svg text{font-family:inherit}
+  .vz-plot svg{display:block;direction:rtl}
+  .vz-plot:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:var(--r-sm)} .vz-plot svg text{font-family:inherit}
   .vz-empty{color:var(--ink-soft);padding:var(--sp-5) 0;text-align:center}
   .vz-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:var(--fs-2);color:var(--ink-soft);margin-top:var(--sp-2)}
   .vz-legend span{display:inline-flex;align-items:center;gap:6px} .vz-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
@@ -1384,6 +1421,28 @@
   .cfo-notes{margin:0;padding-inline-start:18px;font-size:var(--fs-3);line-height:1.8}
   .cfo-notes small{color:var(--ink-soft);font-size:var(--fs-2)}
 
+  /* v139: جه منين؟ · التأكيد · سبب الإلغاء */
+  .cf-tag{display:inline-block;font-size:var(--fs-1);font-weight:600;border-radius:var(--r-pill);padding:1px 8px;margin-inline-start:4px;vertical-align:middle;white-space:nowrap}
+  .cf-tag.ok{background:var(--gain-soft);color:var(--gain-ink)}
+  .cf-tag.wait{background:var(--warn-soft);color:var(--warn)}
+  .cf-tag.nr{background:var(--due-soft);color:var(--due)}
+  .cf-btns{display:inline-flex;gap:4px;margin-inline-start:6px;vertical-align:middle}
+  .cf-btns button{font:inherit;font-size:var(--fs-1);font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);
+    border-radius:var(--r-pill);padding:2px 9px;cursor:pointer}
+  .cf-btns button.ok{border-color:var(--gain);color:var(--gain-ink)}
+  .cf-btns button:hover{background:var(--teal-soft)}
+  .cfbox[hidden],.rsnbox[hidden],.c-src[hidden]{display:none}
+  .cfbox,.rsnbox{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-3) 0 0}
+  .cfbox .cf-l,.rsnbox .cf-l{font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
+  .cfbox .quick button[data-cf="ok"].on{background:var(--gain);border-color:var(--gain);color:var(--on-accent)}
+  .cfbox .quick button[data-cf="nr"].on{background:var(--due);border-color:var(--due);color:var(--on-accent)}
+  .rsn-ask{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);background:var(--due-soft);border-radius:var(--r-md);
+    padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-3)}
+  .rsn-ask b{color:var(--due)}
+  .rsn-ask .quick{display:flex;flex-wrap:wrap;gap:4px}
+  #t-cfo-src tr.cfo-src-na td{color:var(--ink-soft)}
+  .c-src{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);grid-column:1/-1;margin-top:var(--sp-3)}
+  @media (max-width:760px){ .c-src{grid-template-columns:1fr} }
   /* v133: تقرير الشركاء — ثيم Lora Plum. ألوانه من --lp-* الثابتة: التقرير بيتطبع فاتح حتى لو السيستم ليلي */
   #prt{position:fixed;inset:0;z-index:60;background:#E9E3E8;overflow:auto;direction:rtl}
   #prt[hidden]{display:none}
@@ -1639,7 +1698,7 @@
   .pis-dl .go{font:inherit;font-size:var(--fs-2);color:var(--teal);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline}
   /* v126: حالة كل صنف */
   .itp-st{display:inline-block;font-size:var(--fs-1);font-weight:600;border-radius:99px;padding:2px 10px;white-space:nowrap}
-  .itp-st.go{background:rgba(50,123,99,.14);color:var(--gain)}
+  .itp-st.go{background:rgba(50,123,99,.14);color:var(--gain-ink)}
   .itp-st.pair{background:rgba(138,98,18,.14);color:var(--warn)}
   .itp-st.bad{background:rgba(154,19,51,.12);color:var(--due)}
   .itp-st.idle{background:var(--teal-soft);color:var(--ink-soft)}
@@ -2163,7 +2222,7 @@
   .co-t small{display:block;color:var(--ink-soft);font-size:var(--fs-1)} .co-t b{display:block;font-size:var(--fs-5);margin:2px 0}
   .co-sub{display:block;font-size:var(--fs-1);color:var(--ink-soft);line-height:1.5}
   .co-st{position:absolute;top:9px;inset-inline-end:10px;font-size:11px;font-weight:700;border-radius:99px;padding:1px 8px}
-  .co-t.ok .co-st{background:rgba(50,123,99,.14);color:var(--gain)} .co-t.wr .co-st{background:rgba(138,98,18,.14);color:var(--warn)}
+  .co-t.ok .co-st{background:rgba(50,123,99,.14);color:var(--gain-ink)} .co-t.wr .co-st{background:rgba(138,98,18,.14);color:var(--warn)}
   .co-t.bd .co-st{background:rgba(154,19,51,.12);color:var(--due)} .co-t.na .co-st{background:var(--teal-soft);color:var(--ink-soft)}
   .co-t.bd{border-color:rgba(154,19,51,.35)} .co-t.wr{border-color:rgba(138,98,18,.35)}
   .co-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)} .co-two .panel h3{margin-top:0}
@@ -2175,7 +2234,7 @@
   .co-bal{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .co-p{background:var(--teal-soft);border-radius:var(--r-sm);padding:6px 10px} .co-p small{display:block;color:var(--ink-soft);font-size:11px}
   .co-op{color:var(--ink-soft);font-size:var(--fs-4)}
-  .co-okb{background:rgba(50,123,99,.14);color:var(--gain);border-radius:99px;padding:2px 10px;font-weight:700;font-size:var(--fs-1)}
+  .co-okb{background:rgba(50,123,99,.14);color:var(--gain-ink);border-radius:99px;padding:2px 10px;font-weight:700;font-size:var(--fs-1)}
   .co-badb{border:0;background:rgba(154,19,51,.12);color:var(--due);border-radius:99px;padding:2px 10px;font:inherit;font-weight:700;font-size:var(--fs-1);cursor:pointer}
   @media (max-width:760px){ .co-two{grid-template-columns:1fr} .co-vd{flex-wrap:wrap} .co-exp{margin-inline-start:0;width:100%} }
 </style>
@@ -2204,7 +2263,7 @@
      الأقسام كانت صف لوحدها تحت الهيدر، وخانة الاسم والوضع الليلي والتحديث
      صف تاني — ٣ صفوف قبل ما الشغل يبان. على الموبايل الأقسام شريط تحت زي ما هي. -->
 <header class="top">
-  <h1>Lora Collection <span id="ver-badge" class="ver-b"></span></h1>
+  <h1><span class="shiny">Lora Collection</span> <span id="ver-badge" class="ver-b"></span></h1>
   <div class="nav-groups" id="nav-groups" role="tablist" aria-label="الأقسام">
     <button type="button" data-group="home"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-home"/></svg></span><span class="lb">الرئيسية</span></button>
     <button type="button" data-group="orders"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-box"/></svg></span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
@@ -2442,6 +2501,7 @@
   </div>
   <datalist id="ship-list"></datalist>
   <datalist id="owner-list"></datalist>
+  <datalist id="camp-list"></datalist>
 </section>
 
 <!-- شركات الشحن -->
@@ -2815,7 +2875,11 @@
           <button type="button" data-ccat="other">تاني</button>
         </div>
         <input type="hidden" id="c-cat">
-        <p class="hintline" id="c-cat-hint" style="margin:6px 0 0"></p></div>
+        <p class="hintline" id="c-cat-hint" style="margin:6px 0 0"></p>
+        <div class="c-src" id="c-src-wrap" hidden>
+          <div><label for="c-src">الإعلان على</label><select id="c-src"></select></div>
+          <div><label for="c-camp">الحملة</label><input id="c-camp" list="camp-list" autocomplete="off" placeholder="مثلاً فرو أكتوبر"></div>
+        </div></div>
       <div id="c-over" hidden style="grid-column:1/-1">
         <p class="note bad" id="c-over-msg" style="margin-top:0"></p>
         <label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-2);cursor:pointer;margin-top:6px">
@@ -3340,6 +3404,11 @@
       <div class="tbl-wrap"><table id="t-cfo-prices" class="cfo-prices"></table></div>
     </details>
   </div>
+  <div class="panel money-only" data-rt="cfo">
+    <h3 style="margin-top:0">الإعلان حسب المصدر <small id="cfo-src-s"></small></h3>
+    <p class="hint" id="cfo-src-h" style="margin:0 0 var(--sp-3)"></p>
+    <div class="tbl-wrap"><table id="t-cfo-src" class="cfo-prices"></table></div>
+  </div>
   <div class="cfo-two money-only" data-rt="cfo">
     <div class="panel"><h3 style="margin-top:0">المخاطر</h3><div id="cfo-risk"></div></div>
     <div class="panel"><h3 style="margin-top:0">المخزون والكاش</h3><div id="cfo-stock"></div></div>
@@ -3489,7 +3558,7 @@
         <button type="button" data-vzm="act">اتسلّم فعلاً</button>
       </div></div>
     <div class="vz-stats" id="vz1-stats"></div>
-    <div class="vz-plot vz-wide" id="vz-wf"></div>
+    <div class="vz-plot vz-wide" id="vz-wf" tabindex="0" role="region" aria-label="رسمة فلوسك راحت فين — بتتسحب بالعرض"></div>
     <div class="vz-foot"><span>نفس أرقام «قايمة الدخل» · بتتحدّث بعد كل حركة</span><button type="button" class="vz-go" data-vzgo="rep">قايمة الدخل ←</button></div>
   </div>
 
@@ -3789,10 +3858,24 @@
           <input id="e-date" type="date" data-f="date"></div>
         <div><label for="e-status">الحالة</label>
           <select id="e-status" data-f="status"></select></div>
+        <div><label for="e-src">جه منين؟</label>
+          <select id="e-src" data-f="src"></select></div>
+        <div id="e-camp-wrap" hidden><label for="e-camp">الحملة</label>
+          <input id="e-camp" data-f="camp" list="camp-list" autocomplete="off" placeholder="مثلاً فرو أكتوبر"></div>
       </div>
       <p class="hintline" id="e-cust"></p>
       <p class="hintline bad" id="e-repeat" hidden></p>
       <p class="hintline bad" id="e-conflict" hidden></p>
+      <div class="cfbox" id="e-cfbox">
+        <span class="cf-l">التأكيد مع العميل</span>
+        <div class="quick" id="e-cf" role="group" aria-label="التأكيد مع العميل">
+          <button type="button" data-cf="">لسه</button><button type="button" data-cf="ok">✓ اتأكد</button><button type="button" data-cf="nr">ما ردّش</button></div>
+        <a class="tbtn" id="e-wa" href="#" target="_blank" rel="noopener" hidden>ابعت تأكيد واتساب</a>
+      </div>
+      <div class="rsnbox" id="e-rsnbox" hidden>
+        <span class="cf-l">سبب الإلغاء</span>
+        <div class="quick" id="e-rsn" role="group" aria-label="سبب الإلغاء"></div>
+      </div>
 
       <div class="newcust" id="newcust-box" hidden>
         <h4>عميل جديد</h4>
@@ -3914,8 +3997,26 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "136";
+  var VERSION = "139";
   var CHANGELOG = [
+    { v:"139", d:"2026-10-10", items:[
+      "جديد: «جه منين؟» في كل أوردر (إعلان فيسبوك · إنستجرام · تيك توك · واتساب · عميل قديم · ترشيح) واسم الحملة — ونفس الاختيار في مصروف الإعلانات",
+      "المدير المالي: «الإعلان حسب المصدر» — كل مصدر جاب كام أوردر، اتلغى منهم كام، صرفنا عليه كام، وربح الأوردر بعد الإعلان",
+      "التأكيد قبل الشحن: «✓ اتأكد · ما ردّش · لغى» في «ناقصه شحن» وفي الأوردر، وزرار «ابعت تأكيد واتساب» برسالة جاهزة، وتنبيه في الرئيسية",
+      "سبب الإلغاء: السيستم بيسأل عن السبب أول ما الأوردر يتلغي، والأسباب بتظهر في «المخاطر»",
+      "الإلغاء قبل الشحن بقى مسموح — من غير مصاريف شحن، وما بيظهرش في «مرتجع عند الشركة»"
+    ]},
+    { v:"138", d:"2026-10-09", items:[
+      "مراجعة Impeccable (polish): الكسور و«ج.م» في كل المبالغ بقت مقروءة — نفس لون الرقم وأخف بالحجم والوزن بس، ومش أصغر من 11px (كانت باهتة ومش مقروءة في 593 مكان)",
+      "شارة «كويس» الخضرا وإجمالي اليوم في الخزنة بأخضر أغمق يتقري على خلفيته",
+      "رسمة «فلوسك راحت فين» بتتوصل بالكيبورد، وشريط التمرير بلون الثيم"
+    ]},
+    { v:"137", d:"2026-10-09", items:[
+      "حركات من React Bits (منقولة لكود عادي من غير React): الأرقام الكبيرة بتعدّ لحد قيمتها لما تفتح أي شاشة أو قسم في التحليل — الرئيسية، المدير المالي، رسومات، ماشي إزاي؟، المخزون",
+      "المدير المالي: قرارات زيادة الربح بتدخل واحدة ورا التانية من غشاوة لوضوح",
+      "نور خفيف بلون الثيم بيمشي ورا الماوس على الكروت اللي بتتداس (على الكمبيوتر)، ولمعة ذهبي على «Lora Collection» فوق",
+      "كل الحركات بتقف مع «تقليل الحركة» في إعدادات الجهاز، والاسم بيفضل باين في وضع التباين العالي"
+    ]},
     { v:"136", d:"2026-10-09", items:[
       "المدير المالي: «أسعار البيع الجديدة لكل صنف» — قسم مطوي تحت القرارات بالسعر اللي تحطه على كل صنف عشان الخطة تتنفذ، وكام هيفضل لك من القطعة قبل وبعد",
       "السعر الجديد = سعر الصنف + فرق الشحن على القطعة + زيادة الهامش للأصناف الضعيفة (لحد 40% بحد أقصى 10%)، مقرّب لأقرب 5 — وبيشمل الأصناف اللي لسه ما اتباعتش",
@@ -5526,6 +5627,119 @@
     "الشرقية","الغربية","المنوفية","بورسعيد","الإسماعيلية","السويس","شمال سيناء","جنوب سيناء","الفيوم",
     "بني سويف","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان","البحر الأحمر","الوادي الجديد","مطروح"];
 
+  /* ═══ v139 — جه منين؟ · التأكيد قبل الشحن · سبب الإلغاء ═══
+     مصدر الأوردر (src) والحملة (camp) بيتسجّلوا على الأوردر، ونفس المصدر على مصروف الإعلان —
+     فنعرف كل مصدر جاب كام أوردر وصرفنا عليه كام. التأكيد (cf) بيتعمل قبل الشحن، وسبب الإلغاء (rsn)
+     بيتسجّل لما الأوردر يتلغي أو العميل يرفض. كله اختياري: الأوردرات القديمة «مش متحدد». */
+  var SRC = [["fb","إعلان فيسبوك"],["ig","إعلان إنستجرام"],["tt","إعلان تيك توك"],["wa","واتساب ورسايل"],
+             ["old","عميل قديم"],["ref","ترشيح"],["oth","تاني"]];
+  var SRC_AD = { fb:1, ig:1, tt:1 }, SRC_LABEL = {};
+  SRC.forEach(function(x){ SRC_LABEL[x[0]] = x[1]; });
+  var RSN = [["refused","رفض الاستلام"],["noans","مش بيرد"],["mind","غيّر رأيه"],["size","المقاس أو اللون"],
+             ["price","السعر أو الشحن"],["late","اتأخر"],["dup","مكرر أو غلط"],["oth","تاني"]];
+  var RSN_LABEL = {}; RSN.forEach(function(x){ RSN_LABEL[x[0]] = x[1]; });
+  var ORD_CF_LABEL = { "":"لسه ما اتأكدش", ok:"اتأكد", nr:"ما ردّش" };
+  // التأكيد بيفرق قبل الشحن بس: أوردر جاري لسه ما خرجش (لا بوليصة ولا «خرج للتوصيل»)
+  function cfPending(s){ return stOf(s) === "progress" && !s.shippedAt && !squish(s.shipCode) && s.cf !== "ok"; }
+  function cfTag(s){
+    if(stOf(s) !== "progress") return "";
+    if(s.cf === "ok") return " <span class='cf-tag ok'>✓ اتأكد</span>";
+    if(!cfPending(s)) return "";
+    return " <span class='cf-tag " + (s.cf === "nr" ? "nr" : "wait") + "'>" + ORD_CF_LABEL[s.cf || ""] + "</span>";
+  }
+  /* إلغاء قبل الشحن: الأوردر ما خرجش (لا بوليصة ولا «خرج للتوصيل») — مفيش مصاريف شحن ولا بضاعة عند الشركة.
+     preCancel بيتسجّل على الأوردر عشان المرتجع والمحافظ ما يحسبوهوش. */
+  function preShip(rec, shippedAt){ return !squish(rec.shipCode) && !(shippedAt !== undefined ? shippedAt : rec.shippedAt); }
+  function preCancelFix(rec){
+    if(stOf(rec) === "cancelled" && preShip(rec)){ rec.preCancel = true; rec.shipIn = 0; rec.shipOut = 0; }
+    else if(rec.preCancel) rec.preCancel = false;
+  }
+  function srcName(k){ return SRC_LABEL[k] || "مش متحدد"; }
+  // رقم مصري لواتساب: 01xxxxxxxxx → 201xxxxxxxxx
+  function waNum(ph){
+    var d = String(ph || "").replace(/\D/g, "");
+    if(/^01\d{9}$/.test(d)) return "2" + d;
+    if(/^201\d{9}$/.test(d)) return d;
+    return "";
+  }
+  function waConfirmText(rec, total){
+    var p = db.parties.find(function(x){ return x.id === rec.partyId; }) || {};
+    var its = (rec.lines || []).filter(function(l){ return l.itemId && (Number(l.qty)||0) > 0; }).map(function(l){
+      return itemName(l.itemId) + ([l.color, l.size].filter(Boolean).length ? " (" + [l.color, l.size].filter(Boolean).join(" ") + ")" : "") +
+        ((Number(l.qty)||0) > 1 ? " × " + l.qty : "");
+    }).join(" · ");
+    return "أهلاً " + (squish(p.name) || "") + "، معاك Lora Collection. بنأكد أوردرك: " + its +
+      " — الإجمالي " + (Math.round(total)||0).toLocaleString("en-US") + " جنيه شامل الشحن. نشحنه النهارده؟";
+  }
+  // سبب الرفض: بيظهر فوق لوحة المراحل لما أوردر يترفض منها، لحد ما تختار أو تقفله
+  var rsnAsk = null;
+  function rsnAskHTML(){
+    var r = rsnAsk && db.sales.find(function(x){ return x.id === rsnAsk; });
+    if(!r || !isCancelled(r) || r.rsn){ rsnAsk = null; return ""; }
+    return "<div class='rsn-ask' role='group' aria-label='سبب الرفض'><b>#" + esc(r.no || "") + " اتلغى — السبب؟</b>" +
+      "<span class='quick'>" + RSN.map(function(x){ return "<button type='button' data-rsnset='" + esc(r.id) + "|" + x[0] + "'>" + x[1] + "</button>"; }).join("") + "</span>" +
+      "<button type='button' class='tbtn ghostx' data-rsnset='" + esc(r.id) + "|'>بعدين</button></div>";
+  }
+  function setOrderMeta(id, k, v){
+    var rec = db.sales.find(function(x){ return x.id === id; }); if(!rec) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(saleLocked(rec)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+    rec[k] = v; if(k === "cf") rec.cfAt = v ? today() : "";
+    rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+    // اللي اتكتب في خانات اللوحة (الشركة · الكود · مين هيوصّله) ولسه ما اتسجّلش ما يضيعش مع إعادة الرسم
+    var keep = [];
+    Array.prototype.forEach.call(document.querySelectorAll("#s-stage-panel input[data-sgco],#s-stage-panel input[data-sgcode],#s-stage-panel input[data-sgcour]"), function(i){
+      var a = ["data-sgco","data-sgcode","data-sgcour"].filter(function(n){ return i.hasAttribute(n); })[0];
+      if(i.value) keep.push([a, i.getAttribute(a), i.value]);
+    });
+    saveSoon("sales"); renderAll();
+    keep.forEach(function(x){ var i = document.querySelector("#s-stage-panel input[" + x[0] + "='" + x[1] + "']"); if(i && !i.value) i.value = x[2]; });
+    toast("#" + (rec.no || "") + " " + (k === "cf" ? (v === "ok" ? "اتأكد ✓" : v === "nr" ? "— ما ردّش" : "رجع «لسه»") : (v ? "السبب: " + RSN_LABEL[v] : "")));
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest ? e.target.closest("[data-cfset],[data-rsnset]") : null; if(!t) return;
+    if(t.dataset.cfset){
+      var a = t.dataset.cfset.split("|");
+      if(a[1] === "x"){                                               // العميل قال لا في التأكيد: إلغاء قبل الشحن
+        var rx = db.sales.find(function(x){ return x.id === a[0]; }); if(rx) setSaleStatus(rx, "cancelled"); return; }
+      setOrderMeta(a[0], "cf", a[1]); return;
+    }
+    var b = t.dataset.rsnset.split("|");
+    if(!b[1]){ rsnAsk = null; renderStages(); return; }
+    rsnAsk = null; setOrderMeta(b[0], "rsn", b[1]);
+  });
+  // الدرج: «جه منين؟» والحملة والتأكيد وسبب الإلغاء (full = أول ما الدرج يتفتح)
+  function campList(){
+    var dl = document.getElementById("camp-list"); if(!dl) return;
+    var seen = {};
+    live("sales").concat(live("cash")).forEach(function(x){ var c = squish(x.camp); if(c) seen[c] = 1; });
+    dl.innerHTML = Object.keys(seen).sort().map(function(c){ return "<option value='" + esc(c) + "'>"; }).join("");
+  }
+  function syncSrcUI(full){
+    var sel = document.getElementById("e-src"); if(!sel) return;
+    if(full){
+      sel.innerHTML = optsHTML(SRC.map(function(x){ return { v:x[0], t:x[1] }; }), draft.src, "اختار");
+      document.getElementById("e-camp").value = draft.camp || "";
+      document.getElementById("e-rsn").innerHTML = RSN.map(function(x){ return "<button type='button' data-rsn='" + x[0] + "'>" + x[1] + "</button>"; }).join("");
+      campList();
+    }
+    document.getElementById("e-camp-wrap").hidden = !SRC_AD[draft.src];
+    var prog = draft.status === "progress", canc = draft.status === "cancelled";
+    document.getElementById("e-cfbox").hidden = !prog;
+    Array.prototype.forEach.call(document.querySelectorAll("#e-cf [data-cf]"), function(b){
+      var on = (b.dataset.cf || "") === (draft.cf || ""); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+    document.getElementById("e-rsnbox").hidden = !canc;
+    Array.prototype.forEach.call(document.querySelectorAll("#e-rsn [data-rsn]"), function(b){
+      var on = b.dataset.rsn === (draft.rsn || ""); b.classList.toggle("on", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+    var p = db.parties.find(function(x){ return x.id === draft.partyId; }) || {};
+    document.getElementById("e-wa").hidden = !(prog && waNum(p.phone));
+  }
+  function cfBtns(s){
+    if(!canEdit() || saleLocked(s) || !cfPending(s)) return "";
+    return "<span class='cf-btns'><button type='button' class='ok' data-cfset='" + esc(s.id) + "|ok'>✓ اتأكد</button>" +
+      (s.cf === "nr" ? "" : "<button type='button' data-cfset='" + esc(s.id) + "|nr'>ما ردّش</button>") +
+      "<button type='button' data-cfset='" + esc(s.id) + "|x' title='العميل مش عايزه — إلغاء قبل الشحن من غير مصاريف شحن'>لغى</button></span>";
+  }
   var ST_LABEL = { proposed:"مقترح", progress:"جاري", delivered:"مسلّم", cancelled:"ملغي" };
   /* «مسلّم» لوحدها مش بتقول القصة: العميل ممكن ياخد صنف ويرجّع صنف.
      الوصف مستنتج من الأرقام مش حالة متخزّنة لوحدها، فمستحيل يتعارض
@@ -5577,6 +5791,7 @@
   function stepBlock(rec, next){
     var st = next || stOf(rec);
     if(rec && rec.selfDel) return null;    // بتوصّله بنفسك — مفيش شركة ولا بوليصة
+    if(st === "cancelled" && rec && !squish(rec.shipCode) && !rec.shippedAt) return null;   // v139: إلغاء قبل الشحن
     if(st === "delivered" || st === "cancelled"){
       var miss = [];
       if(!squish(rec.shipCo))   miss.push("اسم شركة الشحن");
@@ -6606,6 +6821,10 @@
     var line = function(o){ L.push(o); };
     if(canTab("sales")){
       var g = stageLists();
+      var ncf = g.st[1].filter(cfPending).length;
+      if(ncf)
+        line({ ic:"tag", cls:"warn", t: ncf === 1 ? "أوردر لسه ما اتأكدش" : "أوردرات لسه ما اتأكدتش",
+               s:"كلّم العميل أو ابعتله واتساب قبل الشحن — بيقلّل المرتجع", v:qty(ncf), go:"sales|1", btn:"أكّدهم" });
       if(g.st[1].length)
         line({ ic:"tag", t: g.st[1].length === 1 ? "أوردر ناقصه شحن" : "أوردرات ناقصها شحن",
                s:"اكتب الشركة وكود البوليصة", v:qty(g.st[1].length), go:"sales|1" });
@@ -6703,7 +6922,7 @@
           (o.n ? " data-hn='" + o.n + "'" : "") + " title='" + esc(o.t + " — " + o.s) + "'>" +
           "<span class='ic' aria-hidden='true'>" + ico(o.ic) + "</span>" +
           "<span class='tx'><b>" + esc(o.t) + "</b><span class='s" + (o.red ? " red" : "") + "'>" + esc(o.s) + "</span></span>" +
-          "<span class='v num'>" + esc(o.v) + "</span><span class='cta' aria-hidden='true'>" + esc(ctaOf(o.go)) + "</span></button>";
+          "<span class='v num'>" + esc(o.v) + "</span><span class='cta' aria-hidden='true'>" + esc(o.btn || ctaOf(o.go)) + "</span></button>";
       }).join("") + "</div>" : "<p class='hm-ok'>✓ مفيش حاجة مستنياك دلوقتي</p>");
     var dt2 = document.getElementById("hm-date");
     if(dt2 && L.length) dt2.textContent += " · عندك " + plural(L.length, "حاجة واحدة", "حاجتين", "حاجات") + " محتاجاك النهارده";
@@ -8796,8 +9015,8 @@
     try{ if(LS) LS.setItem("naya:rtab", t); }catch(e){}
     applyRepTab(true); repTitle();
     if(repTab === "fin") renderFin();
-    if(repTab === "cfo") renderCfo();
-    if(activeTab === "rep") navMark();
+    if(repTab === "cfo"){ renderCfo(); cfoListIn(); }
+    if(activeTab === "rep"){ navMark(); countIn(document.getElementById("tab-rep")); }
   }
   (function(){
     var bar = document.getElementById("rep-tabs");
@@ -9018,6 +9237,60 @@
     o.score = gs.length ? gs.reduce(function(a, x){ return a + CFO_GL[x.g][2]; }, 0) / gs.length : null;
     return o;
   }
+  /* v139: الإعلان حسب المصدر — كل مصدر جاب كام أوردر، اتلغى منهم كام، وصرفنا عليه كام إعلان.
+     ربح الأوردر قبل الإعلان: المسلّم فعلاً، والماشي «لو اتسلّم»، والملغي خسارة الشحن بس — وبعدين
+     التغليف والمتغيّر التاني بيتوزّعوا على المصادر بنسبة مبيعاتها (زي «المدير المالي» فوق بالظبط).
+     مصروف إعلان من غير مصدر بيتعرض في سطر لوحده، والإجمالي تحت بيقفل على إجمالي الإعلانات. */
+  function cfoSrcData(r, P, v){
+    var by = {}, row = function(k){ return by[k] = by[k] || { k:k, n:0, x:0, d:0, goods:0, pre:0, ads:0 }; };
+    P.c.list.forEach(function(s){
+      var b = row(s.src || ""), canc = isCancelled(s);
+      b.n++; if(canc) b.x++;
+      if(isDelivered(s)){ b.d++; b.goods += saleTotal(s); b.pre += saleProfit(s); }
+      else if(canc) b.pre += saleProfit(s);
+      else { var e = expProfit(s); b.goods += e.goods; b.pre += e.net; }
+    });
+    var adsAll = 0;
+    live("cash").forEach(function(c){
+      if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c) || expCat(c) !== "ads") return;
+      var a = Number(c.amount)||0; adsAll += a; row(SRC_AD[c.src] ? c.src : "").ads += a;
+    });
+    var rows = Object.keys(by).map(function(k){ return by[k]; });
+    var G = rows.reduce(function(a, x){ return a + x.goods; }, 0), ov = v.varExp - v.ads;   // تغليف + متغيّر تاني
+    rows.forEach(function(x){ x.ov = G > 0.009 ? ov * x.goods / G : 0; x.net = x.pre - x.ov - x.ads; });
+    rows.sort(function(a, b){ return (a.k === "") - (b.k === "") || b.n - a.n; });
+    var tagged = rows.filter(function(x){ return x.k; }).reduce(function(a, x){ return a + x.n; }, 0);
+    var adsNa = by[""] ? by[""].ads : 0;
+    var tot = rows.reduce(function(a, x){ a.n += x.n; a.x += x.x; a.d += x.d; a.ads += x.ads; a.net += x.net; return a; }, { n:0, x:0, d:0, ads:0, net:0 });
+    return { rows:rows, adsAll:adsAll, adsNa:adsNa, tot:tot, tagged:tagged, n:P.c.list.length };
+  }
+  function renderCfoSrc(o){
+    var t = document.getElementById("t-cfo-src"); if(!t) return;
+    var nn = function(x){ return (Math.round(x)||0).toLocaleString("en-US"); };
+    var sg = function(x){ return x < -0.5 ? "(" + nn(-x) + ")" : nn(x); };
+    if(!o.n){ t.innerHTML = ""; document.getElementById("cfo-src-h").textContent = ""; document.getElementById("cfo-src-s").textContent = ""; return; }
+    var D = cfoSrcData(periodRange(), o.P, o.v);
+    document.getElementById("cfo-src-s").textContent = "— " + qty(D.tagged) + " من " + qty(D.n) + " أوردر متحدد مصدره";
+    var hint = [];
+    if(D.tagged < D.n) hint.push("اختار «جه منين؟» في كل أوردر جديد — والجدول ده هيقولك أنهي إعلان بيكسب وأنهي بيخسر.");
+    if(D.adsNa > 0.5) hint.push(nn(D.adsNa) + " من الإعلانات (" + Math.round(D.adsNa / Math.max(1, D.adsAll) * 100) + "%) من غير مصدر — اختار «الإعلان على» في مصروف الإعلانات.");
+    document.getElementById("cfo-src-h").textContent = hint.join(" ") || "كل الأوردرات والإعلانات متحدد مصدرها.";
+    var cl = function(v){ return v < -0.5 ? "v-due" : v > 0.5 ? "v-gain" : ""; };
+    t.innerHTML = "<thead><tr><th>المصدر</th><th class='num'>أوردرات</th><th class='num'>اتلغى</th><th class='num'>الإعلان</th>" +
+      "<th class='num'>إعلان على الأوردر</th><th class='num'>ربح الأوردر بعد الإعلان</th></tr></thead><tbody>" +
+      // اتلغى: النسبة من اللي خلصوا (اتسلّم أو اتلغى) زي «الرفض والإلغاء» فوق — مش من الماشيين لسه
+      D.rows.concat([Object.assign({ k:"_tot" }, D.tot)]).map(function(x){
+        var tot = x.k === "_tot", fin = x.d + x.x, isAd = SRC_AD[x.k];
+        var per = x.n ? "<b class='" + cl(x.net / x.n) + "'>" + sg(x.net / x.n) + "</b>"
+          : (x.ads ? "<b class='v-due' title='صرف إعلان من غير ولا أوردر'>(" + nn(x.ads) + ") إجمالي</b>" : "—");
+        return "<tr class='" + (tot ? "fs-tot" : x.k ? "" : "cfo-src-na") + "'><td class='wide'><b>" + (tot ? "الإجمالي" : esc(srcName(x.k))) + "</b></td>" +
+          "<td class='num' data-l='أوردرات'>" + qty(x.n) + "</td>" +
+          "<td class='num' data-l='اتلغى'>" + (x.x ? qty(x.x) + " <small>(" + Math.round(x.x / Math.max(1, fin) * 100) + "% من " + qty(fin) + " خلصوا)</small>" : "—") + "</td>" +
+          "<td class='num' data-l='الإعلان'>" + (x.ads ? nn(x.ads) : (isAd ? "0" : "—")) + "</td>" +
+          "<td class='num' data-l='إعلان على الأوردر'>" + (x.ads && x.n ? nn(x.ads / x.n) : "—") + "</td>" +
+          "<td class='num' data-l='ربح الأوردر بعد الإعلان'>" + per + "</td></tr>";
+      }).join("") + "</tbody>";
+  }
   function renderCfo(){
     var vd = document.getElementById("cfo-verdict"); if(!vd) return;
     var o = cfoData(periodRange()), v = o.v, n = o.n;
@@ -9027,7 +9300,7 @@
     if(!n){
       vd.innerHTML = "<div class='cfo-vd'><div><h3>لسه مفيش أوردرات في الفترة دي</h3><p>اختار فترة فيها بيع، أو «كل الفترات».</p></div></div>";
       ids.forEach(function(id){ var e = document.getElementById(id); if(e) e.innerHTML = ""; });
-      document.getElementById("cfo-basis").textContent = ""; document.getElementById("cfo-acts-sum").textContent = ""; document.getElementById("cfo-score-s").textContent = ""; document.getElementById("cfo-prices-s").textContent = "";
+      document.getElementById("cfo-basis").textContent = ""; document.getElementById("cfo-acts-sum").textContent = ""; document.getElementById("cfo-score-s").textContent = ""; document.getElementById("cfo-prices-s").textContent = ""; renderCfoSrc(o);
       return;
     }
     var u = o.u, A = o.after;
@@ -9077,11 +9350,11 @@
     document.getElementById("cfo-acts-sum").textContent = o.gain > 0.5 ? "— الإجمالي +" + nn(o.gain) + " على نفس الأوردرات" : "";
     var h = acts.map(function(x, i){
       var done = x.imp < 0.5;
-      return "<div class='cfo-act" + (done ? " done" : "") + "'><span class='no'>" + (done ? "✓" : i + 1) + "</span>" +
+      return "<div class='cfo-act" + (done ? " done" : "") + "' style='--k:" + Math.min(i, 6) + "'><span class='no'>" + (done ? "✓" : i + 1) + "</span>" +
         "<div><h4>" + esc(x.t) + "</h4><p>" + x.d + "</p></div>" +
         "<div class='imp'>" + (done ? "<small>تمام</small>" : "<b class='num'>+" + nn(x.imp) + "</b><small>+" + nn(x.imp / n) + " على الأوردر</small>") + "</div></div>";
     }).join("");
-    if(o.thin.length) h += "<div class='cfo-act'><span class='no'>!</span><div><h4>أصناف بتتباع بس مش بتكسب</h4><p>" +
+    if(o.thin.length) h += "<div class='cfo-act' style='--k:" + Math.min(acts.length, 6) + "'><span class='no'>!</span><div><h4>أصناف بتتباع بس مش بتكسب</h4><p>" +
       o.thin.map(function(x){ return esc(itemName(x.id)) + ": بيفضل لك " + nn(x.per) + " جنيه من القطعة بعد البضاعة والإعلان والشحن (" + nPcs(x.q) + ")"; }).join("<br>") +
       "<br>← ارفع سعرها، أو بيع اللي عندك منها وما تشتريش تاني.</p></div><div class='imp'><small>تنبيه بس — مش داخل في الإجمالي<br>عشان ما يتحسبش مرتين</small></div></div>";
     document.getElementById("cfo-acts").innerHTML = h;
@@ -9117,6 +9390,14 @@
     });
     rk.push("<div class='cfo-ln'>الرفض والإلغاء في الفترة: <b>" + (rr ? Math.round(rr.p * 100) + "%" : "لسه بدري") + "</b>" +
       "<small>" + (rr ? rr.x + " من " + rr.n + " أوردر خلصوا" : "محتاج ٥ أوردرات خلصوا على الأقل") + " · أكّد كل أوردر بمكالمة أو واتساب قبل الشحن</small></div>");
+    // v139: التأكيد قبل الشحن وأسباب الإلغاء في الفترة
+    var pend = P.c.list.filter(cfPending), rs = {}, rsN = 0, cx2 = 0;
+    P.c.list.forEach(function(sl){ if(!isCancelled(sl)) return; cx2++; if(sl.rsn){ rs[sl.rsn] = (rs[sl.rsn] || 0) + 1; rsN++; } });
+    if(pend.length) rk.push("<div class='cfo-ln'><b>" + qty(pend.length) + " أوردر لسه ما اتأكدش قبل الشحن</b>" +
+      "<small>كلّم العميل أو ابعتله واتساب من «ناقصه شحن» — الأوردر اللي اتأكد بيرجع أقل</small></div>");
+    if(cx2) rk.push("<div class='cfo-ln'><b>أسباب الإلغاء</b> " + (rsN ? Object.keys(rs).sort(function(a, b){ return rs[b] - rs[a]; })
+      .map(function(k){ return esc(RSN_LABEL[k]) + " " + qty(rs[k]); }).join(" · ") : "") +
+      (cx2 > rsN ? "<small>" + qty(cx2 - rsN) + " من " + qty(cx2) + " من غير سبب — اختار السبب لما الأوردر يتلغي</small>" : "") + "</div>");
     document.getElementById("cfo-risk").innerHTML = rk.join("");
     // المخزون والكاش
     var st = [], sold = {}, B = o.B;
@@ -9153,6 +9434,7 @@
     if(P.nOpen) nt.push("«اتسلّم فعلاً» بيبان أقل من «لو كله اتسلّم» لحد ما الأوردرات تتسلّم: الإيراد بيتحسب عند التسليم <small>(IFRS 15.38)</small> والإعلان بيتحسب أول ما يتدفع <small>(IAS 38.69(c))</small>.");
     nt.push("المعايير اللي الشاشة بتقيس عليها: هامش البضاعة " + Math.round(CFO_T.margin * 100) + "% · صنف أقل من " + Math.round(CFO_T.itemMin * 100) + "% سعره يتراجع (بحد أقصى +" + Math.round(CFO_T.raiseCap * 100) + "%) · الإعلان ≤ " + Math.round(CFO_T.adShare * 100) + "% من ربح الأوردر قبل الإعلان · الخصم ≤ " + Math.round(CFO_T.discMax * 100) + "% من المبيعات.");
     document.getElementById("cfo-notes").innerHTML = nt.map(function(x){ return "<li>" + x + "</li>"; }).join("");
+    renderCfoSrc(o);
   }
   function renderFin(){
     var tb = document.getElementById("t-fin-bs"); if(!tb) return;
@@ -10239,7 +10521,7 @@
              // توصيل بنفسك: الاختيار والاسم بيفضلوا للأوردر اللي بعده زي شركة الشحن
              selfDel: keep ? !!keep.selfDel : false, courier: keep ? (keep.courier || "") : "",
              shipIn:"", shipOut:"", payVia: keep ? keep.payVia : "ship",
-             paid:"", note:"", lines:[ blankLine() ] };
+             paid:"", note:"", src:"", camp:"", cf:"", cfAt:"", rsn:"", lines:[ blankLine() ] };
   }
   /* «كرّر الأوردر»: نفس العميل ونفس الأصناف، بس الحاجات اللي بتخص
      المرة اللي فاتت بتتشال — التاريخ والحالة وكود البوليصة والمحصّل
@@ -10252,6 +10534,7 @@
     d.shipCode = "";
     d.paid     = "";
     d.note     = "";
+    d.src = "old"; d.camp = ""; d.cf = ""; d.cfAt = ""; d.rsn = "";   // تكرار الأوردر = عميل قديم
     d.lines = d.lines.map(function(l){
       return { itemId:l.itemId, color:l.color, size:l.size,
                qty:l.qty, price:l.price, ret:"", manual:true };
@@ -10277,6 +10560,7 @@
              selfDel: !!rec.selfDel, courier: rec.courier || "",
              shipIn: rec.shipIn || "", shipOut: rec.shipOut || "", payVia: payVia(rec),
              paid: rec.paid || "", note: rec.note || "",
+             src: rec.src || "", camp: rec.camp || "", cf: rec.cf || "", cfAt: rec.cfAt || "", rsn: rec.rsn || "",
              lines: SL(rec).map(function(l){
                return { itemId:l.itemId||"", color:vColor(l), size:vSize(l),
                         qty:Number(l.qty)||"", price:Number(l.price)||"",
@@ -10450,7 +10734,7 @@
      ["e-payvia","payVia"],["e-paid","paid"],["e-note","note"],["e-courier","courier"]].forEach(function(pair){
       document.getElementById(pair[0]).value = draft[pair[1]] == null ? "" : draft[pair[1]];
     });
-    syncDelMode();
+    syncDelMode(); syncSrcUI(true);
 
     document.getElementById("newcust-box").hidden = true;
     var sn = document.getElementById("e-shipnote");
@@ -10748,7 +11032,7 @@
       "</select>" + (function(){
         var sp = orderStep(s);
         return "<span class='stepline" + (sp.done ? " done" : "") + "'>" + esc(stepTxt(sp)) + "</span>";
-      })() + delTag(s) + "</td>" +
+      })() + delTag(s) + cfTag(s) + "</td>" +
       "<td class='rowacts'>" + rowNextBtn(s) +
         "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل' aria-label='تعديل'>✎</button>" +
         "<span class='chev' aria-hidden='true'>▾</span></td></tr>";
@@ -11400,7 +11684,7 @@
     pnl.hidden = all;
     if(expStage) renderExp();      // شاشة التحليل مفتوحة؟ تتحدّث مع أي تغيير (مزامنة من جهاز تاني مثلاً)
     if(all) return;
-    pnl.innerHTML = SG_PANEL[sView](g);
+    pnl.innerHTML = rsnAskHTML() + SG_PANEL[sView](g);
   }
 
   // رقم الأوردر في أي بانل بيفتح تفاصيله الكاملة في «الكل»
@@ -11432,7 +11716,7 @@
         return "<div class='sg-row' data-sgrow='" + esc(s.id) + "'>" +
           "<span>" + sgNo(s) + "<span class='sg-sub num'>" + esc(s.date || "—") + "</span></span>" +
           // عميل رفض قبل كده؟ تشوفها قبل ما تشحن
-          "<span>" + sgCust(s) + refusalFlag(s.partyId) + "</span>" + sgItems(s) +
+          "<span>" + sgCust(s) + refusalFlag(s.partyId) + cfTag(s) + cfBtns(s) + "</span>" + sgItems(s) +
           "<span class='sg-amt num'>" + sgNum(sgFull(s)) + "</span>" +
           (ed && s.selfDel ? "<span class='sg-inl'><span class='sg-pill self'>🛵 توصيل بنفسك</span>" +
                 "<input list='courier-list' data-sgcour='" + esc(s.id) + "' placeholder='مين هيوصّله' value='" + esc(squish(s.courier)) + "' aria-label='مين هيوصّله'>" +
@@ -13248,7 +13532,7 @@
   }
   // شحنت فعلاً؟ من غير شركة شحن البضاعة ما راحتش لحد
   function heldShipped(s){
-    if(s.selfDel) return false;
+    if(s.selfDel || s.preCancel) return false;                       // اتلغى قبل الشحن: مفيش حاجة عند الشركة
     return !!(squish(s.shipCo) || shipOut(s) || shipIn(s) || viaShip(s));
   }
   // سطر لكل صنف راجع — مش سطر لكل فاتورة، عشان الصنف بيرجع لوحده
@@ -14591,6 +14875,7 @@
   });
 
   function fillSelects(){
+    campList();                                                       // الحملات بتتقترح في الأوردر ومصروف الإعلان
     function opts(list, sel, placeholder, withStock){
       var el = document.getElementById(sel);
       var cur = el.value;
@@ -15327,6 +15612,7 @@
       el.style.setProperty("--i", Math.min(n++, 12));
     });
     sec.classList.remove("enter"); void sec.offsetWidth; sec.classList.add("enter");
+    countIn(sec);
     clearTimeout(sec._enterT);
     sec._enterT = setTimeout(function(){ sec.classList.remove("enter"); }, 800);
   }
@@ -15724,6 +16010,7 @@
       g("c-date").value=rec.date||today(); g("c-type").value=rec.type||"in"; fillSelects();
       g("c-party").value=rec.partyId||""; g("c-amount").value=rec.amount||""; g("c-note").value=rec.note||"";
       g("c-cat").value = rec.type === "expense" ? expCat(rec) : ""; syncCatChips(); catPicked = rec.type === "expense";
+      g("c-src").value = rec.src || ""; g("c-camp").value = rec.camp || "";
       fillSelects(); g("c-shipco").value=rec.shipCo||"";
     }
     setEditUI(list);
@@ -15923,6 +16210,18 @@
   // أي كتابة في الدرج بتروح للمسوّدة على طول
   SD.addEventListener("input", onEntryEdit);
   SD.addEventListener("change", onEntryEdit);
+  SD.addEventListener("click", function(e){
+    var b = e.target.closest("[data-cf],[data-rsn],#e-wa"); if(!b) return;
+    if(b.id === "e-wa"){
+      var p = db.parties.find(function(x){ return x.id === draft.partyId; }) || {};
+      var tot = draft.lines.reduce(function(a, l){ return a + (Number(l.qty)||0) * (Number(l.price)||0); }, 0) + (Number(draft.shipIn)||0);
+      b.href = "https://wa.me/" + waNum(p.phone) + "?text=" + encodeURIComponent(waConfirmText({ partyId:draft.partyId, lines:draft.lines }, tot));
+      return;                                                        // الرابط بيفتح في تاب جديد
+    }
+    if(b.dataset.cf !== undefined){ draft.cf = b.dataset.cf; draft.cfAt = b.dataset.cf ? today() : ""; }
+    else draft.rsn = draft.rsn === b.dataset.rsn ? "" : b.dataset.rsn;
+    syncSrcUI();
+  });
 
   function onEntryEdit(e){
     var el = e.target;
@@ -15945,6 +16244,7 @@
     } else {
       var prev = draft[f];
       draft[f] = v;
+      if(f === "src" || f === "status" || f === "partyId") syncSrcUI();
       if(f === "status"){ renderDrawerLines(); return; }  // المرتجع بيظهر ويختفي مع الحالة
       // أول ما اسم شركة الشحن يتكتب في خانة فاضية → التحصيل عن طريقها
       if(f === "shipCo" && !squish(prev || "") && squish(v)) autoPayViaShip();
@@ -16108,7 +16408,7 @@
 
   // Enter بيحفظ · Esc بيقفل الدرج
   SD.addEventListener("keydown", function(e){
-    if(e.key === "Enter" && e.target.tagName !== "BUTTON"){ e.preventDefault(); saveDraft(); }
+    if(e.key === "Enter" && e.target.tagName !== "BUTTON" && e.target.tagName !== "A" && e.target.id !== "e-camp"){ e.preventDefault(); saveDraft(); }
     if(e.key === "Escape"){ e.preventDefault(); cancelDraft(); }
   });
   document.getElementById("sale-scrim").addEventListener("click", cancelDraft);
@@ -16543,7 +16843,8 @@
           if(short){ no(rec, short); return; }      // ما ينفعش يتسلّم = مش هيتحصّل كمان
         }
         var b0 = Number(rec.paid)||0;
-        rec.status = want; stampDelivery(rec); syncShipPaid(rec); touched = true; nDeliv++;
+        rec.rsn = ""; if(want !== "progress" && rec.cf === "nr"){ rec.cf = ""; rec.cfAt = ""; }
+        rec.status = want; preCancelFix(rec); stampDelivery(rec); syncShipPaid(rec); touched = true; nDeliv++;
         shipPaid(rec, b0);
       }
 
@@ -16666,6 +16967,7 @@
         ? Math.round((lines.reduce(function(a, l){ return a + (l.qty - l.ret) * l.price; }, 0) +
                       (Number(draft.shipIn)||0)) * 100) / 100
         : 0;
+    var cfV = status === "progress" ? (draft.cf || "") : (draft.cf === "ok" ? "ok" : "");   // «ما ردّش» بيخص الجاري بس
     var fields = {
       date: draft.date || today(), partyId: draft.partyId, lines: lines, status: status,
       paid: paidV,
@@ -16677,9 +16979,15 @@
       selfDel: !!draft.selfDel, courier: draft.selfDel ? squish(draft.courier || "") : "",
       shipIn: Number(draft.shipIn)||0, shipOut: Number(draft.shipOut)||0,
       note: (draft.note||"").trim(),
+      src: draft.src || "", camp: SRC_AD[draft.src] ? squish(draft.camp || "") : "",
+      cf: cfV, cfAt: cfV ? (draft.cfAt || today()) : "",
+      rsn: status === "cancelled" ? (draft.rsn || "") : "",
+      preCancel: false,
       itemId:"", color:"", size:"", qty:0, price:0, ret:0
     };
 
+    var shippedB4 = editing.sales ? ((db.sales.find(function(x){ return x.id === editing.sales; }) || {}).shippedAt || "") : "";
+    if(status === "cancelled" && preShip(fields, shippedB4)){ fields.preCancel = true; fields.shipIn = 0; fields.shipOut = 0; }
     if(editing.sales){
       var rec = db.sales.find(function(x){ return x.id === editing.sales; });
       if(rec){
@@ -16755,7 +17063,7 @@
     document.getElementById("nc-gov").value = "";
     document.getElementById("newcust-box").hidden = true;
     draft.partyId = rec.id;            // يتختار في سطر الإدخال على طول
-    renderAll();
+    renderAll(); syncSrcUI();
     suggestShipping();
     toast("اتضاف العميل واتختار");
     saveSoon("parties");
@@ -17473,6 +17781,9 @@
       b.setAttribute("aria-pressed", b.dataset.ccat === shown ? "true" : "false");
     });
     var h = document.getElementById("c-cat-hint");
+    var sw = document.getElementById("c-src-wrap"), ss = document.getElementById("c-src");
+    if(ss && !ss.options.length) ss.innerHTML = optsHTML(SRC.filter(function(x){ return SRC_AD[x[0]]; }).map(function(x){ return { v:x[0], t:x[1] }; }), "", "مش متحدد");
+    if(sw) sw.hidden = shown !== "ads";
     if(h) h.innerHTML = shown ? CAT_HINT[shown] + (v ? "" : " <span style='color:var(--ink-soft)'>(اتعرف من البيان)</span>")
                               : "اختار النوع — ده اللي بيفرّق الإعلان والتغليف (متغيّر) عن الباقي (ثابت).";
   }
@@ -17499,6 +17810,8 @@
     if(fields.type === "expense"){
       fields.cat = document.getElementById("c-cat").value || expCatGuess(fields.note) || "other";
       fields.costKind = EXP_CAT[fields.cat].kind === "var" ? "var" : "fixed";
+      fields.src = fields.cat === "ads" ? document.getElementById("c-src").value : "";
+      fields.camp = fields.cat === "ads" ? squish(document.getElementById("c-camp").value) : "";
     } else { fields.cat = ""; fields.costKind = ""; }
     if(!fields.amount){ toast("اكتب المبلغ"); return; }
     if(fields.type==="settle"){
@@ -17518,6 +17831,7 @@
     commit("cash", fields, form, "اتسجّلت الحركة");
     document.getElementById("c-date").value = today();
     document.getElementById("c-cat").value = ""; syncCatChips();
+    document.getElementById("c-src").value = ""; document.getElementById("c-camp").value = "";
     clearOver(); fillSelects(); renderAll();
   });
 
@@ -17610,14 +17924,20 @@
       if(short){ toast(short + " — سجّل شراء الأول"); return false; }
     }
     var paidBefore = Number(rec.paid)||0;
+    rec.rsn = "";                                                     // سبب قديم ما يتنقلش للإلغاء الجديد
+    if(next === "cancelled") rsnAsk = rec.id;                         // اسأل عن السبب فوق لوحة المراحل
+    if(next !== "progress" && rec.cf === "nr"){ rec.cf = ""; rec.cfAt = ""; }
     rec.status = next; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
+    preCancelFix(rec);
     stampDelivery(rec);
     syncShipPaid(rec);             // أوردر الشركة: استلم = دفع للمندوب
     syncSelfPaid(rec, paidBefore); // توصيل بنفسك: استلم = دفع والفلوس دخلت الخزنة
     renderAll(); saveSoon("sales");
     var via = viaShip(rec), co = squish(rec.shipCo) || "شركة الشحن";
     // لما الملغي يرجع مسلّم، خانة المحصّل بتكون اتصفّرت وقت الإلغاء
-    if(!via && prev === "cancelled" && next === "delivered" && !(Number(rec.paid)||0))
+    if(rec.preCancel && next === "cancelled")
+      toast("#" + (rec.no || "") + " اتلغى قبل الشحن — من غير مصاريف شحن" + ((Number(rec.paid)||0) ? " · كان دافع " + money(Number(rec.paid)||0) + "، رجّعهوله من الخزنة" : ""), 4200);
+    else if(!via && prev === "cancelled" && next === "delivered" && !(Number(rec.paid)||0))
       toast("الحالة بقت مسلّم — راجع خانة المحصّل من زرار تعديل");
     else if(via && next === "delivered")
       toast("العميل استلم ودفع " + money(Number(rec.paid)||0) + " لـ " + co +
@@ -17868,32 +18188,86 @@
     scan(document.body);
   })();
 
-  /* v109 — أرقام الرئيسية بتعدّ لحد قيمتها أول ما السيستم يفتح (مرة واحدة بس) */
-  var hmCounted = false;
-  function hmCountUp(){
-    if(hmCounted) return;
-    var sec = document.getElementById("tab-dash"); if(!sec || sec.hidden) return;
-    hmCounted = true;
+  /* ═══ v137 — من React Bits (منقولة لـJavaScript عادي، من غير React) ═══
+     CountUp: الأرقام الكبيرة بتعدّ لحد قيمتها لما الشاشة أو قسم التحليل يتفتح — مش مع كل حفظ.
+     بتحافظ على شكل الرقم: الفاصلة والكسور، ولو الرقم مقسوم (m-i / m-d) الجزء الصحيح بس هو اللي بيعدّ.
+     ease-out أسّي في ٧٠٠ms — قريب من الـspring بتاع React Bits. مع «تقليل الحركة» الرقم بيبان على طول.
+     بتشتغل في أول frame: بعد ما مراقب العملة (v109) يقسّم الرقم لأجزاء، ومرة واحدة لو اتطلبت مرتين ورا بعض. */
+  var COUNT_SEL = ".kpi strong,.hm-k strong,.hm-hmain strong,.vz-st b,.cfo-hero b,.cfo-sc b,.co-t b,.mbig";
+  function countIn(sec){
+    if(!sec || sec.hidden || sec._cuPend) return;
     if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    var items = Array.prototype.map.call(document.querySelectorAll("#hm-big .hm-k strong, #hm-big .hm-hmain strong"), function(el){
-      var t = el.textContent, m = /[\d,]+(?:\.\d+)?/.exec(t);
-      if(!m) return null;
-      return { el:el, t:t, n:m[0], v:Number(m[0].replace(/,/g, "")), dec:(m[0].split(".")[1] || "").length };
-    }).filter(function(x){ return x && x.v > 0; });
+    sec._cuPend = true;
+    requestAnimationFrame(function(){ sec._cuPend = false; countRun(sec); });
+  }
+  function countRun(sec){
+    if(sec.hidden) return;
+    var items = [], boxes = [];
+    Array.prototype.forEach.call(sec.querySelectorAll(COUNT_SEL), function(el){
+      if(!el.offsetParent) return;
+      var parts = el.querySelectorAll(".m-i");
+      var list = parts.length ? Array.prototype.slice.call(parts) : (el.children.length ? [] : [el]);
+      var any = false;
+      list.forEach(function(t){
+        // عدّ قديم لسه شغال ومحدش غيّر الرقم من بره: نبدأ من الرقم الأصلي مش من نص العدّ
+        var prev = t._cu, txt = prev && t.textContent === prev.last ? prev.t : t.textContent;
+        if(prev) prev.stop = true;
+        var m = /\d[\d,]*(?:\.\d+)?/.exec(txt); if(!m) return;
+        var v = Number(m[0].replace(/,/g, "")); if(!(v > 0) || !isFinite(v)) return;
+        var it = { el:t, t:txt, n:m[0], v:v, dec:(m[0].split(".")[1] || "").length, comma:m[0].indexOf(",") >= 0, last:txt };
+        t._cu = it; items.push(it); any = true;
+      });
+      // العرض بيفضل على قد الرقم النهائي وهو بيعدّ — اللي جنبه ما يتزحزحش
+      if(any && !el.style.minWidth){ el.style.minWidth = Math.ceil(el.getBoundingClientRect().width) + "px"; boxes.push(el); }
+    });
     if(!items.length) return;
-    var t0 = 0, D = 650;
+    var t0 = 0, D = 700;
+    function fmt(it, x){
+      it.nf = it.nf || new Intl.NumberFormat("en-US", { minimumFractionDigits:it.dec, maximumFractionDigits:it.dec, useGrouping:it.comma });
+      return it.nf.format(x);
+    }
     function step(now){
       if(!t0) t0 = now;
-      var k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3);
+      var k = Math.min(1, (now - t0) / D), e = k >= 1 ? 1 : 1 - Math.pow(2, -10 * k), live = 0;
       items.forEach(function(it){
-        if(!it.el.isConnected) return;
-        it.el.textContent = k >= 1 ? it.t : it.t.replace(it.n,
-          (it.v * e).toLocaleString("en-US", { minimumFractionDigits:it.dec, maximumFractionDigits:it.dec }));
+        if(it.stop || !it.el.isConnected) return;
+        if(it.el.textContent !== it.last){ it.stop = true; it.el._cu = null; return; }   // اترسم من بره: سيبه
+        live++;
+        it.last = k >= 1 ? it.t : it.t.replace(it.n, fmt(it, it.v * e));
+        it.el.textContent = it.last;
+        if(k >= 1) it.el._cu = null;
       });
-      if(k < 1) requestAnimationFrame(step);
+      if(k < 1 && live) requestAnimationFrame(step);
+      else boxes.forEach(function(el){ el.style.minWidth = ""; });
     }
     requestAnimationFrame(step);
   }
+  // AnimatedList: قرارات «المدير المالي» بتدخل واحدة ورا التانية لما القسم يتفتح (class لحظة وبتتشال)
+  function cfoListIn(){
+    var el = document.getElementById("cfo-acts"); if(!el) return;
+    el.classList.remove("in"); void el.offsetWidth; el.classList.add("in");
+    clearTimeout(el._inT); el._inT = setTimeout(function(){ el.classList.remove("in"); }, 1000);
+  }
+  // SpotlightCard: مستمع واحد للصفحة كلها. على الكروت اللي بتتداس بس — النور معناه «ده بيتداس»
+  (function(){
+    if(!window.matchMedia || !window.matchMedia("(hover:hover)").matches) return;
+    if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var SEL = ".hm-k,.hm-hmain,.iv,.pv,.sg-card", cur = null, last = null;
+    function off(){ if(cur){ cur.classList.remove("spot-on"); cur = null; } }
+    document.addEventListener("pointermove", function(e){
+      var el = e.target && e.target.closest ? e.target.closest(SEL) : null;
+      if(el !== cur){ off(); if(el){ cur = el; el.classList.add("spot-on"); } }
+      if(!el) return;
+      last = e;
+      if(el._spRaf) return;
+      el._spRaf = requestAnimationFrame(function(){
+        el._spRaf = 0; var r = el.getBoundingClientRect();
+        el.style.setProperty("--mx", (last.clientX - r.left) + "px"); el.style.setProperty("--my", (last.clientY - r.top) + "px");
+      });
+    }, { passive:true });
+    document.documentElement.addEventListener("pointerleave", off);   // الماوس خرج من الصفحة
+    window.addEventListener("blur", off);
+  })();
 
   /* الكروت اللي فوق كل شاشة: السطر الصغير بيبان لما تقف على الكارت (title).
      بنراقب بدل ما نعدّل كل دالة بترسم كروت — أي كارت جديد بياخدها لوحده. */
@@ -19757,7 +20131,6 @@
     if(lockOn() && !curUser()) lockShow();
     renderAll();
     renderStorageState();
-    hmCountUp();
     tabEnter(document.querySelector("main > section[id^='tab-']:not([hidden])"));
 
     // المزامنة بتكمّل لوحدها من غير ما حد يشغّلها كل مرة
