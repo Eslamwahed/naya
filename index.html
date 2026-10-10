@@ -1441,6 +1441,54 @@
   .rsn-ask b{color:var(--due)}
   .rsn-ask .quick{display:flex;flex-wrap:wrap;gap:4px}
   #t-cfo-src tr.cfo-src-na td{color:var(--ink-soft)}
+  /* v142: المدفوع مقدّماً */
+  .pp-tot{font-size:var(--fs-4);font-weight:700;color:var(--ink-soft);margin-inline-start:var(--sp-2)}
+  .pp{display:grid;gap:var(--sp-5)}
+  .pp h3{margin:0 0 4px;font-size:var(--fs-4)}
+  .pp .hint{margin:0}
+  .pp-mh{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--sp-4);flex-wrap:wrap}
+  .pp-mv{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .pp-mv b{font-size:var(--fs-6, 28px);line-height:1.1;font-weight:700;letter-spacing:-0.02em}
+  .pp-st{font-size:var(--fs-1);font-weight:600;border-radius:var(--r-pill);padding:2px 10px;background:var(--line);color:var(--ink-soft);white-space:nowrap}
+  .pp-st.ok{background:var(--gain-soft);color:var(--gain-ink)}
+  .pp-st.warn{background:var(--warn-soft);color:var(--warn)}
+  .pp-rec{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:var(--sp-3);align-items:end;margin-top:var(--sp-4);
+    padding:var(--sp-4);background:var(--teal-soft);border-radius:var(--r-md)}
+  .pp-rec label{display:block;font-size:var(--fs-2);color:var(--ink-soft);margin-bottom:4px}
+  .pp-rec .pp-prev{grid-column:1/-1;margin:0}
+  .pp-hist{margin-top:var(--sp-4)}
+  .pp-hist summary{cursor:pointer;font-weight:600;font-size:var(--fs-2);color:var(--ink-soft);padding:4px 0}
+  .pp-t{width:100%}
+  .pp-t td .sub{display:block}
+  .pp-bar{display:block;height:4px;border-radius:2px;background:var(--line);margin-top:6px;max-width:180px;overflow:hidden}
+  .pp-bar i{display:block;height:100%;width:var(--u);background:var(--teal)}
+  .pp-sub{border-top:1px solid var(--line);padding-top:var(--sp-5)}
+  .c-xtra{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-3)}
+  .c-xtra > [hidden]{display:none}
+  .c-xtra label{display:block}
+  .c-xtra .hintline{margin:4px 0 0}
+  .cpc-owe{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-3) 0 0;
+    padding:var(--sp-3) var(--sp-4);background:var(--warn-soft);border-radius:var(--r-md)}
+  .cpc-owe span{display:flex;flex-direction:column;gap:2px;font-size:var(--fs-2)}
+  .cpc-owe b{font-size:var(--fs-4)}
+  .cpc-owe small{color:var(--ink-soft)}
+  @media (max-width:760px){
+    .pp-rec{grid-template-columns:1fr 1fr}
+    .pp-rec > div:nth-child(3){grid-column:1/-1}
+    .pp-rec .act{width:100%}
+    .c-xtra{grid-template-columns:1fr}
+    .pp-mv{align-items:flex-start}
+  }
+  .fx-card{border-color:var(--warn)}
+  .fx-card h3{margin:0 0 4px;font-size:var(--fs-4)}
+  .fx-eff{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-3);margin:var(--sp-4) 0}
+  .fx-eff div{background:var(--paper);border-radius:var(--r-md);padding:var(--sp-3)}
+  .fx-eff small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .fx-eff b{font-size:var(--fs-3)}
+  .fx-card details summary{cursor:pointer;font-weight:600;font-size:var(--fs-2);color:var(--ink-soft);padding:4px 0}
+  .fx-a{display:flex;gap:var(--sp-2);margin-top:var(--sp-4)}
+  @media (max-width:760px){ .fx-eff{grid-template-columns:1fr 1fr} }
+
   .c-src{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);grid-column:1/-1;margin-top:var(--sp-3)}
   @media (max-width:760px){ .c-src{grid-template-columns:1fr} }
   /* v133: تقرير الشركاء — ثيم Lora Plum. ألوانه من --lp-* الثابتة: التقرير بيتطبع فاتح حتى لو السيستم ليلي */
@@ -2307,6 +2355,7 @@
     <button data-tab="parties" data-grp="goods" data-sub="supplier">الموردين</button>
     <button data-tab="cash" data-grp="money">الخزنة</button>
     <button data-tab="capital" data-grp="money">الشركاء</button>
+    <button data-tab="prepaid" data-grp="money" class="money-only">المدفوع مقدّماً</button>
     <button data-tab="rep" data-grp="more" data-sub="sum">قايمة الدخل</button>
     <button data-tab="rep" data-grp="more" data-sub="fin" class="money-only">القوايم المالية</button>
     <button data-tab="rep" data-grp="more" data-sub="cfo" class="money-only">المدير المالي</button>
@@ -2866,6 +2915,7 @@
       <div><label for="c-note">البيان</label><input id="c-note" autocomplete="off"></div>
       <div class="cash-kind" hidden style="grid-column:1/-1"><label id="c-cat-l">نوع المصروف</label>
         <div class="quick c-cats" id="c-cats" role="group" aria-labelledby="c-cat-l">
+          <button type="button" data-ccat="metatop">شحن رصيد فيسبوك</button>
           <button type="button" data-ccat="ads">إعلانات</button>
           <button type="button" data-ccat="pack">تغليف</button>
           <button type="button" data-ccat="trans">انتقالات شراء بضاعة</button>
@@ -2876,6 +2926,14 @@
         </div>
         <input type="hidden" id="c-cat">
         <p class="hintline" id="c-cat-hint" style="margin:6px 0 0"></p>
+        <div class="c-xtra">
+          <div id="c-meta-wrap" hidden><label for="c-credit">دخل رصيد فيسبوك كام؟</label><input type="number" id="c-credit" step="any" min="0" autocomplete="off">
+            <p class="hintline" id="c-credit-hint"></p></div>
+          <div id="c-svc-wrap" hidden><label for="c-svc">بيتحسب على</label><select id="c-svc"><option value='1'>يوم الدفع</option><option value='7'>أسبوع</option><option value='30'>شهر</option><option value='90'>٣ شهور</option><option value='365'>سنة</option></select>
+            <p class="hintline" id="c-svc-hint"></p></div>
+          <div id="c-payer-wrap" hidden><label for="c-paidby">دفعه مين؟</label><select id="c-paidby"></select>
+            <p class="hintline" id="c-payer-hint"></p></div>
+        </div>
         <div class="c-src" id="c-src-wrap" hidden>
           <div><label for="c-src">الإعلان على</label><select id="c-src"></select></div>
           <div><label for="c-camp">الحملة</label><input id="c-camp" list="camp-list" autocomplete="off" placeholder="مثلاً فرو أكتوبر"></div>
@@ -3033,6 +3091,13 @@
 </section>
 
 <!-- المخزون -->
+<section id="tab-prepaid" hidden>
+  <h2>المدفوع مقدّماً <span class="pp-tot num" id="pp-total"></span><button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>فلوس طلعت من الخزنة عن حاجة لسه هتستفيد منها: رصيد فيسبوك اللي الإعلانات لسه ما صرفتوش، واشتراك اتدفع عن شهر لسه أيامه ما خلصتش. قايمة الدخل بتحسبها <strong>يوم بيوم وانت بتستخدمها</strong> مش يوم الدفع — والباقي هنا، وبيظهر في الميزانية «مصروفات مدفوعة مقدّماً».</p>
+  <div id="pp-fix"></div>
+  <div class="panel pp" id="pp-body"></div>
+</section>
+
 <section id="tab-capital" hidden>
   <div class="pt-head"><h2>رأس المال والشركاء</h2><button class="tbtn primary" type="button" data-openentry="capital">+ حركة رأس مال</button></div>
 
@@ -3120,6 +3185,7 @@
           <option value="cap_out">الشريك سحب من رأس ماله — نسبته تقل</option>
           <option value="cap_payout">صرف أرباح للشريك — نسبته ما تتغيّرش</option>
           <option value="cap_reinvest">الشريك ساب أرباحه رأس مال — نسبته تزيد</option>
+          <option value="cap_repay">رجّعنا للشريك مصروف دفعه من جيبه — نسبته ما تتغيّرش</option>
         </select></div>
       <div><label for="cp-amount">المبلغ</label><input type="number" id="cp-amount" step="any" min="0" autocomplete="off"></div>
       <div><label for="cp-note">البيان</label><input id="cp-note" autocomplete="off"></div>
@@ -4009,8 +4075,16 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "141";
+  var VERSION = "142";
   var CHANGELOG = [
+    { v:"142", d:"2026-10-10", items:[
+      "قايمة الدخل بقت بتحسب المصروف في الأيام اللي استفدت منه فيها: الاشتراك على شهر، والإعلانات على اللي فيسبوك صرفه فعلاً — والتغليف والمرة الواحدة يوم الدفع زي ما هما",
+      "جديد: الفلوس ← «المدفوع مقدّماً» — رصيد فيسبوك وزرار «طابق» (تكتب الرصيد اللي في فيسبوك والسيستم يحسب الإعلانات صرفت كام)، والاشتراكات اللي أيامها لسه ما خلصتش",
+      "مصروف جديد «شحن رصيد فيسبوك»: تكتب اللي دفعته في فوري واللي دخل فيسبوك، والفرق رسوم فوري",
+      "«دفعه مين؟» في المصروف: لو شريك دفع من جيبه الخزنة ما بتتأثرش، والشركة بيبقى عليها له لحد «رجّعله من الخزنة» في الشركاء",
+      "الميزانية: «مصروفات مدفوعة مقدّماً» و«مستحق للشركاء»",
+      "تصحيحات حسابات أكتوبر اللي اتفقنا عليها (اشتراك إسلام، الفلايرات، دفعات فيسبوك) جاهزة في «المدفوع مقدّماً» — بتتطبّق بزرار"
+    ]},
     { v:"141", d:"2026-10-10", items:[
       "الإلغاء قبل الشحن ما بقاش بيمسح مصاريف الشحن من الأوردر — بتفضل مكتوبة ومش بتتحسب طول ما هو ملغي، ولو رجّعته (اتلغى بالغلط أو العميل رجع في كلامه) بترجع تتحسب لوحدها",
       "أوردر اتلغى قبل كده على نسخة قديمة ورجّعته: بيظهرلك تنبيه إن الشحن عليه صفر عشان تكتبه"
@@ -4776,7 +4850,7 @@
     ["dash","لوحة المتابعة"],["capital","رأس المال"],["cash","الخزنة"],
     ["purch","المشتريات"],["items","الأصناف"],["price","التسعير"],["inv","المخزون"],
     ["sales","المبيعات"],["ship","شركات الشحن"],["parties","العملاء والموردين"],
-    ["rep","تقارير"],["viz","رسومات"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"]
+    ["rep","تقارير"],["viz","رسومات"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"],["prepaid","المدفوع مقدّماً"]
   ];
   var TAB_NAME = {}; TABS.forEach(function(t){ TAB_NAME[t[0]] = t[1]; });
   var authUser = null;                  // المستخدم الداخل دلوقتي
@@ -4791,11 +4865,11 @@
   /* شاشة جديدة اتضافت بعد ما المستخدمين اتعملوا: صلاحياتهم المتخزّنة
      مافيهاش اسمها، فكانوا هيلاقوها مختفية من غير سبب. بنورّثها من
      الشاشة اللي هي جزء منها. */
-  var TAB_FROM = { price:"items", coach:"rep", viz:"rep" };
+  var TAB_FROM = { price:"items", coach:"rep", viz:"rep", prepaid:"cash" };
   /* شاشات كلها تكلفة وربح من أول سطر لآخر سطر — مينفعش تتفتح لحد
      الأرباح مخفية عنه، حتى لو التبويب متعلّم له. إخفاء أعمدة واحد
      واحد بيسيب تسريب أول ما يتضاف عمود جديد. */
-  var TAB_MONEY = { price:1, coach:1, viz:1 };
+  var TAB_MONEY = { price:1, coach:1, viz:1, prepaid:1 };
   function canTab(t){
     if(!lockOn()) return true;
     var u = curUser();
@@ -6275,7 +6349,7 @@
       if(c.type === "opening")      v += a;    // رصيد افتتاحي للخزنة
       else if(c.type === "opening_party") return;  // ده بيأثّر على رصيد الجهة بس
       else if(c.type === "in" || c.type === "settle") v += a;
-      else if(c.type === "out" || c.type === "expense") v -= a;
+      else if(c.type === "out" || (c.type === "expense" && !c.paidBy)) v -= a;   // v142: شريك دفعه من جيبه
     });
     return v;
   }
@@ -6288,7 +6362,8 @@
     cap_out:      { label:"سحب من رأس ماله",     cash:-1, capital:-1, current: 0 },
     cap_share:    { label:"أرباح مستحقة له",     cash: 0, capital: 0, current:+1 },
     cap_payout:   { label:"صرف أرباح",           cash:-1, capital: 0, current:-1 },
-    cap_reinvest: { label:"ساب أرباحه رأس مال",  cash: 0, capital:+1, current:-1 }
+    cap_reinvest: { label:"ساب أرباحه رأس مال",  cash: 0, capital:+1, current:-1 },
+    cap_repay:    { label:"رجّعناله مصروف دفعه",   cash:-1, capital: 0, current: 0 }   // v142
   };
   function isCapType(t){ return Object.prototype.hasOwnProperty.call(CAP, t); }
 
@@ -6426,7 +6501,7 @@
   function duesNet(){ return partyDues().net; }
   // صافي الأصول لازم يساوي حقوق الملكية. الفرق معناه حاجة مش مسجّلة.
   function netAssets(){
-    return cashBox() + walletsTotal() + stockBookValue() + duesNet();
+    return cashBox() + walletsTotal() + stockBookValue() + duesNet() + prepaidTotal() - owedTotal();
   }
   function totalEquity(){
     return partners().reduce(function(a,p){
@@ -6573,7 +6648,9 @@
     ["once",   "مرة واحدة",          "fixed"],
     ["other",  "تاني",               "fixed"],
     // مش زرار: مصروف قديم متعلّم «متغيّر» وبيانه ما بيقولش نوعه (أو عمولة) — بيفضل متغيّر
-    ["othervar", "مصاريف متغيّرة تانية", "var"]
+    ["othervar", "مصاريف متغيّرة تانية", "var"],
+    // v142: شحن رصيد فيسبوك — أصل (مدفوع مقدّماً) مش مصروف؛ رسومه وصرفه بيتحسبوا على «إعلانات»
+    ["metatop", "شحن رصيد فيسبوك", "var"]
   ];
   var EXP_CAT = {}; EXP_CATS.forEach(function(x){ EXP_CAT[x[0]] = { label:x[1], kind:x[2] }; });
   function expCatGuess(note){
@@ -6655,20 +6732,125 @@
     return T;
   }
   function trLinked(c){ return !!(c && trIdx().link[c.id]); }
+  /* ═══ v142 — المصروف على مدته · المدفوع مقدّماً · حساب فيسبوك · الشريك يدفع من جيبه ═══
+     قايمة الدخل بتحسب المصروف في الأيام اللي استفدت منه فيها، مش يوم الدفع (أساس الاستحقاق — IAS 1.27):
+       · اشتراك: شهر من يوم الدفع (أو المدة اللي تكتبها). اللي لسه أيامه ما جتش = مدفوع مقدّماً.
+       · شحن رصيد فيسبوك: اللي دخل الحساب أصل، ورسوم فوري مصروف على طول (cat "metatop", credit = اللي دخل).
+         صرف فيسبوك بين كل مطابقتين = الرصيد اللي فات + الشحن − الرصيد دلوقتي، موزّع على أيامها (فيه ضريبة 14%).
+       · أي مصروف تاني (تغليف، مرة واحدة، مرتبات…) يوم الدفع زي ما هو.
+     paidBy = شريك دفع المصروف من جيبه: الخزنة ما بتتلمسش، والشركة عليها له لحد «رجّعناله» (cap_repay). */
+  var SVC_DAYS = { subs:30 };
+  /* المدة الافتراضية بتشتغل على المصاريف من يوم الإصدار ده وطالع بس — اللي قبله (والشهور المقفولة)
+     بيفضل يوم الدفع زي ما كان، إلا لو المدة متكتبة على المصروف نفسه (svcDays). */
+  var SVC_FROM = "2026-10-10";
+  function svcDefault(cat, date){ return (date || "") >= SVC_FROM ? (SVC_DAYS[cat] || 1) : 1; }
+  var SVC_OPTS = [[1, "يوم الدفع"], [7, "أسبوع"], [30, "شهر"], [90, "٣ شهور"], [365, "سنة"]];
+  var META_MAX_GAP = 7;                                                       // أيام من غير مطابقة قبل التذكير
+  function isMetaTop(c){ return c && c.type === "expense" && c.cat === "metatop"; }
+  function metaCredit(c){ var v = Number(c.credit); return isFinite(v) && c.credit !== "" && c.credit != null ? v : Number(c.amount)||0; }
+  function metaFee(c){ return Math.max(0, (Number(c.amount)||0) - metaCredit(c)); }
+  function svcOf(c){
+    var d = Number(c.svcDays) || svcDefault(expCat(c), c.date);
+    return { from: c.svcFrom || c.date, days: Math.max(1, Math.round(d)) };
+  }
+  function svcTo(c){ var s = svcOf(c); return addDays(s.from, s.days - 1); }
+  // نصيب مبلغ موزّع على days يوم من from، جوه الفترة r ولحد النهارده بس
+  function shareIn(from, days, amount, r){
+    if(!from || !amount) return 0;
+    var b = addDays(from, days - 1), t = today(), a = from;
+    if(b > t) b = t;
+    if(r){ if(r.from && r.from > a) a = r.from; if(r.to && r.to < b) b = r.to; }
+    if(a > b) return 0;
+    return amount * (daysBetween(a, b) + 1) / days;
+  }
+  function metaRecs(){
+    return (settings.metaRec || []).filter(function(x){ return x && x.d; })
+      .slice().sort(function(a, b){ return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; });
+  }
+  function metaTops(){ return live("cash").filter(isMetaTop); }
+  // الشحنة بعد المطابقة؟ نفس اليوم: بالوقت اللي اتسجّلت فيه (مطابقة من غير وقت = آخر اليوم)
+  // made = وقت تسجيل الشحنة أول مرة (التعديل ما بيغيّروش) — الشحنات القديمة من غيره بتتحسب قبل مطابقة نفس اليوم
+  function afterRec(c, R){ return !!R && (c.date > R.d || (c.date === R.d && (c.made||0) > (R.at == null ? Infinity : R.at))); }
+  // فترات المطابقة: كل فترة اتصرف فيها كام وعلى كام يوم
+  var _mspan = null;                                                         // بيتصفّر في renderAll
+  function metaSpans(){
+    if(_mspan) return _mspan;
+    var tops = metaTops(), out = [], prevD = "", prevB = 0, prevR = null;
+    metaRecs().forEach(function(x){
+      var cr = 0, first = "";
+      tops.forEach(function(c){ if((!prevR || afterRec(c, prevR)) && !afterRec(c, x)){ cr += metaCredit(c); if(!first || c.date < first) first = c.date; } });
+      var from = prevD ? addDays(prevD, 1) : (first || x.d);
+      out.push({ from:from, to:x.d, days:daysBetween(from, x.d) + 1, start:prevB, credit:cr, bal:Number(x.bal)||0,
+                 spent:Math.round((prevB + cr - (Number(x.bal)||0)) * 100) / 100 });
+      prevD = x.d; prevB = Number(x.bal)||0; prevR = x;
+    });
+    _mspan = out;
+    return out;
+  }
+  function metaSpendIn(r){
+    return metaSpans().reduce(function(a, s){ return a + shareIn(s.from, s.days, s.spent, r); }, 0);
+  }
+  // رصيد فيسبوك دلوقتي في الدفاتر: آخر مطابقة + اللي اتشحن بعدها (صرف ما بعد المطابقة لسه ما اتحسبش)
+  function metaBook(){
+    var R = metaRecs(), last = R.length ? R[R.length - 1] : null, after = 0, t = today();
+    metaTops().forEach(function(c){ if(!last || afterRec(c, last)) after += metaCredit(c); });   // حتى لو تاريخها جاي — الخزنة اتخصمت
+    return { last:last, after:after, bal:(last ? Number(last.bal)||0 : 0) + after };
+  }
+  // نصيب المصروف من الفترة (قايمة الدخل)
+  function expAmtIn(c, r){
+    if(isMetaTop(c)) return inRange(c.date, r) ? metaFee(c) : 0;
+    var s = svcOf(c);
+    if(s.days <= 1) return inRange(c.date, r) ? Number(c.amount)||0 : 0;        // يوم الدفع — زي ما كان بالظبط
+    return shareIn(s.from, s.days, Number(c.amount)||0, r);
+  }
+  // المدفوع مقدّماً: المصاريف اللي أيامها لسه ما جتش + رصيد فيسبوك
+  function prepaidList(){
+    var t = today(), L = [];
+    live("cash").forEach(function(c){
+      if(c.type !== "expense" || trLinked(c) || isMetaTop(c) || !c.date) return;      // تاريخها جاي: كلها مقدّم
+      var s = svcOf(c); if(s.days <= 1) return;
+      var a = Number(c.amount)||0, left = a - shareIn(s.from, s.days, a, null);
+      if(left > 0.004) L.push({ c:c, left:left, to:svcTo(c), from:s.from, days:s.days });
+    });
+    return L;
+  }
+  // المطابقة دي تنفع؟ ما ينفعش رصيد أكبر من اللي اتشحن (كان هيطلع إعلان بالسالب = ربح وهمي)
+  function metaRecsOk(L){
+    var keep = settings.metaRec, bad;
+    settings.metaRec = L; _mspan = null;
+    try{ bad = metaSpans().filter(function(s){ return s.spent < -0.009; })[0] || null; }
+    finally{ settings.metaRec = keep; _mspan = null; }
+    return bad;
+  }
+  function prepaidTotal(){
+    return prepaidList().reduce(function(a, x){ return a + x.left; }, 0) + metaBook().bal;
+  }
+  // الشريك دفع من جيبه: الشركة عليها له كام
+  function owedOf(id){
+    var v = 0;
+    live("cash").forEach(function(c){
+      if(c.type === "expense" && c.paidBy === id) v += Number(c.amount)||0;
+      if(c.type === "cap_repay" && c.partyId === id) v -= Number(c.amount)||0;
+    });
+    return Math.round(v * 100) / 100;
+  }
+  function owedTotal(){ return partners().reduce(function(a, p){ return a + owedOf(p.id); }, 0); }
+  // v142: مصاريف الفترة على أساس الاستحقاق — من expByCat عشان الرقمين يفضلوا واحد
   function expensesIn(r, kind){
-    return live("cash").filter(function(c){
-      if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c)) return false;
-      return !kind || costKindOf(c) === kind;
-    }).reduce(function(a,c){ return a + (Number(c.amount)||0); },0) +
-      (!kind || kind === "var" ? xLossIn(r) : 0);
+    var X = expByCat(r), v = 0;
+    EXP_CATS.forEach(function(x){ if(!kind || (kind === "var" ? x[2] === "var" : x[2] !== "var")) v += X[x[0]]; });
+    return v + (!kind || kind === "var" ? xLossIn(r) : 0);
   }
   // مصاريف الفترة بالنوع — من غير الانتقالات اللي اتحطت على البضاعة
   function expByCat(r){
     var o = {}; EXP_CATS.forEach(function(x){ o[x[0]] = 0; });
     live("cash").forEach(function(c){
-      if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c)) return;
-      o[expCat(c)] += Number(c.amount)||0;
+      if(c.type !== "expense" || trLinked(c)) return;
+      if(isMetaTop(c)){ o.ads += expAmtIn(c, r); return; }               // رسوم فوري
+      o[expCat(c)] += expAmtIn(c, r);
     });
+    o.ads += metaSpendIn(r);                                              // اللي فيسبوك صرفه فعلاً (بالضريبة)
+    o.metatop = 0;
     return o;
   }
   // خسارة (أو مكسب) الاستبدال مع المورد — مصروف متغيّر من غير خزنة
@@ -6944,6 +7126,21 @@
                               v:money(-b), go:"party|" + p.id });
       });
     }
+    if(canTab("prepaid") && fix142Pending())
+      line({ ic:"book", cls:"warn", t:"تصحيحات حساباتك جاهزة", s:"اشتراك إسلام · رصيد فيسبوك · الفلايرات — راجعها ودوس «طبّق»", v:"", go:"prepaid" });
+    if(canTab("prepaid") && canMoney()){
+      var MB = metaBook(), gp = MB.last ? daysBetween(MB.last.d, today()) : null;
+      if(metaTops().length && (gp === null || gp >= META_MAX_GAP))
+        line({ ic:"wallet", cls:"warn", t:"طابق رصيد فيسبوك", s: gp === null ? "لسه ما طابقتش ولا مرة" : "آخر مطابقة من " + qty(gp) + " يوم", v:money(MB.bal), go:"prepaid" });
+      prepaidList().forEach(function(x){
+        var dl = daysBetween(today(), x.to);
+        if(dl <= 3 && expCat(x.c) === "subs") line({ ic:"receipt", cls:"warn", t:"اشتراك بيتجدد " + (dl <= 0 ? "النهارده" : "بعد " + qty(dl) + " يوم"), s:squish(x.c.note) || "اشتراك", v:dShort(addDays(x.to, 1)), go:"cash" });
+      });
+    }
+    if(canTab("capital") && canMoney()) partners().forEach(function(p){
+      var ow = owedOf(p.id);
+      if(ow > 0.009) line({ ic:"hand", cls:"warn", t:"الشركة عليها لـ " + p.name, s:"مصاريف دفعها من جيبه", v:money(ow), go:"capital" });
+    });
     /* v124 — كل سطر في «محتاج منك» جنبه اسم الحاجة اللي هيعملها (زي «استلمها»).
        جوّه نفس الزرار — زرار جوّه زرار مش مسموح، والسطر كله بيودّي نفس المكان. */
     var ctaOf = function(go){
@@ -7066,6 +7263,7 @@
     if(q[0] === "newsale"){ goTab("sales"); document.getElementById("b-newsale").click(); return; }
     if(q[0] === "sales"){ goTab("sales"); setSView(q[1]); window.scrollTo(0, 0); return; }
     if(q[0] === "party"){ openPartyCard(q[1]); return; }
+    if(q[0] === "prepaid" || q[0] === "capital" || q[0] === "cash"){ goTab(q[0]); window.scrollTo(0, 0); return; }
     if(q[0] === "inv"){
       goTab("inv");
       var low = document.querySelector("#tab-inv [data-invonly='" + (q[1] || "low") + "']");
@@ -7161,7 +7359,12 @@
                head:["الأوردر","شركة الشحن","حمّلته للعميل","دفعته للشركة","الصافي"], rows:rows };
     },
     exp: function(cur, r){
-      var rows = live("cash").filter(function(c){ return c.type==="expense" && inRange(c.date, r) && !trLinked(c); })
+      var rows = live("cash").filter(function(c){ return c.type==="expense" && !trLinked(c) && Math.abs(expAmtIn(c, r)) > 0.004; })
+        .map(function(c){ var v = expAmtIn(c, r), a = Number(c.amount)||0;
+          return { date:c.date, at:c.at, partyId:c.paidBy || c.partyId, type:"expense", cat:c.cat, costKind:c.costKind,
+                   note:(isMetaTop(c) ? "رسوم فوري · " : "") + (squish(c.note) || "") + (Math.abs(v - a) > 0.009 && !isMetaTop(c) ? " (اتدفع " + money(a) + ")" : ""), amount:v }; })
+        .concat(metaSpans().map(function(s){ return { date:s.to, at:0, partyId:"", type:"expense", cat:"ads", amount:shareIn(s.from, s.days, s.spent, r),
+          note:"فيسبوك صرف من " + dShort(s.from) + " لـ " + dShort(s.to) + " (مطابقة)" }; }).filter(function(x){ return Math.abs(x.amount) > 0.004; }))
         .concat(live("purchases").filter(function(p){ return p.xloss && inRange(p.date, r); })
           .map(function(p){ return { date:p.date, at:p.at, partyId:p.partyId, amount:p.xloss,
             note:(p.xloss > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
@@ -7172,7 +7375,7 @@
           "<td class='num v-due'>" + money(c.amount) + "</td></tr>";
       });
       rows.push(sumRow(["الإجمالي","","","<b>"+money(cur.expenses)+"</b>"]));
-      return { note:"مصاريف التشغيل المسجّلة في الخزنة. مصاريف نقل المشتريات وانتقالات شراء البضاعة اللي ليها فاتورة مش هنا — دي بتتحط على تكلفة البضاعة.",
+      return { note:"مصاريف التشغيل — نصيب الفترة من كل مصروف (الاشتراك على أيامه، والإعلانات اللي فيسبوك صرفها فعلاً). مصاريف نقل المشتريات وانتقالات شراء البضاعة اللي ليها فاتورة مش هنا — دي بتتحط على تكلفة البضاعة.",
                head:["التاريخ","البيان","الجهة","المبلغ"], rows:rows };
     },
     be: function(cur, r){
@@ -7185,7 +7388,7 @@
         var pd = Number(p.paid)||0; if(pd > 0) sup += pd; fr += pFreight(p); });
       live("sales").forEach(function(s){ if(shipCounts(s)) shp += shipOut(s); });
       live("cash").forEach(function(c){
-        if(c.type === "expense") exp += Number(c.amount)||0;
+        if(c.type === "expense" && !c.paidBy) exp += Number(c.amount)||0;
         if(c.type === "out")     out += Number(c.amount)||0; });
       var fromCust = 0, fromSup = 0, manIn = 0;
       live("sales").forEach(function(s){
@@ -7262,7 +7465,7 @@
         if(isCapType(c.type)) m[k] += CAP[c.type].cash * a;
         else if(c.type==="opening_party") m[k] += 0;
         else if(c.type==="in" || c.type==="settle" || c.type==="opening") m[k] += a;
-        else m[k] -= a;
+        else if(!(c.type === "expense" && c.paidBy)) m[k] -= a;           // v142: من جيب الشريك — الخزنة ما اتأثرتش
       });
       var rows = [];
       // المبيعات والمشتريات مش حركات خزنة، فبنحسبهم من مصدرهم
@@ -7683,7 +7886,7 @@
       if(shipCounts(s)) v += shipOut(s);  // مدفوع لشركة الشحن
     });
     live("cash").forEach(function(c){
-      if(c.type === "expense" || c.type === "out") v += Number(c.amount)||0;
+      if((c.type === "expense" && !c.paidBy) || c.type === "out" || c.type === "cap_repay") v += Number(c.amount)||0;   // ترجيع الشريك = المصروف خرج دلوقتي
     });
     return v;
   }
@@ -8810,6 +9013,7 @@
       (T.total > 0.009 ? " انتقالات شراء البضاعة (" + esc(money(T.total)) + ") اتحطت على تكلفة القطع اللي اتشرت في المشوار — اللي اتباع منها في التكلفة فوق، والباقي في قيمة المخزون." : "") +
       (T.unlinked.length ? " <span class='v-due'>" + qty(T.unlinked.length) + " مشوار شراء مالوش فاتورة في نفس الأيام — اتحسب مصروف ثابت.</span>" : "") +
       (un ? " <span style='color:var(--ink-soft)'>" + qty(un) + " مصروف نوعه اتعرف من البيان — لو فيه غلط عدّله من الخزنة.</span>" : "") +
+      (prepaidTotal() > 0.009 ? " المصاريف محسوبة على أيامها: <b class='num'>" + esc(money(prepaidTotal())) + "</b> اتدفعت مقدّم (رصيد فيسبوك واشتراكات) ولسه ما دخلتش — في «المدفوع مقدّماً»." : "") +
       (P.noCost ? " <span class='v-due'>" + esc(qty(P.noCost)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
   }
   /* v130: «من غير إعلانات» — نفس القايمة بالوضعين جنب بعض («لو كله اتسلّم» و«اتسلّم فعلاً»)
@@ -8880,9 +9084,14 @@
       go = "purch"; goTxt = "افتح المشتريات";
     } else {
       live("cash").forEach(function(c){
-        if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c) || expCat(c) !== key) return;
-        var a = Number(c.amount)||0; tot += a;
-        L.push({ d:c.date, t:esc(c.note || "—"), v:a });
+        if(c.type !== "expense" || trLinked(c)) return;
+        if(!(expCat(c) === key || (key === "ads" && isMetaTop(c)))) return;
+        var a = expAmtIn(c, r); if(Math.abs(a) < 0.005) return; tot += a;
+        L.push({ d:c.date, t:(isMetaTop(c) ? "رسوم فوري · " : "") + esc(c.note || "—"), v:a });
+      });
+      if(key === "ads") metaSpans().forEach(function(s){
+        var a = shareIn(s.from, s.days, s.spent, r); if(Math.abs(a) < 0.005) return; tot += a;
+        L.push({ d:s.to, t:"فيسبوك صرف من " + esc(dShort(s.from)) + " لـ " + esc(dShort(s.to)), v:a });
       });
       go = "cash"; goTxt = "افتحهم في الخزنة";
     }
@@ -9100,8 +9309,9 @@
     var o = { cash:cashBox(), wallets:walletsTotal(), recv:cr, supAdv:sa, stock:stockBookValue(), inOrders:inOrders,
               pay:sp, custAdv:ca, partners:partners().map(function(p){ return { n:p.name, cap:capitalOf(p.id), cur:currentOf(p.id) }; }),
               re:retainedEarnings(), dist:distributedTotal(), opening:openingEquity() };
-    o.assets = o.cash + o.wallets + o.recv + o.supAdv + o.stock;
-    o.liab = o.pay + o.custAdv;
+    o.prepaid = prepaidTotal(); o.prepMeta = metaBook().bal; o.owed = owedTotal();
+    o.assets = o.cash + o.wallets + o.recv + o.supAdv + o.stock + o.prepaid;
+    o.liab = o.pay + o.custAdv + o.owed;
     o.cap = o.partners.reduce(function(a, x){ return a + x.cap; }, 0);
     o.cur = o.partners.reduce(function(a, x){ return a + x.cur; }, 0);
     o.equity = o.cap + o.cur + o.re + o.opening;
@@ -9298,11 +9508,13 @@
       else if(canc) b.pre += saleProfit(s);
       else { var e = expProfit(s); b.goods += e.goods; b.pre += e.net; }
     });
-    var adsAll = 0;
+    // v142: الإعلان من نفس قايمة الدخل — المتعلّم بمصدر لمصدره، والباقي (رصيد فيسبوك ورسومه) «مش متحدد»
+    var adsAll = expByCat(r).ads, tagd = 0;
     live("cash").forEach(function(c){
-      if(c.type !== "expense" || !inRange(c.date, r) || trLinked(c) || expCat(c) !== "ads") return;
-      var a = Number(c.amount)||0; adsAll += a; row(SRC_AD[c.src] ? c.src : "").ads += a;
+      if(c.type !== "expense" || trLinked(c) || expCat(c) !== "ads" || !SRC_AD[c.src]) return;
+      var a = expAmtIn(c, r); tagd += a; row(c.src).ads += a;
     });
+    if(adsAll - tagd > 0.004) row("").ads += adsAll - tagd;
     var rows = Object.keys(by).map(function(k){ return by[k]; });
     var G = rows.reduce(function(a, x){ return a + x.goods; }, 0), ov = v.varExp - v.ads;   // تغليف + متغيّر تاني
     rows.forEach(function(x){ x.ov = G > 0.009 ? ov * x.goods / G : 0; x.net = x.pre - x.ov - x.ads; });
@@ -9508,10 +9720,13 @@
     if(B.recv > 0.009) bs.push(R("مديونيات العملاء", B.recv, "ind"));
     if(B.supAdv > 0.009) bs.push(R("دفعات مقدّمة للموردين", B.supAdv, "ind"));
     bs.push(R("المخزون (بالتكلفة)", B.stock, "ind", B.inOrders > 0.009 ? "منه حوالي " + esc(money(B.inOrders)) + " في أوردرات لسه ما اتسلّمتش" : ""));
+    if(B.prepaid > 0.009) bs.push(R("مصروفات مدفوعة مقدّماً", B.prepaid, "ind",
+      "رصيد فيسبوك " + esc(money(B.prepMeta)) + (B.prepaid - B.prepMeta > 0.009 ? " · اشتراكات لسه أيامها ما جتش " + esc(money(B.prepaid - B.prepMeta)) : "")));
     bs.push(R("إجمالي الأصول", B.assets, "tot"));
     bs.push(R("الالتزامات المتداولة", null, "sec"));
     bs.push(R("مستحق للموردين", B.pay, "ind"));
     bs.push(R("عرابين عملاء — التزامات عقود (IFRS 15.106)", B.custAdv, "ind", "فلوس دفعها عملاء على أوردرات لسه ما اتسلّمتش"));
+    if(B.owed > 0.009) bs.push(R("مستحق للشركاء", B.owed, "ind", "مصاريف دفعوها من جيبهم ولسه ما رجعتلهمش"));
     bs.push(R("إجمالي الالتزامات", B.liab, "tot"));
     bs.push(R("حقوق الملكية", null, "sec"));
     B.partners.forEach(function(x){ if(Math.abs(x.cap) > 0.009) bs.push(R("رأس مال " + esc(x.n), x.cap, "ind")); });
@@ -13457,6 +13672,7 @@
       if(c.type === "expense"){
         var ck = expCat(c);
         lab += " · " + EXP_CAT[ck].label + (ck === "trans" ? (trLinked(c) ? " (على تكلفة البضاعة)" : " (من غير فاتورة)") : "");
+        if(c.paidBy){ lab += " · دفعه " + partyName(c.paidBy) + " من جيبه"; a = 0; }   // v142: الخزنة ما اتأثرتش
       }
       L.push({d:c.date, at:c.at, t:lab, kind:cashKind(c.type), cap:isCapType(c.type),
         who:(c.type==="settle" ? (c.shipCo||"شركة شحن") : (c.partyId?partyName(c.partyId):"—")),
@@ -15530,7 +15746,7 @@
     var host = document.getElementById("vz-ad"), N = vizDays, to = today(), from = addDays(to, -(N - 1));
     var days = [], ix = {};
     for(var i = 0; i < N; i++){ var dd = addDays(from, i); ix[dd] = days.length; days.push({ d:dd, ads:0, n:0 }); }
-    live("cash").forEach(function(c){ if(c.type === "expense" && expCat(c) === "ads" && ix[c.date] != null) days[ix[c.date]].ads += Number(c.amount)||0; });
+    days.forEach(function(x){ x.ads = expByCat({ from:x.d, to:x.d }).ads; });          // v142: اللي فيسبوك صرفه في اليوم ده
     live("sales").forEach(function(s){ if(ix[s.date] != null) days[ix[s.date]].n++; });
     var tAds = days.reduce(function(a, x){ return a + x.ads; }, 0), tN = days.reduce(function(a, x){ return a + x.n; }, 0);
     var adDays = days.filter(function(x){ return x.ads > 0.009; }).length;
@@ -15619,6 +15835,7 @@
                          renderLowStock(); renderShipping(); renderBalances(); },
     capital: function(){ renderCapital(); renderDistLimits(); },
     cash:    function(){ renderWallets(); renderCash(); },
+    prepaid: function(){ renderPrepaid(); },
     purch:   function(){ renderPurch(); },
     items:   function(){ renderItems(); renderVars(); renderOffers(); },
     price:   function(){ renderPricing(); },
@@ -15695,11 +15912,217 @@
         (F.manual > 0 ? " — محسوب على رقمك (" + nn(F.manual) + ")" : "") + ". الرقم ده بيظهر في حاسبة التسعير والمدير المالي وتقرير الأصناف."
       : "لسه مفيش بيع في آخر ١٤ يوم نحسب عليه نصيب القطعة.";
   }
+  /* ═══ v142 — شاشة «المدفوع مقدّماً» + مطابقة فيسبوك ═══ */
+  /* v142 — تصحيحات لمرة واحدة على حسابات Lora (اتفقنا عليها مع إسلام بند بند — 10-10-2026).
+     كل بند مربوط برقم الحركة ومبلغها: لو الحركة اتعدّلت أو اتمسحت أو في فترة مقفولة، البند بيتخطّى ومش بيتلمس.
+     ما بيتطبّقش غير لما حد عنده صلاحية يدوس «طبّق»، وبيتعلّم في settings.fix142 عشان ما يتكررش. */
+  var FIX142_ME = "mucar8on1myhc";
+  var FIX142 = [
+    { id:"muccwrh3dldde", amt:1000, set:{ date:"2026-09-21", cat:"subs", costKind:"fixed", paidBy:FIX142_ME, svcDays:30 },
+      t:"اشتراك شات جي بي تي", was:"مصروف من الخزنة 22/9", now:"دفعه إسلام من الكارت 21/9 · بيتحسب على شهر", why:"الخزنة ما دفعتش — الشركة عليها لإسلام 1,000 لحد ما يتردّله" },
+    { id:"mummiyckwa8qp", amt:345, set:{ cat:"pack", costKind:"var" }, t:"الفلايرات", was:"مرة واحدة (تأسيس)", now:"تغليف", why:"بتتحط في كل أوردر" },
+    { id:"muscx10uuu5v5", amt:250, set:{ cat:"pack", costKind:"var" }, t:"بابلز ولزق", was:"تغليف (مستنتج)", now:"تغليف", why:"تثبيت النوع" },
+    { id:"mudkugz2m1ma7", amt:350, set:{ cat:"once", costKind:"fixed" }, t:"تفاعل الصفحة", was:"مرة واحدة (مستنتج)", now:"مرة واحدة — تأسيس", why:"مش هيتدفع تاني" },
+    { id:"mue9nxlje9bpf", amt:360, set:{ cat:"once", costKind:"fixed" }, t:"خط الموبايل", was:"مرة واحدة (مستنتج)", now:"مرة واحدة — تأسيس", why:"مش هيتدفع تاني" },
+    { id:"mue9pwxcfz0bc", amt:315, set:{ cat:"once", costKind:"fixed" }, t:"معدات التصوير", was:"مرة واحدة (مستنتج)", now:"مرة واحدة — تأسيس", why:"مش هيتدفع تاني" },
+    { id:"mul0fyzuxw2lk", amt:690, set:{ cat:"metatop", costKind:"var", credit:670, date:"2026-09-27" }, t:"إعلان 690", was:"مصروف إعلان 28/9", now:"شحن رصيد فيسبوك 27/9 — دخل 670 · رسوم فوري 20", why:"زي جدول فيسبوك" },
+    { id:"mumn44lpy1ke4", amt:150, set:{ cat:"metatop", costKind:"var", credit:150 }, t:"إعلان 150", was:"مصروف إعلان 29/9", now:"شحن رصيد فيسبوك — دخل 150", why:"زي جدول فيسبوك" },
+    { id:"mupm8zxqaxkby", amt:1030, set:{ cat:"metatop", costKind:"var", credit:1000, date:"2026-09-30" }, t:"إعلان 1,030", was:"مصروف إعلان 1/10", now:"شحن رصيد فيسبوك 30/9 — دخل 1,000 · رسوم 30", why:"زي جدول فيسبوك" },
+    { id:"mur15vb071exs", amt:1030, set:{ cat:"metatop", costKind:"var", credit:1000 }, t:"إعلان 1,030", was:"مصروف إعلان 2/10", now:"شحن رصيد فيسبوك — دخل 1,000 · رسوم 30", why:"زي جدول فيسبوك" },
+    { id:"muzizjluwwj30", amt:1030, set:{ cat:"metatop", costKind:"var", credit:1000 }, t:"إعلان 1,030", was:"مصروف إعلان 8/10", now:"شحن رصيد فيسبوك — دخل 1,000 · رسوم 30", why:"زي جدول فيسبوك" }
+  ];
+  // رصيد فيسبوك آخر كل يوم فيه سحب — من جدول Payment activity لحساب Loraa El Barbary، والرصيد الفعلي يوم 10-10
+  var FIX142_REC = [["2026-09-30",1711.47],["2026-10-01",1563.94],["2026-10-02",2247.78],["2026-10-03",1826.45],["2026-10-04",1388.22],
+    ["2026-10-05",1163.63],["2026-10-06",992.33],["2026-10-07",731.98],["2026-10-08",1569.75],["2026-10-09",1311.21],["2026-10-10",729.22]];
+  var fix142Later = false;
+  function fix142Items(){
+    return FIX142.map(function(x){
+      var c = db.cash.find(function(r){ return r.id === x.id; }), st = "ok";
+      if(!c || c.deleted || c.type !== "expense" || Number(c.amount) !== x.amt) st = "gone";
+      else if(Object.keys(x.set).every(function(k){ return c[k] === x.set[k]; })) st = "done";
+      else if(isLocked(c.date) || (x.set.date && isLocked(x.set.date))) st = "locked";
+      else if(x.set.paidBy && !partners().some(function(p){ return p.id === x.set.paidBy; })) st = "gone";
+      return { x:x, c:c, st:st };
+    });
+  }
+  function fix142Pending(){
+    if(settings.fix142 || fix142Later || !canEdit() || !canMoney()) return false;
+    return fix142Items().some(function(i){ return i.st === "ok"; });
+  }
+  // dry = معاينة: بيطبّق في الذاكرة ويحسب ويرجّع كل حاجة زي ما كانت — حتى لو حصل خطأ في النص
+  function fix142Run(dry){
+    var L = fix142Items().filter(function(i){ return i.st === "ok"; }), undo = [], mr0 = settings.metaRec, out;
+    try{
+      L.forEach(function(i){
+        var keep = {}; Object.keys(i.x.set).forEach(function(k){ keep[k] = i.c.hasOwnProperty(k) ? i.c[k] : undefined; });
+        undo.push([i.c, keep]); Object.assign(i.c, i.x.set);
+        if(!dry){ i.c.editedBy = me || "غير محدد"; i.c.at = Date.now(); }
+      });
+      var have = {}; (settings.metaRec || []).forEach(function(r){ have[r.d] = 1; });
+      settings.metaRec = (settings.metaRec || []).concat(FIX142_REC.filter(function(r){ return !have[r[0]] && !isLocked(r[0]); })
+        .map(function(r){ return { d:r[0], bal:r[1], by:"جدول فيسبوك" }; }));
+      clearStockIdx(); _mspan = null;
+      out = { n:L.length, net:projStats(null).exp.net, cash:cashBox(), pre:prepaidTotal(), owed:owedTotal() };
+    } finally {
+      if(dry){
+        undo.forEach(function(u){ Object.keys(u[1]).forEach(function(k){ if(u[1][k] === undefined) delete u[0][k]; else u[0][k] = u[1][k]; }); });
+        settings.metaRec = mr0; clearStockIdx(); _mspan = null;
+      }
+    }
+    return out;
+  }
+  function fix142HTML(){
+    if(!fix142Pending()) return "";
+    var I = fix142Items(), before = { net:projStats(null).exp.net, cash:cashBox() }, after = fix142Run(true);
+    var tag = { ok:"", done:"<span class='pp-st ok'>متصلّح</span>", gone:"<span class='pp-st'>اتغيّر — هيتخطّى</span>", locked:"<span class='pp-st warn'>فترة مقفولة</span>" };
+    return "<div class='panel fx-card' id='fx142'><h3>تصحيحات حساباتك اللي اتفقنا عليها</h3>" +
+      "<p class='hint'>" + qty(after.n) + " تصحيح + سجل رصيد فيسبوك من جدول Payment activity. مفيش حاجة هتتغيّر غير لما تدوس «طبّق».</p>" +
+      "<div class='fx-eff'><div><small>صافي الربح (لو كله اتسلّم)</small><b class='num'>" + esc(money(before.net)) + " ← " + esc(money(after.net)) + "</b></div>" +
+        "<div><small>الخزنة</small><b class='num'>" + esc(money(before.cash)) + " ← " + esc(money(after.cash)) + "</b></div>" +
+        "<div><small>مدفوع مقدّماً</small><b class='num'>" + esc(money(after.pre)) + "</b></div>" +
+        "<div><small>الشركة عليها لإسلام</small><b class='num'>" + esc(money(after.owed)) + "</b></div></div>" +
+      "<details><summary>التفاصيل بند بند</summary><div class='tbl-wrap'><table class='pp-t'><thead><tr><th>البند</th><th>كان</th><th>هيبقى</th><th>ليه</th></tr></thead><tbody>" +
+      I.map(function(i){ return "<tr><td data-l='البند'><b>" + esc(i.x.t) + "</b> " + tag[i.st] + "</td><td data-l='كان'>" + esc(i.x.was) + "</td><td data-l='هيبقى'>" + esc(i.x.now) + "</td><td data-l='ليه'>" + esc(i.x.why) + "</td></tr>"; }).join("") +
+      "<tr><td data-l='البند'><b>رصيد فيسبوك</b></td><td data-l='كان'>مش متسجّل</td><td data-l='هيبقى'>" + qty(FIX142_REC.length) + " مطابقة من 30/9 لـ 10/10 — آخر رصيد 729.22</td><td data-l='ليه'>من جدول فيسبوك</td></tr>" +
+      "</tbody></table></div></details>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx142'>طبّق التصحيحات</button><button class='tbtn' type='button' id='x-fx142'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx142")){ fix142Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx142")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var r = fix142Run(false);
+    settings.fix142 = { at:Date.now(), by:me || "", n:r.n };
+    saveSoon("cash"); saveSettings(); renderAll();
+    toast("اتصلّح " + qty(r.n) + " بند — صافي الربح " + money(r.net), 4200);
+  });
+  function renderPrepaid(){
+    var box = document.getElementById("pp-body"); if(!box) return;
+    var fx = document.getElementById("pp-fix"); if(fx) fx.innerHTML = fix142HTML();
+    var nn = function(x){ return esc(money(x)); }, t = today();
+    var M = metaBook(), L = prepaidList(), spans = metaSpans(), tops = metaTops();
+    var subsTot = L.reduce(function(a, x){ return a + x.left; }, 0), tot = M.bal + subsTot;
+    var last = M.last, gap = last ? daysBetween(last.d, t) : null;
+    document.getElementById("pp-total").textContent = money(tot);
+    // ١) فيسبوك: رصيد الدفاتر وآخر مطابقة
+    var st = !tops.length ? "<span class='pp-st'>لسه ما شحنتش رصيد</span>"
+      : !last ? "<span class='pp-st warn'>لسه ما طابقتش ولا مرة</span>"
+      : gap === 0 ? "<span class='pp-st ok'>✓ مطابق النهارده</span>"
+      : gap < META_MAX_GAP ? "<span class='pp-st ok'>✓ آخر مطابقة " + esc(dShort(last.d)) + "</span>"
+      : "<span class='pp-st warn'>آخر مطابقة من " + qty(gap) + " يوم</span>";
+    var lastSpan = spans.length ? spans[spans.length - 1] : null;
+    var meta = "<div class='pp-meta'>" +
+      "<div class='pp-mh'><div><h3>رصيد فيسبوك</h3><p class='hint'>حساب الإعلانات اللي بتشحنه بفوري — الرصيد ده فلوسك لحد ما الإعلانات تصرفه.</p></div>" +
+        "<div class='pp-mv'><b class='num'>" + nn(M.bal) + "</b>" + st + "</div></div>" +
+      (M.after > 0.009 ? "<p class='hintline'>منه " + nn(M.after) + " شحنته بعد آخر مطابقة — طابق عشان يتخصم اللي اتصرف منه.</p>" : "") +
+      "<form class='pp-rec' id='f-metarec' onsubmit='return false'>" +
+        "<div><label for='mr-bal'>الرصيد في فيسبوك دلوقتي</label><input id='mr-bal' type='number' step='any' min='0' placeholder='Prepaid balance'></div>" +
+        "<div><label for='mr-date'>في يوم</label><input id='mr-date' type='date' value='" + t + "'></div>" +
+        "<div><button class='act' type='button' id='b-metarec'>طابق</button></div>" +
+        "<p class='hintline pp-prev' id='mr-prev'>تلاقيه في فيسبوك: Billing &amp; payments ← Payment activity ← <b>Prepaid balance</b></p>" +
+      "</form>" +
+      (spans.length ? "<details class='pp-hist'" + (spans.length <= 3 ? " open" : "") + "><summary>المطابقات اللي فاتت (" + qty(spans.length) + ")</summary>" +
+        "<div class='tbl-wrap'><table class='pp-t'><thead><tr><th>من</th><th>لحد</th><th class='num'>رصيد أول المدة</th><th class='num'>+ شحنت</th><th class='num'>− اتصرف على الإعلانات</th><th class='num'>= الرصيد</th></tr></thead><tbody>" +
+        spans.slice().reverse().map(function(s){
+          return "<tr><td data-l='من'>" + esc(dShort(s.from)) + "</td><td data-l='لحد'>" + esc(dShort(s.to)) + "</td>" +
+            "<td class='num' data-l='رصيد أول المدة'>" + nn(s.start) + "</td><td class='num' data-l='شحنت'>" + (s.credit ? nn(s.credit) : "—") + "</td>" +
+            "<td class='num v-due' data-l='اتصرف'>" + nn(s.spent) + "</td><td class='num' data-l='الرصيد'><b>" + nn(s.bal) + "</b></td></tr>";
+        }).join("") + "</tbody></table></div>" +
+        "<p class='hintline'>«اتصرف» فيه ضريبة القيمة المضافة 14% اللي فيسبوك بيخصمها — ده اللي بيدخل قايمة الدخل «إعلانات»، ورسوم فوري بتدخل يوم الشحن.</p></details>" : "") +
+    "</div>";
+    // ٢) مصاريف ليها مدة (اشتراكات وغيرها)
+    var rows = L.slice().sort(function(a, b){ return a.to < b.to ? -1 : 1; }).map(function(x){
+      var used = 1 - x.left / (Number(x.c.amount)||1), who = x.c.paidBy ? " · دفعه " + esc(partyName(x.c.paidBy)) : "";
+      return "<tr><td class='wide' data-l='البيان'><b>" + esc(squish(x.c.note) || EXP_CAT[expCat(x.c)].label) + "</b><span class='sub'>" + esc(EXP_CAT[expCat(x.c)].label) + who + "</span></td>" +
+        "<td class='num' data-l='اتدفع'>" + nn(Number(x.c.amount)||0) + "<span class='sub'>" + esc(dShort(x.c.date)) + "</span></td>" +
+        "<td data-l='بيغطي'>" + esc(dShort(x.from)) + " ← " + esc(dShort(x.to)) + "<span class='pp-bar' style='--u:" + Math.round(used * 100) + "%'><i></i></span></td>" +
+        "<td class='num' data-l='فاضل'><b>" + nn(x.left) + "</b><span class='sub'>" + qty(daysBetween(t, x.to)) + " يوم</span></td></tr>";
+    });
+    var subs = "<div class='pp-sub'><h3>اشتراكات ومصاريف ليها مدة</h3>" +
+      (rows.length ? "<div class='tbl-wrap'><table class='pp-t'><thead><tr><th>البيان</th><th class='num'>اتدفع</th><th>بيغطي</th><th class='num'>فاضل</th></tr></thead><tbody>" + rows.join("") + "</tbody></table></div>"
+                   : "<p class='hint'>مفيش — كل المصاريف اتحسبت يوم دفعها.</p>") +
+      "<p class='hintline'>كل يوم بيعدّي بيتحول جزء منها مصروف في قايمة الدخل. التغليف ومصاريف المرة الواحدة بتتحسب يوم الدفع — مش بتظهر هنا.</p></div>";
+    box.innerHTML = meta + subs;
+  }
+  function metaRecPreview(){
+    var el = document.getElementById("mr-prev"), v = document.getElementById("mr-bal").value;
+    if(!el) return;
+    if(v === ""){ el.innerHTML = "تلاقيه في فيسبوك: Billing &amp; payments ← Payment activity ← <b>Prepaid balance</b>"; return; }
+    var d = document.getElementById("mr-date").value || today(), R = metaRecs().filter(function(x){ return x.d < d; });
+    var prev = R.length ? R[R.length - 1] : null, cr = 0;
+    metaTops().forEach(function(c){ if((!prev || afterRec(c, prev)) && c.date <= d) cr += metaCredit(c); });
+    var sp = (prev ? Number(prev.bal)||0 : 0) + cr - (Number(v)||0);
+    el.innerHTML = sp < -0.009
+      ? "<span class='v-due'>الرصيد ده أكتر من اللي شحنته — راجع الرقم، أو فيه شحنة فوري ما اتسجّلتش في الخزنة.</span>"
+      : "الإعلانات صرفت <b class='num'>" + esc(money(sp)) + "</b> من " + (prev ? esc(dShort(prev.d)) : "أول شحنة") + " — هيدخل قايمة الدخل «إعلانات».";
+  }
+  document.addEventListener("input", function(e){ if(e.target && (e.target.id === "mr-bal" || e.target.id === "mr-date")) metaRecPreview(); });
+  document.addEventListener("change", function(e){ if(e.target && e.target.id === "mr-date") metaRecPreview(); });
+  document.addEventListener("click", function(e){
+    if(!e.target.closest || !e.target.closest("#b-metarec")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var v = document.getElementById("mr-bal").value, d = document.getElementById("mr-date").value || today();
+    if(v === "" || !(Number(v) >= 0)){ toast("اكتب الرصيد اللي في فيسبوك"); return; }
+    if(d > today()){ toast("التاريخ لسه ما جاش"); return; }
+    if(!guardLock(d, "مطابقة فيسبوك")) return;
+    var L = (settings.metaRec || []).filter(function(x){ return x.d !== d; });
+    L.push({ d:d, bal:Math.round(Number(v) * 100) / 100, by:me || "", at:Date.now() });
+    var bad = metaRecsOk(L);
+    if(bad){ toast("الرصيد ده أكتر من اللي شحنته لحد " + dShort(bad.to) + " — سجّل شحنة فوري الناقصة في الخزنة الأول", 5200); return; }
+    settings.metaRec = L; saveSettings(); renderAll();
+    toast("اتطابق — رصيد فيسبوك " + money(Number(v)));
+  });
+
+  /* المصروف: دفعه مين؟ · بيتحسب على كام يوم · شحن فيسبوك دخل كام */
+  var svcPicked = false, creditPicked = false;
+  function metaRatio(){
+    var L = metaTops().filter(function(c){ return c.credit !== "" && c.credit != null && Number(c.amount) > 0; })
+      .sort(function(a, b){ return (a.date||"") < (b.date||"") ? 1 : -1; });
+    return L.length ? metaCredit(L[0]) / Number(L[0].amount) : 1000 / 1030;
+  }
+  function syncExpExtra(){
+    var cat = document.getElementById("c-cat").value || expCatGuess(document.getElementById("c-note").value) || "other";
+    var isExp = document.getElementById("c-type").value === "expense";
+    var mw = document.getElementById("c-meta-wrap"), sw = document.getElementById("c-svc-wrap"), pw = document.getElementById("c-payer-wrap");
+    if(!mw) return;
+    var pb = document.getElementById("c-paidby"), cur = pb.value;
+    pb.innerHTML = "<option value=''>الخزنة</option>" + partners().map(function(p){ return "<option value='" + esc(p.id) + "'>" + esc(p.name) + " — من جيبه</option>"; }).join("");
+    pb.value = cur && partners().some(function(p){ return p.id === cur; }) ? cur : "";
+    pw.hidden = !isExp;
+    mw.hidden = !isExp || cat !== "metatop";
+    sw.hidden = !isExp || cat === "metatop" || cat === "trans";
+    var am = Number(document.getElementById("c-amount").value)||0, cr = document.getElementById("c-credit");
+    if(!mw.hidden && !creditPicked) cr.value = am ? (Math.round(am * metaRatio() * 100) / 100) : "";
+    var crv = Number(cr.value)||0;
+    document.getElementById("c-credit-hint").innerHTML = mw.hidden ? "" : (crv > am + 0.009
+      ? "<span class='v-due'>اللي دخل فيسبوك أكتر من اللي دفعته؟ راجع الرقم.</span>"
+      : "رسوم فوري <b class='num'>" + esc(money(Math.max(0, am - crv))) + "</b> مصروف على طول · والـ<b class='num'>" + esc(money(crv)) + "</b> رصيد في «المدفوع مقدّماً» لحد ما الإعلانات تصرفه.");
+    var sv = document.getElementById("c-svc");
+    var d = document.getElementById("c-date").value || today();
+    if(!svcPicked) sv.value = String(svcDefault(cat, d));
+    var days = Number(sv.value)||1;
+    document.getElementById("c-svc-hint").innerHTML = days <= 1 ? "بيدخل قايمة الدخل يوم الدفع."
+      : "من " + esc(dShort(d)) + " لـ " + esc(dShort(addDays(d, days - 1))) + " — كل يوم بيتحسب <b class='num'>" + esc(money(am / days)) + "</b>، والباقي في «المدفوع مقدّماً».";
+    document.getElementById("c-payer-hint").innerHTML = pb.value
+      ? "الخزنة مش هتتأثر — والشركة هيبقى عليها لـ" + esc(partyName(pb.value)) + " " + esc(money(am)) + " لحد ما ترجّعهوله من «الشركاء»."
+      : "";
+  }
+  ["c-amount","c-date","c-note","c-type"].forEach(function(id){
+    var el = document.getElementById(id); if(!el) return;
+    el.addEventListener("input", syncExpExtra); el.addEventListener("change", syncExpExtra);
+  });
+  document.addEventListener("change", function(e){
+    var id = e.target && e.target.id;
+    if(id === "c-svc"){ svcPicked = true; syncExpExtra(); }
+    if(id === "c-paidby"){ syncExpExtra(); updateImpact("cash"); }
+  });
+  document.addEventListener("input", function(e){ if(e.target && e.target.id === "c-credit"){ creditPicked = true; syncExpExtra(); } });
   function renderAll(){
     clearStockIdx();                     // أضمن حتة: أي رسم كامل بيبدأ بفهرس جديد
     clearMonthly();                      // نفس السبب: أرباح الشهور مش تفضل قديمة
     pendCache = null;                    // فلوسك عند الشركة بالأوردر
-    fxMemo = null;                       // v140: نصيب القطعة من الثابت
+    fxMemo = null; _mspan = null;        // v140: نصيب القطعة من الثابت · v142: فترات مطابقة فيسبوك
     fillSelects();                       // القوايم بتتغذّى في كل الأدراج
     Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
     renderTab(activeTab);
@@ -16120,6 +16543,9 @@
       g("c-party").value=rec.partyId||""; g("c-amount").value=rec.amount||""; g("c-note").value=rec.note||"";
       g("c-cat").value = rec.type === "expense" ? expCat(rec) : ""; syncCatChips(); catPicked = rec.type === "expense";
       g("c-src").value = rec.src || ""; g("c-camp").value = rec.camp || "";
+      syncExpExtra(); g("c-paidby").value = rec.paidBy || "";
+      creditPicked = rec.credit !== "" && rec.credit != null; g("c-credit").value = creditPicked ? rec.credit : "";
+      svcPicked = !!rec.svcDays; g("c-svc").value = String(Number(rec.svcDays) || svcDefault(expCat(rec), rec.date)); syncExpExtra();
       fillSelects(); g("c-shipco").value=rec.shipCo||"";
     }
     setEditUI(list);
@@ -17892,7 +18318,8 @@
     subs:"<strong>ثابت</strong> — بيتدفع كل شهر مهما بعت.", salary:"<strong>ثابت</strong> — بيتدفع مهما بعت.",
     once:"<strong>ثابت</strong> — حاجة مش بتتكرر مع كل أوردر، حتى لو اشتريتها تاني بعدين.",
     other:"<strong>ثابت</strong>.",
-    othervar:"<strong>متغيّر</strong> — متسجّل كده من قبل كده. لو تحب، اختار نوعه من فوق."
+    othervar:"<strong>متغيّر</strong> — متسجّل كده من قبل كده. لو تحب، اختار نوعه من فوق.",
+    metatop:"<strong>رصيد مش مصروف</strong> — اللي دخل فيسبوك بيفضل رصيدك لحد ما الإعلانات تصرفه، وبيتحسب «إعلانات» أول بأول لما تطابق."
   };
   var catPicked = false;
   function syncCatChips(){
@@ -17909,6 +18336,7 @@
     if(sw) sw.hidden = shown !== "ads";
     if(h) h.innerHTML = shown ? CAT_HINT[shown] + (v ? "" : " <span style='color:var(--ink-soft)'>(اتعرف من البيان)</span>")
                               : "اختار النوع — ده اللي بيفرّق الإعلان والتغليف (متغيّر) عن الباقي (ثابت).";
+    if(typeof syncExpExtra === "function"){ svcPicked = false; syncExpExtra(); }
   }
   document.getElementById("c-cats").addEventListener("click", function(e){
     var b = e.target.closest("[data-ccat]"); if(!b) return;
@@ -17935,7 +18363,18 @@
       fields.costKind = EXP_CAT[fields.cat].kind === "var" ? "var" : "fixed";
       fields.src = fields.cat === "ads" ? document.getElementById("c-src").value : "";
       fields.camp = fields.cat === "ads" ? squish(document.getElementById("c-camp").value) : "";
-    } else { fields.cat = ""; fields.costKind = ""; }
+      // v142: دفعه مين · المدة · اللي دخل فيسبوك
+      fields.paidBy = document.getElementById("c-paidby").value || "";
+      if(fields.cat === "metatop"){
+        var crv = document.getElementById("c-credit").value;
+        fields.credit = crv === "" ? "" : Math.round((Number(crv)||0) * 100) / 100; fields.svcDays = "";
+        if(fields.credit !== "" && fields.credit > fields.amount + 0.009){ toast("اللي دخل فيسبوك أكتر من اللي دفعته"); return; }
+        if(!editing.cash) fields.made = Date.now();                     // ترتيبها مع مطابقة نفس اليوم — التعديل ما بيغيّروش
+      } else {
+        var sd = Number(document.getElementById("c-svc").value)||1;
+        fields.svcDays = fields.cat !== "trans" && sd !== svcDefault(fields.cat, fields.date) ? sd : ""; fields.credit = "";
+      }
+    } else { fields.cat = ""; fields.costKind = ""; fields.paidBy = ""; fields.svcDays = ""; fields.credit = ""; }
     if(!fields.amount){ toast("اكتب المبلغ"); return; }
     if(fields.type==="settle"){
       if(!fields.shipCo){ toast("اختر شركة الشحن"); return; }
@@ -17955,7 +18394,8 @@
     document.getElementById("c-date").value = today();
     document.getElementById("c-cat").value = ""; syncCatChips();
     document.getElementById("c-src").value = ""; document.getElementById("c-camp").value = "";
-    clearOver(); fillSelects(); renderAll();
+    document.getElementById("c-paidby").value = ""; document.getElementById("c-credit").value = ""; svcPicked = false; creditPicked = false;
+    clearOver(); fillSelects(); renderAll(); syncExpExtra();
   });
 
   /* ---------- حاجز الصرف بأكتر من رصيد الخزنة ---------- */
@@ -17972,12 +18412,13 @@
     if(!o) return bal;
     var a = Number(o.amount)||0;
     if(isCapType(o.type)) return bal - CAP[o.type].cash * a;
-    if(o.type === "opening_party") return bal;
+    if(o.type === "opening_party" || (o.type === "expense" && o.paidBy)) return bal;
     if(o.type === "in" || o.type === "settle" || o.type === "opening") return bal - a;
     return bal + a;
   }
   function cashOutOk(fields){
     if(fields.type !== "out" && fields.type !== "expense") return true;
+    if(fields.paidBy) return true;                                        // v142: من جيب الشريك مش من الخزنة
     var bal = cashWithoutEdited();
     if(fields.amount <= bal + 0.009) return true;
     var f = document.getElementById("c-force");
@@ -18941,7 +19382,8 @@
     cap_out:      ["−", "v-due",  "رأس ماله"],
     cap_share:    ["+", "v-gain", "أرباح ليه"],
     cap_payout:   ["−", "v-due",  "أرباحه · خدها كاش"],
-    cap_reinvest: ["+", "v-gain", "رأس ماله · من أرباحه"]
+    cap_reinvest: ["+", "v-gain", "رأس ماله · من أرباحه"],
+    cap_repay:    ["−", "v-due",  "رجّعناله مصروف دفعه من جيبه"]
   };
 
   function renderCapRecon(){
@@ -19006,6 +19448,8 @@
           "<div><small>رأس ماله</small><b class='num'>" + esc(money(cap)) + "</b></div>" +
           "<div><small>أرباح ليه لسه ما أخدهاش</small><b class='num" + (cur > 0.009 ? " v-gain" : "") + "'>" + esc(money(cur)) + "</b></div>" +
           "<div><small>إجمالي حقه</small><b class='num'>" + esc(money(cap + cur)) + "</b></div></div>" +
+        (owedOf(p.id) > 0.009 ? "<div class='cpc-owe'><span>الشركة عليها له <b class='num'>" + esc(money(owedOf(p.id))) + "</b><small>مصاريف دفعها من جيبه — مش جزء من رأس ماله ولا أرباحه</small></span>" +
+          "<button class='tbtn primary' type='button' data-capdo='cap_repay|" + p.id + "'>رجّعله من الخزنة</button></div>" : "") +
         "<div class='cpc-a'>" +
           "<button class='tbtn' type='button' data-capdo='cap_in|" + p.id + "'>+ دفع رأس مال</button>" +
           "<button class='tbtn' type='button' data-capdo='cap_out|" + p.id + "'" + (cap > 0.009 ? "" : " disabled") + ">سحب من رأس ماله</button>" +
@@ -19146,6 +19590,10 @@
       el.textContent = "أرباح مستحقة لـ" + partyName(pid) + ": " + money(c) +
         (c <= 0 ? " — مفيش رصيد يتصرف منه" : "");
       el.className = c > 0 ? "hintline" : "hintline bad";
+    } else if(t === "cap_repay"){
+      var ow = owedOf(pid);
+      el.textContent = "الشركة عليها لـ" + partyName(pid) + ": " + money(ow) + (ow <= 0 ? " — مفيش حاجة تترد" : " — مصاريف دفعها من جيبه");
+      el.className = ow > 0 ? "hintline" : "hintline bad";
     } else if(t === "cap_out"){
       var k = capitalOf(pid);
       el.textContent = "رأس مال " + partyName(pid) + ": " + money(k);
@@ -19243,6 +19691,8 @@
     var bad = withoutCap(editingCap, function(){
       if(t === "cap_out" && a > capitalOf(pid) + 0.009)
         return "رأس مال " + partyName(pid) + " " + money(capitalOf(pid)) + " بس";
+      if(t === "cap_repay" && a > owedOf(pid) + 0.009)
+        return "الشركة عليها لـ" + partyName(pid) + " " + money(owedOf(pid)) + " بس";
       if((t === "cap_payout" || t === "cap_reinvest") && a > currentOf(pid) + 0.009)
         return "الأرباح المستحقة لـ" + partyName(pid) + " " + money(currentOf(pid)) + " بس";
       if(CAP[t].cash < 0 && a > cashBox() + 0.009)
@@ -19386,7 +19836,7 @@
       document.getElementById("cp-partner").value = q[1];
       document.getElementById("cp-type").value = q[0];
       var am = document.getElementById("cp-amount");
-      am.value = q[0] === "cap_payout" ? String(Math.round(currentOf(q[1]) * 100) / 100) : "";
+      am.value = q[0] === "cap_payout" ? String(Math.round(currentOf(q[1]) * 100) / 100) : q[0] === "cap_repay" ? String(owedOf(q[1])) : "";
       renderCapHint(); updateImpact("capital");
       setTimeout(function(){ try{ am.focus(); am.select(); }catch(err){} }, 90);
       return;
@@ -19727,7 +20177,9 @@
       var t = (document.getElementById("c-type")||{}).value;
       var a = Number((document.getElementById("c-amount")||{}).value)||0;
       var sign = (t === "in" || t === "settle" || t === "opening") ? 1 : -1;
-      html = "<span>الخزنة</span> <b>" + esc(money(cash)) + "</b>" +
+      var pbx = t === "expense" && (document.getElementById("c-paidby")||{}).value;      // v142: من جيب الشريك
+      if(pbx) a = 0;
+      html = "<span>الخزنة</span> <b>" + esc(money(cash)) + "</b>" + (pbx ? " <span class='arrow'>·</span> ما بتتأثرش — " + esc(partyName(pbx)) + " دفع من جيبه" : "") +
         (a ? " <span class='arrow'>←</span> <b class='" + (cash + sign*a < 0 ? "v-due" : "") + "'>" +
           esc(money(cash + sign*a)) + "</b>" : "");
     } else if(key === "capital"){
