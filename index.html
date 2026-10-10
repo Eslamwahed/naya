@@ -4072,8 +4072,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "144";
+  var VERSION = "145";
   var CHANGELOG = [
+    { v:"145", d:"2026-10-10", items:[
+      "كل جداول تفاصيل الأوردرات بقى تحتها «الإجمالي (عدد الأوردرات)» وإجمالي كل عمود فلوس: كل الأوردرات · المبيعات المسلّمة · تجريه من العملاء (المطلوب والمحصّل) · فلوسك عند الشركات (العميل دفع) · الشحن من جيبك (الفرق من جيبك ولا ليك) — وبيتعدل لوحده مع البحث والفلتر"
+    ]},
     { v:"144", d:"2026-10-10", items:[
       "تفاصيل «صافي الربح — أوردر أوردر»: صف الإجمالي بقى فيه إجمالي المبيعات وتكلفة البضاعة والشحن وعدد الأوردرات — وبيتحسب على الأوردرات اللي ظاهرة بالبحث والفلتر"
     ]},
@@ -11715,14 +11718,19 @@
   var S_TITLE = { all:"الأوردرات الظاهرة", rev:"المبيعات المسلّمة",
                   owed:"تجريه من العملاء — تحصيل مباشر ليك", ship:"فلوسك عند شركات الشحن — أوردر أوردر",
                   pocket:"الشحن — حمّلت كام ودفعت كام", net:"صافي الربح — أوردر أوردر" };
+  // v145: «الإجمالي (n أوردر)» تحت كل جداول تفاصيل الأوردرات
+  function sumLbl(n){ return "الإجمالي (" + qty(n) + " أوردر)"; }
   var S_DETAIL = {
     all: function(L){
+      var t = 0;                                                    // v145: إجمالي القيمة
       var rows = L.slice().sort(byDate).map(function(s){          // byDate = الأحدث الأول
+        t += saleTotal(s);
         return "<tr><td class='num'>" + sRowLink(s) + "</td><td class='num'>" + esc(s.date || "—") + "</td>" +
           "<td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
           "<td class='num'>" + money(saleTotal(s)) + "</td>" +
           "<td>" + esc(saleStateTxt(s)) + "</td><td>" + esc(stepTxt(orderStep(s))) + "</td></tr>";
       });
+      if(rows.length) rows.push(sumRow([sumLbl(rows.length),"","","<b>"+money(t)+"</b>","",""]));
       return { note:"كل الأوردرات اللي ظاهرة بالفلتر الحالي — الأحدث فوق. دوس على رقم الأوردر يفتح تفاصيله.",
                head:["الأوردر","التاريخ","العميل","الإجمالي","الحالة","الخطوة"], rows:rows };
     },
@@ -11735,35 +11743,35 @@
           "<td class='num'>" + qty(q) + (retQty(s) ? "<span class='sub'>رجّع " + qty(retQty(s)) + "</span>" : "") + "</td>" +
           "<td class='num'>" + money(v) + "</td></tr>";
       });
-      if(rows.length) rows.push(sumRow(["الإجمالي","","","<b>"+qty(tq)+"</b>","<b>"+money(t)+"</b>"]));
+      if(rows.length) rows.push(sumRow([sumLbl(d.length),"","","<b>"+qty(tq)+"</b>","<b>"+money(t)+"</b>"]));
       return { note:"الأوردرات اللي اتسلّمت بس — ودي بس اللي بتتحسب مبيعات. القطع اللي رجعت مش محسوبة.",
                head:["الأوردر","التاريخ","العميل","قطع اتباعت","المبيعات"], rows:rows };
     },
     owed: function(L){
-      var d = L.filter(function(s){ return isDelivered(s) && !viaShip(s) && sDue(s) > 0.009; }), t = 0;
+      var d = L.filter(function(s){ return isDelivered(s) && !viaShip(s) && sDue(s) > 0.009; }), t = 0, tr = 0, tpd = 0;
       var rows = d.map(function(s){
         var p = db.parties.find(function(x){ return x.id === s.partyId; }) || {};
-        t += sDue(s);
+        t += sDue(s); tr += saleTotal(s) + shipIn(s); tpd += Number(s.paid)||0;
         return "<tr><td class='num'>" + sRowLink(s) + "</td><td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
           "<td class='num'>" + (esc(p.phone || "") || "—") + "</td>" +
           "<td class='num'>" + money(saleTotal(s) + shipIn(s)) + "</td>" +
           "<td class='num'>" + money(Number(s.paid)||0) + "</td>" +
           "<td class='num v-due'>" + money(sDue(s)) + "</td></tr>";
       });
-      if(rows.length) rows.push(sumRow(["الإجمالي","","","","","<b>"+money(t)+"</b>"]));
+      if(rows.length) rows.push(sumRow([sumLbl(d.length),"","","<b>"+money(tr)+"</b>","<b>"+money(tpd)+"</b>","<b>"+money(t)+"</b>"]));
       return { note:"أوردرات اتسلّمت والتحصيل فيها مباشر ليك — مش عن طريق شركة الشحن — ولسه فيها باقي. دي اللي محتاجة تكلّم العميل عليها.",
                head:["الأوردر","العميل","التليفون","المطلوب","المحصّل","الباقي"], rows:rows };
     },
     ship: function(L){
-      var d = L.filter(function(s){ return viaShip(s) && shipPend(s).left > 0.009; }).sort(byDate), t = 0;
+      var d = L.filter(function(s){ return viaShip(s) && shipPend(s).left > 0.009; }).sort(byDate), t = 0, tpd = 0;
       var rows = d.map(function(s){
-        var lf = shipPend(s).left; t += lf;
+        var lf = shipPend(s).left, pd = isCancelled(s) ? shipIn(s) : (Number(s.paid)||0); t += lf; tpd += pd;
         return "<tr><td class='num'>" + sRowLink(s) + "</td><td class='wide'>" + esc(partyName(s.partyId)) + "</td>" +
           "<td>" + esc(shipCoLabel(s.shipCo)) + "</td><td class='num'>" + (esc(squish(s.shipCode)) || "—") + "</td>" +
-          "<td class='num'>" + money(isCancelled(s) ? shipIn(s) : (Number(s.paid)||0)) + "</td>" +
+          "<td class='num'>" + money(pd) + "</td>" +
           "<td class='num'>" + money(lf) + "</td></tr>";
       });
-      if(rows.length) rows.push(sumRow(["الإجمالي","","","","","<b>"+money(t)+"</b>"]));
+      if(rows.length) rows.push(sumRow([sumLbl(d.length),"","","","<b>"+money(tpd)+"</b>","<b>"+money(t)+"</b>"]));
       return { note:"العميل دفع للمندوب وخرج من القصة — الفلوس دي عند شركة الشحن (بعد عمولتها) ولسه ما استلمتهاش. " +
                     "الاستلام من «شركات الشحن» بيتحسب على الأوردرات الأقدم الأول.",
                head:["الأوردر","العميل","الشركة","كود البوليصة","العميل دفع","لسه عند الشركة"], rows:rows };
@@ -11780,8 +11788,8 @@
           "<td class='num " + (g > 0 ? "v-due" : "v-gain") + "'>" + money(Math.abs(g)) +
           "<span class='sub'>" + (g > 0 ? "من جيبك" : "ليك") + "</span></td></tr>";
       });
-      if(rows.length) rows.push(sumRow(["الإجمالي","","","<b>"+money(ti)+"</b>","<b>"+money(to)+"</b>",
-        "<b>"+money(Math.abs(to - ti))+"</b>"]));
+      if(rows.length) rows.push(sumRow([sumLbl(d.length),"","","<b>"+money(ti)+"</b>","<b>"+money(to)+"</b>",
+        "<b>"+money(Math.abs(to - ti))+"</b><span class='sub'>" + (to - ti > 0.009 ? "من جيبك" : to - ti < -0.009 ? "ليك" : "") + "</span>"]));
       return { note:"الأوردرات اللي الشحن اللي حمّلته للعميل فيها مختلف عن اللي دفعته لشركة الشحن. الأكبر من جيبك فوق.",
                head:["الأوردر","العميل","الشركة","حمّلت العميل","دفعت للشركة","الفرق"], rows:rows };
     },
@@ -11796,7 +11804,7 @@
           "<td class='num'>" + (m.pocket ? (m.pocket > 0 ? "−" : "+") + money(Math.abs(m.pocket)) : "—") + "</td>" +
           "<td class='num " + (pr >= 0 ? "v-gain" : "v-due") + "'>" + money(pr) + "</td></tr>";
       });
-      if(rows.length) rows.push(sumRow(["الإجمالي (" + qty(d.length) + " أوردر)","","<b>"+money(tg)+"</b>","<b>"+money(tc)+"</b>",
+      if(rows.length) rows.push(sumRow([sumLbl(d.length),"","<b>"+money(tg)+"</b>","<b>"+money(tc)+"</b>",
         "<b>" + (Math.abs(tp) > 0.009 ? (tp > 0 ? "−" : "+") + money(Math.abs(tp)) : "—") + "</b>","<b>"+money(t)+"</b>"]));
       return { note:"ربح كل أوردر = المبيعات − تكلفة البضاعة − اللي طلع من جيبك في الشحن. الأكبر ربح فوق، والخسران تحت بالأحمر.",
                head:["الأوردر","العميل","المبيعات","تكلفة البضاعة","الشحن","صافي الربح"], rows:rows };
