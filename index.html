@@ -4084,8 +4084,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "149";
+  var VERSION = "150";
   var CHANGELOG = [
+    { v:"150", d:"2026-10-11", items:[
+      "كارت «استلام QP 11/10 — 3,735» في شركات الشحن: 7 أوردرات زي كشف QP (#30 #36 #31 #16 #11 #37 #34)، والشحن على #30 و#34 بقى 85 زي الكشف — بيستنى لحد ما الأوردرات تتسجّل مسلّمة",
+      "الشركة اللي رصيدها بالسالب: «عليك مصاريف مرتجع — هتتخصم من الاستلام الجاي»"
+    ]},
     { v:"149", d:"2026-10-11", items:[
       "كارت تحديث الأوردرات: «طبّق» بيسجّل كل الأوردرات على طول، و#34 لو ما اخترتش القطعة اللي رجعت بتفضل في الكارت لوحدها — وقايمة الاختيار بقت جوه الجدول"
     ]},
@@ -7190,6 +7194,8 @@
     }
     if(canTab("ship") && fix147Pending() && !fix147Why().length)
       line({ ic:"truck", cls:"warn", t:"تحصيلات SONIC من الكشوف جاهزة", s:"5/10 · 7/10 · 11/10 أوردر أوردر — راجعها ودوس «طبّق»", v:"", go:"ship" });
+    if(canTab("ship") && fix150Pending() && !fix150State().bad.length)
+      line({ ic:"truck", cls:"warn", t:"استلام QP 3,735 جاهز يتسجّل", s:"7 أوردرات زي كشف 11/10 — راجعه ودوس «طبّق»", v:"", go:"ship" });
     if(canTab("ship") && fix148Pending())
       line({ ic:"truck", cls:"warn", t:"تحديث أوردرات الشحن جاهز", s:"#11 #30 #31 #16 #34 اتسلّموا · #32 #33 #35 اترفضوا — راجعها ودوس «طبّق»", v:"", go:"ship" });
     if(canTab("prepaid") && fix142Pending())
@@ -14485,10 +14491,86 @@
     saveSoon("sales"); saveSettings(); renderAll();
     toast("اتسجّل " + qty(r.n) + " أوردر — رصيدك عند QP " + money(r.qp) + (wait ? " · #34 مستني تختار القطعة اللي رجعت" : ""), 5200);
   });
+  /* v150 — استلام QP 11/10: 3,735 = 7 أوردرات (Revenue Report 11/10). الشحن على #30 و#34 طلع 85 مش 80،
+     وكود بوليصة #31 و#11 زي الكشف. بيستنى لحد ما الـ7 يبقوا مسلّمين (كارت 11/10 أو بإيدك). */
+  var FIX150 = [
+    { id:"muyckbslvr42w", no:30, code:"23206434", paid:360, fee:85, net:275 },
+    { id:"muykje8tukm2v", no:36, code:"23206452", paid:615, fee:80, net:535 },
+    { id:"muycq7xvmussf", no:31, code:"23206445", paid:350, fee:100, net:250 },
+    { id:"musg11hhw2qci", no:16, code:"23206466", paid:1530, fee:100, net:1430 },
+    { id:"mur39wnz2rtrs", no:11, code:"23206448", paid:550, fee:100, net:450 },
+    { id:"muyktb2oltrib", no:37, code:"23206458", paid:370, fee:100, net:270 },
+    { id:"muyk3ko0yepp2", no:34, code:"23206441", paid:610, fee:85, net:525 }
+  ];
+  var FIX150_AMT = 3735, FIX150_D = "2026-10-11", fix150Later = false;
+  function fix150State(){
+    var w = [], wait = [];
+    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "QP"; })) w.push("فيه استلام من QP اتسجّل — ابعت نسخة جديدة نراجعها");
+    if(isLocked(FIX150_D)) w.push("فترة 11/10 مقفولة");
+    FIX150.forEach(function(x){
+      var r = db.sales.find(function(y){ return y.id === x.id; });
+      if(!r || r.deleted || !viaShip(r) || squish(r.shipCo) !== "QP" && !(x.no === 11 && squish(r.shipCo) === "SONIC")) { w.push("#" + x.no + " اتعدّل"); return; }
+      if(stOf(r) === "progress" && !(Number(r.paid)||0)){ wait.push("#" + x.no); return; }
+      if(!isDelivered(r) || Math.abs((Number(r.paid)||0) - x.paid) > 0.009 || !(Number(r.shipOut) === x.fee || Number(r.shipOut) === 80 && x.fee === 85))
+        w.push("#" + x.no + " مش زي الكشف");
+    });
+    return { bad:w, wait:wait };
+  }
+  function fix150Pending(){ return !settings.fix150 && !fix150Later && canEdit() && canMoney(); }
+  function fix150Run(dry){
+    var R = FIX150.map(function(x){ return db.sales.find(function(y){ return y.id === x.id; }); });
+    var snap = R.map(function(r){ return JSON.stringify(r); }), n0 = db.cash.length, out;
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    try{
+      FIX150.forEach(function(x, k){
+        var r = R[k], ch = false;
+        if(Number(r.shipOut) !== x.fee){ r.shipOut = x.fee; ch = true; }
+        if(squish(r.shipCode) !== x.code){ r.shipCode = x.code; ch = true; }
+        if(ch){ syncShipPaid(r); if(!dry){ r.editedBy = me || "غير محدد"; r.at = Date.now(); } }
+      });
+      db.cash.push(stamp({ date:FIX150_D, type:"settle", partyId:"", amount:FIX150_AMT, shipCo:"QP", fx:"150",
+        orders:FIX150.map(function(x){ return x.id; }),
+        note:"كشف " + dShort(FIX150_D) + " من QP: أوردرات " + FIX150.map(function(x){ return "#" + x.no; }).join(" و") }));
+      pendCache = null;
+      out = { wal:walletOf("QP"), cash:cashBox(), net:projStats(null).exp.net,
+              left:R.map(function(r){ return shipPend(r).left; }).reduce(function(a, v){ return a + Math.abs(v); }, 0) };
+    } finally {
+      if(dry){ R.forEach(function(r, k){ back(r, snap[k]); }); db.cash.length = n0; pendCache = null; }
+    }
+    return out;
+  }
+  function fix150HTML(){
+    if(!fix150Pending()) return "";
+    var S = fix150State(), head = "<div class='panel fx-card' id='fx150'><h3>استلام QP 11/10 — " + esc(money(FIX150_AMT)) + "</h3>";
+    if(S.bad.length) return head + "<p class='hint v-due'>مش هينفع يتطبّق: " + esc(S.bad.join(" · ")) + "</p><div class='fx-a'><button class='tbtn' type='button' id='x-fx150'>بعدين</button></div></div>";
+    if(S.wait.length) return head + "<p class='hint'>جاهز — مستني " + esc(S.wait.join(" و")) + " يتسجّلوا مسلّمين" +
+      (fix148Pending() ? ": دوس «طبّق» في «تحديث أوردرات الشحن» فوق" + (S.wait.indexOf("#34") >= 0 ? " واختار قطعة #34" : "") : "") + ".</p></div>";
+    var before = { wal:walletOf("QP"), cash:cashBox(), net:projStats(null).exp.net }, after = fix150Run(true);
+    var bd = function(a, v){ return "<bdi>" + esc(a) + "</bdi> <bdi class='num'>" + esc(v) + "</bdi>"; };
+    return head +
+      "<p class='hint'>كشف QP (Revenue Report 11/10): " + FIX150.map(function(x){ return bd("#" + x.no, qty(x.net)); }).join(" · ") + " = " + esc(money(FIX150_AMT)) + ".</p>" +
+      "<div class='fx-eff'><div><small>رصيدك عند QP</small><b class='num'>" + esc(money(before.wal)) + " ← " + esc(money(after.wal)) + "</b></div>" +
+        "<div><small>الخزنة</small><b class='num'>" + esc(money(before.cash)) + " ← " + esc(money(after.cash)) + "</b></div>" +
+        "<div><small>صافي الربح (لو كله اتسلّم)</small><b class='num'>" + esc(money(before.net)) + " ← " + esc(money(after.net)) + "</b></div></div>" +
+      "<p class='hintline'>الشحن على #30 و#34 هيتعدّل لـ 85 زي الكشف (كان 80)، وكود بوليصة #11 و#31 زي الكشف. " +
+        (after.wal < -0.009 ? "الرصيد بالسالب = مصاريف مرتجع المرفوضين اللي QP لسه هتخصمها من الاستلام الجاي." : "") + "</p>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx150'>طبّق</button><button class='tbtn' type='button' id='x-fx150'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx150")){ fix150Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx150")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var S = fix150State(); if(S.bad.length || S.wait.length){ renderAll(); return; }
+    var r = fix150Run(false);
+    settings.fix150 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتسجّل استلام " + money(FIX150_AMT) + " من QP — 7 أوردرات", 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
-    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix147HTML() + fix148HTML();
+    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix147HTML() + fix148HTML() + fix150HTML();
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
@@ -14529,7 +14611,7 @@
           ? "<button class='tbtn primary' type='button' data-shcall='" + esc(name) + "'>استلم " + esc(money(bal)) + "</button>" +
             "<button class='tbtn' type='button' data-shcpart='" + esc(name) + "'>استلم جزء</button>"
           : (bal > 0.009 && !name ? "<span class='sub'>افتح الأوردرات واكتب اسم الشركة</span>"
-             : (bal < -0.009 ? "<span class='sub'>الشركة خصمت أكتر ما حصّلت</span>" : "<span class='sub'>✓ كل فلوسك وصلتك</span>"))) +
+             : (bal < -0.009 ? "<span class='sub'>عليك مصاريف مرتجع — هتتخصم من الاستلام الجاي</span>" : "<span class='sub'>✓ كل فلوسك وصلتك</span>"))) +
         "</span></div>";
       var part = (shcPart === name && ed)
         ? "<div class='shc-part'><label>استلمت كام؟ <input inputmode='decimal' class='num' data-shcamt='" + esc(name) + "' placeholder='" + esc(money(bal)) + "'></label>" +
