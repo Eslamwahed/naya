@@ -784,7 +784,7 @@
   .shc-row .ono{color:var(--teal);font-weight:600}
   .shc-row.st{grid-template-columns:52px minmax(0,1fr) auto 130px}
   .shc-row.pk{grid-template-columns:22px 56px minmax(0,1fr) 70px auto auto;align-items:center}
-  #fx148 select{max-width:100%;margin-inline-start:6px}
+  #fx148 select{display:block;width:auto;max-width:100%;margin:6px 0 2px;padding:6px 10px;font-size:var(--fs-3)}
   .fx148-pd{display:inline-flex;align-items:center;gap:4px;margin-inline-start:8px;font-size:var(--fs-2);cursor:pointer}
   .shc-row .shc-one{padding:4px 10px;font-size:var(--fs-2)}
   .shc-row.pk input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--teal);cursor:pointer}
@@ -4084,8 +4084,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "148";
+  var VERSION = "149";
   var CHANGELOG = [
+    { v:"149", d:"2026-10-11", items:[
+      "كارت تحديث الأوردرات: «طبّق» بيسجّل كل الأوردرات على طول، و#34 لو ما اخترتش القطعة اللي رجعت بتفضل في الكارت لوحدها — وقايمة الاختيار بقت جوه الجدول"
+    ]},
     { v:"148", d:"2026-10-11", items:[
       "كارت «تحديث أوردرات الشحن — 11/10» في شركات الشحن: #11 #30 #31 #16 اتسلّموا (#11 مع QP)، #34 خدت قطعتين ورجّعت واحدة (تختار أنهي)، #32 #33 #35 اترفضوا — مش بيتطبّق غير لما تدوس «طبّق»، وأي أوردر اتسجّل بإيدك قبلها بيتخطّى"
     ]},
@@ -14440,7 +14443,7 @@
     var I = fix148Items(), before = { qp:walletOf("QP"), net:projStats(null).exp.net }, after = fix148Run(true);
     var by = {}; after.rows.forEach(function(r){ by[r.no] = r; });
     var p34 = I.find(function(i){ return i.x.no === 34; });
-    var rows = I.map(function(i){
+    var rows = I.filter(function(i){ return i.st === "ok" || !settings.fix148p; }).map(function(i){
       var x = i.x, r = i.r, a = by[x.no], what;
       if(i.st !== "ok") what = "<span class='pp-st'>اتغيّر — هيتخطّى</span>";
       else if(x.a === "part"){
@@ -14456,7 +14459,8 @@
       return "<tr><td data-l='الأوردر'><b>#" + x.no + "</b><span class='sub'>" + esc(r ? partyName(r.partyId) : "") + "</span></td><td data-l='هيبقى'>" + what + "</td></tr>";
     }).join("");
     return "<div class='panel fx-card' id='fx148'><h3>تحديث أوردرات الشحن — 11/10</h3>" +
-      "<p class='hint'>الأوردرات اللي بعتها: اتسلّموا · خد جزء · اترفضوا. مفيش حاجة هتتغيّر غير لما تدوس «طبّق».</p>" +
+      "<p class='hint'>" + (settings.fix148p ? "الباقي #34: اختار القطعة اللي رجعت ودوس «طبّق»." :
+        "الأوردرات اللي بعتها: اتسلّموا · خد جزء · اترفضوا. مفيش حاجة هتتغيّر غير لما تدوس «طبّق» — و#34 لو ما اخترتش قطعتها هتفضل هنا لوحدها.") + "</p>" +
       "<div class='fx-eff'><div><small>رصيدك عند QP</small><b class='num'>" + esc(money(before.qp)) + " ← " + esc(money(after.qp)) + "</b></div>" +
         "<div><small>صافي الربح (لو كله اتسلّم)</small><b class='num'>" + esc(money(before.net)) + " ← " + esc(money(after.net)) + "</b></div></div>" +
       "<div class='tbl-wrap'><table class='pp-t'><thead><tr><th>الأوردر</th><th>هيبقى</th></tr></thead><tbody>" + rows + "</tbody></table></div>" +
@@ -14473,12 +14477,13 @@
     if(e.target.closest("#x-fx148")){ fix148Later = true; renderAll(); return; }
     if(!e.target.closest("#b-fx148")) return;
     if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
-    var i34 = fix148Items().find(function(i){ return i.x.no === 34; });
-    if(i34 && i34.st === "ok" && fix148Ret === null){ toast("اختار القطعة اللي رجعت من #34 الأول"); var se = document.getElementById("fx148-r34"); if(se) se.focus(); return; }
     var r = fix148Run(false);
-    settings.fix148 = { at:Date.now(), by:me || "", n:r.n };
+    // v149: #34 من غير اختيار القطعة الراجعة بيستنى لوحده في الكارت — والباقي يتسجّل
+    var wait = fix148Items().some(function(i){ return i.st === "ok"; });
+    if(wait) settings.fix148p = { at:Date.now(), by:me || "", n:((settings.fix148p || {}).n || 0) + r.n };
+    else settings.fix148 = { at:Date.now(), by:me || "", n:((settings.fix148p || {}).n || 0) + r.n };
     saveSoon("sales"); saveSettings(); renderAll();
-    toast("اتسجّل " + qty(r.n) + " أوردر — رصيدك عند QP " + money(r.qp), 4200);
+    toast("اتسجّل " + qty(r.n) + " أوردر — رصيدك عند QP " + money(r.qp) + (wait ? " · #34 مستني تختار القطعة اللي رجعت" : ""), 5200);
   });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
