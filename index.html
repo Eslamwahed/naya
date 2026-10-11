@@ -783,6 +783,14 @@
   .shc-row > b{text-align:end;white-space:nowrap}
   .shc-row .ono{color:var(--teal);font-weight:600}
   .shc-row.st{grid-template-columns:52px minmax(0,1fr) auto 130px}
+  .shc-row.pk{grid-template-columns:22px 56px minmax(0,1fr) 70px auto auto;align-items:center}
+  .shc-row .shc-one{padding:4px 10px;font-size:var(--fs-2)}
+  .shc-row.pk input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--teal);cursor:pointer}
+  .shc-row.on{background:var(--teal-soft);border-radius:var(--r-sm)}
+  .shc-pick{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:8px 10px;margin-bottom:6px;border-radius:var(--r-sm);
+    background:var(--paper)}
+  .shc-pick > :first-child{flex:1;min-width:0}
+  .shc-pick.on{position:sticky;top:8px;z-index:2;background:var(--teal-soft);border:1px solid var(--teal);box-shadow:var(--shadow)}
   .shc-row.st > .sub:last-child{text-align:end}
   @media (max-width:760px){
     #shc-top{display:grid;grid-template-columns:1fr 1fr}
@@ -795,6 +803,7 @@
     .shc-row{grid-template-columns:48px minmax(0,1fr) auto}
     .shc-row > .sub.num{display:none}
     .shc-row.st{grid-template-columns:44px minmax(0,1fr) auto}
+    .shc-row.pk{grid-template-columns:22px 44px minmax(0,1fr) auto auto}
     .shc-row.st > .sub:last-child{grid-column:2 / -1;text-align:start}
   }
 
@@ -4072,8 +4081,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "145";
+  var VERSION = "146";
   var CHANGELOG = [
+    { v:"146", d:"2026-10-11", items:[
+      "شركات الشحن: استلام أوردر أوردر — زرار «استلمت» جنب كل أوردر، أو علّم أكتر من أوردر ودوس «استلمت فلوسهم»؛ الفلوس بتدخل الخزنة والأوردرات دي بس اللي بتخرج من «الأوردرات اللي فلوسها عندها»",
+      "كشف حساب الشركة بيكتب أرقام الأوردرات اللي اتحاسبت عليها — و«استلم جزء» فضل زي ما هو بيتحسب على الأقدم الأول"
+    ]},
     { v:"145", d:"2026-10-10", items:[
       "كل جداول تفاصيل الأوردرات بقى تحتها «الإجمالي (عدد الأوردرات)» وإجمالي كل عمود فلوس: كل الأوردرات · المبيعات المسلّمة · تجريه من العملاء (المطلوب والمحصّل) · فلوسك عند الشركات (العميل دفع) · الشحن من جيبك (الفرق من جيبك ولا ليك) — وبيتعدل لوحده مع البحث والفلتر"
     ]},
@@ -5954,10 +5967,14 @@
       var net = (isCancelled(s) ? shipIn(s) : (Number(s.paid)||0)) - (shipCounts(s) ? shipOut(s) : 0);
       (by[co] = by[co] || []).push({ s:s, net:Math.round(net * 100) / 100 });
     });
-    var drawn = {}, credits = {};
+    var drawn = {}, credits = {}, pick = {};
     live("cash").forEach(function(c){
-      if(c.type === "settle"){ var n = squish(c.shipCo); drawn[n] = (drawn[n]||0) + (Number(c.amount)||0);
-        (credits[n] = credits[n] || []).push({ d:c.date || "", a:Number(c.amount)||0 }); }
+      if(c.type !== "settle") return;
+      var n = squish(c.shipCo), a = Number(c.amount)||0;
+      // v146: استلام أوردر أوردر — المبلغ بيروح للأوردرات اللي اخترتها، واللي يزيد بيتوزع الأقدم الأول
+      if(Array.isArray(c.orders) && c.orders.length){ (pick[n] = pick[n] || []).push({ d:c.date || "", at:c.at || 0, a:a, ids:c.orders }); return; }
+      drawn[n] = (drawn[n]||0) + a;
+      (credits[n] = credits[n] || []).push({ d:c.date || "", a:a });
     });
     Object.keys(by).forEach(function(co){
       /* الأقدم الأول — بتاريخ ما الفلوس وصلت الشركة (التسليم أو الرفض)،
@@ -5968,14 +5985,26 @@
         var da = moneyDate(a.s), dbb = moneyDate(b.s);
         return da !== dbb ? (da < dbb ? -1 : 1) : (Number(a.s.no)||0) - (Number(b.s.no)||0);
       });
+      var ix = {};
+      L.forEach(function(x){ x.rest = x.net; x.exD = ""; ix[x.s.id] = x; });
+      (pick[co] || []).sort(function(a, b){ return a.d !== b.d ? (a.d < b.d ? -1 : 1) : a.at - b.at; }).forEach(function(p){
+        var pp = p.a;
+        p.ids.forEach(function(id){
+          var x = ix[id]; if(!x || x.rest <= 0.009 || pp <= 0.009) return;
+          var tk = Math.min(pp, x.rest); pp -= tk;
+          x.rest = Math.round((x.rest - tk) * 100) / 100;
+          if(p.d > x.exD) x.exD = p.d;
+        });
+        if(pp > 0.009){ drawn[co] = (drawn[co]||0) + pp; (credits[co] = credits[co] || []).push({ d:p.d, a:pp }); }
+      });
       var pool = drawn[co] || 0;
       L.forEach(function(x){ if(x.net < 0) pool += -x.net; });
       var run = 0;
       L.forEach(function(x){
-        if(x.net <= 0.009){ out[x.s.id] = { left:0, upto:run }; return; }
-        var take = Math.min(pool, x.net);
+        if(x.rest <= 0.009){ out[x.s.id] = { left:0, upto:run }; return; }
+        var take = Math.min(pool, x.rest);
         pool -= take;
-        var left = Math.round((x.net - take) * 100) / 100;
+        var left = Math.round((x.rest - take) * 100) / 100;
         run += left;
         out[x.s.id] = { left:left, upto:Math.round(run * 100) / 100 };
       });
@@ -5987,9 +6016,9 @@
       cr.sort(function(a, b){ return a.d < b.d ? -1 : (a.d > b.d ? 1 : 0); });
       var ci = 0, have = 0, need = 0, lastD = "";
       L.forEach(function(x){
-        var md = moneyDate(x.s);
-        if(x.net <= 0.009){ out[x.s.id].closedAt = md; return; }
-        need += x.net;
+        var md = moneyDate(x.s); if(x.exD > md) md = x.exD;               // اتقفل يوم الاستلام اللي اخترته فيه
+        if(x.rest <= 0.009){ out[x.s.id].closedAt = md; return; }
+        need += x.rest;
         while(have < need - 0.009 && ci < cr.length){ have += cr[ci].a; lastD = cr[ci].d; ci++; }
         out[x.s.id].closedAt = have >= need - 0.009 ? (lastD > md ? lastD : md) : "";
       });
@@ -12210,18 +12239,23 @@
     }
   }
   // استلام فلوس من الشركة — نفس حركة «سجّل الاستلام» في شاشة الشركات
-  function settleCo(co, amt){
+  function settleCo(co, amt, ids){
     var name = squish(co), bal = walletOf(name);
     if(!name){ toast("الأوردرات دي من غير اسم شركة — افتحها واكتب الاسم الأول"); return false; }
     if(!(amt > 0)){ toast("اكتب المبلغ اللي استلمته"); return false; }
     if(amt > bal + 0.009){ toast("المبلغ أكبر من رصيدك عندها (" + money(bal) + ")"); return false; }
     var d = today();
     if(!guardLock(d, "الاستلام")) return false;
-    db.cash.push(stamp({ date:d, type:"settle", partyId:"", amount:Math.round(amt * 100) / 100,
-      shipCo:name, note:"استلام من " + name }));
+    var rec = { date:d, type:"settle", partyId:"", amount:Math.round(amt * 100) / 100,
+      shipCo:name, note:"استلام من " + name };
+    if(ids && ids.length){
+      rec.orders = ids.slice();
+      rec.note += " — " + ids.map(function(id){ var x = db.sales.find(function(y){ return y.id === id; }); return "#" + ((x && x.no) || "—"); }).join(" · ");
+    }
+    db.cash.push(stamp(rec));
     saveSoon("cash"); renderAll();
     var left = bal - amt;
-    toast("اتسجّل استلام " + money(amt) + " من " + name + " — دخل الخزنة" +
+    toast("اتسجّل استلام " + money(amt) + " من " + name + (ids && ids.length ? " (" + plural(ids.length, "أوردر واحد", "أوردرين", "أوردرات") + ")" : "") + " — دخل الخزنة" +
           (left > 0.009 ? " · باقي لك " + money(left) : " · خلص رصيدك عندها"), 4200);
     return true;
   }
@@ -14223,6 +14257,7 @@
      للكشف — فمجموع الكروت = الجدول القديم بالظبط. */
   var shcOpen = {};                      // {co: "orders"|"held"|"stmt"}
   var shcPart = null;                    // الشركة اللي مفتوح فيها «استلم جزء»
+  var shcSel = {};                       // v146: {co: {saleId:1}} — الأوردرات اللي هتستلم فلوسها
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
@@ -14285,16 +14320,29 @@
       };
       var body = "";
       if(sec === "orders"){
-        body = pend.length ? pend.map(function(x){
+        var sel = shcSel[name] || {}, ids = pend.filter(function(x){ return sel[x.id]; });
+        var sum = ids.reduce(function(a, x){ return a + shipPend(x).left; }, 0);
+        var pick = !ed || !pend.length ? "" : "<div class='shc-pick" + (ids.length ? " on" : "") + "'>" +
+          (ids.length
+            ? "<b>اخترت " + esc(plural(ids.length, "أوردر واحد", "أوردرين", "أوردرات")) + " · <span class='num'>" + esc(money(sum)) + "</span></b>" +
+              "<button class='tbtn primary' type='button' data-shcpick='" + esc(name) + "'>استلمت فلوسهم</button>" +
+              "<button class='tbtn' type='button' data-shcclr='" + esc(name) + "'>إلغاء</button>"
+            : "<span class='sub'>علّم الأوردرات اللي الشركة حاسبتك عليها</span>" +
+              "<button class='tbtn' type='button' data-shcselall='" + esc(name) + "'>اختار الكل</button>") + "</div>";
+        body = pick + (pend.length ? pend.map(function(x){
           var got = isCancelled(x) ? shipIn(x) : (Number(x.paid)||0), fee = shipCounts(x) ? shipOut(x) : 0;
           var net = got - fee, pd = shipPend(x).left;
-          return "<div class='shc-row'><a href='#' class='ono' data-shcorder='" + esc(x.id) + "'>#" + esc(x.no || "—") + "</a>" +
+          return "<div class='shc-row" + (ed ? " pk" : "") + (sel[x.id] ? " on" : "") + "'>" +
+            (ed ? "<input type='checkbox' data-shcsel='" + esc(name) + "|" + esc(x.id) + "'" + (sel[x.id] ? " checked" : "") +
+                  " aria-label='استلمت فلوس أوردر " + esc(x.no || "") + "'>" : "") +
+            "<a href='#' class='ono' data-shcorder='" + esc(x.id) + "'>#" + esc(x.no || "—") + "</a>" +
             "<span>" + esc(partyName(x.partyId)) + "<span class='sub'>" + (isCancelled(x) ? "رفض · دفع الشحن " : "العميل دفع ") +
               esc(qty(got)) + (fee ? " − شحنها " + esc(qty(fee)) : "") +
               (net - pd > 0.009 ? " · اتحسب منها " + esc(qty(Math.round((net - pd) * 100) / 100)) + " من اللي استلمته" : "") + "</span></span>" +
             "<span class='sub num'>" + esc(dShort(x.deliveredAt || x.date)) + "</span>" +
-            "<b class='num'>" + esc(money(pd)) + "</b></div>";
-        }).join("") : "<p class='sub' style='margin:0'>مفيش أوردرات فلوسها لسه عندها.</p>";
+            "<b class='num'>" + esc(money(pd)) + "</b>" +
+            (ed ? "<button class='tbtn shc-one' type='button' data-shcone='" + esc(name) + "|" + esc(x.id) + "' title='الشركة حاسبتك على الأوردر ده — " + esc(money(pd)) + " تدخل الخزنة'>استلمت</button>" : "") + "</div>";
+        }).join("") : "<p class='sub' style='margin:0'>مفيش أوردرات فلوسها لسه عندها.</p>");
       } else if(sec === "held"){
         body = hl.length ? hl.map(function(h){
           var vl = vLabel(vColor(h.l), vSize(h.l));
@@ -14337,6 +14385,30 @@
       renderShipCards(); return;
     }
     if((t = e.target.closest("[data-shcorder]"))){ e.preventDefault(); goTab("sales"); sgOpenRow(t.dataset.shcorder); return; }
+    if((t = e.target.closest("[data-shcclr]"))){ delete shcSel[t.dataset.shcclr]; renderShipCards(); return; }
+    if((t = e.target.closest("[data-shcselall]"))){
+      var an = t.dataset.shcselall, m = shcSel[an] = {};
+      live("sales").forEach(function(x){ if(viaShip(x) && squish(x.shipCo) === an && shipPend(x).left > 0.009) m[x.id] = 1; });
+      renderShipCards(); return;
+    }
+    if((t = e.target.closest("[data-shcone]"))){
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      var oq = t.dataset.shcone.split("|"), ox = live("sales").find(function(x){ return x.id === oq[1]; });
+      var ol = ox ? shipPend(ox).left : 0;
+      if(!(ol > 0.009)){ renderShipCards(); return; }
+      if(settleCo(oq[0], Math.min(Math.round(ol * 100) / 100, walletOf(oq[0])), [oq[1]]) && shcSel[oq[0]]){ delete shcSel[oq[0]][oq[1]]; renderShipCards(); }
+      return;
+    }
+    if((t = e.target.closest("[data-shcpick]"))){
+      if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+      var pn = t.dataset.shcpick, pm = shcSel[pn] || {};
+      var pl = live("sales").filter(function(x){ return pm[x.id] && squish(x.shipCo) === pn && shipPend(x).left > 0.009; })
+        .sort(function(a, b){ return -byDate(a, b); });
+      if(!pl.length){ delete shcSel[pn]; renderShipCards(); return; }
+      var pa = Math.round(pl.reduce(function(a, x){ return a + shipPend(x).left; }, 0) * 100) / 100;
+      if(settleCo(pn, Math.min(pa, walletOf(pn)), pl.map(function(x){ return x.id; }))){ delete shcSel[pn]; shcPart = null; renderShipCards(); }
+      return;
+    }
     if((t = e.target.closest("[data-shcall]"))){
       if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
       shcPart = null; settleCo(t.dataset.shcall, walletOf(t.dataset.shcall)); return;
@@ -14353,6 +14425,12 @@
       if(settleCo(nm, v)) shcPart = null; else if(box) box.focus();
       return;
     }
+  });
+  document.getElementById("shc-cards").addEventListener("change", function(e){
+    var c = e.target.closest("[data-shcsel]"); if(!c) return;
+    var q = c.dataset.shcsel.split("|"), m = shcSel[q[0]] = shcSel[q[0]] || {};
+    if(c.checked) m[q[1]] = 1; else delete m[q[1]];
+    renderShipCards();
   });
   document.getElementById("shc-cards").addEventListener("keydown", function(e){
     if(e.key !== "Enter") return;
