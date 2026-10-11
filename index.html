@@ -785,6 +785,7 @@
   .shc-row.st{grid-template-columns:52px minmax(0,1fr) auto 130px}
   .shc-row.pk{grid-template-columns:22px 56px minmax(0,1fr) 70px auto auto;align-items:center}
   #fx148 select{display:block;width:auto;max-width:100%;margin:6px 0 2px;padding:6px 10px;font-size:var(--fs-3)}
+  .fx-ul{margin:var(--sp-2) 0;padding-inline-start:20px;display:grid;gap:6px;font-size:var(--fs-3)}
   .fx148-pd{display:inline-flex;align-items:center;gap:4px;margin-inline-start:8px;font-size:var(--fs-2);cursor:pointer}
   .shc-row .shc-one{padding:4px 10px;font-size:var(--fs-2)}
   .shc-row.pk input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--teal);cursor:pointer}
@@ -4084,8 +4085,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "150";
+  var VERSION = "151";
   var CHANGELOG = [
+    { v:"151", d:"2026-10-11", items:[
+      "«ظبّط حسابات الشحن» — كارت واحد بدوسة واحدة بدل الكارتين: #20 اتسلّم ودفعت 500 (فرو السلسلة البيج راجع)، #34 اتسلّم ودفعت 610، واستلام QP 3,735 على الـ7 أوردرات"
+    ]},
     { v:"150", d:"2026-10-11", items:[
       "كارت «استلام QP 11/10 — 3,735» في شركات الشحن: 7 أوردرات زي كشف QP (#30 #36 #31 #16 #11 #37 #34)، والشحن على #30 و#34 بقى 85 زي الكشف — بيستنى لحد ما الأوردرات تتسجّل مسلّمة",
       "الشركة اللي رصيدها بالسالب: «عليك مصاريف مرتجع — هتتخصم من الاستلام الجاي»"
@@ -7194,9 +7198,11 @@
     }
     if(canTab("ship") && fix147Pending() && !fix147Why().length)
       line({ ic:"truck", cls:"warn", t:"تحصيلات SONIC من الكشوف جاهزة", s:"5/10 · 7/10 · 11/10 أوردر أوردر — راجعها ودوس «طبّق»", v:"", go:"ship" });
-    if(canTab("ship") && fix150Pending() && !fix150State().bad.length)
+    if(canTab("ship") && fix151Pending())
+      line({ ic:"truck", cls:"warn", t:"ظبّط حسابات الشحن", s:"#20 و#34 واستلام QP 3,735 — دوسة واحدة", v:"", go:"ship" });
+    if(canTab("ship") && !fix151Pending() && fix150Pending() && !fix150State().bad.length)
       line({ ic:"truck", cls:"warn", t:"استلام QP 3,735 جاهز يتسجّل", s:"7 أوردرات زي كشف 11/10 — راجعه ودوس «طبّق»", v:"", go:"ship" });
-    if(canTab("ship") && fix148Pending())
+    if(canTab("ship") && !fix151Pending() && fix148Pending())
       line({ ic:"truck", cls:"warn", t:"تحديث أوردرات الشحن جاهز", s:"#11 #30 #31 #16 #34 اتسلّموا · #32 #33 #35 اترفضوا — راجعها ودوس «طبّق»", v:"", go:"ship" });
     if(canTab("prepaid") && fix142Pending())
       line({ ic:"book", cls:"warn", t:"تصحيحات حساباتك جاهزة", s:"اشتراك إسلام · رصيد فيسبوك · الفلايرات — راجعها ودوس «طبّق»", v:"", go:"prepaid" });
@@ -14567,10 +14573,86 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتسجّل استلام " + money(FIX150_AMT) + " من QP — 7 أوردرات", 4200);
   });
+  /* v151 — «ظبّط الشحن»: كارت واحد بيقفل اللي فاضل من 11/10 بدل كارتين (نسخة إسلام 11/10 بعد الضهر):
+     #20 خدت قطعتين ودفعت 500 (فرو السلسلة البيج اللي اتشالت من الأوردر بترجع سطر «رجع» — لسه عند SONIC)،
+     #34 خدت قطعتين ودفعت 610 (الأبيض اتحسب هو الراجع — إسلام مش عارف، يتعدّل لما القطعة توصل)،
+     شحن #30 و#34 = 85 زي كشف QP، واستلام QP 3,735 على الـ7 أوردرات. */
+  var FIX151_L20 = { qty:1, ret:1, size:"37/38", color:"بيج", price:250, itemId:"mujoq45boyh22", unitCost:null };
+  var fix151Later = false;
+  function fix151Sale(id){ return db.sales.find(function(y){ return y.id === id; }); }
+  function fix151Why(){
+    var w = [], r20 = fix151Sale("mutqkxgb9nc70"), r34 = fix151Sale("muyk3ko0yepp2");
+    if(!r20 || r20.deleted || stOf(r20) !== "progress" || (Number(r20.paid)||0) || SL(r20).length !== 2 || squish(r20.shipCo) !== "SONIC") w.push("#20 اتعدّل");
+    if(!r34 || r34.deleted || stOf(r34) !== "progress" || (Number(r34.paid)||0) || SL(r34).length !== 3 || squish(r34.shipCo) !== "QP") w.push("#34 اتعدّل");
+    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "QP"; })) w.push("فيه استلام من QP اتسجّل");
+    if(isLocked("2026-10-11")) w.push("فترة 11/10 مقفولة");
+    FIX150.forEach(function(x){
+      if(x.no === 34) return;
+      var r = fix151Sale(x.id);
+      if(!r || r.deleted || !isDelivered(r) || squish(r.shipCo) !== "QP" || Math.abs((Number(r.paid)||0) - x.paid) > 0.009) w.push("#" + x.no + " مش زي كشف QP");
+    });
+    return w;
+  }
+  function fix151Pending(){ return !settings.fix151 && !settings.fix150 && !fix151Later && canEdit() && canMoney() && !fix151Why().length; }
+  function fix151Run(dry){
+    var r20 = fix151Sale("mutqkxgb9nc70"), r34 = fix151Sale("muyk3ko0yepp2");
+    var R = FIX150.map(function(x){ return fix151Sale(x.id); }).concat([r20]);
+    var snap = R.map(function(r){ return JSON.stringify(r); }), n0 = db.cash.length, out;
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    var deliver = function(r){ r.status = "delivered"; r.rsn = ""; if(r.cf === "nr"){ r.cf = ""; r.cfAt = ""; } preCancelFix(r); stampDelivery(r); syncShipPaid(r); };
+    try{
+      r20.lines = [JSON.parse(JSON.stringify(FIX151_L20))].concat(SL(r20)); deliver(r20);
+      SL(r34)[0].ret = 1; deliver(r34);
+      FIX150.forEach(function(x){
+        var r = fix151Sale(x.id);
+        if(Number(r.shipOut) !== x.fee) r.shipOut = x.fee;
+        if(squish(r.shipCode) !== x.code) r.shipCode = x.code;
+        syncShipPaid(r);
+      });
+      if(!dry) R.forEach(function(r){ r.editedBy = me || "غير محدد"; r.at = Date.now(); });
+      db.cash.push(stamp({ date:FIX150_D, type:"settle", partyId:"", amount:FIX150_AMT, shipCo:"QP", fx:"151",
+        orders:FIX150.map(function(x){ return x.id; }),
+        note:"كشف " + dShort(FIX150_D) + " من QP: أوردرات " + FIX150.map(function(x){ return "#" + x.no; }).join(" و") }));
+      pendCache = null; clearStockIdx();
+      out = { qp:walletOf("QP"), so:walletOf("SONIC"), cash:cashBox(), net:projStats(null).exp.net, p20:Number(r20.paid)||0, p34:Number(r34.paid)||0 };
+    } finally {
+      if(dry){ R.forEach(function(r, k){ back(r, snap[k]); }); db.cash.length = n0; pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix151HTML(){
+    if(!fix151Pending()) return "";
+    var b = { qp:walletOf("QP"), so:walletOf("SONIC"), cash:cashBox() }, a = fix151Run(true);
+    var li = function(t){ return "<li>" + t + "</li>"; };
+    return "<div class='panel fx-card' id='fx151'><h3>ظبّط حسابات الشحن — دوسة واحدة</h3>" +
+      "<p class='hint'>بيقفل كل اللي فاضل من 11/10. دوس «ظبّط» وخلاص.</p>" +
+      "<div class='fx-eff'><div><small>SONIC</small><b class='num'>" + esc(money(b.so)) + " ← " + esc(money(a.so)) + "</b></div>" +
+        "<div><small>QP</small><b class='num'>" + esc(money(b.qp)) + " ← " + esc(money(a.qp)) + "</b></div>" +
+        "<div><small>الخزنة</small><b class='num'>" + esc(money(b.cash)) + " ← " + esc(money(a.cash)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" +
+        li("<b>#20 نور أحمد</b> — اتسلّم: خدت فرو المقص الكافيه والأسود ودفعت " + esc(money(a.p20)) + "، وفرو السلسلة البيج رجع (عند SONIC لحد «وصلني»)") +
+        li("<b>#34 ولاء</b> — اتسلّم: خدت قطعتين ودفعت " + esc(money(a.p34)) + "، والأبيض اتحسب هو الراجع — لو طلع لون تاني لما يوصل قولّي") +
+        li("<b>استلام QP " + esc(money(FIX150_AMT)) + "</b> — 7 أوردرات زي الكشف، والشحن على #30 و#34 بقى 85") +
+        li("<b>QP بالسالب " + esc(money(-a.qp)) + "</b> — مصاريف رجوع #32 و#33 و#35، هتتخصم من تحويل QP الجاي") +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx151'>ظبّط</button><button class='tbtn' type='button' id='x-fx151'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx151")){ fix151Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx151")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix151Why().length){ renderAll(); return; }
+    var r = fix151Run(false), now = { at:Date.now(), by:me || "" };
+    settings.fix151 = now; settings.fix150 = now; settings.fix148 = now;           // الكارتين القدام خلصوا بيه
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتظبط — SONIC " + money(r.so) + " · QP " + money(r.qp), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
-    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix147HTML() + fix148HTML() + fix150HTML();
+    var fxb = document.getElementById("shc-fix");
+    if(fxb) fxb.innerHTML = fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML());
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
