@@ -4085,8 +4085,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "151";
+  var VERSION = "152";
   var CHANGELOG = [
+    { v:"152", d:"2026-10-12", items:[
+      "«ظبّط 12/10»: #34 الأسود هو اللي رجع (الأبيض والأحمر اتباعوا — 610)، #40 رجع كله والشحن 100 علينا، شحن #48 = 90، واستلام QP 985 على #41 #42 #48 #40"
+    ]},
     { v:"151", d:"2026-10-11", items:[
       "«ظبّط حسابات الشحن» — كارت واحد بدوسة واحدة بدل الكارتين: #20 اتسلّم ودفعت 500 (فرو السلسلة البيج راجع)، #34 اتسلّم ودفعت 610، واستلام QP 3,735 على الـ7 أوردرات"
     ]},
@@ -7198,6 +7201,8 @@
     }
     if(canTab("ship") && fix147Pending() && !fix147Why().length)
       line({ ic:"truck", cls:"warn", t:"تحصيلات SONIC من الكشوف جاهزة", s:"5/10 · 7/10 · 11/10 أوردر أوردر — راجعها ودوس «طبّق»", v:"", go:"ship" });
+    if(canTab("ship") && fix152Pending())
+      line({ ic:"truck", cls:"warn", t:"ظبّط 12/10", s:"#34 · #40 · استلام QP 985 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix151Pending())
       line({ ic:"truck", cls:"warn", t:"ظبّط حسابات الشحن", s:"#20 و#34 واستلام QP 3,735 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && !fix151Pending() && fix150Pending() && !fix150State().bad.length)
@@ -14648,10 +14653,83 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتظبط — SONIC " + money(r.so) + " · QP " + money(r.qp), 4200);
   });
+  /* v152 — «ظبّط 12/10» (نسخة إسلام 12-10): #34 القطعة الراجعة طلعت الأسود (الأبيض والأحمر اتباعوا — دفعت 610)،
+     #40 رجع كله والشحن 100 علينا، شحن #48 = 90، واستلام QP 985 (كشف 12/10) على #41 #42 #48 #40. */
+  var FIX152_BLK = { qty:1, ret:1, size:"39", color:"اسود", price:280, itemId:"mul9ai9vxl8t9", trCost:null, unitCost:null, backAt:"2026-10-12" };
+  var FIX152 = [ { id:"muzr1gp23ouvn", no:41, paid:350, fee:100 }, { id:"muzzamh8fhfhn", no:42, paid:355, fee:100 },
+                 { id:"mv19ozfqaf7kz", no:48, paid:670, fee:90 }, { id:"muzgre5fejzoi", no:40, paid:0, fee:100 } ];
+  var fix152Later = false;
+  function fix152Why(){
+    var w = [], g = function(id){ return db.sales.find(function(y){ return y.id === id; }); };
+    var r34 = g("muyk3ko0yepp2"), L = r34 ? SL(r34) : [];
+    if(!r34 || r34.deleted || !isDelivered(r34) || L.length !== 2 || L[0].color !== "ابيض" || lineRet(L[0]) !== 1 || L[1].color !== "احمر" || lineRet(L[1])) w.push("#34 اتعدّل");
+    var r40 = g("muzgre5fejzoi");
+    if(!r40 || r40.deleted || stOf(r40) !== "progress" || (Number(r40.paid)||0) || squish(r40.shipCo) !== "QP" || SL(r40).length !== 2) w.push("#40 اتعدّل");
+    FIX152.forEach(function(x){
+      if(x.no === 40) return;
+      var r = g(x.id);
+      if(!r || r.deleted || !isDelivered(r) || squish(r.shipCo) !== "QP" || Math.abs((Number(r.paid)||0) - x.paid) > 0.009) w.push("#" + x.no + " مش زي كشف QP");
+    });
+    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "QP" && c.fx !== "151"; })) w.push("فيه استلام QP تاني اتسجّل");
+    if(isLocked("2026-10-12")) w.push("فترة 12/10 مقفولة");
+    return w;
+  }
+  function fix152Pending(){ return !settings.fix152 && !fix152Later && settings.fix151 && canEdit() && canMoney() && !fix152Why().length; }
+  function fix152Run(dry){
+    var g = function(id){ return db.sales.find(function(y){ return y.id === id; }); };
+    var R = [g("muyk3ko0yepp2")].concat(FIX152.map(function(x){ return g(x.id); }));
+    var snap = R.map(function(r){ return JSON.stringify(r); }), n0 = db.cash.length, out;
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    try{
+      var r34 = R[0];                                                        // الأبيض والأحمر اتباعوا · الأسود رجع ووصل
+      SL(r34)[0].ret = 0; delete SL(r34)[0].backAt;
+      r34.lines = SL(r34).concat([JSON.parse(JSON.stringify(FIX152_BLK))]); syncShipPaid(r34);
+      var r40 = g("muzgre5fejzoi");                                          // رجع كله ووصل · الشحن 100 علينا
+      r40.status = "cancelled"; r40.rsn = "refused"; r40.shipIn = 0; r40.cancelledAt = "2026-10-12";
+      if(r40.cf === "nr"){ r40.cf = ""; r40.cfAt = ""; }
+      preCancelFix(r40); stampDelivery(r40); syncShipPaid(r40);
+      SL(r40).forEach(function(l){ l.backAt = "2026-10-12"; });
+      FIX152.forEach(function(x){ var r = g(x.id); if(Number(r.shipOut) !== x.fee) r.shipOut = x.fee; syncShipPaid(r); });
+      if(!dry) R.forEach(function(r){ r.editedBy = me || "غير محدد"; r.at = Date.now(); });
+      db.cash.push(stamp({ date:"2026-10-12", type:"settle", partyId:"", amount:985, shipCo:"QP", fx:"152",
+        orders:FIX152.map(function(x){ return x.id; }), note:"كشف 12/10 من QP: أوردرات #41 و#42 و#48 و#40" }));
+      pendCache = null; clearStockIdx();
+      out = { qp:walletOf("QP"), cash:cashBox(), p34:Number(r34.paid)||0 };
+    } finally {
+      if(dry){ R.forEach(function(r, k){ back(r, snap[k]); }); db.cash.length = n0; pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix152HTML(){
+    if(!fix152Pending()) return "";
+    var b = { qp:walletOf("QP"), cash:cashBox() }, a = fix152Run(true);
+    var li = function(t){ return "<li>" + t + "</li>"; };
+    return "<div class='panel fx-card' id='fx152'><h3>ظبّط 12/10 — دوسة واحدة</h3>" +
+      "<div class='fx-eff'><div><small>QP</small><b class='num'>" + esc(money(b.qp)) + " ← " + esc(money(a.qp)) + "</b></div>" +
+        "<div><small>الخزنة</small><b class='num'>" + esc(money(b.cash)) + " ← " + esc(money(a.cash)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" +
+        li("<b>#34 ولاء</b> — خدت الأبيض والأحمر ودفعت " + esc(money(a.p34)) + "، والأسود هو اللي رجع (في المخزن)") +
+        li("<b>#40 فرحة عرفات</b> — رجع كله ووصلك، والشحن 100 علينا") +
+        li("<b>استلام QP 985</b> — كشف 12/10: #41 250 · #42 255 · #48 580 (شحنها 90) · #40 −100") +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx152'>ظبّط</button><button class='tbtn' type='button' id='x-fx152'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx152")){ fix152Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx152")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix152Why().length){ renderAll(); return; }
+    var r = fix152Run(false);
+    settings.fix152 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتظبط 12/10 — QP " + money(r.qp), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     var fxb = document.getElementById("shc-fix");
+    if(fxb && fix152Pending()){ fxb.innerHTML = fix152HTML(); fxb = null; }
     if(fxb) fxb.innerHTML = fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML());
     var cos = shipBuckets();
     var S = live("sales");
