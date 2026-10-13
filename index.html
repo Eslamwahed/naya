@@ -4086,8 +4086,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "153";
+  var VERSION = "154";
   var CHANGELOG = [
+    { v:"154", d:"2026-10-13", items:[
+      "فاتورة احمد اوطه 12/10 على صنف جديد «كلوجز هاند ميد شبكة» زي الشيت — ولو كانت اتسجّلت على «كلوجز هاند ميد» بتتنقل"
+    ]},
     { v:"153", d:"2026-10-13", items:[
       "فاتورة احمد اوطه 12/10 جاهزة في المشتريات بدوسة: 10 كلوجز هاند ميد (بيج وأسود 37–41) بـ160 — 1,600 من الخزنة"
     ]},
@@ -7206,7 +7209,7 @@
     if(canTab("ship") && fix147Pending() && !fix147Why().length)
       line({ ic:"truck", cls:"warn", t:"تحصيلات SONIC من الكشوف جاهزة", s:"5/10 · 7/10 · 11/10 أوردر أوردر — راجعها ودوس «طبّق»", v:"", go:"ship" });
     if(canTab("purch") && fix153Pending())
-      line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 كلوجز هاند ميد · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+      line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("ship") && fix152Pending())
       line({ ic:"truck", cls:"warn", t:"ظبّط 12/10", s:"#34 · #40 · استلام QP 985 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix151Pending())
@@ -13560,31 +13563,47 @@
     box.innerHTML = html;
   }
 
-  /* v153 — فاتورة كلوجز هاند ميد من احمد اوطه 12/10: 10 قطع (بيج وأسود 37–41) بـ160، المدفوع 1,600 من الخزنة.
-     زي فاتورة 6/10 بالظبط بس بضاعة جديدة (إسلام 13-10). بتتسجّل مرة واحدة بدوسة. */
-  var FIX153_ITEM = "muw5ez44xcwzn", FIX153_SUP = "muw5gvlafklvz", FIX153_D = "2026-10-12";
+  /* v153/v154 — فاتورة احمد اوطه 12/10: 10 قطع «كلوجز هاند ميد شبكة» (صنف جديد بالاسم اللي في الشيت — إسلام 13-10)،
+     بيج وأسود 37–41 بـ160، المدفوع 1,600 من الخزنة. لو كانت اتسجّلت على «كلوجز هاند ميد» (v153) بتتنقل للصنف الجديد. */
+  var FIX153_ITEM = "muw5ez44xcwzn", FIX153_SUP = "muw5gvlafklvz", FIX153_D = "2026-10-12", FIX153_NAME = "كلوجز هاند ميد شبكة";
   var fix153Later = false;
-  function fix153Done(){ return live("purchases").some(function(p){ return p.itemId === FIX153_ITEM && p.date === FIX153_D && p.partyId === FIX153_SUP; }); }
+  function fix153New(){ return live("items").find(function(i){ return squish(i.name) === FIX153_NAME; }); }
+  function fix153Old(){ return live("purchases").filter(function(p){ return p.itemId === FIX153_ITEM && p.date === FIX153_D && p.partyId === FIX153_SUP && p.note === "فاتورة احمد اوطه 12/10"; }); }
+  function fix153Done(){ var n = fix153New(); return !!n && live("purchases").some(function(p){ return p.itemId === n.id && p.date === FIX153_D && p.partyId === FIX153_SUP; }); }
+  // النقل مينفعش لو القطع اتباعت من الصنف القديم (المتاح منه هيبقى بالسالب)
+  function fix153MoveOk(){ return fix153Old().every(function(p){ return freeOfV(FIX153_ITEM, p.color, p.size) >= (Number(p.qty)||0); }); }
   function fix153Pending(){
     var it = db.items.find(function(i){ return i.id === FIX153_ITEM && !i.deleted; }), sp = db.parties.find(function(x){ return x.id === FIX153_SUP && !x.deleted; });
-    return !settings.fix153 && !fix153Later && canEdit() && canMoney() && it && sp && !fix153Done() && !isLocked(FIX153_D);
+    return !settings.fix154 && !fix153Later && canEdit() && canMoney() && it && sp && !fix153Done() && !isLocked(FIX153_D) && (!fix153Old().length || fix153MoveOk());
   }
   function fix153Run(){
+    var base = db.items.find(function(i){ return i.id === FIX153_ITEM; }), n = fix153New();
+    if(!n){
+      n = stamp({ img:"", min:base.min || 0, name:FIX153_NAME, unit:base.unit || "", price:Number(base.price)||0, sizes:base.sizes, colors:base.colors });
+      db.items.push(n); saveSoon("items");
+    }
+    var old = fix153Old();
+    if(old.length){ old.forEach(function(p){ p.itemId = n.id; p.editedBy = me || "غير محدد"; p.at = Date.now(); }); return "move"; }
     var batchId = uid(), lineId = uid();
     ["بيج", "اسود"].forEach(function(c){
       ["37", "38", "39", "40", "41"].forEach(function(z){
-        db.purchases.push(stamp({ date:FIX153_D, partyId:FIX153_SUP, inv:"", itemId:FIX153_ITEM, color:c, size:z,
+        db.purchases.push(stamp({ date:FIX153_D, partyId:FIX153_SUP, inv:"", itemId:n.id, color:c, size:z,
           packName:"قطعة", byPack:false, packs:10, packQty:1, packCost:160, linePieces:10, lineId:lineId,
           freight:0, paid:160, qty:1, cost:160, note:"فاتورة احمد اوطه 12/10", batchId:batchId }));
       });
     });
+    return "new";
   }
   function fix153HTML(){
     if(!fix153Pending()) return "";
-    return "<div class='panel fx-card' id='fx153'><h3>فاتورة كلوجز هاند ميد — احمد اوطه 12/10</h3>" +
-      "<ul class='fx-ul'><li>10 قطع: بيج وأسود، مقاس 37 لـ 41 (قطعة من كل مقاس) — 160 للقطعة</li>" +
-      "<li>المدفوع <b class='num'>1,600</b> من الخزنة — مفيش باقي للمورد</li>" +
-      "<li>الخزنة <b class='num'>" + esc(money(cashBox())) + " ← " + esc(money(cashBox() - 1600)) + "</b> · المخزون يزيد 10 قطع</li></ul>" +
+    var mv = fix153Old().length > 0, base = db.items.find(function(i){ return i.id === FIX153_ITEM; });
+    return "<div class='panel fx-card' id='fx153'><h3>فاتورة احمد اوطه 12/10 — " + esc(FIX153_NAME) + "</h3>" +
+      "<ul class='fx-ul'>" +
+        (fix153New() ? "" : "<li>صنف جديد <b>«" + esc(FIX153_NAME) + "»</b> — بيج وأسود، مقاس 37 لـ 41، سعر البيع " + esc(qty(Number(base.price)||0)) + " زي كلوجز هاند ميد (غيّره من الأصناف لو مختلف)</li>") +
+        "<li>10 قطع (قطعة من كل لون ومقاس) — 160 للقطعة</li>" +
+        (mv ? "<li>الفاتورة متسجّلة على «كلوجز هاند ميد» — هتتنقل للصنف الجديد، والخزنة مش هتتغيّر</li>"
+            : "<li>المدفوع <b class='num'>1,600</b> من الخزنة — مفيش باقي للمورد · الخزنة <b class='num'>" + esc(money(cashBox())) + " ← " + esc(money(cashBox() - 1600)) + "</b></li>") +
+      "</ul>" +
       "<div class='fx-a'><button class='act' type='button' id='b-fx153'>سجّل</button><button class='tbtn' type='button' id='x-fx153'>بعدين</button></div></div>";
   }
   document.addEventListener("click", function(e){
@@ -13593,10 +13612,10 @@
     if(!e.target.closest("#b-fx153")) return;
     if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
     if(!fix153Pending()){ renderAll(); return; }
-    fix153Run();
-    settings.fix153 = { at:Date.now(), by:me || "" };
+    var how = fix153Run();
+    settings.fix154 = { at:Date.now(), by:me || "", how:how };
     clearStockIdx(); saveSoon("purchases"); saveSettings(); renderAll();
-    toast("اتسجّلت فاتورة احمد اوطه — 10 قطع كلوجز هاند ميد · 1,600 من الخزنة", 4200);
+    toast(how === "move" ? "الفاتورة اتنقلت لـ «" + FIX153_NAME + "»" : "اتسجّلت فاتورة احمد اوطه — 10 قطع «" + FIX153_NAME + "» · 1,600 من الخزنة", 4200);
   });
   function renderPurch(){
     var pf = document.getElementById("pu-fix"); if(pf) pf.innerHTML = fix153HTML();
