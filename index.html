@@ -2653,6 +2653,7 @@
   <p class="note" id="pu-msg" hidden></p>
 
   <div class="stats" id="pu-top"></div>
+  <div id="pu-fix"></div>
   <div class="pu-owe money-only" id="pu-owe"></div>
 
   <div class="panel" id="entry-purchases" hidden>
@@ -4085,8 +4086,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "152";
+  var VERSION = "153";
   var CHANGELOG = [
+    { v:"153", d:"2026-10-13", items:[
+      "فاتورة احمد اوطه 12/10 جاهزة في المشتريات بدوسة: 10 كلوجز هاند ميد (بيج وأسود 37–41) بـ160 — 1,600 من الخزنة"
+    ]},
     { v:"152", d:"2026-10-12", items:[
       "«ظبّط 12/10»: #34 الأسود هو اللي رجع (الأبيض والأحمر اتباعوا — 610)، #40 رجع كله والشحن 100 علينا، شحن #48 = 90، واستلام QP 985 على #41 #42 #48 #40"
     ]},
@@ -7201,6 +7205,8 @@
     }
     if(canTab("ship") && fix147Pending() && !fix147Why().length)
       line({ ic:"truck", cls:"warn", t:"تحصيلات SONIC من الكشوف جاهزة", s:"5/10 · 7/10 · 11/10 أوردر أوردر — راجعها ودوس «طبّق»", v:"", go:"ship" });
+    if(canTab("purch") && fix153Pending())
+      line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 كلوجز هاند ميد · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("ship") && fix152Pending())
       line({ ic:"truck", cls:"warn", t:"ظبّط 12/10", s:"#34 · #40 · استلام QP 985 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix151Pending())
@@ -13554,7 +13560,46 @@
     box.innerHTML = html;
   }
 
+  /* v153 — فاتورة كلوجز هاند ميد من احمد اوطه 12/10: 10 قطع (بيج وأسود 37–41) بـ160، المدفوع 1,600 من الخزنة.
+     زي فاتورة 6/10 بالظبط بس بضاعة جديدة (إسلام 13-10). بتتسجّل مرة واحدة بدوسة. */
+  var FIX153_ITEM = "muw5ez44xcwzn", FIX153_SUP = "muw5gvlafklvz", FIX153_D = "2026-10-12";
+  var fix153Later = false;
+  function fix153Done(){ return live("purchases").some(function(p){ return p.itemId === FIX153_ITEM && p.date === FIX153_D && p.partyId === FIX153_SUP; }); }
+  function fix153Pending(){
+    var it = db.items.find(function(i){ return i.id === FIX153_ITEM && !i.deleted; }), sp = db.parties.find(function(x){ return x.id === FIX153_SUP && !x.deleted; });
+    return !settings.fix153 && !fix153Later && canEdit() && canMoney() && it && sp && !fix153Done() && !isLocked(FIX153_D);
+  }
+  function fix153Run(){
+    var batchId = uid(), lineId = uid();
+    ["بيج", "اسود"].forEach(function(c){
+      ["37", "38", "39", "40", "41"].forEach(function(z){
+        db.purchases.push(stamp({ date:FIX153_D, partyId:FIX153_SUP, inv:"", itemId:FIX153_ITEM, color:c, size:z,
+          packName:"قطعة", byPack:false, packs:10, packQty:1, packCost:160, linePieces:10, lineId:lineId,
+          freight:0, paid:160, qty:1, cost:160, note:"فاتورة احمد اوطه 12/10", batchId:batchId }));
+      });
+    });
+  }
+  function fix153HTML(){
+    if(!fix153Pending()) return "";
+    return "<div class='panel fx-card' id='fx153'><h3>فاتورة كلوجز هاند ميد — احمد اوطه 12/10</h3>" +
+      "<ul class='fx-ul'><li>10 قطع: بيج وأسود، مقاس 37 لـ 41 (قطعة من كل مقاس) — 160 للقطعة</li>" +
+      "<li>المدفوع <b class='num'>1,600</b> من الخزنة — مفيش باقي للمورد</li>" +
+      "<li>الخزنة <b class='num'>" + esc(money(cashBox())) + " ← " + esc(money(cashBox() - 1600)) + "</b> · المخزون يزيد 10 قطع</li></ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx153'>سجّل</button><button class='tbtn' type='button' id='x-fx153'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx153")){ fix153Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx153")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(!fix153Pending()){ renderAll(); return; }
+    fix153Run();
+    settings.fix153 = { at:Date.now(), by:me || "" };
+    clearStockIdx(); saveSoon("purchases"); saveSettings(); renderAll();
+    toast("اتسجّلت فاتورة احمد اوطه — 10 قطع كلوجز هاند ميد · 1,600 من الخزنة", 4200);
+  });
   function renderPurch(){
+    var pf = document.getElementById("pu-fix"); if(pf) pf.innerHTML = fix153HTML();
     backfillPurchNos();
     renderPuTop();
     readPuFilters();
