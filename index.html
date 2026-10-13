@@ -785,6 +785,33 @@
   .shc-row.st{grid-template-columns:52px minmax(0,1fr) auto 130px}
   .shc-row.pk{grid-template-columns:22px 56px minmax(0,1fr) 70px auto auto;align-items:center}
   #fx148 select{display:block;width:auto;max-width:100%;margin:6px 0 2px;padding:6px 10px;font-size:var(--fs-3)}
+  .aud-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-2);margin-bottom:var(--sp-3)}
+  .aud-s{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+  .aud-s b{font-size:var(--fs-6)} .aud-s span{font-size:var(--fs-2);color:var(--ink-soft)}
+  .aud-s.bad b{color:var(--due)} .aud-s.warn b{color:var(--warn)} .aud-s.ok b{color:var(--gain)}
+  .aud-g h3{margin:0 0 var(--sp-2)} .aud-allok{font-size:var(--fs-2);color:var(--gain);font-weight:600}
+  .aud-i{border-top:1px solid var(--line)} .aud-i:first-of-type{border-top:0}
+  .aud-h{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:var(--sp-2);align-items:start;padding:10px 0;cursor:pointer}
+  .aud-h:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:6px}
+  .aud-ic{font-weight:700;text-align:center;font-size:var(--fs-4)} .aud-i.bad .aud-ic{color:var(--due)} .aud-i.warn .aud-ic{color:var(--warn)} .aud-i.info .aud-ic{color:var(--ink-soft)}
+  .aud-t b{display:block;font-size:var(--fs-3)} .aud-t small{display:block;color:var(--ink-soft);font-size:var(--fs-2);margin-top:2px;line-height:1.6}
+  .aud-n{background:var(--paper);border-radius:var(--r-pill);padding:2px 10px;font-weight:700;font-size:var(--fs-2)}
+  .aud-i.bad .aud-n{background:var(--due-soft);color:var(--due)} .aud-i.warn .aud-n{background:var(--warn-soft);color:var(--warn)}
+  .aud-rows{margin:0 0 10px;padding-inline-start:44px;display:grid;gap:4px;font-size:var(--fs-2)}
+  .aud-rows a{color:var(--teal);text-decoration:none} .aud-rows a:hover{text-decoration:underline}
+  .aud-ok{margin-top:var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft)} .aud-ok ul{margin:6px 0 0;padding-inline-start:18px;display:grid;gap:2px}
+  .aud-link{margin:0 0 var(--sp-3);font-size:var(--fs-3);color:var(--ink-soft)} .aud-link a{color:var(--teal);font-weight:600;text-decoration:none}
+  .aud-why h3{margin:0 0 var(--sp-2)} .aud-why h3 small{font-weight:400;color:var(--ink-soft);font-size:var(--fs-2)}
+  .aw-top{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-2)}
+  .aw-top div{background:var(--paper);border-radius:var(--r-sm);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+  .aw-top small{color:var(--ink-soft);font-size:var(--fs-2)} .aw-top b{font-size:var(--fs-5)}
+  .aw-h{font-weight:700;font-size:var(--fs-3);margin:var(--sp-3) 0 6px}
+  .aw-wf{max-width:520px} .aw-r{display:flex;justify-content:space-between;gap:var(--sp-2);padding:4px 0;font-size:var(--fs-3)}
+  .aw-r.m b{color:var(--due)} .aw-r.s{border-top:1px solid var(--line);font-weight:700} .aw-r.neg b{color:var(--due)} .aw-r.pos b{color:var(--gain)}
+  .aw-l{margin:0;padding-inline-start:22px;display:grid;gap:10px}
+  .aw-l li div{display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:baseline} .aw-l small{display:block;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.6}
+  .aw-l .aw-fix{color:var(--teal)}
+  @media (max-width:640px){ .aud-sum{grid-template-columns:repeat(2,minmax(0,1fr))} }
   .fx-ul{margin:var(--sp-2) 0;padding-inline-start:20px;display:grid;gap:6px;font-size:var(--fs-3)}
   .fx148-pd{display:inline-flex;align-items:center;gap:4px;margin-inline-start:8px;font-size:var(--fs-2);cursor:pointer}
   .shc-row .shc-one{padding:4px 10px;font-size:var(--fs-2)}
@@ -2385,6 +2412,7 @@
     <button data-tab="rep" data-grp="more" data-sub="team">الفريق</button>
     <button data-tab="viz" data-grp="more">رسومات</button>
     <button data-tab="coach" data-grp="more">ماشي إزاي؟</button>
+    <button data-tab="audit" data-grp="more" class="money-only">مراجع الحسابات</button>
     <button data-tab="log" data-grp="menu" class="nav-alias">سجل الحركات</button>
     <button data-tab="backup" data-grp="menu" class="nav-alias">الإعدادات</button>
   </div>
@@ -3678,6 +3706,14 @@
 </section>
 
 <!-- v121: ماشي إزاي؟ — تقييم الشغل من الحركات نفسها، بيتحدّث بعد كل حركة -->
+<section id="tab-audit" hidden>
+  <h2>مراجع الحسابات <button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>السيستم بيراجع كل حساباتك لوحده كل ما تفتحه: المصاريف ومعالجتها، الأوردرات وشركات الشحن، المخزون، والميزانية. الفحص بيقرا بس — مش بيغيّر حاجة. دوس على أي مشكلة تشوف الأوردرات أو المصاريف اللي فيها، ودوس على السطر يفتحهولك تصلّحه.</p>
+  <div id="aud-why"></div>
+  <div class="aud-sum" id="aud-sum"></div>
+  <div id="aud-body"></div>
+</section>
+
 <section id="tab-coach" hidden>
   <div class="co-head"><h2>ماشي إزاي؟<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
     <div class="quick" id="co-per" role="group" aria-label="الفترة">
@@ -4086,8 +4122,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "154";
+  var VERSION = "155";
   var CHANGELOG = [
+    { v:"155", d:"2026-10-13", items:[
+      "شاشة جديدة «مراجع الحسابات» في التحليل: 22 فحص بيدوّروا على الغلط في المتسجّل — المصاريف ومعالجتها (نوع متخمّن · اشتراك مش متوزع · شحن فيسبوك · يوم صرف غريب · مصروف مكرر) · الأوردرات والشحن (محصّل غلط · من غير تكلفة · بأقل من التكلفة · استلام على أوردر ممسوح) · المخزون · الميزانية — ولو لقى حاجة بتظهر في «محتاج منك»",
+      "اللي ليه مكان تاني ما بيتكررش في المراجع (مطابقة فيسبوك · فلوس الشريك · المندوب المتأخر · المرتجع · الناقص للأوردرات)",
+      "«ماشي إزاي؟»: الصنف اللي بيخسر أكتر من 5 في القطعة بعد الإعلان والشحن والتغليف بيظهر في «اللي محتاج يتظبط»"
+    ]},
     { v:"154", d:"2026-10-13", items:[
       "فاتورة احمد اوطه 12/10 على صنف جديد «كلوجز هاند ميد شبكة» زي الشيت — ولو كانت اتسجّلت على «كلوجز هاند ميد» بتتنقل"
     ]},
@@ -4905,7 +4946,7 @@
     ["dash","لوحة المتابعة"],["capital","رأس المال"],["cash","الخزنة"],
     ["purch","المشتريات"],["items","الأصناف"],["price","التسعير"],["inv","المخزون"],
     ["sales","المبيعات"],["ship","شركات الشحن"],["parties","العملاء والموردين"],
-    ["rep","تقارير"],["viz","رسومات"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"],["prepaid","المدفوع مقدّماً"]
+    ["rep","تقارير"],["viz","رسومات"],["log","سجل الحركات"],["coach","ماشي إزاي؟"],["backup","الإعدادات"],["prepaid","المدفوع مقدّماً"],["audit","مراجع الحسابات"]
   ];
   var TAB_NAME = {}; TABS.forEach(function(t){ TAB_NAME[t[0]] = t[1]; });
   var authUser = null;                  // المستخدم الداخل دلوقتي
@@ -4920,11 +4961,11 @@
   /* شاشة جديدة اتضافت بعد ما المستخدمين اتعملوا: صلاحياتهم المتخزّنة
      مافيهاش اسمها، فكانوا هيلاقوها مختفية من غير سبب. بنورّثها من
      الشاشة اللي هي جزء منها. */
-  var TAB_FROM = { price:"items", coach:"rep", viz:"rep", prepaid:"cash" };
+  var TAB_FROM = { price:"items", coach:"rep", viz:"rep", prepaid:"cash", audit:"rep" };
   /* شاشات كلها تكلفة وربح من أول سطر لآخر سطر — مينفعش تتفتح لحد
      الأرباح مخفية عنه، حتى لو التبويب متعلّم له. إخفاء أعمدة واحد
      واحد بيسيب تسريب أول ما يتضاف عمود جديد. */
-  var TAB_MONEY = { price:1, coach:1, viz:1, prepaid:1 };
+  var TAB_MONEY = { price:1, coach:1, viz:1, prepaid:1, audit:1 };
   function canTab(t){
     if(!lockOn()) return true;
     var u = curUser();
@@ -7208,6 +7249,12 @@
     }
     if(canTab("ship") && fix147Pending() && !fix147Why().length)
       line({ ic:"truck", cls:"warn", t:"تحصيلات SONIC من الكشوف جاهزة", s:"5/10 · 7/10 · 11/10 أوردر أوردر — راجعها ودوس «طبّق»", v:"", go:"ship" });
+    if(canTab("audit")){
+      var AC = audCount();
+      if(AC.bad + AC.warn)
+        line({ ic:"book", cls: AC.bad ? "bad" : "warn", t:"مراجع الحسابات لقى حاجات محتاجة تبصّلها",
+               s:(AC.bad ? qty(AC.bad) + " لازم تتصلح" : "") + (AC.bad && AC.warn ? " · " : "") + (AC.warn ? qty(AC.warn) + " محتاجة مراجعة" : ""), v:qty(AC.bad + AC.warn), go:"audit" });
+    }
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("ship") && fix152Pending())
@@ -16052,6 +16099,15 @@
       else bad.push([Math.round(rr * 100) + "% من الأوردرات اترفضت أو اتلغت — كل واحد بيكلّفك إعلان وشحن من غير إيراد.", "أكّد مع العميل بالتليفون قبل الشحن"]);
     }
 
+    // v155: أصناف بتخسر بعد الإعلان والشحن والتغليف — مش ظاهرة في أي حتة تانية
+    (function(){
+      var IP = itemProfit(S.P, false).M;
+      var lose = Object.keys(IP).filter(function(id){ return id && IP[id].q > 0 && IP[id].net / IP[id].q < -5; })                 // خسارة أقل من 5 في القطعة = تقريب مش مشكلة
+        .sort(function(a, b){ return IP[a].net - IP[b].net; });
+      if(lose.length) bad.push([lose.slice(0, 3).map(function(id){ return itemName(id) + " بيخسر " + money(-IP[id].net / IP[id].q) + " في القطعة"; }).join(" · ") +
+        " — بعد نصيبه من الإعلان والشحن والتغليف.", "زوّد سعره أو وقّف إعلانه"]);
+    })();
+
     // ٧ الكاش
     var cash = cashBox(), cap = totalCapital();
     tile(cash >= 0 ? "ok" : "bd", cash >= 0 ? "✓ في أمان" : "✗ بالسالب", "الكاش", money(cash),
@@ -16477,6 +16533,7 @@
     capital: function(){ renderCapital(); renderDistLimits(); },
     cash:    function(){ renderWallets(); renderCash(); },
     prepaid: function(){ renderPrepaid(); },
+    audit:   function(){ renderAudit(); },
     purch:   function(){ renderPurch(); },
     items:   function(){ renderItems(); renderVars(); renderOffers(); },
     price:   function(){ renderPricing(); },
@@ -16634,6 +16691,153 @@
     saveSoon("cash"); saveSettings(); renderAll();
     toast("اتصلّح " + qty(r.n) + " بند — صافي الربح " + money(r.net), 4200);
   });
+  /* ═══ v155 — مراجع الحسابات: فحص تلقائي لكل الحسابات كل ما السيستم يتفتح ═══
+     كل فحص: مجموعة · شدة (bad = لازم يتصلح · warn = راجعه · info = خلي بالك) · عنوان · ليه مهم · السطور اللي فيها المشكلة.
+     الفحوصات بتقرا بس — مش بتغيّر أي حاجة. */
+  var AUD_G = [["exp", "المصاريف الثابتة والمعالجة"], ["ord", "الأوردرات وشركات الشحن"], ["stk", "المخزون والمشتريات"], ["bal", "الميزان العام"]];
+  var _aud = null;                                                         // بيتصفّر في renderAll
+  function audRun(){
+    if(_aud) return _aud;
+    var R = [], t = today();
+    var chk = function(g, sev, t1, why, rows){ R.push({ g:g, sev:sev, t:t1, why:why, rows:rows || [] }); };
+    var sRow = function(s, l){ return { l:"#" + (s.no || "—") + " " + partyName(s.partyId) + (l ? " — " + l : ""), go:"sale|" + s.id }; };
+    var cRow = function(c, l){ return { l:(squish(c.note) || EXP_CAT[expCat(c)].label) + " · " + money(Number(c.amount)||0) + " · " + dShort(c.date) + (l ? " — " + l : ""), go:"cash|" + c.id }; };
+    var ago = function(d){ return d ? daysBetween(d, t) : 0; };
+    var ex = live("cash").filter(function(c){ return c.type === "expense"; });
+    var S = live("sales");
+
+    // ── ١) المصاريف ──
+    chk("exp", "warn", "مصاريف نوعها متخمّن", "النوع بيحدد المصروف ثابت ولا متغيّر وبيدخل تكلفة القطعة إزاي — لو التخمين غلط الحسبة كلها بتتلخبط.",
+      ex.filter(function(c){ return !expCatSet(c) && !trLinked(c); }).map(function(c){ return cRow(c, "اتحسب «" + EXP_CAT[expCat(c)].label + "»"); }));
+    chk("exp", "warn", "اشتراكات متحسبة يوم الدفع بس", "الاشتراك بيخدم شهر — لو اتحسب كله يوم الدفع، ربح اليوم ده بيقع والأيام اللي بعده بتبان أحسن من الحقيقة.",
+      ex.filter(function(c){ return expCat(c) === "subs" && c.date >= SVC_FROM && svcOf(c).days <= 1; }).map(function(c){ return cRow(c); }));
+    chk("exp", "bad", "شحن فيسبوك أرقامه مش منطقية", "«دخل رصيد فيسبوك» لازم يبقى أقل من أو يساوي اللي دفعته — الفرق رسوم فوري.",
+      metaTops().filter(function(c){ return metaCredit(c) > (Number(c.amount)||0) + 0.009 || metaCredit(c) <= 0; }).map(function(c){ return cRow(c, "دخل " + money(metaCredit(c))); }));
+    var sp = metaSpans().filter(function(x){ return x.days > 0; }), per = sp.map(function(x){ return x.spent / x.days; }).sort(function(a, b){ return a - b; });
+    var med = per.length ? per[Math.floor(per.length / 2)] : 0;
+    chk("exp", "info", "يوم صرف إعلانات غريب", "صرف أكبر من 3 أضعاف المعتاد — يا إما حملة كبيرة، يا إما رقم مطابقة غلط.",
+      med > 0 ? sp.filter(function(x){ return x.spent / x.days > med * 3; }).map(function(x){ return { l:dShort(x.from) + " ← " + dShort(x.to) + ": " + money(x.spent) + " (المعتاد " + money(med) + " في اليوم)", go:"tab|prepaid" }; }) : []);
+    var dup = [], seen = {};                                                  // شحن فيسبوك بيتكرر بنفس المبلغ عادي — برّه الفحص
+    ex.filter(function(c){ return !isMetaTop(c); }).sort(function(a, b){ return (a.date || "") < (b.date || "") ? -1 : 1; }).forEach(function(c){
+      var k = expCat(c) + "|" + (Number(c.amount)||0);
+      (seen[k] || []).forEach(function(o){ if(Math.abs(daysBetween(o.date, c.date)) <= 3) dup.push(cRow(c, "ومعاه واحد زيه " + dShort(o.date))); });
+      (seen[k] = seen[k] || []).push(c);
+    });
+    chk("exp", "warn", "مصروف ممكن يكون متسجّل مرتين", "نفس النوع ونفس المبلغ في خلال 3 أيام — اتأكد إنهم مصروفين فعلاً.", dup);
+    var first = S.filter(isDelivered).map(function(s){ return s.deliveredAt || s.date; }).sort()[0];
+    chk("exp", "info", "«مرة واحدة» بعد فترة التأسيس", "مصاريف التأسيس بتتوزع على 3 شهور — لو المصروف ده بيتكرر يبقى نوعه «اشتراكات» أو «تاني».",
+      first ? ex.filter(function(c){ return expCat(c) === "once" && daysBetween(first, c.date) > 30; }).map(function(c){ return cRow(c); }) : []);
+    chk("exp", "bad", "مصروف تاريخه لسه ما جاش", "مصروف بتاريخ بعد النهارده بيخصم من الخزنة قبل معاده.",
+      ex.filter(function(c){ return (c.date || "") > t; }).map(function(c){ return cRow(c); }));
+    chk("exp", "bad", "مصروف بمبلغ صفر أو سالب", "مالوش معنى في الحسابات.", ex.filter(function(c){ return !((Number(c.amount)||0) > 0); }).map(function(c){ return cRow(c); }));
+
+    // ── ٢) الأوردرات وشركات الشحن ──
+    chk("ord", "bad", "أوردر متسلّم والمحصّل مش مظبوط", "مع شركة الشحن: المحصّل لازم = سعر القطع + الشحن على العميل. غير كده رصيد الشركة بيطلع غلط.",
+      S.filter(function(s){ return isDelivered(s) && shipPaidGap(s); }).map(function(s){ return sRow(s, "المحصّل " + money(Number(s.paid)||0) + " والمفروض " + money(shipPaidOf(s))); }));
+    chk("ord", "warn", "عميل دافع أكتر من المطلوب", "تحصيل مباشر أكبر من الأوردر — يا إما رقم غلط، يا إما ليه فلوس عندك.",
+      S.filter(function(s){ return isDelivered(s) && !viaShip(s) && sDue(s) < -0.009; }).map(function(s){ return sRow(s, "زيادة " + money(-sDue(s))); }));
+    chk("ord", "warn", "أوردر ملغي وعليه فلوس محصّلة", "لو العميل رجعله فلوسه سجّل ده، ولو لأ يبقى الأوردر مش ملغي.",
+      S.filter(function(s){ return isCancelled(s) && !viaShip(s) && (Number(s.paid)||0) > 0.009; }).map(function(s){ return sRow(s, "محصّل " + money(Number(s.paid)||0)); }));
+    var noCost = [], below = [];
+    S.filter(isDelivered).forEach(function(s){
+      SL(s).forEach(function(l){
+        if(lineSold(l, s) <= 0) return;
+        if(l.unitCost == null || l.unitCost === "") noCost.push(sRow(s, itemName(l.itemId)));
+        else if((Number(l.price)||0) > 0 && (Number(l.price)||0) < Number(l.unitCost)) below.push(sRow(s, itemName(l.itemId) + " اتباع " + money(Number(l.price)||0) + " وتكلفته " + money(Number(l.unitCost))));
+      });
+    });
+    chk("ord", "warn", "قطعة اتباعت من غير تكلفة", "التكلفة بتتحفظ يوم التسليم — من غيرها ربح الأوردر بيطلع أكبر من الحقيقة.", noCost);
+    chk("ord", "warn", "قطعة اتباعت بأقل من تكلفتها", "خسارة في البضاعة نفسها قبل الشحن والإعلان.", below);
+    var badSettle = [];
+    live("cash").forEach(function(c){
+      if(c.type !== "settle" || !Array.isArray(c.orders)) return;
+      c.orders.forEach(function(id){
+        var s = db.sales.find(function(y){ return y.id === id; });
+        if(!s || s.deleted) badSettle.push({ l:"استلام " + dShort(c.date) + " من " + c.shipCo + " — أوردر اتمسح بعد ما اتحاسب عليه", go:"cash|" + c.id });
+        else if(!(isDelivered(s) || isCancelled(s))) badSettle.push(sRow(s, "اتحاسب عليه في استلام " + dShort(c.date) + " وهو لسه مش متسلّم"));
+      });
+    });
+    chk("ord", "bad", "استلام مربوط بأوردر مش مظبوط", "الفلوس اتحسبت على أوردر اتمسح أو لسه ما اتسلّمش — رصيد الشركة هيطلع غلط.", badSettle);
+    chk("ord", "bad", "رصيد شركة بالسالب من غير مرتجعات", "الشركة مش ممكن تكون خصمت أكتر ما حصّلت إلا لو فيه مرتجع عليك.",
+      shipBuckets().filter(function(co){
+        var w = walletOf(co); if(w >= -0.009) return false;
+        var neg = S.filter(function(s){ return squish(s.shipCo) === squish(co) && shipPend(s).left < -0.009; }).reduce(function(a, s){ return a + shipPend(s).left; }, 0);
+        return w < neg - 0.009;
+      }).map(function(co){ return { l:co + " · " + money(walletOf(co)), go:"tab|ship" }; }));
+    var feeOut = [];
+    shipBuckets().forEach(function(co){
+      var L = S.filter(function(s){ return squish(s.shipCo) === squish(co) && shipCounts(s) && shipOut(s) > 0; });
+      var fs = L.map(shipOut).sort(function(a, b){ return a - b; }), m = fs.length ? fs[Math.floor(fs.length / 2)] : 0;
+      L.forEach(function(s){ if(m && shipOut(s) > m * 1.5) feeOut.push(sRow(s, co + " خدت " + money(shipOut(s)) + " والمعتاد " + money(m))); });
+    });
+    chk("ord", "info", "شحن بعيد عن المعتاد", "مصاريف شحن أعلى من المعتاد بكتير — اتأكد إن الرقم زي كشف الشركة.", feeOut);
+    chk("ord", "warn", "أوردر خلص مع شركة والشحن عليه صفر", "الشركة بتاخد شحن على كل أوردر — صفر يعني الرقم ما اتكتبش.",
+      S.filter(function(s){ return viaShip(s) && shipCounts(s) && !s.preCancel && !(shipOut(s) > 0); }).map(function(s){ return sRow(s); }));
+
+    // ── ٣) المخزون والمشتريات ──
+    var X = stockIdx(), neg = [];
+    Object.keys(X.vars).forEach(function(id){
+      Object.keys(X.vars[id]).forEach(function(k){
+        var v = X.vars[id][k], lb = itemName(id) + (vLabel(v.color, v.size) ? " (" + vLabel(v.color, v.size) + ")" : "");
+        if(X.stock[k] < 0) neg.push({ l:lb + " · الرصيد " + qty(X.stock[k]), go:"tab|inv" });
+      });
+    });
+    chk("stk", "bad", "رصيد بالسالب", "اتباع أكتر من اللي اشتريته — يا إما فاتورة شراء ناقصة، يا إما أوردر متسجّل على لون أو مقاس غلط.", neg);
+    var P = live("purchases").filter(function(p){ return !p.isReturn && (Number(p.qty)||0) > 0; });
+    chk("stk", "warn", "مشتريات بتكلفة صفر", "القطع دي هتتباع وربحها هيطلع 100% — غلط في الحسابات.",
+      P.filter(function(p){ return !((Number(p.cost)||0) > 0); }).map(function(p){ return { l:itemName(p.itemId) + " " + vLabel(vColor(p), vSize(p)) + " · " + dShort(p.date), go:"purchases|" + p.id }; }));
+    chk("stk", "warn", "تكلفة أعلى من سعر البيع", "الصنف ده هيتباع بخسارة — راجع السعر أو التكلفة.",
+      live("items").filter(function(i){ var c = avgCostB(i.id); return (Number(i.price)||0) > 0 && c > (Number(i.price)||0); }).map(function(i){ return { l:i.name + " · التكلفة " + money(avgCostB(i.id)) + " والسعر " + money(Number(i.price)||0), go:"tab|items" }; }));
+
+    // ── ٤) الميزان العام ──
+    var d = netAssets() - totalEquity();
+    chk("bal", "bad", "الميزانية مش مقفولة", "كل اللي عندك (خزنة + بضاعة + فلوس بره) لازم = رأس المال ± الربح. الفرق ده فلوس مش عارفين راحت فين.",
+      Math.abs(d) >= 0.01 ? [{ l:"الفرق " + money(d), go:"tab|capital" }] : []);
+    chk("bal", "bad", "الخزنة بالسالب", "صرفت فلوس مش موجودة — يا إما حركة دخول ناقصة، يا إما مصروف متسجّل غلط.",
+      cashBox() < -0.009 ? [{ l:"الخزنة " + money(cashBox()), go:"tab|cash" }] : []);
+    _aud = R;
+    return R;
+  }
+  function audCount(){ var a = { bad:0, warn:0, info:0 }; audRun().forEach(function(x){ if(x.rows.length) a[x.sev] += x.rows.length; }); return a; }
+  var audOpen = {};
+  function renderAudit(){
+    var box = document.getElementById("aud-body"); if(!box) return;
+    var R = audRun(), n = audCount(), ok = R.filter(function(x){ return !x.rows.length; }).length;
+    var ic = { bad:"✗", warn:"⚠", info:"ⓘ" }, lb = { bad:"لازم يتصلح", warn:"راجعه", info:"خلي بالك" };
+    var wy = document.getElementById("aud-why");
+    if(wy) wy.innerHTML = canTab("coach") ? "<p class='aud-link'>عايز تعرف ليه مش بتكسب والفلوس بتروح فين؟ <a href='#' data-audgo='tab|coach'>«ماشي إزاي؟» ←</a></p>" : "";
+    document.getElementById("aud-sum").innerHTML =
+      "<div class='aud-s bad'><b class='num'>" + qty(n.bad) + "</b><span>لازم يتصلح</span></div>" +
+      "<div class='aud-s warn'><b class='num'>" + qty(n.warn) + "</b><span>راجعه</span></div>" +
+      "<div class='aud-s info'><b class='num'>" + qty(n.info) + "</b><span>خلي بالك</span></div>" +
+      "<div class='aud-s ok'><b class='num'>" + qty(ok) + "/" + qty(R.length) + "</b><span>فحص سليم ✓</span></div>";
+    box.innerHTML = AUD_G.map(function(g){
+      var L = R.filter(function(x){ return x.g === g[0]; });
+      var bad = L.filter(function(x){ return x.rows.length; }).sort(function(a, b){ return "bad warn info".indexOf(a.sev) - "bad warn info".indexOf(b.sev); });
+      var good = L.filter(function(x){ return !x.rows.length; });
+      return "<div class='panel aud-g'><h3>" + esc(g[1]) + (bad.length ? "" : " <span class='aud-allok'>✓ كله سليم</span>") + "</h3>" +
+        bad.map(function(x){
+          var k = g[0] + "|" + x.t, op = !!audOpen[k];
+          return "<div class='aud-i " + x.sev + "'><button type='button' class='aud-h' data-audk='" + esc(k) + "' aria-expanded='" + op + "'>" +
+            "<span class='aud-ic'>" + ic[x.sev] + "</span><span class='aud-t'><b>" + esc(x.t) + "</b><small>" + esc(lb[x.sev]) + " · " + esc(x.why) + "</small></span>" +
+            "<span class='aud-n num'>" + qty(x.rows.length) + "</span></button>" +
+            (op ? "<ul class='aud-rows'>" + x.rows.map(function(r){ return "<li><a href='#' data-audgo='" + esc(r.go) + "'>" + esc(r.l) + "</a></li>"; }).join("") + "</ul>" : "") + "</div>";
+        }).join("") +
+        (good.length ? "<details class='aud-ok'><summary>" + qty(good.length) + " فحص سليم</summary><ul>" + good.map(function(x){ return "<li>✓ " + esc(x.t) + "</li>"; }).join("") + "</ul></details>" : "") +
+        "</div>";
+    }).join("");
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    var h = e.target.closest("[data-audk]");
+    if(h){ audOpen[h.dataset.audk] = !audOpen[h.dataset.audk]; renderAudit(); return; }
+    var a = e.target.closest("[data-audgo]"); if(!a) return;
+    e.preventDefault();
+    var q = a.dataset.audgo.split("|");
+    if(q[0] === "sale"){ goTab("sales"); sgOpenRow(q[1]); }
+    else if(q[0] === "tab") goTab(q[1]);
+    else { goTab(q[0] === "cash" ? "cash" : "purch"); startEdit(q[0], q[1]); }
+  });
   function renderPrepaid(){
     var box = document.getElementById("pp-body"); if(!box) return;
     var fx = document.getElementById("pp-fix"); if(fx) fx.innerHTML = fix142HTML();
@@ -16759,7 +16963,7 @@
     clearStockIdx();                     // أضمن حتة: أي رسم كامل بيبدأ بفهرس جديد
     clearMonthly();                      // نفس السبب: أرباح الشهور مش تفضل قديمة
     pendCache = null;                    // فلوسك عند الشركة بالأوردر
-    _mspan = null; _opNow = null;        // v142: فترات مطابقة فيسبوك · v143: تكلفة التشغيل للتسعير
+    _mspan = null; _opNow = null; _aud = null;        // v142: فترات مطابقة فيسبوك · v143: تكلفة التشغيل للتسعير
     fillSelects();                       // القوايم بتتغذّى في كل الأدراج
     Object.keys(TAB_RENDER).forEach(function(t){ dirtyTabs[t] = 1; });
     renderTab(activeTab);
