@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "157";
+  var VERSION = "158";
   var CHANGELOG = [
+    { v:"158", d:"2026-10-14", items:[
+      "استلام QP 14/10: مرتجع #35 سندس (قطعتين) بيتسجّل إنه وصل ورجع المخزن مع نفس الدوسة"
+    ]},
     { v:"157", d:"2026-10-14", items:[
       "استلام QP 14/10 جاهز في شركات الشحن بدوسة: 1,440 على #38 #44 #51 #49 #43 و#35 (−95)، والأوردرات اللي لسه مع المندوب بتتسجّل مسلّمة — وشحن #49 اتصلّح (العميلة 80 · QP 100)"
     ]},
@@ -14935,6 +14938,7 @@
         if(x.sout != null) r.shipOut = x.sout;
         if(x.code) r.shipCode = x.code;
         if(stOf(r) === "progress"){ r.status = "delivered"; r.rsn = ""; if(r.cf === "nr"){ r.cf = ""; r.cfAt = ""; } preCancelFix(r); stampDelivery(r); }
+        if(x.no === 35) SL(r).forEach(function(l){ if(!l.backAt) l.backAt = FIX157_D; });   // v158: مرتجع سندس وصل 14/10
         syncShipPaid(r);
         if(!dry){ r.editedBy = me || "غير محدد"; r.at = Date.now(); }
       });
@@ -14959,7 +14963,7 @@
         li("كشف QP: " + FIX157.map(function(x){ return bd("#" + x.no, x.net < 0 ? "−" + qty(-x.net) : qty(x.net)); }).join(" · ")) +
         (del.length ? li("<b>" + esc(del.join(" و")) + "</b> هيتسجّلوا اتسلّموا") : "") +
         li("<b>#49 مدام منار جبر</b> — الشحن على العميلة 80 وQP خدت 100 (كان متسجّل 100 و80 بالعكس)") +
-        li("<b>#35 سندس</b> — مصاريف الرجوع 95 اتخصمت في الكشف ده") +
+        li("<b>#35 سندس</b> — مصاريف الرجوع 95 اتخصمت في الكشف ده، والقطعتين وصلوك ورجعوا المخزن") +
       "</ul>" +
       "<div class='fx-a'><button class='act' type='button' id='b-fx157'>سجّل</button><button class='tbtn' type='button' id='x-fx157'>بعدين</button></div></div>";
   }
