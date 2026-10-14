@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "156";
+  var VERSION = "157";
   var CHANGELOG = [
+    { v:"157", d:"2026-10-14", items:[
+      "استلام QP 14/10 جاهز في شركات الشحن بدوسة: 1,440 على #38 #44 #51 #49 #43 و#35 (−95)، والأوردرات اللي لسه مع المندوب بتتسجّل مسلّمة — وشحن #49 اتصلّح (العميلة 80 · QP 100)"
+    ]},
     { v:"156", d:"2026-10-14", items:[
       "فاتورة ابو العيون 12/10 جاهزة في المشتريات بدوسة: مورد جديد وصنف جديد «كلوجز شريطة» — 25 قطعة (بيج · اسود · هافان · زيتي · بني، مقاس 37–41) بـ230، 5,750 من الخزنة، وسعر البيع بتكتبه في الكارت"
     ]},
@@ -7264,6 +7267,8 @@
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+    if(canTab("ship") && fix157Pending())
+      line({ ic:"truck", cls:"warn", t:"سجّل استلام QP 14/10", s:"1,440 — 6 أوردرات زي الكشف · دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix152Pending())
       line({ ic:"truck", cls:"warn", t:"ظبّط 12/10", s:"#34 · #40 · استلام QP 985 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix151Pending())
@@ -14837,7 +14842,7 @@
       var r = g(x.id);
       if(!r || r.deleted || !isDelivered(r) || squish(r.shipCo) !== "QP" || Math.abs((Number(r.paid)||0) - x.paid) > 0.009) w.push("#" + x.no + " مش زي كشف QP");
     });
-    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "QP" && c.fx !== "151"; })) w.push("فيه استلام QP تاني اتسجّل");
+    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "QP" && c.fx !== "151" && c.fx !== "157"; })) w.push("فيه استلام QP تاني اتسجّل");
     if(isLocked("2026-10-12")) w.push("فترة 12/10 مقفولة");
     return w;
   }
@@ -14892,12 +14897,88 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتظبط 12/10 — QP " + money(r.qp), 4200);
   });
+  /* v157 — استلام QP 14/10 (Revenue Report 14/10): 1,440 = #38 420 · #44 275 · #51 300 · #49 280 · #43 260 · #35 −95.
+     #38 #44 #49 #51 بيتسجّلوا مسلّمين لو لسه مع المندوب؛ #49 الشحن على العميلة 80 وQP خدت 100 (كان متسجّل بالعكس)؛
+     كود بوليصة #38 زي الكشف. كل أوردر لازم يطلع بنفس صافي الكشف وإلا الكارت بيقف. */
+  var FIX157 = [
+    { id:"muykyk54sfga3", no:38, net:420, code:"23206438" },
+    { id:"mv03mkb5ncnne", no:44, net:275 },
+    { id:"mv2dwfy4o6i7o", no:51, net:300 },
+    { id:"mv1acs2oqelhq", no:49, net:280, sin:80, sout:100 },
+    { id:"mv00gh3kupbrg", no:43, net:260 },
+    { id:"muykak8gqouij", no:35, net:-95 }
+  ];
+  var FIX157_D = "2026-10-14", FIX157_AMT = 1440, fix157Later = false;
+  function fix157S(id){ return db.sales.find(function(y){ return y.id === id; }); }
+  function fix157Why(){
+    var w = [];
+    FIX157.forEach(function(x){
+      var r = fix157S(x.id);
+      if(!r || r.deleted || !viaShip(r) || squish(r.shipCo) !== "QP") { w.push("#" + x.no + " اتعدّل"); return; }
+      if(x.net < 0){ if(!isCancelled(r) || Math.abs(shipIn(r) - shipOut(r) - x.net) > 0.009) w.push("#" + x.no + " مش زي الكشف"); return; }
+      var sin = x.sin != null ? x.sin : shipIn(r), sout = x.sout != null ? x.sout : shipOut(r);
+      if(!(stOf(r) === "progress" || isDelivered(r)) || Math.abs(saleTotal(r) + sin - sout - x.net) > 0.009) w.push("#" + x.no + " مش زي الكشف");
+    });
+    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "QP" && (c.date === FIX157_D || (c.orders || []).some(function(id){ return FIX157.some(function(x){ return x.id === id; }); })); }))
+      w.push("استلام QP 14/10 متسجّل");
+    if(isLocked(FIX157_D)) w.push("فترة 14/10 مقفولة");
+    return w;
+  }
+  function fix157Pending(){ return !settings.fix157 && !fix157Later && canEdit() && canMoney() && !fix157Why().length; }
+  function fix157Run(dry){
+    var R = FIX157.map(function(x){ return fix157S(x.id); }), snap = R.map(function(r){ return JSON.stringify(r); }), n0 = db.cash.length, out;
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    try{
+      FIX157.forEach(function(x, k){
+        var r = R[k];
+        if(x.sin != null) r.shipIn = x.sin;
+        if(x.sout != null) r.shipOut = x.sout;
+        if(x.code) r.shipCode = x.code;
+        if(stOf(r) === "progress"){ r.status = "delivered"; r.rsn = ""; if(r.cf === "nr"){ r.cf = ""; r.cfAt = ""; } preCancelFix(r); stampDelivery(r); }
+        syncShipPaid(r);
+        if(!dry){ r.editedBy = me || "غير محدد"; r.at = Date.now(); }
+      });
+      db.cash.push(stamp({ date:FIX157_D, type:"settle", partyId:"", amount:FIX157_AMT, shipCo:"QP", fx:"157",
+        orders:FIX157.map(function(x){ return x.id; }), note:"كشف 14/10 من QP: أوردرات " + FIX157.map(function(x){ return "#" + x.no; }).join(" و") }));
+      pendCache = null; clearStockIdx();
+      out = { qp:walletOf("QP"), cash:cashBox() };
+    } finally {
+      if(dry){ R.forEach(function(r, k){ back(r, snap[k]); }); db.cash.length = n0; pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix157HTML(){
+    if(!fix157Pending()) return "";
+    var b = { qp:walletOf("QP"), cash:cashBox() }, a = fix157Run(true);
+    var li = function(t){ return "<li>" + t + "</li>"; }, bd = function(x, v){ return "<bdi>" + esc(x) + "</bdi> <bdi class='num'>" + esc(v) + "</bdi>"; };
+    var del = FIX157.filter(function(x){ var r = fix157S(x.id); return x.net > 0 && stOf(r) === "progress"; }).map(function(x){ return "#" + x.no; });
+    return "<div class='panel fx-card' id='fx157'><h3>استلام QP 14/10 — " + esc(money(FIX157_AMT)) + "</h3>" +
+      "<div class='fx-eff'><div><small>QP</small><b class='num'>" + esc(money(b.qp)) + " ← " + esc(money(a.qp)) + "</b></div>" +
+        "<div><small>الخزنة</small><b class='num'>" + esc(money(b.cash)) + " ← " + esc(money(a.cash)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" +
+        li("كشف QP: " + FIX157.map(function(x){ return bd("#" + x.no, x.net < 0 ? "−" + qty(-x.net) : qty(x.net)); }).join(" · ")) +
+        (del.length ? li("<b>" + esc(del.join(" و")) + "</b> هيتسجّلوا اتسلّموا") : "") +
+        li("<b>#49 مدام منار جبر</b> — الشحن على العميلة 80 وQP خدت 100 (كان متسجّل 100 و80 بالعكس)") +
+        li("<b>#35 سندس</b> — مصاريف الرجوع 95 اتخصمت في الكشف ده") +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx157'>سجّل</button><button class='tbtn' type='button' id='x-fx157'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx157")){ fix157Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx157")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix157Why().length){ renderAll(); return; }
+    var r = fix157Run(false);
+    settings.fix157 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتسجّل استلام QP 14/10 — " + money(FIX157_AMT) + " · رصيد QP " + money(r.qp), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     var fxb = document.getElementById("shc-fix");
-    if(fxb && fix152Pending()){ fxb.innerHTML = fix152HTML(); fxb = null; }
-    if(fxb) fxb.innerHTML = fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML());
+    if(fxb) fxb.innerHTML = (fix152Pending() ? fix152HTML() : fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML())) + fix157HTML();
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
