@@ -812,6 +812,8 @@
   .aw-l li div{display:flex;gap:var(--sp-2);flex-wrap:wrap;align-items:baseline} .aw-l small{display:block;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.6}
   .aw-l .aw-fix{color:var(--teal)}
   @media (max-width:640px){ .aud-sum{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  .fx156-p{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-3);margin:var(--sp-2) 0}
+  .fx156-p input{width:140px}
   .fx-ul{margin:var(--sp-2) 0;padding-inline-start:20px;display:grid;gap:6px;font-size:var(--fs-3)}
   .fx148-pd{display:inline-flex;align-items:center;gap:4px;margin-inline-start:8px;font-size:var(--fs-2);cursor:pointer}
   .shc-row .shc-one{padding:4px 10px;font-size:var(--fs-2)}
@@ -4122,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "155";
+  var VERSION = "156";
   var CHANGELOG = [
+    { v:"156", d:"2026-10-14", items:[
+      "فاتورة ابو العيون 12/10 جاهزة في المشتريات بدوسة: مورد جديد وصنف جديد «كلوجز شريطة» — 25 قطعة (بيج · اسود · هافان · زيتي · بني، مقاس 37–41) بـ230، 5,750 من الخزنة، وسعر البيع بتكتبه في الكارت"
+    ]},
     { v:"155", d:"2026-10-13", items:[
       "شاشة جديدة «مراجع الحسابات» في التحليل: 22 فحص بيدوّروا على الغلط في المتسجّل — المصاريف ومعالجتها (نوع متخمّن · اشتراك مش متوزع · شحن فيسبوك · يوم صرف غريب · مصروف مكرر) · الأوردرات والشحن (محصّل غلط · من غير تكلفة · بأقل من التكلفة · استلام على أوردر ممسوح) · المخزون · الميزانية — ولو لقى حاجة بتظهر في «محتاج منك»",
       "اللي ليه مكان تاني ما بيتكررش في المراجع (مطابقة فيسبوك · فلوس الشريك · المندوب المتأخر · المرتجع · الناقص للأوردرات)",
@@ -7255,6 +7260,8 @@
         line({ ic:"book", cls: AC.bad ? "bad" : "warn", t:"مراجع الحسابات لقى حاجات محتاجة تبصّلها",
                s:(AC.bad ? qty(AC.bad) + " لازم تتصلح" : "") + (AC.bad && AC.warn ? " · " : "") + (AC.warn ? qty(AC.warn) + " محتاجة مراجعة" : ""), v:qty(AC.bad + AC.warn), go:"audit" });
     }
+    if(canTab("purch") && fix156Pending())
+      line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("ship") && fix152Pending())
@@ -13664,8 +13671,57 @@
     clearStockIdx(); saveSoon("purchases"); saveSettings(); renderAll();
     toast(how === "move" ? "الفاتورة اتنقلت لـ «" + FIX153_NAME + "»" : "اتسجّلت فاتورة احمد اوطه — 10 قطع «" + FIX153_NAME + "» · 1,600 من الخزنة", 4200);
   });
+  /* v156 — فاتورة ابو العيون 12/10 (مورد جديد · موديل جديد «كلوجز شريطة»): 25 قطعة — 5 ألوان × 37–41 — بـ230،
+     المدفوع 5,750 من الخزنة. سعر البيع بيتكتب في الكارت. بتتسجّل مرة واحدة. */
+  var FIX156 = { sup:"ابو العيون", item:"كلوجز شريطة", d:"2026-10-12", cost:230,
+                 colors:["بيج", "اسود", "هافان", "زيتي", "بني"], sizes:["37", "38", "39", "40", "41"] };
+  var fix156Later = false;
+  function fix156Item(){ return live("items").find(function(i){ return squish(i.name) === FIX156.item; }); }
+  function fix156Sup(){ return live("parties").find(function(x){ return x.type === "supplier" && squish(x.name) === FIX156.sup; }); }
+  function fix156Done(){
+    var it = fix156Item(), sp = fix156Sup();
+    return !!(it && sp && live("purchases").some(function(p){ return p.itemId === it.id && p.partyId === sp.id && p.date === FIX156.d; }));
+  }
+  function fix156Pending(){ return !settings.fix156 && !fix156Later && canEdit() && canMoney() && !fix156Done() && !isLocked(FIX156.d); }
+  function fix156Total(){ return FIX156.colors.length * FIX156.sizes.length * FIX156.cost; }
+  function fix156HTML(){
+    if(!fix156Pending()) return "";
+    var n = FIX156.colors.length * FIX156.sizes.length, tot = fix156Total();
+    return "<div class='panel fx-card' id='fx156'><h3>فاتورة ابو العيون 12/10 — " + esc(FIX156.item) + "</h3>" +
+      "<ul class='fx-ul'>" +
+        (fix156Sup() ? "" : "<li>مورد جديد <b>«" + esc(FIX156.sup) + "»</b></li>") +
+        (fix156Item() ? "" : "<li>صنف جديد <b>«" + esc(FIX156.item) + "»</b> — " + esc(FIX156.colors.join(" · ")) + " · مقاس 37 لـ 41</li>") +
+        "<li>" + qty(n) + " قطعة (قطعة من كل لون ومقاس) — " + qty(FIX156.cost) + " للقطعة</li>" +
+        "<li>المدفوع <b class='num'>" + esc(money(tot)) + "</b> من الخزنة — مفيش باقي للمورد · الخزنة <b class='num'>" + esc(money(cashBox())) + " ← " + esc(money(cashBox() - tot)) + "</b></li>" +
+      "</ul>" +
+      (fix156Item() ? "" : "<label class='fx156-p'>سعر بيع القطعة <input id='fx156-price' type='number' inputmode='decimal' min='0' step='any' placeholder='مثلاً 320'></label>") +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx156'>سجّل</button><button class='tbtn' type='button' id='x-fx156'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx156")){ fix156Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx156")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(!fix156Pending()){ renderAll(); return; }
+    var it = fix156Item(), pin = document.getElementById("fx156-price"), price = pin ? Number(toEn(pin.value)) : 0;
+    if(!it && !(price > 0)){ toast("اكتب سعر بيع القطعة الأول"); if(pin) pin.focus(); return; }
+    var sp = fix156Sup();
+    if(!sp){ sp = stamp({ name:FIX156.sup, type:"supplier", phone:"", gov:"", address:"", fb:"", note:"" }); db.parties.push(sp); saveSoon("parties"); }
+    if(!it){ it = stamp({ img:"", min:2, name:FIX156.item, unit:"", price:price, sizes:FIX156.sizes.join("، "), colors:FIX156.colors.join("، ") }); db.items.push(it); saveSoon("items"); }
+    var batchId = uid(), lineId = uid(), n = FIX156.colors.length * FIX156.sizes.length;
+    FIX156.colors.forEach(function(c){
+      FIX156.sizes.forEach(function(z){
+        db.purchases.push(stamp({ date:FIX156.d, partyId:sp.id, inv:"", itemId:it.id, color:c, size:z,
+          packName:"قطعة", byPack:false, packs:n, packQty:1, packCost:FIX156.cost, linePieces:n, lineId:lineId,
+          freight:0, paid:FIX156.cost, qty:1, cost:FIX156.cost, note:"فاتورة ابو العيون 12/10", batchId:batchId }));
+      });
+    });
+    settings.fix156 = { at:Date.now(), by:me || "" };
+    clearStockIdx(); saveSoon("purchases"); saveSettings(); renderAll();
+    toast("اتسجّلت فاتورة ابو العيون — " + qty(n) + " قطعة «" + FIX156.item + "» · " + money(fix156Total()) + " من الخزنة", 4200);
+  });
   function renderPurch(){
-    var pf = document.getElementById("pu-fix"); if(pf) pf.innerHTML = fix153HTML();
+    var pf = document.getElementById("pu-fix"); if(pf) pf.innerHTML = fix153HTML() + fix156HTML();
     backfillPurchNos();
     renderPuTop();
     readPuFilters();
