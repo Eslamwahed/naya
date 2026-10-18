@@ -4124,8 +4124,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "158";
+  var VERSION = "159";
   var CHANGELOG = [
+    { v:"159", d:"2026-10-18", items:[
+      "تصحيح استلامات QP 18/10 بدوسة: #71 اتسجّل 45 والكشف 320 · #64 270 والكشف 265 · #62 580 والكشف 575 — الخزنة بتزيد 265 وبتطابق الكشف (6,335)",
+      "إصلاح: الزيادة الصغيرة في استلام أوردر أوردر كانت بتتحسب كأنها استلام بالإجمالي وبتبلع مصاريف المرتجعات اللي الشركة لسه ما خصمتهاش — فكانت أرقام الأوردرات اللي فاضلة بتطلع غلط"
+    ]},
     { v:"158", d:"2026-10-14", items:[
       "استلام QP 14/10: مرتجع #35 سندس (قطعتين) بيتسجّل إنه وصل ورجع المخزن مع نفس الدوسة"
     ]},
@@ -6084,12 +6088,13 @@
           x.rest = Math.round((x.rest - tk) * 100) / 100;
           if(p.d > x.exD) x.exD = p.d;
         });
-        if(pp > 0.009){ drawn[co] = (drawn[co]||0) + pp; (credits[co] = credits[co] || []).push({ d:p.d, a:pp }); }
+        if(pp > 0.009){ drawn[co] = (drawn[co]||0) + pp; (credits[co] = credits[co] || []).push({ d:p.d, a:pp, rem:true }); }
       });
       var pool = drawn[co] || 0;
       /* v147: المرفوض اللي ما اتحددش في استلام بيتخصم من أي استلام بالإجمالي بعد ما اترفض؛
          لو مفيش، بيفضل سطر «عليك» في القايمة لحد ما تعلّمه مع أوردرات الاستلام الجاي */
-      var lumpD = (credits[co] || []).reduce(function(m, c){ return c.d > m ? c.d : m; }, "");
+      // v159: زيادة استلام أوردر أوردر (rem) مش استلام بالإجمالي — ما تبلعش مرتجعات لسه الشركة ما خصمتهاش
+      var lumpD = (credits[co] || []).reduce(function(m, c){ return !c.rem && c.d > m ? c.d : m; }, "");
       L.forEach(function(x){ if(x.net < 0 && !x.negUsed && lumpD && lumpD >= moneyDate(x.s)){ pool += -x.net; x.absorbed = true; } });
       var run = 0;
       L.forEach(function(x){
@@ -7270,6 +7275,8 @@
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+    if(canTab("ship") && fix159Pending())
+      line({ ic:"truck", cls:"bad", t:"صحّح استلامات QP 18/10", s:"الخزنة ناقصة 265 عن الكشف — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix157Pending())
       line({ ic:"truck", cls:"warn", t:"سجّل استلام QP 14/10", s:"1,440 — 6 أوردرات زي الكشف · دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix152Pending())
@@ -14978,10 +14985,55 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتسجّل استلام QP 14/10 — " + money(FIX157_AMT) + " · رصيد QP " + money(r.qp), 4200);
   });
+  /* v159 — استلامات QP 18/10 (Revenue Report 18/10 = 6,335): 3 اتسجّلوا بمبلغ غلط —
+     #71 اتسجّل 45 والكشف 320 · #64 اتسجّل 270 والكشف 265 · #62 اتسجّل 580 والكشف 575 (الشحن 85 مش 80). */
+  var FIX159 = [ { id:"mvdudah9m8odo", no:71, was:45, now:320 }, { id:"mvdub4fmaozcz", no:64, was:270, now:265 }, { id:"mvducn87epaoe", no:62, was:580, now:575 } ];
+  var fix159Later = false;
+  function fix159Items(){
+    return FIX159.map(function(x){
+      var c = db.cash.find(function(r){ return r.id === x.id; });
+      var ok = c && !c.deleted && c.type === "settle" && squish(c.shipCo) === "QP" && Number(c.amount) === x.was && !isLocked(c.date);
+      return { x:x, c:c, ok:!!ok };
+    });
+  }
+  function fix159Pending(){ return !settings.fix159 && !fix159Later && canEdit() && canMoney() && fix159Items().some(function(i){ return i.ok; }); }
+  function fix159Run(dry){
+    var I = fix159Items().filter(function(i){ return i.ok; }), out;
+    try{
+      I.forEach(function(i){ i.c.amount = i.x.now; if(!dry){ i.c.editedBy = me || "غير محدد"; i.c.at = Date.now(); } });
+      pendCache = null;
+      out = { n:I.length, qp:walletOf("QP"), cash:cashBox() };
+    } finally {
+      if(dry){ I.forEach(function(i){ i.c.amount = i.x.was; }); pendCache = null; }
+    }
+    return out;
+  }
+  function fix159HTML(){
+    if(!fix159Pending()) return "";
+    var b = { qp:walletOf("QP"), cash:cashBox() }, a = fix159Run(true);
+    return "<div class='panel fx-card' id='fx159'><h3>تصحيح استلامات QP 18/10</h3>" +
+      "<p class='hint'>الكشف 6,335 والمتسجّل 6,070 — 3 استلامات اتسجّلت بمبلغ غلط.</p>" +
+      "<div class='fx-eff'><div><small>الخزنة</small><b class='num'>" + esc(money(b.cash)) + " ← " + esc(money(a.cash)) + "</b></div>" +
+        "<div><small>QP</small><b class='num'>" + esc(money(b.qp)) + " ← " + esc(money(a.qp)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" + fix159Items().map(function(i){
+        return "<li><b>#" + i.x.no + "</b> — اتسجّل <span class='num'>" + esc(qty(i.x.was)) + "</span> والكشف <span class='num'>" + esc(qty(i.x.now)) + "</span>" + (i.ok ? "" : " <span class='pp-st'>اتغيّر — هيتخطّى</span>") + "</li>"; }).join("") + "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx159'>صحّح</button><button class='tbtn' type='button' id='x-fx159'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx159")){ fix159Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx159")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    var r = fix159Run(false);
+    settings.fix159 = { at:Date.now(), by:me || "", n:r.n };
+    saveSoon("cash"); saveSettings(); renderAll();
+    toast("اتصحّحت استلامات QP — الخزنة زادت " + money(265) + " زي الكشف", 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     var fxb = document.getElementById("shc-fix");
+    if(fxb && fix159Pending()){ fxb.innerHTML = fix159HTML(); fxb = null; }
     if(fxb) fxb.innerHTML = (fix152Pending() ? fix152HTML() : fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML())) + fix157HTML();
     var cos = shipBuckets();
     var S = live("sales");
