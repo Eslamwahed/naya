@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "161";
+  var VERSION = "162";
   var CHANGELOG = [
+    { v:"162", d:"2026-10-19", items:[
+      "استلام SONIC 13/10 جاهز في شركات الشحن بدوسة: 1,340 — كشف 920 (#9 #13 #14) وكشف 420 (#20 تسليم جزئي)، وتاريخ تسليم #14 بقى 10/10 زي الكشف"
+    ]},
     { v:"161", d:"2026-10-19", items:[
       "تكملة استلام QP 19/10 بعد التسجيل باليد: #75 كان 220 والكشف 590 ناقص مرتجعات 240 = 350، ومصاريف مرتجعات #47 #32 #46 زي الكشف — الخزنة +130 ورصيد QP يبقى −195 (#33 −100 ورفض #4 #54 #69 #70 −95 لسه مش في كشف)"
     ]},
@@ -7281,6 +7284,8 @@
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+    if(canTab("ship") && fix162Pending())
+      line({ ic:"truck", cls:"warn", t:"سجّل استلام SONIC 13/10", s:"1,340 — 4 أوردرات زي الكشفين · دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix161Pending())
       line({ ic:"truck", cls:"bad", t:"كمّل استلام QP 19/10", s:"الخزنة ناقصة 130 عن الكشف — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix160Pending())
@@ -15192,11 +15197,80 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتكمّل استلام QP 19/10 — الخزنة زادت " + money(130) + " · رصيد QP " + money(r.qp), 4200);
   });
+  /* v162 — كشفين SONIC بتاريخ 13/10: مدفوعات نقدية CSHP-1-000466 = 920 (#9 250 · #13 170 · #14 500)
+     وكشف SON59452 = 420 (#20 تسليم جزئي 500 − 80). #14 الكشف بيقول اتسلّم 10/10 والمتسجّل 17/10. */
+  var FIX162 = [
+    { d:"2026-10-13", amt:920, ref:"CSHP-1-000466", o:[
+      { id:"muqy8cr1rq2uk", no:9, net:250 },
+      { id:"musbfqycreeuy", no:13, net:170 },
+      { id:"musf70ydz4jvt", no:14, net:500, dAt:"2026-10-10" } ] },
+    { d:"2026-10-13", amt:420, ref:"SON59452", o:[
+      { id:"mutqkxgb9nc70", no:20, net:420 } ] }
+  ];
+  var fix162Later = false;
+  function fix162Why(){
+    var w = [], all = [];
+    FIX162.forEach(function(g){ g.o.forEach(function(x){
+      all.push(x.id);
+      var r = fix160S(x.id);
+      if(!r || r.deleted || !viaShip(r) || squish(r.shipCo) !== "SONIC" || !isDelivered(r)){ w.push("#" + x.no + " اتعدّل"); return; }
+      if(Math.abs(saleTotal(r) + shipIn(r) - shipOut(r) - x.net) > 0.009) w.push("#" + x.no + " مش زي الكشف");
+    }); });
+    if(live("cash").some(function(c){ return c.type === "settle" && squish(c.shipCo) === "SONIC" && (c.date === "2026-10-13" || (c.orders || []).some(function(id){ return all.indexOf(id) >= 0; })); }))
+      w.push("استلام SONIC 13/10 متسجّل");
+    if(isLocked("2026-10-10")) w.push("فترة 10/10 مقفولة");
+    return w;
+  }
+  function fix162Pending(){ return !settings.fix162 && !fix162Later && canEdit() && canMoney() && !fix162Why().length; }
+  function fix162Run(dry){
+    var R = [], n0 = db.cash.length, out;
+    FIX162.forEach(function(g){ g.o.forEach(function(x){ var r = fix160S(x.id); R.push({ x:x, r:r, j:JSON.stringify(r) }); }); });
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    try{
+      R.forEach(function(q){
+        if(q.x.dAt && q.r.deliveredAt !== q.x.dAt){ q.r.deliveredAt = q.x.dAt; if(!dry){ q.r.editedBy = me || "غير محدد"; q.r.at = Date.now(); } }
+      });
+      FIX162.forEach(function(g){
+        db.cash.push(stamp({ date:g.d, type:"settle", partyId:"", amount:g.amt, shipCo:"SONIC", fx:"162",
+          orders:g.o.map(function(x){ return x.id; }), note:"كشف " + g.ref + " من SONIC: أوردرات " + g.o.map(function(x){ return "#" + x.no; }).join(" و") }));
+      });
+      pendCache = null; clearStockIdx();
+      out = { sonic:walletOf("SONIC"), cash:cashBox() };
+    } finally {
+      if(dry){ R.forEach(function(q){ back(q.r, q.j); }); db.cash.length = n0; pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix162HTML(){
+    if(!fix162Pending()) return "";
+    var b = { sonic:walletOf("SONIC"), cash:cashBox() }, a = fix162Run(true);
+    var bd = function(x){ return "<b>#" + x.no + "</b> <span class='num'>" + esc(qty(x.net)) + "</span>"; };
+    return "<div class='panel fx-card' id='fx162'><h3>استلام SONIC 13/10 — " + esc(money(1340)) + "</h3>" +
+      "<div class='fx-eff'><div><small>SONIC</small><b class='num'>" + esc(money(b.sonic)) + " ← " + esc(money(a.sonic)) + "</b></div>" +
+        "<div><small>الخزنة</small><b class='num'>" + esc(money(b.cash)) + " ← " + esc(money(a.cash)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" + FIX162.map(function(g){
+        return "<li>كشف <bdi>" + esc(g.ref) + "</bdi> = <span class='num'>" + esc(qty(g.amt)) + "</span>: " + g.o.map(bd).join(" · ") + "</li>"; }).join("") +
+        "<li><b>#14 دينا</b> — الكشف بيقول اتسلّم 10/10، هيتعدّل من 17/10</li>" +
+        "<li>لسه مش في كشف: <b>#26 سماح</b> مرفوض −25 · <b>#27 أمانى</b> لسه في الطريق</li>" +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx162'>سجّل</button><button class='tbtn' type='button' id='x-fx162'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx162")){ fix162Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx162")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix162Why().length){ renderAll(); return; }
+    var r = fix162Run(false);
+    settings.fix162 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتسجّل استلام SONIC — " + money(1340) + " · رصيد SONIC " + money(r.sonic), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     var fxb = document.getElementById("shc-fix");
-    if(fxb && (fix159Pending() || fix160Pending() || fix161Pending())){ fxb.innerHTML = fix159HTML() + fix160HTML() + fix161HTML(); fxb = null; }
+    if(fxb && (fix159Pending() || fix160Pending() || fix161Pending() || fix162Pending())){ fxb.innerHTML = fix159HTML() + fix160HTML() + fix161HTML() + fix162HTML(); fxb = null; }
     if(fxb) fxb.innerHTML = (fix152Pending() ? fix152HTML() : fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML())) + fix157HTML();
     var cos = shipBuckets();
     var S = live("sales");
