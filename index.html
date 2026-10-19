@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "160";
+  var VERSION = "161";
   var CHANGELOG = [
+    { v:"161", d:"2026-10-19", items:[
+      "تكملة استلام QP 19/10 بعد التسجيل باليد: #75 كان 220 والكشف 590 ناقص مرتجعات 240 = 350، ومصاريف مرتجعات #47 #32 #46 زي الكشف — الخزنة +130 ورصيد QP يبقى −195 (#33 −100 ورفض #4 #54 #69 #70 −95 لسه مش في كشف)"
+    ]},
     { v:"160", d:"2026-10-19", items:[
       "استلام QP 19/10 جاهز في شركات الشحن بدوسة: 645 — #75 و#77 اتسلّموا، ومصاريف مرتجعات #50 #47 #32 #46 زي الكشف والقطع رجعت المخزن"
     ]},
@@ -7278,6 +7281,8 @@
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+    if(canTab("ship") && fix161Pending())
+      line({ ic:"truck", cls:"bad", t:"كمّل استلام QP 19/10", s:"الخزنة ناقصة 130 عن الكشف — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix160Pending())
       line({ ic:"truck", cls:"warn", t:"سجّل استلام QP 19/10", s:"645 — 2 اتسلّموا و4 مرتجعات زي الكشف · دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix159Pending())
@@ -15111,11 +15116,87 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتسجّل استلام QP 19/10 — " + money(FIX160_AMT) + " · رصيد QP " + money(r.qp), 4200);
   });
+  /* v161 — كشف QP 19/10 (645) اتسجّل باليد 515: #77 295 مظبوط، و#75 220 والصح 590 ناقص مرتجعات 240 = 350.
+     الكارت بيعدّل استلام #75 لـ 350 ويضم له المرتجعات الأربعة، ويظبط مصاريفها زي الكشف:
+     #47 ما دفعتش شحن (75 ← 0) · #32 QP خدت 80 (100 ← 80) · #46 دفع 75 (85 ← 75). */
+  var FIX161_C = { id:"mvf9ea7n5o9ar", was:220, now:350 }, FIX161_C77 = { id:"mvf9ah2a0bif8", amt:295 };
+  var FIX161 = [
+    { id:"mv28jwnezmu1y", no:50, sin:85, sout:110 },
+    { id:"mv0sweqmkme44", no:47, sin:75, sout:100, nsin:0 },
+    { id:"muycwlghr3b0n", no:32, sin:0, sout:100, nsout:80 },
+    { id:"mv0qs3zss9x9y", no:46, sin:85, sout:110, nsin:75 }
+  ];
+  var fix161Later = false;
+  function fix161Cash(id){ return live("cash").find(function(c){ return c.id === id; }); }
+  function fix161Why(){
+    var w = [], c = fix161Cash(FIX161_C.id), c77 = fix161Cash(FIX161_C77.id);
+    if(settings.fix160) w.push("كارت 160 اتطبّق");
+    if(!c || c.type !== "settle" || squish(c.shipCo) !== "QP" || c.date !== FIX160_D || Math.abs(c.amount - FIX161_C.was) > 0.009 || (c.orders || []).join() !== "mv9ka9wtyocos") w.push("استلام #75 اتغيّر");
+    if(!c77 || c77.type !== "settle" || squish(c77.shipCo) !== "QP" || c77.date !== FIX160_D || Math.abs(c77.amount - FIX161_C77.amt) > 0.009 || (c77.orders || []).join() !== "mvasd56bqf21v") w.push("استلام #77 اتغيّر");
+    FIX161.forEach(function(x){
+      var r = fix160S(x.id);
+      if(!r || r.deleted || !viaShip(r) || squish(r.shipCo) !== "QP" || !isCancelled(r) || shipIn(r) !== x.sin || shipOut(r) !== x.sout) w.push("#" + x.no + " اتعدّل");
+    });
+    if(live("cash").some(function(k){ return k.type === "settle" && k.id !== FIX161_C.id && (k.orders || []).some(function(id){ return FIX161.some(function(x){ return x.id === id; }); }); }))
+      w.push("مرتجع متسجّل في استلام تاني");
+    [["mv9ka9wtyocos", 75], ["mvasd56bqf21v", 77]].forEach(function(x){ var r = fix160S(x[0]); if(!r || r.deleted || !isDelivered(r)) w.push("#" + x[1] + " مش متسلّم"); });
+    if(isLocked(FIX160_D)) w.push("فترة 19/10 مقفولة");
+    return w;
+  }
+  function fix161Pending(){ return !settings.fix161 && !fix161Later && canEdit() && canMoney() && !fix161Why().length; }
+  function fix161Run(dry){
+    var c = fix161Cash(FIX161_C.id), cs = JSON.stringify(c), R = FIX161.map(function(x){ return fix160S(x.id); }), snap = R.map(function(r){ return JSON.stringify(r); }), out;
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    try{
+      FIX161.forEach(function(x, k){
+        var r = R[k];
+        if(x.nsin != null) r.shipIn = x.nsin;
+        if(x.nsout != null) r.shipOut = x.nsout;
+        syncShipPaid(r);
+        if(!dry && (x.nsin != null || x.nsout != null)){ r.editedBy = me || "غير محدد"; r.at = Date.now(); }
+      });
+      c.amount = FIX161_C.now; c.fx = "161";
+      c.orders = ["mv9ka9wtyocos"].concat(FIX161.map(function(x){ return x.id; }));
+      c.note = "كشف 19/10 من QP: أوردر #75 ومرتجعات " + FIX161.map(function(x){ return "#" + x.no; }).join(" و");
+      if(!dry){ c.editedBy = me || "غير محدد"; c.at = Date.now(); }
+      pendCache = null; clearStockIdx();
+      out = { qp:walletOf("QP"), cash:cashBox() };
+    } finally {
+      if(dry){ back(c, cs); R.forEach(function(r, k){ back(r, snap[k]); }); pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix161HTML(){
+    if(!fix161Pending()) return "";
+    var b = { qp:walletOf("QP"), cash:cashBox() }, a = fix161Run(true);
+    return "<div class='panel fx-card' id='fx161'><h3>كمّل استلام QP 19/10</h3>" +
+      "<p class='hint'>الكشف <span class='num'>645</span> والمتسجّل باليد <span class='num'>515</span> — ناقص <span class='num'>130</span>.</p>" +
+      "<div class='fx-eff'><div><small>الخزنة</small><b class='num'>" + esc(money(b.cash)) + " ← " + esc(money(a.cash)) + "</b></div>" +
+        "<div><small>QP</small><b class='num'>" + esc(money(b.qp)) + " ← " + esc(money(a.qp)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" +
+        "<li><b>#77</b> — <span class='num'>295</span> مظبوط زي ما هو</li>" +
+        "<li><b>#75</b> — اتسجّل <span class='num'>220</span>، والكشف <span class='num'>590</span> ناقص مرتجعات <span class='num'>240</span> = <span class='num'>350</span></li>" +
+        "<li>مصاريف المرتجعات زي الكشف: <b>#50</b> −25 · <b>#47</b> −100 (ما دفعتش شحن) · <b>#32</b> −80 (QP خدت 80) · <b>#46</b> −35 (دفع 75)</li>" +
+        "<li>لسه مش في كشف: <b>#33 جنى</b> −100، ورفض <b>#4 #54 #69 #70</b> اللي اتسجّل النهاردة −95</li>" +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx161'>كمّل</button><button class='tbtn' type='button' id='x-fx161'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx161")){ fix161Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx161")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix161Why().length){ renderAll(); return; }
+    var r = fix161Run(false);
+    settings.fix161 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتكمّل استلام QP 19/10 — الخزنة زادت " + money(130) + " · رصيد QP " + money(r.qp), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     var fxb = document.getElementById("shc-fix");
-    if(fxb && (fix159Pending() || fix160Pending())){ fxb.innerHTML = fix159HTML() + fix160HTML(); fxb = null; }
+    if(fxb && (fix159Pending() || fix160Pending() || fix161Pending())){ fxb.innerHTML = fix159HTML() + fix160HTML() + fix161HTML(); fxb = null; }
     if(fxb) fxb.innerHTML = (fix152Pending() ? fix152HTML() : fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML())) + fix157HTML();
     var cos = shipBuckets();
     var S = live("sales");
