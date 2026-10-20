@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "163";
+  var VERSION = "164";
   var CHANGELOG = [
+    { v:"164", d:"2026-10-20", items:[
+      "فواتير 19/10 جاهزة في المشتريات بدوسة: فيوليت 5 «كعب 5 سم» نبيتي (950) · احمد اوطه 5 «كلوجز هاند ميد شبكة» بيج (800) · مصنع الخواجه 5 «كلوجز lv» بني LV و5 «كلوجز سادة» اسود (1,125) — 2,875 من الخزنة على نفس الأصناف"
+    ]},
     { v:"163", d:"2026-10-20", items:[
       "تصحيح: استلام 300 لـ #75 من QP اتسجّل مرتين (الكارت 161 كمّله قبلها) فالزيادة نزلت على #39 وبقت 1,020 بدل 1,320 — اتشال. واستلام #14 من SONIC بقى 500 زي الكشف بدل 475، و#4 أسماء خالد ما دفعتش الشحن (عليك 100 مش 30)"
     ]},
@@ -7283,6 +7286,8 @@
         line({ ic:"book", cls: AC.bad ? "bad" : "warn", t:"مراجع الحسابات لقى حاجات محتاجة تبصّلها",
                s:(AC.bad ? qty(AC.bad) + " لازم تتصلح" : "") + (AC.bad && AC.warn ? " · " : "") + (AC.warn ? qty(AC.warn) + " محتاجة مراجعة" : ""), v:qty(AC.bad + AC.warn), go:"audit" });
     }
+    if(canTab("purch") && fix164Pending())
+      line({ ic:"box", cls:"warn", t:"سجّل فواتير 19/10", s:"فيوليت · احمد اوطه · مصنع الخواجه — 20 قطعة · 2,875 من الخزنة", v:"", go:"purch" });
     if(canTab("purch") && fix156Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
@@ -13755,8 +13760,66 @@
     clearStockIdx(); saveSoon("purchases"); saveSettings(); renderAll();
     toast("اتسجّلت فاتورة ابو العيون — " + qty(n) + " قطعة «" + FIX156.item + "» · " + money(fix156Total()) + " من الخزنة", 4200);
   });
+  /* v164 — شيتين مشتريات 19/10، كل سطر متطابق مع صنف ولون موجودين (ونفس سعر الشرا اللي قبل كده):
+     فيوليت: كعب 5 سم نبيتي 5 × 190 · احمد اوطه: كلوجز هاند ميد شبكة بيج 5 × 160 ·
+     مصنع الخواجه: كلوجز lv «بني LV» 5 × 115 + كلوجز سادة اسود 5 × 110. مقاس 37 لـ 41، كله مدفوع من الخزنة. */
+  var FIX164_D = "2026-10-19", FIX164 = [
+    { sup:"mup2ympq7sp8y", sn:"Violet", note:"فاتورة فيوليت 19/10", L:[ { item:"mup2xtf6m04np", c:"نبيتي", cost:190 } ] },
+    { sup:"muw5gvlafklvz", sn:"احمد اوطه", note:"فاتورة احمد اوطه 19/10", L:[ { item:"mv6rjmcypp5p7", c:"بيج", cost:160 } ] },
+    { sup:"muscjafvles4h", sn:"مصنع الخواجه", note:"فاتورة الخواجه 19/10", L:[ { item:"musckcgal0yfb", c:"بني LV", cost:115 }, { item:"muw5f83zmo4lq", c:"اسود", cost:110 } ] }
+  ], FIX164_Z = ["37", "38", "39", "40", "41"], fix164Later = false;
+  function fix164Tot(g){ return g.L.reduce(function(a, l){ return a + l.cost * FIX164_Z.length; }, 0); }
+  function fix164All(){ return FIX164.reduce(function(a, g){ return a + fix164Tot(g); }, 0); }
+  function fix164Why(){
+    var w = [];
+    FIX164.forEach(function(g){
+      if(!live("parties").some(function(x){ return x.id === g.sup && x.type === "supplier"; })) w.push("المورد " + g.sn + " مش موجود");
+      g.L.forEach(function(l){
+        var it = live("items").find(function(i){ return i.id === l.item; });
+        if(!it || itemColors(it.id).indexOf(l.c) < 0) w.push("صنف/لون اتغيّر");
+      });
+      if(live("purchases").some(function(p){ return p.partyId === g.sup && p.date >= FIX164_D && !p.xchg; })) w.push("فاتورة " + g.sn + " متسجّلة");
+    });
+    if(isLocked(FIX164_D)) w.push("فترة 19/10 مقفولة");
+    return w;
+  }
+  function fix164Pending(){ return !settings.fix164 && !fix164Later && canEdit() && canMoney() && !fix164Why().length; }
+  function fix164HTML(){
+    if(!fix164Pending()) return "";
+    var tot = fix164All();
+    return "<div class='panel fx-card' id='fx164'><h3>فواتير 19/10 — " + esc(money(tot)) + "</h3>" +
+      "<ul class='fx-ul'>" + FIX164.map(function(g){
+        return "<li><b>" + esc(g.sn) + "</b> — " + g.L.map(function(l){
+          return "<bdi>«" + esc(itemName(l.item)) + "» " + esc(l.c) + "</bdi> <bdi class='num'>" + qty(FIX164_Z.length) + " × " + qty(l.cost) + "</bdi>"; }).join(" + ") +
+          " = <b class='num'>" + esc(qty(fix164Tot(g))) + "</b></li>"; }).join("") +
+        "<li>قطعة من كل مقاس 37 لـ 41 · كله على أصناف موجودة بنفس سعر الشرا اللي قبل كده</li>" +
+        "<li>المدفوع من الخزنة — مفيش باقي لحد · الخزنة <b class='num'>" + esc(money(cashBox())) + " ← " + esc(money(cashBox() - tot)) + "</b></li>" +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx164'>سجّل</button><button class='tbtn' type='button' id='x-fx164'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx164")){ fix164Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx164")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(!fix164Pending()){ renderAll(); return; }
+    FIX164.forEach(function(g){
+      var batchId = uid();
+      g.L.forEach(function(l){
+        var lineId = uid();
+        FIX164_Z.forEach(function(z){
+          db.purchases.push(stamp({ date:FIX164_D, partyId:g.sup, inv:"", itemId:l.item, color:l.c, size:z,
+            packName:"قطعة", byPack:false, packs:FIX164_Z.length, packQty:1, packCost:l.cost, linePieces:FIX164_Z.length, lineId:lineId,
+            freight:0, paid:l.cost, qty:1, cost:l.cost, note:g.note, batchId:batchId }));
+        });
+      });
+    });
+    settings.fix164 = { at:Date.now(), by:me || "" };
+    clearStockIdx(); saveSoon("purchases"); saveSettings(); renderAll();
+    toast("اتسجّلت فواتير 19/10 — 20 قطعة · " + money(fix164All()) + " من الخزنة", 4200);
+  });
   function renderPurch(){
-    var pf = document.getElementById("pu-fix"); if(pf) pf.innerHTML = fix153HTML() + fix156HTML();
+    var pf = document.getElementById("pu-fix"); if(pf) pf.innerHTML = fix153HTML() + fix156HTML() + fix164HTML();
     backfillPurchNos();
     renderPuTop();
     readPuFilters();
