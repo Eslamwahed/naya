@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "162";
+  var VERSION = "163";
   var CHANGELOG = [
+    { v:"163", d:"2026-10-20", items:[
+      "تصحيح: استلام 300 لـ #75 من QP اتسجّل مرتين (الكارت 161 كمّله قبلها) فالزيادة نزلت على #39 وبقت 1,020 بدل 1,320 — اتشال. واستلام #14 من SONIC بقى 500 زي الكشف بدل 475، و#4 أسماء خالد ما دفعتش الشحن (عليك 100 مش 30)"
+    ]},
     { v:"162", d:"2026-10-19", items:[
       "استلام SONIC 13/10 جاهز في شركات الشحن بدوسة: 1,340 — كشف 920 (#9 #13 #14) وكشف 420 (#20 تسليم جزئي)، وتاريخ تسليم #14 بقى 10/10 زي الكشف"
     ]},
@@ -7284,6 +7287,8 @@
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+    if(canTab("ship") && fix163Pending())
+      line({ ic:"truck", cls:"bad", t:"صحّح استلامات 19/10", s:"300 متسجّلة مرتين لـ #75 · #14 SONIC 475 بدل 500 · #4 ما دفعتش شحن — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix162Pending())
       line({ ic:"truck", cls:"warn", t:"سجّل استلام SONIC 13/10", s:"1,340 — 4 أوردرات زي الكشفين · دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix161Pending())
@@ -15266,11 +15271,66 @@
     saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
     toast("اتسجّل استلام SONIC — " + money(1340) + " · رصيد SONIC " + money(r.sonic), 4200);
   });
+  /* v163 — اللي اتسجّل باليد يوم 19/10 قبل كارت 161:
+     · استلام 300 لـ #75 من QP — #75 اتقفل بكارت 161 (350 + مرتجعات 240 = 590)، فالـ 300 زيادة
+       والمحرك نزّلها على أقدم أوردر مستني (#39 دنيا سيد) فبان 1,020 بدل 1,320. كشف 19/10 = 645 = 295 + 350.
+     · استلام #14 من SONIC اتسجّل 475 والكشف CSHP-1-000466 بيقول 500.
+     · #4 أسماء خالد رفضت وما دفعتش الشحن (كشف QP 20/10: −100) — كان متسجّل إنها دفعت 70. */
+  var FIX163_DUP = { id:"mvfeode6isisi", amt:300, o:"mv9ka9wtyocos" }, FIX163_S14 = { id:"mvfelpgavurj9", was:475, now:500, o:"musf70ydz4jvt" },
+      FIX163_R4 = { id:"mupe4p1h0ekgo", sin:70, sout:100 }, fix163Later = false;
+  function fix163Why(){
+    var w = [], dup = fix161Cash(FIX163_DUP.id), c161 = fix161Cash(FIX161_C.id), s14 = fix161Cash(FIX163_S14.id), r4 = fix160S(FIX163_R4.id);
+    if(!dup || dup.type !== "settle" || squish(dup.shipCo) !== "QP" || dup.date !== FIX160_D || Math.abs(dup.amount - FIX163_DUP.amt) > 0.009 || (dup.orders || []).join() !== FIX163_DUP.o) w.push("استلام 300 اتغيّر");
+    if(!c161 || c161.fx !== "161" || Math.abs(c161.amount - FIX161_C.now) > 0.009) w.push("كارت 161 مش متطبّق");
+    if(!s14 || s14.type !== "settle" || squish(s14.shipCo) !== "SONIC" || Math.abs(s14.amount - FIX163_S14.was) > 0.009 || (s14.orders || []).join() !== FIX163_S14.o) w.push("استلام #14 اتغيّر");
+    if(!r4 || r4.deleted || !viaShip(r4) || squish(r4.shipCo) !== "QP" || !isCancelled(r4) || shipIn(r4) !== FIX163_R4.sin || shipOut(r4) !== FIX163_R4.sout) w.push("#4 اتعدّل");
+    if(isLocked(FIX160_D)) w.push("فترة 19/10 مقفولة");
+    return w;
+  }
+  function fix163Pending(){ return !settings.fix163 && !fix163Later && canEdit() && canMoney() && !fix163Why().length; }
+  function fix163Run(dry){
+    var dup = fix161Cash(FIX163_DUP.id), s14 = fix161Cash(FIX163_S14.id), r4 = fix160S(FIX163_R4.id);
+    var j = [dup, s14, r4].map(function(o){ return JSON.stringify(o); }), out;
+    var back = function(o, x){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(x)); };
+    try{
+      dup.deleted = true; s14.amount = FIX163_S14.now; r4.shipIn = 0; syncShipPaid(r4);
+      if(!dry) [dup, s14, r4].forEach(function(o){ o.editedBy = me || "غير محدد"; o.at = Date.now(); });
+      pendCache = null; clearStockIdx();
+      out = { qp:walletOf("QP"), sonic:walletOf("SONIC"), cash:cashBox() };
+    } finally {
+      if(dry){ back(dup, j[0]); back(s14, j[1]); back(r4, j[2]); pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix163HTML(){
+    if(!fix163Pending()) return "";
+    var b = { qp:walletOf("QP"), sonic:walletOf("SONIC"), cash:cashBox() }, a = fix163Run(true);
+    var ef = function(t, k){ return "<div><small>" + t + "</small><b class='num'>" + esc(money(b[k])) + " ← " + esc(money(a[k])) + "</b></div>"; };
+    return "<div class='panel fx-card' id='fx163'><h3>صحّح استلامات 19/10</h3>" +
+      "<div class='fx-eff'>" + ef("الخزنة", "cash") + ef("QP", "qp") + ef("SONIC", "sonic") + "</div>" +
+      "<ul class='fx-ul'>" +
+        "<li><b>#75</b> — استلام <span class='num'>300</span> اتسجّل زيادة: كشف 19/10 <span class='num'>645</span> اتسجّل خلاص (<span class='num'>295 + 350</span>)، والـ 300 نزلت على <b>#39 دنيا سيد</b> فبانت <span class='num'>1,020</span> — هيتشال وترجع <span class='num'>1,320</span></li>" +
+        "<li><b>#14 دينا</b> SONIC — اتسجّل <span class='num'>475</span> والكشف <span class='num'>500</span></li>" +
+        "<li><b>#4 أسماء خالد</b> — رفضت وما دفعتش الشحن: عليك <span class='num'>100</span> لـ QP مش <span class='num'>30</span></li>" +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx163'>صحّح</button><button class='tbtn' type='button' id='x-fx163'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx163")){ fix163Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx163")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix163Why().length){ renderAll(); return; }
+    var r = fix163Run(false);
+    settings.fix163 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتصحّحت استلامات 19/10 · رصيد QP " + money(r.qp) + " · SONIC " + money(r.sonic), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     var fxb = document.getElementById("shc-fix");
-    if(fxb && (fix159Pending() || fix160Pending() || fix161Pending() || fix162Pending())){ fxb.innerHTML = fix159HTML() + fix160HTML() + fix161HTML() + fix162HTML(); fxb = null; }
+    if(fxb && (fix159Pending() || fix160Pending() || fix161Pending() || fix162Pending() || fix163Pending())){ fxb.innerHTML = fix159HTML() + fix160HTML() + fix161HTML() + fix162HTML() + fix163HTML(); fxb = null; }
     if(fxb) fxb.innerHTML = (fix152Pending() ? fix152HTML() : fix147HTML() + (fix151Pending() ? fix151HTML() : fix148HTML() + fix150HTML())) + fix157HTML();
     var cos = shipBuckets();
     var S = live("sales");
