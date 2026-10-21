@@ -4124,8 +4124,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "165";
+  var VERSION = "166";
   var CHANGELOG = [
+    { v:"166", d:"2026-10-21", items:[
+      "قايمة الدخل: لما تفتح بند فيه أكتر من 12 حركة، بدل «و57 كمان — داخلين في الإجمالي» بقى في زرار «اعرض الـ 57 الباقيين ▾» يفتح القايمة كلها، و«اعرض أول 12 بس ▴» يقفلها"
+    ]},
     { v:"165", d:"2026-10-20", items:[
       "تصحيح كشف QP 20/10 (2,225): استلام #78 فرحة اتسجّل 15 بدل 300 — بقى 200 ومعاه مرتجع #4 أسماء (−100) زي الكشف، فـ #78 بقت 300 و#4 اتقفلت والخزنة +185"
     ]},
@@ -9245,7 +9248,7 @@
      والإجمالي تحت = رقم البند. الأوردرات: المسلّم بإيراده الفعلي، واللي لسه ماشي
      (في «لو كله اتسلّم» بس) بـ expProfit زي projStats. */
   var pisOpen = null;
-  var PIS_DD_MAX = 12;
+  var PIS_DD_MAX = 12, pisAll = false;   // pisAll: البند المفتوح معروض كله
   function pisDrill(key, P){
     var r = periodRange(), L = [], go = "", goTxt = "", tot = 0;
     var act = pisMode === "act" || (pisMode === "noads" && pisNaBase === "act");
@@ -9292,19 +9295,22 @@
     L.sort(function(a, b){ return a.d < b.d ? -1 : a.d > b.d ? 1 : 0; });
     if(!L.length) return "<p class='hint' style='margin:0'>مفيش حاجة في الفترة دي.</p>";
     var more = L.length - PIS_DD_MAX;
-    return "<div class='pis-dl'>" + L.slice(0, PIS_DD_MAX).map(function(x){
+    return "<div class='pis-dl'>" + L.slice(0, pisAll ? L.length : PIS_DD_MAX).map(function(x){
         return "<div><span class='num'>" + esc(dShort(x.d)) + "</span><span class='t'>" + x.t + "</span><b class='num'>" + esc(money(x.v)) + "</b></div>";
       }).join("") +
-      (more > 0 ? "<div><span></span><span class='t' style='color:var(--ink-soft)'>و" + qty(more) + " كمان — داخلين في الإجمالي</span><b></b></div>" : "") +
+      (more > 0 ? "<div style='border:0'><span></span><span class='t'><button type='button' class='go' data-pisall aria-expanded='" + pisAll + "'>" +
+        (pisAll ? "اعرض أول " + qty(PIS_DD_MAX) + " بس ▴" : "اعرض الـ " + qty(more) + " الباقيين ▾") + "</button></span><b></b></div>" : "") +
       "<div class='tot'><span></span><span class='t'>الإجمالي (" + qty(L.length) + ")</span><b class='num'>" + esc(money(tot)) + "</b></div>" +
       (canTab(go) ? "<div style='border:0'><button type='button' class='go' data-pisgo='" + go + "'>" + goTxt + " ←</button></div>" : "") +
       "</div>";
   }
   (function(){
     var t = document.getElementById("t-pis");
-    var tog = function(tr){ pisOpen = pisOpen === tr.dataset.pisdd ? null : tr.dataset.pisdd; renderProjIS();
+    var tog = function(tr){ pisOpen = pisOpen === tr.dataset.pisdd ? null : tr.dataset.pisdd; pisAll = false; renderProjIS();
       var n = t.querySelector("tr[data-pisdd='" + tr.dataset.pisdd + "']"); if(n) n.focus(); };
     t.addEventListener("click", function(e){
+      if(e.target.closest("[data-pisall]")){ pisAll = !pisAll; renderProjIS();
+        var b = t.querySelector("[data-pisall]"); if(b) b.focus(); return; }
       var g = e.target.closest("[data-pisgo]");
       if(g){ goTab(g.dataset.pisgo); if(g.dataset.pisgo === "sales") setSView("all"); return; }
       var tr = e.target.closest("tr[data-pisdd]"); if(tr) tog(tr);
