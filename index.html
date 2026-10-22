@@ -4131,8 +4131,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "167";
+  var VERSION = "168";
   var CHANGELOG = [
+    { v:"168", d:"2026-10-22", items:[
+      "إصلاح توزيع الأرباح: لو الفترة بتبدأ قبل ما رأس المال يدخل، الأيام اللي مفيهاش فلوس كانت بتتحسب ومالهاش صاحب، والفرق كان بيروح كله لأكبر شريك (300 بتتقسم 225 و75 بدل 150 و150) — دلوقتي النسبة على الأيام اللي فيها رأس مال بس",
+      "التقرير المطبوع للشركاء: «مصروفات مدفوعة مقدّماً» و«مستحق للشركاء» و«متغيّرة تانية» بقوا سطور ظاهرة — مجموع السطور = الإجمالي"
+    ]},
     { v:"167", d:"2026-10-21", items:[
       "صلاحيات المستخدمين: الشاشات متقسّمة بنفس أقسام القايمة وبنفس أساميها (الرئيسية · الأوردرات · البضاعة · الفلوس · التحليل · قايمة اسمك) بدل الأسامي القديمة زي «تقارير» و«لوحة المتابعة»",
       "إصلاح: «رسومات» و«ماشي إزاي؟» و«مراجع الحسابات» و«المدفوع مقدّماً» كانوا بيفضلوا ظاهرين حتى لو شيلت علامتهم — دلوقتي كل خانة بتشتغل لوحدها بعد ما تحفظ المستخدم، والقدام زي ما هم لحد ما تحفظهم",
@@ -6615,10 +6619,11 @@
 
   // النسبة المرجّحة بالزمن — الأساس المعتمد في محاسبة شركات الأشخاص.
   // الشريك اللي ضخّ فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.
+  /* v168: الأيام اللي مفيهاش رأس مال خالص مش داخلة في القسمة — وإلا النسب مجموعها أقل من 100%
+     والفرق كان بيروح كله لأكبر نصيب. */
   function weightedRatio(id, from, to){
     if(!from || !to || from > to) return ratioOf(id, to || today());
-    var total = daysBetween(from, to) + 1;
-    if(total <= 0) return 0;
+    var total = 0;
     var bounds = [from];
     capChangeDates().forEach(function(d){
       if(d > from && d <= to && bounds.indexOf(d) < 0) bounds.push(d);
@@ -6628,9 +6633,11 @@
     for(var i = 0; i < bounds.length; i++){
       var a = bounds[i];
       var b = (i + 1 < bounds.length) ? addDays(bounds[i+1], -1) : to;
-      acc += ratioOf(id, a) * (daysBetween(a, b) + 1);
+      if(!(totalCapital(a) > 0)) continue;
+      var n = daysBetween(a, b) + 1;
+      acc += ratioOf(id, a) * n; total += n;
     }
-    return acc / total;
+    return total > 0 ? acc / total : ratioOf(id, to);
   }
 
   /* ---------- الأرباح المحتجزة ---------- */
@@ -7876,6 +7883,10 @@
       return c.type === "cap_share" && inRange(c.date, r);
     }).reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
     var left = net - paidOut;
+    // أيام الفترة اللي كان فيها رأس مال — اللي قبل أول فلوس دخلت مش محسوبة (v168)
+    var fc = ps.map(function(x){ return capStartOf(x.id); }).filter(Boolean).sort()[0];
+    var capFrom = fc && fc > from ? fc : from;
+    var allDays = capFrom > to ? 0 : daysBetween(capFrom, to) + 1;
 
     note.innerHTML = "نصيب كل شريك من ربح الفترة، بنسبة مرجّحة بالزمن من " +
       esc(from) + " لـ" + esc(to) + ". " +
@@ -7885,7 +7896,7 @@
       "التوزيع الفعلي من «وزّع أرباح» تحت." +
       (ps.some(function(x){
           var d = capDaysIn(x.id, from, to);
-          return d !== null && d < daysBetween(from, to) + 1;
+          return d !== null && d < allDays;
         })
         ? "<br><strong>ليه شريكين بنفس المبلغ ليهم نسبتين مختلفتين؟</strong> " +
           "لأن النسبة بتتحسب بعدد أيام ما فلوسه شغّالة، مش بالمبلغ لوحده. " +
@@ -7907,7 +7918,6 @@
       rounded[big] = Math.round((rounded[big]+diff)*100)/100;
     }
 
-    var allDays = daysBetween(from, to) + 1;
     var body = rows.map(function(x, i){
       var cur = currentOf(x.p.id), capi = capitalOf(x.p.id);
       var st = capStartOf(x.p.id), dz = capDaysIn(x.p.id, from, to);
@@ -10071,6 +10081,7 @@
         isr("تكلفة البضاعة المباعة", "cogs", true) + isr("مجمل الربح", "gross", false, "tot") +
         isr("إعلانات", "ads", true) + isr("شحن مدفوع لشركات الشحن", "sout", true) + isr("تغليف", "pack", true) +
         (M.xloss || A.xloss ? isr("خسارة استبدال", "xloss", true) : "") +
+        (M.othervar || A.othervar ? isr("مصروفات متغيّرة تانية", "othervar", true) : "") +
         isr("إجمالي مصروفات البيع والتسويق", "sell", true, "tot") +
         isr("مصروفات إدارية وعمومية", "admin", true) + isr("صافي الربح (الخسارة)", "net", false, "tot") + "</table>" +
       "<h2>الميزانية العمومية <span style='font-weight:400;font-size:13px;color:var(--lp-soft)'>— كما في " + esc(today()) + "</span></h2>" +
@@ -10078,9 +10089,12 @@
         "<tr><td>الخزنة</td><td class='n'>" + nm(B.cash) + "</td></tr><tr><td>عند شركات الشحن</td><td class='n'>" + nm(B.wallets) + "</td></tr>" +
         (B.recv > 0.5 ? "<tr><td>مديونيات العملاء</td><td class='n'>" + nm(B.recv) + "</td></tr>" : "") +
         (B.supAdv > 0.5 ? "<tr><td>دفعات مقدّمة للموردين</td><td class='n'>" + nm(B.supAdv) + "</td></tr>" : "") +
-        "<tr><td>المخزون بالتكلفة</td><td class='n'>" + nm(B.stock) + "</td></tr><tr class='tot'><td>إجمالي الأصول</td><td class='n'>" + nm(B.assets) + "</td></tr></table>" +
+        "<tr><td>المخزون بالتكلفة</td><td class='n'>" + nm(B.stock) + "</td></tr>" +
+        (B.prepaid > 0.5 ? "<tr><td>مصروفات مدفوعة مقدّماً</td><td class='n'>" + nm(B.prepaid) + "</td></tr>" : "") +
+        "<tr class='tot'><td>إجمالي الأصول</td><td class='n'>" + nm(B.assets) + "</td></tr></table>" +
       "<table class='prt-t'><tr class='sec'><td>الالتزامات وحقوق الملكية</td><td class='n'></td></tr>" +
         "<tr><td>مستحق للموردين</td><td class='n'>" + nm(B.pay) + "</td></tr><tr><td>عرابين عملاء</td><td class='n'>" + nm(B.custAdv) + "</td></tr>" +
+        (B.owed > 0.5 ? "<tr><td>مستحق للشركاء</td><td class='n'>" + nm(B.owed) + "</td></tr>" : "") +
         "<tr><td>رأس مال الشركاء</td><td class='n'>" + nm(B.cap) + "</td></tr>" +
         (Math.abs(B.cur) > 0.5 ? "<tr><td>أرباح ليهم لسه ما اتصرفتش</td><td class='n'>" + nm(B.cur) + "</td></tr>" : "") +
         (Math.abs(B.opening) > 0.5 ? "<tr><td>صافي الأرصدة الافتتاحية</td><td class='n" + cl(B.opening) + "'>" + sg(B.opening) + "</td></tr>" : "") +
@@ -21436,7 +21450,7 @@
     bounds.sort();
     return bounds.map(function(a, i){
       var b = (i + 1 < bounds.length) ? addDays(bounds[i+1], -1) : to;
-      return { from:a, to:b, days: daysBetween(a,b) + 1,
+      return { from:a, to:b, days: daysBetween(a,b) + 1, empty: !(totalCapital(a) > 0),
                ratios: partners().map(function(p){ return ratioOf(p.id, a); }) };
     });
   }
@@ -21444,13 +21458,14 @@
   function renderWhy(from, to){
     var ps = partners();
     var segs = ratioSegments(from, to);
-    var total = daysBetween(from, to) + 1;
+    var total = segs.reduce(function(a, sg){ return a + (sg.empty ? 0 : sg.days); }, 0);
     var head = ["الشريحة","أيامها"].concat(ps.map(function(p){ return p.name; }));
     var rows = segs.map(function(sg){
       return "<tr><td class='wide'>" + esc(sg.from) + " → " + esc(sg.to) + "</td>" +
         "<td class='num'>" + qty(sg.days) + "</td>" +
-        sg.ratios.map(function(r){
-          return "<td class='num'>" + (r*100).toFixed(2) + "%</td>"; }).join("") + "</tr>";
+        (sg.empty ? "<td colspan='" + ps.length + "' class='sub'>مفيش رأس مال لسه — مش داخلة في القسمة</td>"
+          : sg.ratios.map(function(r){
+          return "<td class='num'>" + (r*100).toFixed(2) + "%</td>"; }).join("")) + "</tr>";
     });
     rows.push("<tr style='background:var(--teal-soft)'>" +
       "<td class='wide' style='font-weight:600'>المرجّح بالزمن</td>" +
