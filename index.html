@@ -4131,8 +4131,22 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "167";
+  var VERSION = "170";
   var CHANGELOG = [
+    { v:"170", d:"2026-10-22", items:[
+      "مرتجع للمورد بأقل من التكلفة: القطع بتخرج من المخزن بتكلفتها والفرق بيتسجّل «خسارة مرتجع» — قبل كده الفرق كان بيقعد على المخزون حتى لو كل القطع رجعت",
+      "أوردر اتلغى وعليه عربون: الخزنة بتبيّن العربون يوم ما اتدفع، وردّه للعميل يوم الإلغاء — بدل ما يختفي من تاريخ الخزنة",
+      "يومية التحصيل: العميل اللي بيدفع على كذا دفعة، كل دفعة بتتسجّل يومها بدل ما يتجمعوا في آخر يوم"
+    ]},
+    { v:"169", d:"2026-10-22", items:[
+      "إصلاح تكلفة البضاعة: القطعة اللي بتتسلّم بتاخد متوسط تكلفة اللي لسه في المخزن بس (متوسط متحرّك) — قبل كده كانت بتاخد متوسط كل اللي اتشرى من الأول، فلو اشتريت نفس الصنف تاني بسعر أعلى بعد ما بعت منه، الربح كان بيطلع أكبر والمخزون يفضل له قيمة وهو فاضي",
+      "الصنف اللي خلص من المخزن وفضل عليه تكلفة (مشوار نقل اتسجّل بعد ما البضاعة اتباعت مثلًا) الفرق بيتحسب «فرق تكلفة» في يوم آخر حركة عليه بدل ما يقعد قيمة مخزون وهمية",
+      "الأوردر المرفوض خسارة شحنه بتتحسب في شهر الرفض مش شهر عمل الأوردر"
+    ]},
+    { v:"168", d:"2026-10-22", items:[
+      "إصلاح توزيع الأرباح: لو الفترة بتبدأ قبل ما رأس المال يدخل، الأيام اللي مفيهاش فلوس كانت بتتحسب ومالهاش صاحب، والفرق كان بيروح كله لأكبر شريك (300 بتتقسم 225 و75 بدل 150 و150) — دلوقتي النسبة على الأيام اللي فيها رأس مال بس",
+      "التقرير المطبوع للشركاء: «مصروفات مدفوعة مقدّماً» و«مستحق للشركاء» و«متغيّرة تانية» بقوا سطور ظاهرة — مجموع السطور = الإجمالي"
+    ]},
     { v:"167", d:"2026-10-21", items:[
       "صلاحيات المستخدمين: الشاشات متقسّمة بنفس أقسام القايمة وبنفس أساميها (الرئيسية · الأوردرات · البضاعة · الفلوس · التحليل · قايمة اسمك) بدل الأسامي القديمة زي «تقارير» و«لوحة المتابعة»",
       "إصلاح: «رسومات» و«ماشي إزاي؟» و«مراجع الحسابات» و«المدفوع مقدّماً» كانوا بيفضلوا ظاهرين حتى لو شيلت علامتهم — دلوقتي كل خانة بتشتغل لوحدها بعد ما تحفظ المستخدم، والقدام زي ما هم لحد ما تحفظهم",
@@ -5573,9 +5587,31 @@
     });
     return { k:k, q:q, v:v };
   }
-  function avgCostVB(itemId, color, size){
+  /* v169: اللي لسه في المخزن من اللون/المقاس — اللي اتشرى ناقص اللي خرج بتكلفته المتثبّتة.
+     skip = الأوردر اللي بنثبّت تكلفته دلوقتي (لسه ما خرجش). */
+  function remCostV(itemId, color, size, skip){
+    var a = avgCostVQ(itemId, color, size), q = a.q, v = a.v, tr = trIdx().perV[a.k] || 0;
+    live("sales").forEach(function(s){
+      if(s === skip || !isDelivered(s)) return;
+      SL(s).forEach(function(l){
+        if(keyOf(l) !== a.k) return;
+        var n = lineSold(l, s), t = lineTr(l);
+        q -= n; v -= n * (lineCost(l) - t); tr -= n * t;
+      });
+    });
+    return { q:q, v:v, tr:tr };
+  }
+  /* متوسط متحرّك: تكلفة القطعة = متوسط اللي لسه على الرف، مش متوسط كل اللي اتشرى من الأول —
+     وإلا شرا تاني بسعر أعلى بعد ما بعت من الأول بيطلّع ربح أكبر ويسيب قيمة على مخزون فاضي. */
+  function avgCostVB(itemId, color, size, skip){
+    var m = remCostV(itemId, color, size, skip);
+    if(m.q > 0.0001 && m.v > -0.005) return Math.max(0, m.v) / m.q;
     var a = avgCostVQ(itemId, color, size);
     return a.q>0 ? a.v/a.q : avgCostB(itemId);
+  }
+  function trRemV(itemId, color, size, skip){
+    var m = remCostV(itemId, color, size, skip);
+    return m.q > 0.0001 && m.tr > -0.005 ? Math.max(0, m.tr) / m.q : trPerV(itemId, color, size);
   }
   function trPerV(itemId, color, size){
     var T = trIdx(); if(!(T.total > 0)) return 0;
@@ -5609,7 +5645,13 @@
   }
 
   // تاريخ التسليم — الإيراد بيتسجّل فيه، مش في تاريخ إنشاء الأوردر (IFRS 15.31)
-  function revDate(s){ return (s && s.deliveredAt) ? s.deliveredAt : (s ? s.date : ""); }
+  // v169: الملغي يوم ما اترفض — خسارة الشحن بتاعته في شهر الرفض مش شهر الأوردر
+  function revDate(s){
+    if(!s) return "";
+    if(s.deliveredAt) return s.deliveredAt;
+    if(s.cancelledAt && isCancelled(s)) return s.cancelledAt;
+    return s.date;
+  }
 
   // بتتنادى مع كل حفظ أو تغيير حالة: بتثبّت التكلفة وتاريخ التسليم مرة واحدة
   function stampDelivery(rec){
@@ -5618,8 +5660,8 @@
       if(!rec.deliveredAt) rec.deliveredAt = today();
       SL(rec).forEach(function(l){
         if(l && (l.unitCost == null || l.unitCost === "")){
-          l.unitCost = avgCostVB(l.itemId, vColor(l), vSize(l));
-          l.trCost = trPerV(l.itemId, vColor(l), vSize(l));
+          l.unitCost = avgCostVB(l.itemId, vColor(l), vSize(l), rec);
+          l.trCost = trRemV(l.itemId, vColor(l), vSize(l), rec);
         }
       });
     } else {
@@ -6615,10 +6657,11 @@
 
   // النسبة المرجّحة بالزمن — الأساس المعتمد في محاسبة شركات الأشخاص.
   // الشريك اللي ضخّ فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.
+  /* v168: الأيام اللي مفيهاش رأس مال خالص مش داخلة في القسمة — وإلا النسب مجموعها أقل من 100%
+     والفرق كان بيروح كله لأكبر نصيب. */
   function weightedRatio(id, from, to){
     if(!from || !to || from > to) return ratioOf(id, to || today());
-    var total = daysBetween(from, to) + 1;
-    if(total <= 0) return 0;
+    var total = 0;
     var bounds = [from];
     capChangeDates().forEach(function(d){
       if(d > from && d <= to && bounds.indexOf(d) < 0) bounds.push(d);
@@ -6628,9 +6671,11 @@
     for(var i = 0; i < bounds.length; i++){
       var a = bounds[i];
       var b = (i + 1 < bounds.length) ? addDays(bounds[i+1], -1) : to;
-      acc += ratioOf(id, a) * (daysBetween(a, b) + 1);
+      if(!(totalCapital(a) > 0)) continue;
+      var n = daysBetween(a, b) + 1;
+      acc += ratioOf(id, a) * n; total += n;
     }
-    return acc / total;
+    return total > 0 ? acc / total : ratioOf(id, to);
   }
 
   /* ---------- الأرباح المحتجزة ---------- */
@@ -6653,7 +6698,8 @@
      (IAS 2.27 — المتوسط المتحرّك) */
   function stockBookValue(){
     // + الانتقالات اللي اتحطت على البضاعة — نصيب المباع منها بيطلع مع lineCost تحت
-    var v = live("purchases").reduce(function(a,p){ return a + purchTotal(p); }, 0) + trIdx().total;
+    var v = live("purchases").reduce(function(a,p){ return a + purchTotal(p); }, 0) + trIdx().total -
+      costTrueUps().reduce(function(a, x){ return a + x.v; }, 0);          // فرق التكلفة طلع مصروف
     live("sales").forEach(function(s){
       if(!isDelivered(s)) return;
       SL(s).forEach(function(l){ v -= lineCost(l) * lineSold(l, s); });
@@ -6883,7 +6929,7 @@
       if(!byDate[p.date]){ byDate[p.date] = []; dates.push(p.date); }
       byDate[p.date].push(p);
     });
-    var T = { byP:{}, link:{}, unlinked:[], total:0, perV:{}, perI:{}, perC:{}, qV:{}, qI:{}, qC:{} };
+    var T = { byP:{}, trD:{}, link:{}, unlinked:[], total:0, perV:{}, perI:{}, perC:{}, qV:{}, qI:{}, qC:{} };
     /* مشوار في فترة مقفولة ما يتربطش بفاتورة بعد القفل — وإلا فاتورة جديدة كانت
        هتشيل مصروف من شهر مقفول وتغيّر ربحه */
     var lk = lockDate();
@@ -6904,7 +6950,7 @@
       if(!d){ T.unlinked.push(c.id); return; }
       var ps = byDate[d], sum = ps.reduce(function(a, p){ return a + purchTotal(p); }, 0);
       T.link[c.id] = d; T.total += amt;
-      ps.forEach(function(p){ T.byP[p.id] = (T.byP[p.id]||0) + amt * purchTotal(p) / sum; });
+      ps.forEach(function(p){ T.byP[p.id] = (T.byP[p.id]||0) + amt * purchTotal(p) / sum; if(c.date > (T.trD[p.id]||"")) T.trD[p.id] = c.date; });
     });
     // الكميات بنفس طريقة avgCost (المرتجع للمورد بيطرح) — عشان نصيب القطعة يتحسب من غير لفة على المشتريات
     live("purchases").forEach(function(p){
@@ -7042,7 +7088,39 @@
   // خسارة (أو مكسب) الاستبدال مع المورد — مصروف متغيّر من غير خزنة
   function xLossIn(r){
     return live("purchases").reduce(function(a, p){
-      return a + (p.xloss && inRange(p.date, r) ? (Number(p.xloss)||0) : 0); }, 0);
+      return a + (p.xloss && inRange(p.date, r) ? (Number(p.xloss)||0) : 0); }, 0) +
+      costTrueUps().reduce(function(a, x){ return a + (inRange(x.d, r) ? x.v : 0); }, 0);
+  }
+  /* v169 — فرق تكلفة: لون/مقاس خلص من المخزن وفضل عليه تكلفة (مشوار نقل اتسجّل بعد ما اتباع،
+     أو تكلفة اتثبّتت قبل المتوسط المتحرّك). الفرق بيتحسب مصروف «فرق تكلفة» في يوم آخر حركة عليه
+     (أو أول يوم بعد القفل) بدل ما يفضل قيمة مخزون على رف فاضي. */
+  var _tu = null;
+  function costTrueUps(){
+    if(_tu && _tu.at === _sidx && _tu.t === _tidx) return _tu.L;
+    var T = trIdx(), V = {};
+    var g = function(k, it){ return V[k] = V[k] || { itemId:it, q:0, v:0, d:"" }; };
+    var mx = function(o, d){ if(d && d > o.d) o.d = d; };
+    live("purchases").forEach(function(p){
+      if(!p.itemId) return;
+      var o = g(keyOf(p), p.itemId); o.q += Number(p.qty)||0; o.v += purchTotal(p) + (T.byP[p.id]||0);
+      mx(o, p.date); mx(o, T.trD[p.id]);
+    });
+    live("sales").forEach(function(s){
+      if(!isDelivered(s)) return;
+      SL(s).forEach(function(l){
+        if(!l.itemId) return;
+        var o = g(keyOf(l), l.itemId), n = lineSold(l, s); o.q -= n; o.v -= n * lineCost(l); mx(o, revDate(s));
+      });
+    });
+    var lk = lockDate(), L = [];
+    Object.keys(V).forEach(function(k){
+      var o = V[k];
+      if(Math.abs(o.q) > 0.0001 || Math.abs(o.v) < 1) return;       // كسور التقريب تحت الجنيه بتفضل زي ما هي
+      var d = o.d || today(); if(lk && d <= lk) d = addDays(lk, 1);
+      L.push({ k:k, itemId:o.itemId, d:d, v:Math.round(o.v * 100) / 100 });
+    });
+    stockIdx(); _tu = { at:_sidx, t:_tidx, L:L };
+    return L;
   }
 
   // ملخص أرقام الفترة
@@ -7589,7 +7667,7 @@
           note:"فيسبوك صرف من " + dShort(s.from) + " لـ " + dShort(s.to) + " (مطابقة)" }; }).filter(function(x){ return Math.abs(x.amount) > 0.004; }))
         .concat(live("purchases").filter(function(p){ return p.xloss && inRange(p.date, r); })
           .map(function(p){ return { date:p.date, at:p.at, partyId:p.partyId, amount:p.xloss,
-            note:(p.xloss > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
+            note:(p.xloss > 0 ? "خسارة " : "مكسب ") + (p.xchg ? "استبدال" : "مرتجع") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
         .sort(byDate).map(function(c){
         return "<tr><td class='num'>" + esc(c.date||"—") + "</td>" +
           "<td class='wide'>" + (esc(squish(c.note)) || "بدون بيان") + (c.type === "expense" ? "<span class='sub'>" + esc(EXP_CAT[expCat(c)].label) + "</span>" : "") + "</td>" +
@@ -7876,6 +7954,10 @@
       return c.type === "cap_share" && inRange(c.date, r);
     }).reduce(function(a,c){ return a + (Number(c.amount)||0); }, 0);
     var left = net - paidOut;
+    // أيام الفترة اللي كان فيها رأس مال — اللي قبل أول فلوس دخلت مش محسوبة (v168)
+    var fc = ps.map(function(x){ return capStartOf(x.id); }).filter(Boolean).sort()[0];
+    var capFrom = fc && fc > from ? fc : from;
+    var allDays = capFrom > to ? 0 : daysBetween(capFrom, to) + 1;
 
     note.innerHTML = "نصيب كل شريك من ربح الفترة، بنسبة مرجّحة بالزمن من " +
       esc(from) + " لـ" + esc(to) + ". " +
@@ -7885,7 +7967,7 @@
       "التوزيع الفعلي من «وزّع أرباح» تحت." +
       (ps.some(function(x){
           var d = capDaysIn(x.id, from, to);
-          return d !== null && d < daysBetween(from, to) + 1;
+          return d !== null && d < allDays;
         })
         ? "<br><strong>ليه شريكين بنفس المبلغ ليهم نسبتين مختلفتين؟</strong> " +
           "لأن النسبة بتتحسب بعدد أيام ما فلوسه شغّالة، مش بالمبلغ لوحده. " +
@@ -7907,7 +7989,6 @@
       rounded[big] = Math.round((rounded[big]+diff)*100)/100;
     }
 
-    var allDays = daysBetween(from, to) + 1;
     var body = rows.map(function(x, i){
       var cur = currentOf(x.p.id), capi = capitalOf(x.p.id);
       var st = capStartOf(x.p.id), dz = capDaysIn(x.p.id, from, to);
@@ -9172,7 +9253,7 @@
     var t = document.getElementById("t-pis"); if(!t) return;
     // v131: «من غير إعلانات» = نفس القايمة بالظبط (نفس البنود والأعمدة) والإعلانات صفر،
     // على «لو كله اتسلّم» أو «اتسلّم فعلاً» حسب الاختيار اللي تحت الكروت
-    var P = projStats(periodRange()), noAds = pisMode === "noads";
+    var PR = periodRange(), P = projStats(PR), noAds = pisMode === "noads";
     var base = (pisMode === "act" || (noAds && pisNaBase === "act")) ? P.act : P.exp;
     var v = noAds ? pisNoAds(base) : base;
     Array.prototype.forEach.call(document.querySelectorAll("#pis-mode [data-pism]"), function(b){
@@ -9209,7 +9290,7 @@
       ? row("− إعلانات" + tag("var"), 0, "", "", v.adsOff > 0.009 ? "متشالة من الحسبة — اتصرف فعلاً " + esc(money(v.adsOff)) : "")
       : row("− إعلانات" + tag("var"), v.ads, "", "", "", v.ads > 0.009 ? "ads" : ""));
     if(v.pack > 0.009) rows.push(row("− تغليف" + tag("var"), v.pack, "", "", "", "pack"));
-    if(Math.abs(v.xloss) > 0.009) rows.push(row("− خسارة استبدال مع المورد" + tag("var"), v.xloss, "", "", "", "xloss"));
+    if(Math.abs(v.xloss) > 0.009) rows.push(row((costTrueUps().some(function(x){ return inRange(x.d, PR); }) ? "− خسارة استبدال وفرق تكلفة" : "− خسارة استبدال مع المورد") + tag("var"), v.xloss, "", "", "", "xloss"));
     if(Math.abs(v.othervar) > 0.009) rows.push(row("− مصاريف متغيّرة تانية" + tag("var"), v.othervar, "", "", "", "othervar"));
     rows.push(row("= ربح الأوردر بعد مصاريف البيع", v.contrib, "sum", "pis-tot"));
     [["subs","اشتراكات"],["salary","مرتبات"],["once","مرة واحدة"],["trans","انتقالات من غير فاتورة"],["other","مصاريف تانية"]].forEach(function(x){
@@ -9304,7 +9385,12 @@
       live("purchases").forEach(function(p){
         if(!p.xloss || !inRange(p.date, r)) return;
         var a = Number(p.xloss)||0; tot += a;
-        L.push({ d:p.date, t:(a > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + esc(p.pno) : "") + " · " + esc(itemName(p.itemId)), v:a });
+        L.push({ d:p.date, t:(a > 0 ? "خسارة " : "مكسب ") + (p.xchg ? "استبدال" : "مرتجع") + (p.pno ? " #" + esc(p.pno) : "") + " · " + esc(itemName(p.itemId)), v:a });
+      });
+      costTrueUps().forEach(function(x){
+        if(!inRange(x.d, r)) return; tot += x.v;
+        var kk = x.k.split("|");
+        L.push({ d:x.d, t:"فرق تكلفة · " + esc(itemName(x.itemId)) + (vLabel(kk[1], kk[2]) ? " · " + esc(vLabel(kk[1], kk[2])) : "") + " <small>(خلص من المخزن وفضل عليه تكلفة)</small>", v:x.v });
       });
       go = "purch"; goTxt = "افتح المشتريات";
     } else {
@@ -10071,6 +10157,7 @@
         isr("تكلفة البضاعة المباعة", "cogs", true) + isr("مجمل الربح", "gross", false, "tot") +
         isr("إعلانات", "ads", true) + isr("شحن مدفوع لشركات الشحن", "sout", true) + isr("تغليف", "pack", true) +
         (M.xloss || A.xloss ? isr("خسارة استبدال", "xloss", true) : "") +
+        (M.othervar || A.othervar ? isr("مصروفات متغيّرة تانية", "othervar", true) : "") +
         isr("إجمالي مصروفات البيع والتسويق", "sell", true, "tot") +
         isr("مصروفات إدارية وعمومية", "admin", true) + isr("صافي الربح (الخسارة)", "net", false, "tot") + "</table>" +
       "<h2>الميزانية العمومية <span style='font-weight:400;font-size:13px;color:var(--lp-soft)'>— كما في " + esc(today()) + "</span></h2>" +
@@ -10078,9 +10165,12 @@
         "<tr><td>الخزنة</td><td class='n'>" + nm(B.cash) + "</td></tr><tr><td>عند شركات الشحن</td><td class='n'>" + nm(B.wallets) + "</td></tr>" +
         (B.recv > 0.5 ? "<tr><td>مديونيات العملاء</td><td class='n'>" + nm(B.recv) + "</td></tr>" : "") +
         (B.supAdv > 0.5 ? "<tr><td>دفعات مقدّمة للموردين</td><td class='n'>" + nm(B.supAdv) + "</td></tr>" : "") +
-        "<tr><td>المخزون بالتكلفة</td><td class='n'>" + nm(B.stock) + "</td></tr><tr class='tot'><td>إجمالي الأصول</td><td class='n'>" + nm(B.assets) + "</td></tr></table>" +
+        "<tr><td>المخزون بالتكلفة</td><td class='n'>" + nm(B.stock) + "</td></tr>" +
+        (B.prepaid > 0.5 ? "<tr><td>مصروفات مدفوعة مقدّماً</td><td class='n'>" + nm(B.prepaid) + "</td></tr>" : "") +
+        "<tr class='tot'><td>إجمالي الأصول</td><td class='n'>" + nm(B.assets) + "</td></tr></table>" +
       "<table class='prt-t'><tr class='sec'><td>الالتزامات وحقوق الملكية</td><td class='n'></td></tr>" +
         "<tr><td>مستحق للموردين</td><td class='n'>" + nm(B.pay) + "</td></tr><tr><td>عرابين عملاء</td><td class='n'>" + nm(B.custAdv) + "</td></tr>" +
+        (B.owed > 0.5 ? "<tr><td>مستحق للشركاء</td><td class='n'>" + nm(B.owed) + "</td></tr>" : "") +
         "<tr><td>رأس مال الشركاء</td><td class='n'>" + nm(B.cap) + "</td></tr>" +
         (Math.abs(B.cur) > 0.5 ? "<tr><td>أرباح ليهم لسه ما اتصرفتش</td><td class='n'>" + nm(B.cur) + "</td></tr>" : "") +
         (Math.abs(B.opening) > 0.5 ? "<tr><td>صافي الأرصدة الافتتاحية</td><td class='n" + cl(B.opening) + "'>" + sg(B.opening) + "</td></tr>" : "") +
@@ -12912,8 +13002,8 @@
     if(avg > 0 && Math.abs(u - avg) > 0.009){
       var diff = (avg - u) * q;
       parts += "<br>تكلفة القطعة عندك " + money(avg) + " والمورد بيرجّع " + money(u) + " — " +
-        (diff > 0 ? "فرق " + money(diff) + " هيفضل على البضاعة اللي فاضلة (النقل مبيرجعش)."
-                  : "المورد بيرجّع أكتر من تكلفتها بـ " + money(-diff) + " — اتأكد من الرقم.");
+        (diff > 0 ? "فرق " + money(diff) + " هيتسجّل «خسارة مرتجع» في مصاريف الفترة."
+                  : "المورد بيرجّع أكتر من تكلفتها بـ " + money(-diff) + " — هيتسجّل مكسب. اتأكد من الرقم.");
     }
     msg.innerHTML = parts;
     msg.className = "note ok";
@@ -12940,11 +13030,15 @@
     if(!(u >= 0)){ toast("اكتب اللي المورد هيرجّعه للقطعة"); return; }
 
     var total = q * u;
+    /* v170: القطع بتخرج بتكلفتها على الرف، والفرق عن اللي المورد رجّعه «خسارة مرتجع» (xloss) —
+       زي الاستبدال بالظبط. قبل كده كانت بتخرج باللي المورد رجّعه والفرق يقعد على المخزون. */
+    var avg = avgCostVB(rec.itemId, c, z), xl = Math.round((avg - u) * q * 100) / 100;
+    if(!(avg > 0)){ avg = u; xl = 0; }
     db.purchases.push(stamp({
       date: date, partyId: rec.partyId, inv: rec.inv || "",
       itemId: rec.itemId, color: c, size: z,
-      packName: "قطعة", packs: -q, packQty: 1, packCost: u,
-      qty: -q, cost: u, freight: 0,
+      packName: "قطعة", packs: -q, packQty: 1, packCost: avg,
+      qty: -q, cost: avg, freight: 0, credit: u, xloss: Math.abs(xl) >= 0.005 ? xl : 0,
       paid: mode === "cash" ? -total : 0,
       isReturn: true, srcId: rec.id, batchId: uid(),
       note: document.getElementById("pr-note").value.trim() || "مرتجع للمورد"
@@ -14005,8 +14099,29 @@
       if(isCancelled(s)){
         if(shipIn(s)) L.push({d:s.date, at:s.at, t:"شحن من عميل", who:who, kind:"شحن",
           note:"أوردر ملغي · "+what, inn:shipIn(s), out:0, src:"أوردر"});
+        /* v170: العربون دخل يوم ما اتدفع ورجع للعميل يوم الإلغاء — الاتنين في التاريخ،
+           والرصيد زي ما هو (الخزنة بتعتبر الملغي فلوسه رجعت) */
+        var dp = Number(s.paid)||0;
+        if(dp > 0.009){
+          L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل", note:"عربون · أوردر ملغي · "+what, inn:dp, out:0, src:"أوردر"});
+          L.push({d:s.cancelledAt || s.date, at:s.at + 2, t:"ردّ عربون", who:who, kind:"تحصيل", note:"رجع للعميل مع الإلغاء · "+what, inn:0, out:dp, src:"أوردر"});
+        }
       } else if(Number(s.paid)||0){
         var pd = Number(s.paid)||0;
+        // v170: دفعات متسجّلة كل واحدة بيومها
+        var pays = Array.isArray(s.pays) ? s.pays.filter(function(x){ return x && x.d && Number(x.a) > 0; }) : [];
+        var sumP = pays.reduce(function(a, x){ return a + Number(x.a); }, 0);
+        if(pays.length && sumP <= pd + 0.009){
+          var via3 = s.selfDel && s.courier ? " · مع " + s.courier : "";
+          if(pd - sumP > 0.009) L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
+            note:(s.selfDel ? "عربون · " : "دفعة أولى · ") + "أوردر "+saleStateTxt(s)+via3+" · "+what, inn:pd - sumP, out:0, src:"أوردر"});
+          pays.forEach(function(x, i){ L.push({d:x.d, at:s.at + 1 + i, t:"تحصيل من عميل", who:who, kind:"تحصيل",
+            note:"دفعة · أوردر "+saleStateTxt(s)+via3+" · "+what, inn:Number(x.a), out:0, src:"أوردر"}); });
+          if(shipCounts(s) && shipOut(s))
+            L.push({d:s.date, at:s.at, t:s.selfDel ? "توصيل" : "شحن مدفوع", who:(s.selfDel ? (s.courier || "مندوب") : (s.shipCo||"شركة شحن")), kind:"شحن",
+              note:"أوردر "+who+" · "+what, inn:0, out:shipOut(s), src:"أوردر"});
+          return;
+        }
         /* توصيل بنفسك: اللي اتحصّل وقت التسليم بيتسجّل يوم ما دخل فعلاً (paidAt)،
            والعربون (لو كان فيه) بيفضل يوم الأوردر */
         var later = s.paidAt ? Math.max(0, Math.min(pd, pd - (Number(s.dep)||0))) : 0;
@@ -18723,6 +18838,19 @@
     saveSoon("sales"); renderAll(); toast("التاريخ بقى " + rec.date);
   });
 
+  /* v170: تحصيل دفعة النهارده. الخزنة بتسجّل كل دفعة يومها (pays)، و«خلص» بتعدّ الأوردر
+     يوم ما اتحصّل آخر قرش (paidAt). قبل كده الدفعات كلها كانت بتتسجّل في يوم آخر دفعة،
+     والدفعة القديمة (قبل الإصدار ده) بتتحفظ بيومها الأول. */
+  function addPay(rec, add){
+    if(!rec.paidAt) rec.dep = Number(rec.paid)||0;
+    if(!Array.isArray(rec.pays)){
+      var prev = Math.round(((Number(rec.paid)||0) - (Number(rec.dep)||0)) * 100) / 100;
+      rec.pays = rec.paidAt && prev > 0.009 ? [{ d:rec.paidAt, a:prev }] : [];
+    }
+    rec.pays.push({ d:today(), a:Math.round(add * 100) / 100 });
+    rec.paid = (Number(rec.paid)||0) + add;
+    rec.paidAt = today();
+  }
   /* تحصيل سريع: العميل دفع الباقي وإنت واقف في الجدول.
      نفس الحواجز اللي في الدرج — الفترة المقفولة، وشحن من غير اسم شركة. */
   function quickPay(id, all){
@@ -18738,10 +18866,7 @@
     var add = all ? due : Number(toEn(box ? box.value : ""))||0;
     if(!(add > 0)){ toast("اكتب المبلغ اللي اتحصّل"); if(box) box.focus(); return; }
     if(add > due + 0.009){ toast("المبلغ أكبر من الباقي (" + money(due) + ")"); return; }
-    // يوم التحصيل: الخزنة بتسجّله يومها، و«خلص» بتعدّ الأوردر يوم ما اتحصّل آخر قرش
-    if(!rec.paidAt) rec.dep = Number(rec.paid)||0;
-    rec.paid = (Number(rec.paid)||0) + add;
-    rec.paidAt = today();
+    addPay(rec, add);
     rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll();
     var left = due - add;
@@ -18887,7 +19012,7 @@
           var due = saleTotal(rec) + shipIn(rec) - (Number(rec.paid)||0);
           // أوردر الشركة: العميل دفع للمندوب وقت الاستلام — بيتسجّل لوحده
           if(viaShip(rec)){ var b1 = Number(rec.paid)||0; if(syncShipPaid(rec)){ touched = true; shipPaid(rec, b1); } }
-          else if(due > 0.009){ rec.paid = (Number(rec.paid)||0) + due; money_ += due; nPay++; touched = true; }
+          else if(due > 0.009){ addPay(rec, due); money_ += due; nPay++; touched = true; }
         }
       }
       if(touched){ rec.editedBy = me || "غير محدد"; rec.at = Date.now(); }
@@ -21436,7 +21561,7 @@
     bounds.sort();
     return bounds.map(function(a, i){
       var b = (i + 1 < bounds.length) ? addDays(bounds[i+1], -1) : to;
-      return { from:a, to:b, days: daysBetween(a,b) + 1,
+      return { from:a, to:b, days: daysBetween(a,b) + 1, empty: !(totalCapital(a) > 0),
                ratios: partners().map(function(p){ return ratioOf(p.id, a); }) };
     });
   }
@@ -21444,13 +21569,14 @@
   function renderWhy(from, to){
     var ps = partners();
     var segs = ratioSegments(from, to);
-    var total = daysBetween(from, to) + 1;
+    var total = segs.reduce(function(a, sg){ return a + (sg.empty ? 0 : sg.days); }, 0);
     var head = ["الشريحة","أيامها"].concat(ps.map(function(p){ return p.name; }));
     var rows = segs.map(function(sg){
       return "<tr><td class='wide'>" + esc(sg.from) + " → " + esc(sg.to) + "</td>" +
         "<td class='num'>" + qty(sg.days) + "</td>" +
-        sg.ratios.map(function(r){
-          return "<td class='num'>" + (r*100).toFixed(2) + "%</td>"; }).join("") + "</tr>";
+        (sg.empty ? "<td colspan='" + ps.length + "' class='sub'>مفيش رأس مال لسه — مش داخلة في القسمة</td>"
+          : sg.ratios.map(function(r){
+          return "<td class='num'>" + (r*100).toFixed(2) + "%</td>"; }).join("")) + "</tr>";
     });
     rows.push("<tr style='background:var(--teal-soft)'>" +
       "<td class='wide' style='font-weight:600'>المرجّح بالزمن</td>" +
