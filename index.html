@@ -1481,6 +1481,9 @@
     padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-3)}
   .rsn-ask b{color:var(--due)}
   .rsn-ask .quick{display:flex;flex-wrap:wrap;gap:4px}
+  .ship-ask .sub{color:var(--ink-soft);font-size:var(--fs-2)}
+  .ship-ask .sq-part{display:flex;gap:4px;align-items:center}
+  .ship-ask .sq-part input{width:110px}
   #t-cfo-src tr.cfo-src-na td{color:var(--ink-soft)}
   /* v143: تكلفة التشغيل في الحاسبة — السطر بيفتح التفصيل */
   .pc-op > summary{list-style:none;cursor:pointer}
@@ -4131,8 +4134,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "170";
+  var VERSION = "171";
   var CHANGELOG = [
+    { v:"171", d:"2026-10-22", items:[
+      "أوردر مع شركة شحن اترفض: السيستم بيسألك «العميل دفع كام من الشحن؟» — دفع كله · ما دفعش · دفع جزء — بدل ما يفترض إنه دفع الشحن كله. السؤال بيفضل على الأوردر (في التفاصيل وفوق المراحل والرئيسية) لحد ما تجاوب"
+    ]},
     { v:"170", d:"2026-10-22", items:[
       "مرتجع للمورد بأقل من التكلفة: القطع بتخرج من المخزن بتكلفتها والفرق بيتسجّل «خسارة مرتجع» — قبل كده الفرق كان بيقعد على المخزون حتى لو كل القطع رجعت",
       "أوردر اتلغى وعليه عربون: الخزنة بتبيّن العربون يوم ما اتدفع، وردّه للعميل يوم الإلغاء — بدل ما يختفي من تاريخ الخزنة",
@@ -5981,10 +5987,55 @@
     return "أهلاً " + (squish(p.name) || "") + "، معاك Lora Collection. بنأكد أوردرك: " + its +
       " — الإجمالي " + (Math.round(total)||0).toLocaleString("en-US") + " جنيه شامل الشحن. نشحنه النهارده؟";
   }
+  /* v171 — الرفض مع شركة شحن: العميل ساعات بيدفع الشحن كله وساعات جزء وساعات ولا حاجة.
+     قبل كده السيستم كان بيفترض إنه دفع اللي عليه، فالكشف بيطلع مختلف. shipQ = الشحن اللي كان
+     عليه، وبيفضل على الأوردر لحد ما تجاوب — فالسؤال ما يضيعش لو قفلت أو عملت refresh. */
+  function markShipQ(rec){
+    if(stOf(rec) === "cancelled" && viaShip(rec) && !rec.preCancel && (Number(rec.shipIn)||0) > 0){ if(!rec.shipQ) rec.shipQ = Number(rec.shipIn); }
+    else delete rec.shipQ;
+  }
+  function shipQList(){ return live("sales").filter(function(x){ return x.shipQ && isCancelled(x); }); }
+  function shipAskHTML(r){
+    if(!r || !r.shipQ || !isCancelled(r) || !canEdit() || saleLocked(r)) return "";
+    var q = Number(r.shipQ)||0, co = squish(r.shipCo) || "الشركة";
+    return "<div class='rsn-ask ship-ask' role='group' aria-label='الشحن'><b>#" + esc(r.no || "") + " " + esc(partyName(r.partyId)) +
+        " اترفض — العميل دفع كام من الشحن؟</b><span class='sub'>كان عليه <span class='num'>" + esc(qty(q)) + "</span> · " +
+        esc(co) + " واخدة <span class='num'>" + esc(qty(shipOut(r))) + "</span></span>" +
+      "<span class='quick'><button type='button' data-shipq='" + esc(r.id) + "|all'>دفع كله <span class='num'>" + esc(qty(q)) + "</span></button>" +
+        "<button type='button' data-shipq='" + esc(r.id) + "|0'>ما دفعش</button></span>" +
+      "<span class='sq-part'><input type='number' inputmode='decimal' min='0' max='" + q + "' step='any' data-shipqv='" + esc(r.id) +
+        "' placeholder='دفع جزء…' aria-label='العميل دفع كام' autocomplete='off'><button type='button' class='tbtn' data-shipq='" + esc(r.id) + "|part'>سجّل</button></span></div>";
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest ? e.target.closest("[data-shipq]") : null; if(!t) return;
+    var a = t.dataset.shipq.split("|"), r = db.sales.find(function(x){ return x.id === a[0]; });
+    if(!r || !r.shipQ) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(saleLocked(r)){ toast("الأوردر ده في فترة مقفولة — مينفعش يتعدّل"); return; }
+    var q = Number(r.shipQ)||0, v = a[1] === "all" ? q : 0;
+    if(a[1] === "part"){
+      var box = t.parentNode.querySelector("[data-shipqv]"), raw = box ? toEn(box.value).trim() : "";
+      v = Number(raw);
+      if(raw === "" || !(v >= 0)){ toast("اكتب العميل دفع كام"); if(box) box.focus(); return; }
+      if(v > q + 0.009){ toast("كان عليه " + money(q) + " بس"); if(box) box.focus(); return; }
+    }
+    r.shipIn = Math.round(v * 100) / 100; delete r.shipQ;
+    r.editedBy = me || "غير محدد"; r.at = Date.now();
+    pendCache = null; saveSoon("sales"); renderAll();
+    var net = r.shipIn - shipOut(r);
+    toast("#" + (r.no || "") + ": العميل دفع " + money(r.shipIn) + " من الشحن · " +
+      (net < -0.009 ? "عليك " + money(-net) + " لـ " + (squish(r.shipCo) || "الشركة") : "مفيش عليك حاجة"), 4200);
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "Enter" || !e.target.matches || !e.target.matches("[data-shipqv]")) return;
+    e.preventDefault(); var b = e.target.parentNode.querySelector("[data-shipq]"); if(b) b.click();
+  });
   // سبب الرفض: بيظهر فوق لوحة المراحل لما أوردر يترفض منها، لحد ما تختار أو تقفله
   var rsnAsk = null;
   function rsnAskHTML(){
     var r = rsnAsk && db.sales.find(function(x){ return x.id === rsnAsk; });
+    if(r && r.shipQ) return shipAskHTML(r);                          // الشحن الأول وبعدين السبب
+    var q1 = shipQList()[0]; if(q1) return shipAskHTML(q1);
     if(!r || !isCancelled(r) || r.rsn){ rsnAsk = null; return ""; }
     return "<div class='rsn-ask' role='group' aria-label='سبب الرفض'><b>#" + esc(r.no || "") + " اتلغى — السبب؟</b>" +
       "<span class='quick'>" + RSN.map(function(x){ return "<button type='button' data-rsnset='" + esc(r.id) + "|" + x[0] + "'>" + x[1] + "</button>"; }).join("") + "</span>" +
@@ -7404,6 +7455,10 @@
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة ابو العيون", s:"25 «كلوجز شريطة» · 5,750 من الخزنة — دوسة واحدة", v:"", go:"purch" });
     if(canTab("purch") && fix153Pending())
       line({ ic:"box", cls:"warn", t:"سجّل فاتورة احمد اوطه", s:"10 «كلوجز هاند ميد شبكة» · 1,600 من الخزنة — دوسة واحدة", v:"", go:"purch" });
+    var sq = canEdit() ? shipQList() : [];
+    if(canTab("sales") && sq.length)
+      line({ ic:"truck", cls:"warn", t:sq.length === 1 ? "#" + (sq[0].no || "") + " اترفض — العميل دفع كام من الشحن؟" : sq.length + " أوردرات اترفضت — العملاء دفعوا كام من الشحن؟",
+             s:sq.map(function(x){ return "#" + (x.no || ""); }).join(" · ") + " · دوسة على كل واحد", v:"", go:"sales" });
     if(canTab("ship") && fix165Pending())
       line({ ic:"truck", cls:"bad", t:"صحّح استلام QP 20/10", s:"#78 اتسجّل 15 بدل 300 · الخزنة ناقصة 185 عن الكشف — دوسة واحدة", v:"", go:"ship" });
     if(canTab("ship") && fix163Pending())
@@ -11908,7 +11963,7 @@
     }).join("");
 
     return "<tr class='detail' data-detail='" + s.id + "'><td colspan='" + SALE_HEAD.length + "'><div class='detail-in dd'>" +
-      head + step +
+      head + (ed ? shipAskHTML(s) : "") + step +
       "<div class='dd-cards'>" + cust + money_ + tl + "</div>" +
       "<div class='dd-items'><h5>الأصناف</h5>" + items + "</div>" +
       "</div></td></tr>";
@@ -19000,7 +19055,7 @@
         }
         var b0 = Number(rec.paid)||0;
         rec.rsn = ""; if(want !== "progress" && rec.cf === "nr"){ rec.cf = ""; rec.cfAt = ""; }
-        rec.status = want; if(preCancelFix(rec)) nLost.push("#" + (rec.no || "")); stampDelivery(rec); syncShipPaid(rec); touched = true; nDeliv++;
+        rec.status = want; if(preCancelFix(rec)) nLost.push("#" + (rec.no || "")); stampDelivery(rec); markShipQ(rec); syncShipPaid(rec); touched = true; nDeliv++;
         shipPaid(rec, b0);
       }
 
@@ -20106,6 +20161,7 @@
     rec.status = next; rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     var shipLost = preCancelFix(rec);
     stampDelivery(rec);
+    markShipQ(rec);                // اترفض مع شركة: اسأل العميل دفع كام من الشحن
     syncShipPaid(rec);             // أوردر الشركة: استلم = دفع للمندوب
     syncSelfPaid(rec, paidBefore); // توصيل بنفسك: استلم = دفع والفلوس دخلت الخزنة
     renderAll(); saveSoon("sales");
