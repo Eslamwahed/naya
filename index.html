@@ -4131,8 +4131,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "169";
+  var VERSION = "170";
   var CHANGELOG = [
+    { v:"170", d:"2026-10-22", items:[
+      "مرتجع للمورد بأقل من التكلفة: القطع بتخرج من المخزن بتكلفتها والفرق بيتسجّل «خسارة مرتجع» — قبل كده الفرق كان بيقعد على المخزون حتى لو كل القطع رجعت",
+      "أوردر اتلغى وعليه عربون: الخزنة بتبيّن العربون يوم ما اتدفع، وردّه للعميل يوم الإلغاء — بدل ما يختفي من تاريخ الخزنة",
+      "يومية التحصيل: العميل اللي بيدفع على كذا دفعة، كل دفعة بتتسجّل يومها بدل ما يتجمعوا في آخر يوم"
+    ]},
     { v:"169", d:"2026-10-22", items:[
       "إصلاح تكلفة البضاعة: القطعة اللي بتتسلّم بتاخد متوسط تكلفة اللي لسه في المخزن بس (متوسط متحرّك) — قبل كده كانت بتاخد متوسط كل اللي اتشرى من الأول، فلو اشتريت نفس الصنف تاني بسعر أعلى بعد ما بعت منه، الربح كان بيطلع أكبر والمخزون يفضل له قيمة وهو فاضي",
       "الصنف اللي خلص من المخزن وفضل عليه تكلفة (مشوار نقل اتسجّل بعد ما البضاعة اتباعت مثلًا) الفرق بيتحسب «فرق تكلفة» في يوم آخر حركة عليه بدل ما يقعد قيمة مخزون وهمية",
@@ -7662,7 +7667,7 @@
           note:"فيسبوك صرف من " + dShort(s.from) + " لـ " + dShort(s.to) + " (مطابقة)" }; }).filter(function(x){ return Math.abs(x.amount) > 0.004; }))
         .concat(live("purchases").filter(function(p){ return p.xloss && inRange(p.date, r); })
           .map(function(p){ return { date:p.date, at:p.at, partyId:p.partyId, amount:p.xloss,
-            note:(p.xloss > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
+            note:(p.xloss > 0 ? "خسارة " : "مكسب ") + (p.xchg ? "استبدال" : "مرتجع") + (p.pno ? " #" + p.pno : "") + " · " + itemName(p.itemId) }; }))
         .sort(byDate).map(function(c){
         return "<tr><td class='num'>" + esc(c.date||"—") + "</td>" +
           "<td class='wide'>" + (esc(squish(c.note)) || "بدون بيان") + (c.type === "expense" ? "<span class='sub'>" + esc(EXP_CAT[expCat(c)].label) + "</span>" : "") + "</td>" +
@@ -9380,7 +9385,7 @@
       live("purchases").forEach(function(p){
         if(!p.xloss || !inRange(p.date, r)) return;
         var a = Number(p.xloss)||0; tot += a;
-        L.push({ d:p.date, t:(a > 0 ? "خسارة استبدال" : "مكسب استبدال") + (p.pno ? " #" + esc(p.pno) : "") + " · " + esc(itemName(p.itemId)), v:a });
+        L.push({ d:p.date, t:(a > 0 ? "خسارة " : "مكسب ") + (p.xchg ? "استبدال" : "مرتجع") + (p.pno ? " #" + esc(p.pno) : "") + " · " + esc(itemName(p.itemId)), v:a });
       });
       costTrueUps().forEach(function(x){
         if(!inRange(x.d, r)) return; tot += x.v;
@@ -12997,8 +13002,8 @@
     if(avg > 0 && Math.abs(u - avg) > 0.009){
       var diff = (avg - u) * q;
       parts += "<br>تكلفة القطعة عندك " + money(avg) + " والمورد بيرجّع " + money(u) + " — " +
-        (diff > 0 ? "فرق " + money(diff) + " هيفضل على البضاعة اللي فاضلة (النقل مبيرجعش)."
-                  : "المورد بيرجّع أكتر من تكلفتها بـ " + money(-diff) + " — اتأكد من الرقم.");
+        (diff > 0 ? "فرق " + money(diff) + " هيتسجّل «خسارة مرتجع» في مصاريف الفترة."
+                  : "المورد بيرجّع أكتر من تكلفتها بـ " + money(-diff) + " — هيتسجّل مكسب. اتأكد من الرقم.");
     }
     msg.innerHTML = parts;
     msg.className = "note ok";
@@ -13025,11 +13030,15 @@
     if(!(u >= 0)){ toast("اكتب اللي المورد هيرجّعه للقطعة"); return; }
 
     var total = q * u;
+    /* v170: القطع بتخرج بتكلفتها على الرف، والفرق عن اللي المورد رجّعه «خسارة مرتجع» (xloss) —
+       زي الاستبدال بالظبط. قبل كده كانت بتخرج باللي المورد رجّعه والفرق يقعد على المخزون. */
+    var avg = avgCostVB(rec.itemId, c, z), xl = Math.round((avg - u) * q * 100) / 100;
+    if(!(avg > 0)){ avg = u; xl = 0; }
     db.purchases.push(stamp({
       date: date, partyId: rec.partyId, inv: rec.inv || "",
       itemId: rec.itemId, color: c, size: z,
-      packName: "قطعة", packs: -q, packQty: 1, packCost: u,
-      qty: -q, cost: u, freight: 0,
+      packName: "قطعة", packs: -q, packQty: 1, packCost: avg,
+      qty: -q, cost: avg, freight: 0, credit: u, xloss: Math.abs(xl) >= 0.005 ? xl : 0,
       paid: mode === "cash" ? -total : 0,
       isReturn: true, srcId: rec.id, batchId: uid(),
       note: document.getElementById("pr-note").value.trim() || "مرتجع للمورد"
@@ -14090,8 +14099,29 @@
       if(isCancelled(s)){
         if(shipIn(s)) L.push({d:s.date, at:s.at, t:"شحن من عميل", who:who, kind:"شحن",
           note:"أوردر ملغي · "+what, inn:shipIn(s), out:0, src:"أوردر"});
+        /* v170: العربون دخل يوم ما اتدفع ورجع للعميل يوم الإلغاء — الاتنين في التاريخ،
+           والرصيد زي ما هو (الخزنة بتعتبر الملغي فلوسه رجعت) */
+        var dp = Number(s.paid)||0;
+        if(dp > 0.009){
+          L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل", note:"عربون · أوردر ملغي · "+what, inn:dp, out:0, src:"أوردر"});
+          L.push({d:s.cancelledAt || s.date, at:s.at + 2, t:"ردّ عربون", who:who, kind:"تحصيل", note:"رجع للعميل مع الإلغاء · "+what, inn:0, out:dp, src:"أوردر"});
+        }
       } else if(Number(s.paid)||0){
         var pd = Number(s.paid)||0;
+        // v170: دفعات متسجّلة كل واحدة بيومها
+        var pays = Array.isArray(s.pays) ? s.pays.filter(function(x){ return x && x.d && Number(x.a) > 0; }) : [];
+        var sumP = pays.reduce(function(a, x){ return a + Number(x.a); }, 0);
+        if(pays.length && sumP <= pd + 0.009){
+          var via3 = s.selfDel && s.courier ? " · مع " + s.courier : "";
+          if(pd - sumP > 0.009) L.push({d:s.date, at:s.at, t:"تحصيل من عميل", who:who, kind:"تحصيل",
+            note:(s.selfDel ? "عربون · " : "دفعة أولى · ") + "أوردر "+saleStateTxt(s)+via3+" · "+what, inn:pd - sumP, out:0, src:"أوردر"});
+          pays.forEach(function(x, i){ L.push({d:x.d, at:s.at + 1 + i, t:"تحصيل من عميل", who:who, kind:"تحصيل",
+            note:"دفعة · أوردر "+saleStateTxt(s)+via3+" · "+what, inn:Number(x.a), out:0, src:"أوردر"}); });
+          if(shipCounts(s) && shipOut(s))
+            L.push({d:s.date, at:s.at, t:s.selfDel ? "توصيل" : "شحن مدفوع", who:(s.selfDel ? (s.courier || "مندوب") : (s.shipCo||"شركة شحن")), kind:"شحن",
+              note:"أوردر "+who+" · "+what, inn:0, out:shipOut(s), src:"أوردر"});
+          return;
+        }
         /* توصيل بنفسك: اللي اتحصّل وقت التسليم بيتسجّل يوم ما دخل فعلاً (paidAt)،
            والعربون (لو كان فيه) بيفضل يوم الأوردر */
         var later = s.paidAt ? Math.max(0, Math.min(pd, pd - (Number(s.dep)||0))) : 0;
@@ -18808,6 +18838,19 @@
     saveSoon("sales"); renderAll(); toast("التاريخ بقى " + rec.date);
   });
 
+  /* v170: تحصيل دفعة النهارده. الخزنة بتسجّل كل دفعة يومها (pays)، و«خلص» بتعدّ الأوردر
+     يوم ما اتحصّل آخر قرش (paidAt). قبل كده الدفعات كلها كانت بتتسجّل في يوم آخر دفعة،
+     والدفعة القديمة (قبل الإصدار ده) بتتحفظ بيومها الأول. */
+  function addPay(rec, add){
+    if(!rec.paidAt) rec.dep = Number(rec.paid)||0;
+    if(!Array.isArray(rec.pays)){
+      var prev = Math.round(((Number(rec.paid)||0) - (Number(rec.dep)||0)) * 100) / 100;
+      rec.pays = rec.paidAt && prev > 0.009 ? [{ d:rec.paidAt, a:prev }] : [];
+    }
+    rec.pays.push({ d:today(), a:Math.round(add * 100) / 100 });
+    rec.paid = (Number(rec.paid)||0) + add;
+    rec.paidAt = today();
+  }
   /* تحصيل سريع: العميل دفع الباقي وإنت واقف في الجدول.
      نفس الحواجز اللي في الدرج — الفترة المقفولة، وشحن من غير اسم شركة. */
   function quickPay(id, all){
@@ -18823,10 +18866,7 @@
     var add = all ? due : Number(toEn(box ? box.value : ""))||0;
     if(!(add > 0)){ toast("اكتب المبلغ اللي اتحصّل"); if(box) box.focus(); return; }
     if(add > due + 0.009){ toast("المبلغ أكبر من الباقي (" + money(due) + ")"); return; }
-    // يوم التحصيل: الخزنة بتسجّله يومها، و«خلص» بتعدّ الأوردر يوم ما اتحصّل آخر قرش
-    if(!rec.paidAt) rec.dep = Number(rec.paid)||0;
-    rec.paid = (Number(rec.paid)||0) + add;
-    rec.paidAt = today();
+    addPay(rec, add);
     rec.editedBy = me || "غير محدد"; rec.at = Date.now();
     saveSoon("sales"); renderAll();
     var left = due - add;
@@ -18972,7 +19012,7 @@
           var due = saleTotal(rec) + shipIn(rec) - (Number(rec.paid)||0);
           // أوردر الشركة: العميل دفع للمندوب وقت الاستلام — بيتسجّل لوحده
           if(viaShip(rec)){ var b1 = Number(rec.paid)||0; if(syncShipPaid(rec)){ touched = true; shipPaid(rec, b1); } }
-          else if(due > 0.009){ rec.paid = (Number(rec.paid)||0) + due; money_ += due; nPay++; touched = true; }
+          else if(due > 0.009){ addPay(rec, due); money_ += due; nPay++; touched = true; }
         }
       }
       if(touched){ rec.editedBy = me || "غير محدد"; rec.at = Date.now(); }
