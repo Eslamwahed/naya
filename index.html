@@ -2004,6 +2004,13 @@
     color:var(--teal);font:inherit;font-size:var(--fs-2);font-weight:500;
     padding:var(--sp-2);cursor:pointer;width:100%;margin-top:var(--sp-1)}
   .addmix:hover{border-color:var(--teal);border-style:solid;background:var(--teal-soft)}
+  /* v173: مفتاح أجزاء الشاشة تحت العنوان */
+  .pseg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:3px;border:1px solid var(--line);border-radius:99px;background:var(--card);margin:0 0 var(--sp-3);max-width:100%}
+  .pseg[hidden]{display:none}
+  .pseg button{font:inherit;font-size:var(--fs-3);border:0;background:none;border-radius:99px;padding:6px 16px;min-height:36px;color:var(--ink-soft);cursor:pointer;touch-action:manipulation}
+  .pseg button:hover{color:var(--ink);background:var(--teal-soft)}
+  .pseg button[aria-pressed="true"]{background:var(--teal);color:var(--card);font-weight:700;cursor:default}
+  .pseg button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
   .seg{display:flex;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;background:var(--card)}
   .seg button{flex:1;background:none;border:none;font:inherit;font-size:var(--fs-3);
     padding:var(--sp-2) var(--sp-1);color:var(--ink-soft);cursor:pointer;transition:background .12s,color .12s}
@@ -2372,7 +2379,7 @@
     <button type="button" data-group="orders"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-box"/></svg></span><span class="lb">الأوردرات</span><span class="badge" id="nav-badge" hidden></span></button>
     <button type="button" data-group="goods"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-hanger"/></svg></span><span class="lb">البضاعة</span></button>
     <button type="button" data-group="money"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-wallet"/></svg></span><span class="lb">الفلوس</span></button>
-    <button type="button" data-group="more"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-receipt"/></svg></span><span class="lb">التحليل</span></button>
+    <button type="button" data-group="more"><span class="ic" aria-hidden="true"><svg class="i"><use href="#i-receipt"/></svg></span><span class="lb">التقارير</span></button>
   </div>
   <div class="who">
     <span id="save-pill" class="savep" role="status">محفوظ</span>
@@ -2401,25 +2408,26 @@
          data-also = شاشة تانية بتتحسب على نفس الزرار، nav-alias = زرار مخفي عشان goTab بس -->
     <button data-tab="dash" data-grp="home" aria-current="true">الرئيسية</button>
     <button data-tab="sales" data-grp="orders">الأوردرات</button>
-    <button data-tab="parties" data-grp="orders" data-sub="customer">العملاء</button>
     <button data-tab="ship" data-grp="orders">شركات الشحن</button>
+    <button data-tab="parties" data-grp="orders" data-sub="customer">العملاء</button>
     <button data-tab="inv" data-grp="goods">المخزون</button>
     <button data-tab="items" data-grp="goods" data-also="price">الأصناف والتسعير</button>
     <button data-tab="price" data-grp="goods" class="nav-alias">التسعير</button>
-    <button data-tab="purch" data-grp="goods">المشتريات</button>
-    <button data-tab="parties" data-grp="goods" data-sub="supplier">الموردين</button>
+    <button data-tab="purch" data-grp="goods">المشتريات والموردين</button>
+    <button data-tab="parties" data-grp="goods" data-sub="supplier" class="nav-alias" data-mark="purch">الموردين</button>
     <button data-tab="cash" data-grp="money">الخزنة</button>
     <button data-tab="capital" data-grp="money">الشركاء</button>
     <button data-tab="prepaid" data-grp="money" class="money-only">المدفوع مقدّماً</button>
+    <!-- v173: التقارير ٤ شاشات — الأجزاء التانية زراير مخفية (data-mark = الزرار اللي بيتعلّم) والتنقل بينها من المفتاح تحت العنوان -->
     <button data-tab="rep" data-grp="more" data-sub="sum">قايمة الدخل</button>
-    <button data-tab="rep" data-grp="more" data-sub="fin" class="money-only">القوايم المالية</button>
-    <button data-tab="rep" data-grp="more" data-sub="cfo" class="money-only">المدير المالي</button>
-    <button data-tab="rep" data-grp="more" data-sub="items">الأصناف</button>
-    <button data-tab="rep" data-grp="more" data-sub="cust">العملاء والمحافظات</button>
-    <button data-tab="rep" data-grp="more" data-sub="team">الفريق</button>
-    <button data-tab="viz" data-grp="more">رسومات</button>
+    <button data-tab="viz" data-grp="more" class="nav-alias" data-mark="rep|sum">رسومات</button>
+    <button data-tab="rep" data-grp="more" data-sub="fin" class="money-only">الميزانية</button>
+    <button data-tab="rep" data-grp="more" data-sub="items">الأداء</button>
+    <button data-tab="rep" data-grp="more" data-sub="cust" class="nav-alias" data-mark="rep|items">العملاء والمحافظات</button>
+    <button data-tab="rep" data-grp="more" data-sub="team" class="nav-alias" data-mark="rep|items">الفريق</button>
     <button data-tab="coach" data-grp="more">ماشي إزاي؟</button>
-    <button data-tab="audit" data-grp="more" class="money-only">مراجع الحسابات</button>
+    <button data-tab="rep" data-grp="more" data-sub="cfo" class="money-only nav-alias" data-mark="coach">المدير المالي</button>
+    <button data-tab="audit" data-grp="more" class="money-only nav-alias" data-mark="coach">مراجع الحسابات</button>
     <button data-tab="log" data-grp="menu" class="nav-alias">سجل الحركات</button>
     <button data-tab="backup" data-grp="menu" class="nav-alias">الإعدادات</button>
   </div>
@@ -2669,7 +2677,8 @@
 
 <!-- مشتريات -->
 <section id="tab-purch" hidden>
-  <h2>مشتريات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <h2>المشتريات والموردين<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <p class="hint" data-infotxt hidden>الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
   <div class="tbar">
     <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
@@ -3096,10 +3105,11 @@
 <!-- العملاء والموردين -->
 <section id="tab-parties" hidden>
   <div class="pt-head">
-    <h2>العملاء والموردين</h2>
+    <h2 id="pt-title">العملاء</h2>
     <button class="tbtn primary" type="button" data-openentry="parties">+ عميل أو مورد</button>
   </div>
-  <div class="pt-tabs" id="pt-tabs" role="tablist" aria-label="عملاء أو موردين"></div>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
+  <div class="pt-tabs" id="pt-tabs" role="tablist" aria-label="عملاء أو موردين" hidden></div>
   <div class="toolbar">
     <div class="s-search">
       <input id="pt-q" type="search" placeholder="دوّر بالاسم أو التليفون أو المحافظة…" autocomplete="off">
@@ -3473,6 +3483,7 @@
 <!-- التقارير -->
 <section id="tab-rep" hidden>
   <h2>تقارير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <p class="hint" data-infotxt hidden>كل الأرقام هنا بتتبع نفس فترة لوحة المتابعة.</p>
   <div class="panel" style="padding:12px 14px">
     <div class="grid" style="align-items:end">
@@ -3657,7 +3668,8 @@
 <!-- السجل -->
 <!-- v123 — رسومات: نفس أرقام قايمة الدخل في شكل رسمة -->
 <section id="tab-viz" hidden>
-  <h2>رسومات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <h2>قايمة الدخل<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pseg" role="group" aria-label="العرض" hidden></div>
   <p class="hint" data-infotxt hidden>نفس أرقام «قايمة الدخل» في التقارير بس في شكل رسمة، وبتتحدّث لوحدها بعد كل حركة. قف على أي عمود (أو دوس عليه في الموبايل) تشوف تفاصيله. كل بند ليه لون واحد في كل الرسومات — الإعلان أخضر في التلاتة.</p>
   <div class="panel" style="padding:12px 14px">
     <div class="grid" style="align-items:end">
@@ -3714,8 +3726,9 @@
 
 <!-- v121: ماشي إزاي؟ — تقييم الشغل من الحركات نفسها، بيتحدّث بعد كل حركة -->
 <section id="tab-audit" hidden>
-  <h2>مراجع الحسابات <button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <h2>ماشي إزاي؟ <button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
   <p class="hint" data-infotxt hidden>السيستم بيراجع كل حساباتك لوحده كل ما تفتحه: المصاريف ومعالجتها، الأوردرات وشركات الشحن، المخزون، والميزانية. الفحص بيقرا بس — مش بيغيّر حاجة. دوس على أي مشكلة تشوف الأوردرات أو المصاريف اللي فيها، ودوس على السطر يفتحهولك تصلّحه.</p>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <div id="aud-why"></div>
   <div class="aud-sum" id="aud-sum"></div>
   <div id="aud-body"></div>
@@ -3729,10 +3742,11 @@
       <button type="button" data-coper="all" class="on">من البداية</button>
     </div></div>
   <p class="hint" data-infotxt hidden>الشاشة دي بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وتعمل إيه. بتتحدّث لوحدها بعد كل حركة. المسطرة: <strong>هامش البضاعة</strong> ✓ 40% أو أكتر · ✗ أقل من 30% — <strong>الإعلان على الأوردر</strong> (مصاريف الخزنة اللي نوعها «إعلانات») ✓ أقل من تلت ربح بضاعة الأوردر · ✗ أكتر من النص — <strong>الشحن</strong> ✓ العميل بيدفع زي الشركة · ✗ أكتر من 25 من جيبك في الأوردر — <strong>الرفض والإلغاء</strong> بيتحسب من 5 أوردرات خلصوا: ✓ أقل من 10% · ✗ 20% أو أكتر.</p>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <div id="co-verdict"></div>
   <div class="panel"><h3 style="margin-top:0">مؤشراتك</h3><div class="co-tiles" id="co-tiles"></div></div>
   <div class="co-two"><div class="panel" id="co-good"></div><div class="panel" id="co-bad"></div></div>
-  <div class="panel"><h3 style="margin-top:0">اعمل إيه النهارده</h3><div class="co-todo" id="co-todo"></div></div>
+  <div class="panel"><h3 style="margin-top:0">نصايح المشتريات</h3><div class="co-todo" id="co-todo"></div></div>
   <div class="panel"><h3 style="margin-top:0">فلوسك فين <span id="co-bal-badge"></span></h3><div class="co-bal" id="co-bal"></div></div>
 </section>
 
@@ -4131,8 +4145,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "172";
+  var VERSION = "173";
   var CHANGELOG = [
+    { v:"173", d:"2026-10-25", items:[
+      "ترتيب جديد: 14 شاشة بدل 23 — «التحليل» بقى «التقارير» فيه 4 بس: قايمة الدخل (جدول ↔ رسمة) · الميزانية · الأداء (الأصناف · العملاء والمحافظات · الفريق) · ماشي إزاي؟ (مؤشراتك · القرارات والمخاطر · الحسابات سليمة؟)",
+      "«المشتريات والموردين» شاشة واحدة: الفواتير ↔ الموردين بمفتاح تحت العنوان",
+      "المهام اليومية في الرئيسية بس — «ماشي إزاي؟» فيها نصايح المشتريات (اطلب تاني · ما تشتريش) من غير ما تكرر المهام",
+      "مفيش أي رقم ولا صلاحية اتغيّرت — الشاشات نفسها زي ما هي، اتجمعت بس"
+    ]},
     { v:"172", d:"2026-10-25", items:[
       "تنضيف من جوه: اتشالت كروت التصحيح اللي اتطبّقت خلاص (16 كارت)، وسجل التغييرات هنا بقى من إصدار 142 — القديم في ملف CHANGELOG.md على GitHub. مفيش أي رقم اتغيّر"
     ]},
@@ -4276,7 +4296,7 @@
      بتتحفظ مع الأصناف. */
   var PERM_GROUPS = [
     ["الرئيسية", ["dash"]], ["الأوردرات", ["sales", "ship", "parties"]], ["البضاعة", ["inv", "items", "purch"]],
-    ["الفلوس", ["cash", "capital", "prepaid"]], ["التحليل", ["rep", "viz", "coach", "audit"]], ["من قايمة اسمك", ["log", "backup"]]
+    ["الفلوس", ["cash", "capital", "prepaid"]], ["التقارير", ["rep", "viz", "coach", "audit"]], ["من قايمة اسمك", ["log", "backup"]]
   ];
   var PERM_KEYS = TABS.map(function(t){ return t[0]; }).filter(function(k){ return k !== "price"; });
   function permCount(u){ return (u.tabs || []).filter(function(t){ return PERM_KEYS.indexOf(t) > -1; }).length; }
@@ -8854,7 +8874,7 @@
     var rs = sec.querySelector(".rsecs");
     if(rs) rs.classList.toggle("rt-off", !rs.querySelector("[data-rt]:not(.rt-off)"));
   }
-  var REP_TITLE = { sum:"قايمة الدخل", fin:"القوايم المالية", cfo:"المدير المالي", items:"الأصناف", cust:"العملاء والمحافظات", team:"الفريق" };
+  var REP_TITLE = { sum:"قايمة الدخل", fin:"الميزانية", cfo:"ماشي إزاي؟", items:"الأداء", cust:"الأداء", team:"الأداء" };
   function repTitle(){
     var h = document.querySelector("#tab-rep > h2");
     if(h && h.firstChild && h.firstChild.nodeType === 3) h.firstChild.nodeValue = REP_TITLE[repTab] || "تقارير";
@@ -14558,6 +14578,7 @@
     if(!box) return;
     var all = live("parties").filter(function(p){ return !isPartner(p); });
     var nC = all.filter(function(p){ return p.type !== "supplier"; }).length, nS = all.length - nC;
+    var ptt = document.getElementById("pt-title"); if(ptt) ptt.textContent = ptTab === "supplier" ? "المشتريات والموردين" : "العملاء";
     document.getElementById("pt-tabs").innerHTML =
       [["customer", "العملاء", nC], ["supplier", "الموردين", nS]].map(function(t){
         return "<button type='button' role='tab' data-pttab='" + t[0] + "' aria-selected='" + (ptTab === t[0]) + "'" +
@@ -15150,41 +15171,19 @@
     renderCoachTodo(IT);
     renderCoachBal();
   }
-  // اعمل إيه النهارده — الوضع دلوقتي، مش الفترة
+  /* نصايح المشتريات — v173: المهام اليومية (اشحن · حصّل · تابع · المرتجع · اشتري للأوردرات) في الرئيسية بس،
+     هنا اللي بيحتاج قرار: اطلب تاني · ما تشتريش */
   function renderCoachTodo(IT){
-    var D = [], g = stageLists();
+    var D = [];
     // زرار لشاشة مش من حقك ما يظهرش أصلاً (نفس قاعدة الرئيسية)
     var add = function(t, s, go, lab){ if(!canTab(go.split("|")[0])) return; D.push("<button type='button' class='co-td' data-cgo='" + esc(go) + "'><b>" + esc(t) + "</b><span>" + esc(s) + "</span><em>" + esc(lab) + " ←</em></button>"); };
-    if(g.st[1].length){
-      var bigU = g.st[1].slice().sort(function(a, b){ return saleTotal(b) - saleTotal(a); })[0];
-      var pc = SL(bigU).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0);
-      if(g.st[1].length === 1) add("اشحن أوردر #" + (bigU.no || "—"), qty(pc) + " قطعة · " + money(saleTotal(bigU)) + " — من " + dShort(bigU.date), "sales|1", "الأوردرات");
-      else add("اشحن " + qty(g.st[1].length) + " أوردر", "أكبرهم #" + (bigU.no || "—") + " (" + money(saleTotal(bigU)) + ") من " + dShort(bigU.date), "sales|1", "الأوردرات");
-    }
-    var byCo = {};
-    g.st[3].forEach(function(x){ var c = squish(x.shipCo); (byCo[c] = byCo[c] || []).push(x); });
-    Object.keys(byCo).forEach(function(c){
-      var sum = byCo[c].reduce(function(a, x){ return a + shipPend(x).left; }, 0);
-      if(sum > 0.009) add("حصّل " + money(sum) + " من " + (c || "شركة الشحن"), "من " + qty(byCo[c].length) + " أوردر اتسلّموا", "sales|3", "التحصيل");
-    });
-    var stale = g.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; })
-      .sort(function(a, b){ return daysSince(b.date) - daysSince(a.date); });
-    if(stale.length) add("تابع " + qty(stale.length) + " أوردر مع المندوب", "أقدمهم #" + (stale[0].no || "—") + " بقاله " + nDays(daysSince(stale[0].date)), "sales|2", "الأوردرات");
-    if(heldOpen().length) add("استلم المرتجع", qty(heldOpenQty()) + " قطعة عند شركة الشحن", "sales|4", "المرتجع");
-    var SH = shortList();
-    if(SH.length){
-      var shn = SH.reduce(function(a, x){ return a + x.n; }, 0);
-      add("اشتري للأوردرات · " + qty(shn) + " قطعة", SH.slice(0, 3).map(function(x){
-          var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : "") + " × " + qty(x.n); }).join(" · ") +
-        (SH.length > 3 ? " و" + qty(SH.length - 3) + " تاني" : "") + " — اتباعت ولسه ما اتشرتش", "purch", "فاتورة شراء");
-    }
     IT.filter(function(x){ return x.short; }).sort(function(a, b){ return b.q - a.q; }).slice(0, 2).forEach(function(x){
       add("اطلب " + x.it.name + " تاني", "اتطلب منه " + qty(x.q) + " في آخر أسبوعين وفاضل " + qty(x.free) +
         (x.neg ? " · وناقص " + qty(x.neg) : ""), "purch", "فاتورة شراء");
     });
     var slow = IT.filter(function(x){ return x.slow; }).sort(function(a, b){ return b.value - a.value; })[0];
     if(slow) add("ما تشتريش " + slow.it.name, "عندك " + qty(slow.free) + " قطعة = حوالي " + qty(Math.round(slow.cover)) + " يوم بيع بالمعدل ده", "inv", "المخزون");
-    coSet("co-todo", D.length ? D.slice(0, 6).join("") : "<p class='hint' style='margin:0'>مفيش حاجة مستعجلة النهارده ✓</p>");
+    coSet("co-todo", D.length ? D.slice(0, 6).join("") : "<p class='hint' style='margin:0'>مفيش نصايح دلوقتي — المخزون ماشي مع البيع ✓ · المهام اليومية في الرئيسية</p>");
   }
   // فلوسك فين — نفس أرقام «توفيق الميزانية» في رأس المال
   function renderCoachBal(){
@@ -15716,7 +15715,7 @@
     var R = audRun(), n = audCount(), ok = R.filter(function(x){ return !x.rows.length; }).length;
     var ic = { bad:"✗", warn:"⚠", info:"ⓘ" }, lb = { bad:"لازم يتصلح", warn:"راجعه", info:"خلي بالك" };
     var wy = document.getElementById("aud-why");
-    if(wy) wy.innerHTML = canTab("coach") ? "<p class='aud-link'>عايز تعرف ليه مش بتكسب والفلوس بتروح فين؟ <a href='#' data-audgo='tab|coach'>«ماشي إزاي؟» ←</a></p>" : "";
+    if(wy) wy.innerHTML = "";      // v173: «مؤشراتك» في المفتاح فوق — نفس الشاشة
     document.getElementById("aud-sum").innerHTML =
       "<div class='aud-s bad'><b class='num'>" + qty(n.bad) + "</b><span>لازم يتصلح</span></div>" +
       "<div class='aud-s warn'><b class='num'>" + qty(n.warn) + "</b><span>راجعه</span></div>" +
@@ -15920,6 +15919,16 @@
     // التسعير صلاحية لوحدها: لو الأصناف مقفولة والتسعير مسموح، زرار التسعير بيظهر لوحده
     var pa = document.querySelector('#nav-sub button.nav-alias[data-tab="price"], #nav-sub button[data-tab="price"][data-wasalias]');
     if(pa){ var solo = !canTab("items") && canTab("price"); pa.classList.toggle("nav-alias", !solo); if(solo) pa.setAttribute("data-wasalias", "1"); }
+    /* v173: جزء مسموح وشاشته الأصلية مقفولة (مثلاً «مراجع الحسابات» من غير «ماشي إزاي؟») — زراره يبان لوحده */
+    var all = Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-mark]"));
+    all.forEach(function(x){ if(x.hasAttribute("data-wasmark")){ x.classList.add("nav-alias"); x.removeAttribute("data-wasmark"); if(x.dataset.lbl){ x.textContent = x.dataset.lbl; delete x.dataset.lbl; } } });
+    all.forEach(function(x){
+      if(x.hidden) return;
+      var m = x.dataset.mark.split("|"), main = Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-tab]")).find(function(y){
+        return y.dataset.tab === m[0] && (y.dataset.sub || "") === (m[1] || "") && !y.classList.contains("nav-alias"); });
+      if(main && main.hidden && !all.some(function(z){ return z !== x && z.dataset.mark === x.dataset.mark && z.hasAttribute("data-wasmark"); })){
+        x.classList.remove("nav-alias"); x.setAttribute("data-wasmark", "1"); x.dataset.lbl = x.textContent; x.textContent = main.textContent; }
+    });
     navPerms();
     // لو إنت واقف على شاشة مش من حقك، ارجع لأول شاشة مسموحة
     if(!canTab(activeTab)){
@@ -16058,11 +16067,55 @@
   function navSubOf(tab){ return tab === "rep" ? repTab : tab === "parties" ? ptTab : ""; }
   function navBtnFor(tab){
     var bs = Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-tab]")), sub = navSubOf(tab);
-    return bs.find(function(b){ return b.dataset.tab === tab && b.dataset.sub && b.dataset.sub === sub; })
+    return navMarkOf(bs.find(function(b){ return b.dataset.tab === tab && b.dataset.sub && b.dataset.sub === sub; })
         || bs.find(function(b){ return b.dataset.tab === tab && !b.dataset.sub && !b.classList.contains("nav-alias"); })
         || bs.find(function(b){ return b.dataset.also === tab; })
-        || bs.find(function(b){ return b.dataset.tab === tab; });
+        || bs.find(function(b){ return b.dataset.tab === tab; }), bs);
   }
+  /* v173: جزء من شاشة (الرسمة · العملاء والمحافظات · المدير المالي · الموردين…) زراره مخفي،
+     والزرار اللي بيتعلّم في الشريط هو بتاع الشاشة اللي هو جزء منها (data-mark = "tab|sub") */
+  function navMarkOf(b, bs){
+    if(!b || !b.dataset.mark || !b.classList.contains("nav-alias")) return b;
+    var m = b.dataset.mark.split("|");
+    var main = bs.find(function(x){ return x.dataset.tab === m[0] && (x.dataset.sub || "") === (m[1] || "") && !x.classList.contains("nav-alias"); });
+    // الشاشة الأصلية مقفولة على المستخدم ده؟ الزرار اللي بيقوم مقامها (بنفس الاسم) هو اللي يتعلّم
+    if(main && main.hidden) return bs.find(function(x){ return x.dataset.mark === b.dataset.mark && x.hasAttribute("data-wasmark"); }) || b;
+    return main || b;
+  }
+  // المفتاح تحت العنوان: أجزاء الشاشة الواحدة — كل جزء = زرار في الشريط (ظاهر أو مخفي)
+  var SEGS = {
+    inc:[["rep", "sum", "جدول"], ["viz", "", "رسمة"]],
+    perf:[["rep", "items", "الأصناف"], ["rep", "cust", "العملاء والمحافظات"], ["rep", "team", "الفريق"]],
+    coach:[["coach", "", "مؤشراتك"], ["rep", "cfo", "القرارات والمخاطر"], ["audit", "", "الحسابات سليمة؟"]],
+    buy:[["purch", "", "الفواتير"], ["parties", "supplier", "الموردين"]]
+  };
+  function segOf(tab){
+    if(tab === "rep") return { sum:"inc", items:"perf", cust:"perf", team:"perf", cfo:"coach" }[repTab] || "";
+    if(tab === "viz") return "inc";
+    if(tab === "coach" || tab === "audit") return "coach";
+    if(tab === "purch") return "buy";
+    if(tab === "parties") return ptTab === "supplier" ? "buy" : "";
+    return "";
+  }
+  function segBtn(x){
+    return Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-tab]")).find(function(b){
+      return b.dataset.tab === x[0] && (b.dataset.sub || "") === x[1]; });
+  }
+  function renderSeg(tab){
+    var box = document.querySelector("#tab-" + tab + " .pseg"); if(!box) return;
+    var cur = tab === "rep" ? repTab : tab === "parties" ? ptTab : "";
+    var L = (SEGS[segOf(tab)] || []).filter(function(x){ var b = segBtn(x); return b && !b.hidden; });
+    box.hidden = L.length < 2;
+    box.innerHTML = box.hidden ? "" : L.map(function(x){
+      var on = x[0] === tab && (!x[1] || x[1] === cur);
+      return "<button type='button' data-seggo='" + x[0] + "|" + x[1] + "' aria-pressed='" + on + "'>" + esc(x[2]) + "</button>";
+    }).join("");
+  }
+  document.addEventListener("click", function(e){
+    var t = e.target.closest ? e.target.closest("[data-seggo]") : null; if(!t || t.getAttribute("aria-pressed") === "true") return;
+    var b = segBtn(t.dataset.seggo.split("|")); if(b) b.click();
+    var n = document.querySelector("#tab-" + activeTab + " .pseg [aria-pressed='true']"); if(n) n.focus();
+  });
   // الزرار اللي بيفتح الشاشة نفسها (حتى لو مخفي زي التسعير والإعدادات) — للـgoTab وللرجوع لآخر شاشة
   function navGoBtn(tab){
     var bs = Array.prototype.slice.call(document.querySelectorAll("#nav-sub button[data-tab]")), sub = navSubOf(tab);
@@ -16072,6 +16125,7 @@
   }
   function navMark(){
     var cur = navBtnFor(activeTab);
+    renderSeg(activeTab);
     Array.prototype.forEach.call(document.querySelectorAll("#nav button[data-tab]"), function(x){
       x.setAttribute("aria-current", x === cur ? "true" : "false");
     });
