@@ -1,0 +1,123 @@
+  /* ═══ v179 — شاشة الأوردرات بشكل «ألوان البضاعة» ═══
+     السطر: رقم · عميل · صنف بدواير ألوانه · مبلغ · المرحلة (خط خياطة) · زرار واحد.
+     الملف ده آخر حاجة في الـCSS عشان يكسب القواعد القديمة من غير ما نلمسها كلها. */
+  #s-stats[hidden]{display:none}
+  /* دواير ألوان الأصناف */
+  .sw{display:inline-flex;flex:0 0 auto;align-items:center;vertical-align:middle}
+  .sw i{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--card);box-shadow:0 0 0 1px var(--line);margin-inline-start:-4px}
+  .sw i:first-child{margin-inline-start:0}
+  /* خط الخياطة: ٥ غُرز — اللي خلص جملي، اللي دلوقتي نبيتي، الباقي رمادي */
+  .seam{display:flex;gap:3px;margin:0 0 5px}
+  .seam i{width:15px;height:3px;border-radius:2px;background:var(--seam-off)}
+  .seam i.d{background:var(--camel)} .seam i.n{background:var(--teal)}
+
+  /* ---- الجدول ---- */
+  #t-sales{border-collapse:separate;border-spacing:0}
+  #t-sales thead th{font-size:var(--fs-2);font-weight:400;color:var(--ink-soft);background:var(--paper);border-bottom:1px solid var(--line)}
+  #t-sales tbody tr.order td{border-bottom:1px solid var(--line);vertical-align:middle;padding-top:12px;padding-bottom:12px}
+  #t-sales tr[data-st] td.lead{border-inline-start-color:transparent}
+  #t-sales tbody tr.order:hover td{background:color-mix(in srgb,var(--teal-soft) 55%,var(--card))}
+  #t-sales tbody tr.order.open td{background:var(--teal-soft)}
+  #t-sales tbody tr.order.open td.lead{box-shadow:inset -3px 0 0 var(--teal)}
+  #t-sales td.selcell input{opacity:.35;transition:opacity .15s}
+  #t-sales tr.order:hover td.selcell input,#t-sales td.selcell input:checked,#t-sales.sel-mode td.selcell input,
+  #t-sales td.selcell input:focus-visible{opacity:1}
+  #t-sales td.lead .ono{font-weight:600;color:var(--ink)}
+  #t-sales td.cust .primary{font-size:var(--fs-3);font-weight:500;color:var(--ink)}
+  #t-sales .goods{display:flex;align-items:center;gap:10px}
+  #t-sales .goods .sw i{width:13px;height:13px}
+  #t-sales .g1 .nm{font-weight:500;color:var(--ink)}
+  #t-sales td.total{text-align:end}
+  #t-sales td.total .primary{font-size:var(--fs-4);font-weight:600}
+  #t-sales td.total s{opacity:.5;font-weight:400}
+  #t-sales td.total .secondary{display:block;margin-top:3px}
+  #t-sales td.total .pill{font-size:var(--fs-1);padding:1px 8px}
+  #t-sales td.total .pill.wait{background:var(--warn-soft);color:var(--warn)}
+  #t-sales td.stat{min-width:170px}
+  #t-sales td.stat .stg{display:block;font-size:var(--fs-2);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #t-sales td.stat .stg em{font-style:normal;color:var(--ink-soft)}
+  #t-sales td.stat .stg.ok{color:var(--gain)}
+  #t-sales td.stat .stg.off{color:var(--ink-soft)}
+  #t-sales td.stat .stg.late em{color:var(--due)}
+  #t-sales td.stat .cf-tag{display:inline-block;margin-top:3px}
+  #t-sales .rownext{border-radius:var(--r-sm);padding:5px 12px;font-size:var(--fs-2);background:var(--card);color:var(--teal);border-color:var(--line)}
+  /* زرار واحد في كل سطر، بإطار بس — لو كلهم مليانين العمود بيبقى بقعة لون */
+  #t-sales .rownext.primary{background:var(--card);color:var(--teal);border-color:var(--line)}
+  #t-sales .rownext:hover,#t-sales .rownext.primary:hover{background:var(--teal);color:var(--on-accent);border-color:var(--teal)}
+
+  /* ---- تفاصيل الأوردر ---- */
+  .dd-head{align-items:flex-start;flex-wrap:nowrap}
+  .dd-id{display:block;min-width:0}
+  .dd-t{margin:0;font-size:var(--fs-5);font-weight:600;letter-spacing:-.01em;line-height:1.35}
+  .dd-t .dd-no{font-size:inherit;font-weight:inherit}
+  .dd-sub{margin:3px 0 0;font-size:var(--fs-2);color:var(--ink-soft)}
+  .dd-sub .dd-code{font:inherit;color:var(--teal);background:none;border:0;padding:0;cursor:copy;text-decoration:underline dotted;text-underline-offset:3px}
+  .dd-acts{flex-wrap:nowrap;gap:4px}
+  .dd-ic{width:36px;height:36px;padding:0!important;justify-content:center;color:var(--ink-soft)}
+  .dd-ic svg.i{width:18px;height:18px}
+  .dd-more > div{display:flex;flex-direction:column;gap:6px;min-width:190px;padding:8px}
+  .dd-more > div .tbtn{color:var(--ink);justify-content:flex-start}
+  .dd-more > div .tbtn.dd-del{color:var(--due)}
+  .dd-stl{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-1);color:var(--ink-soft);margin:0 0 2px}
+  .dd-stl select{width:100%}
+  /* الخطوة الجاية: كارت واحد بلون الهوية الفاتح، من غير إطار سميك */
+  .ostep.dd-step{border:0;border-radius:var(--r-md);background:var(--teal-soft);padding:var(--sp-4);margin:var(--sp-4) 0 0}
+  .ostep.dd-step.done{background:var(--gain-soft)}
+  .dd-step .dd-k{font-size:var(--fs-2)}
+  .dd-step-t b{font-size:var(--fs-4)}
+  .dd-step .dd-step-b .tbtn{min-height:40px}
+  .dd-step .dd-step-b .tbtn:not(.primary){background:var(--card)}
+  .dd-seam{grid-column:1 / -1;display:grid!important;grid-template-columns:repeat(5,1fr);gap:4px;margin:var(--sp-3) 0 0!important}
+  .dd-seam li i{height:4px!important;border-radius:3px;background:var(--seam-off)!important}
+  .dd-seam li.ok i{background:var(--camel)!important}
+  .dd-seam li.now i{background:var(--teal)!important}
+  .dd-seam li span{text-align:center}
+  /* الأصناف بعد الخطوة على طول — دايرة اللون مكان الصورة لو مفيش صورة */
+  .dd-items{margin-top:var(--sp-4)}
+  .dd-items h5,.dd-card h5{font-size:var(--fs-2);font-weight:500;color:var(--ink-soft)}
+  .dd-it > .sw{justify-self:center}
+  .dd-it > .sw i{width:16px;height:16px}
+  .dd-card{border:0;border-top:1px solid var(--line);border-radius:0;padding:var(--sp-4) 0 0;background:none}
+  .dd-cards{margin-top:var(--sp-4);gap:var(--sp-4)}
+
+  /* ---- الموبايل: كل أوردر ٣ سطور — مين وبكام · إيه · فين ---- */
+  @media (max-width:760px){
+    #t-sales thead{display:none}
+    #t-sales tbody tr.order{border:1px solid var(--line);border-inline-start-width:1px;border-radius:var(--r-md);background:var(--card);
+      grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"lead cust total" "items items acts" "stat stat acts";gap:2px var(--sp-2);padding:12px 14px}
+    #t-sales tr.order[data-st]{border-inline-start-color:var(--line)}
+    #t-sales.sel-mode tbody tr.order{grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"sel lead cust total" "sel items items acts" "sel stat stat acts"}
+    #t-sales tbody tr.order td{border:0;padding:0}
+    #t-sales td.lead{grid-area:lead;align-self:baseline}
+    #t-sales td.lead .ono{font-size:var(--fs-2);color:var(--ink-soft);font-weight:500}
+    #t-sales td.cust .primary{display:inline;font-weight:600}
+    #t-sales td.cust .secondary{display:inline;margin-inline-start:6px}
+    #t-sales td.items{margin:0}
+    #t-sales .goods{gap:8px}
+    #t-sales .g1{display:flex;gap:6px;align-items:baseline}
+    #t-sales .g1 .secondary{margin:0}
+    #t-sales td.stat{display:block;min-width:0}
+    #t-sales td.stat .seam{margin:4px 0 4px}
+    #t-sales td.rowacts{align-self:end}
+  }
+  /* صنف في سطر: دايرة اللون · الاسم واللون والمقاس · العدد × السعر */
+  #t-sales tr.detail .dd-it{grid-template-columns:28px minmax(0,1fr) auto;gap:2px var(--sp-3);padding:10px 0;align-items:center}
+  #t-sales tr.detail .dd-it > :nth-child(1){grid-column:1;grid-row:1 / 3}
+  #t-sales tr.detail .dd-it > span:nth-child(2){grid-column:2;grid-row:1}
+  #t-sales tr.detail .dd-it > span:nth-child(3){grid-column:3;grid-row:1;text-align:end;white-space:nowrap}
+  #t-sales tr.detail .dd-it > span:nth-child(4){grid-column:2 / -1;grid-row:2}
+  #t-sales tr.detail .dd-it > span:nth-child(4):empty{display:none}
+  #t-sales tr.detail .dd-it .dd-ia{grid-column:2 / -1;grid-row:3}
+  #t-sales tr.detail .dd-it .dd-ia:empty{display:none}
+  #t-sales tr.detail .dd-it .thumb{width:28px;height:28px}
+  @media (max-width:760px){
+    .dd-it{grid-template-columns:28px minmax(0,1fr) auto!important;gap:2px var(--sp-3)!important}
+    .dd-it > :nth-child(1){grid-column:1;grid-row:1 / 3}
+    .dd-it > span:nth-child(2){grid-column:2;grid-row:1}
+    .dd-it > span:nth-child(3){grid-column:3;grid-row:1;text-align:end}
+    .dd-it > span:nth-child(4){grid-column:2 / -1;grid-row:2}
+    .dd-it > span:nth-child(4):empty,.dd-it .dd-ia:empty{display:none}
+    .dd-it .dd-ia{grid-column:2 / -1;grid-row:3}
+    .dd-head{flex-wrap:nowrap}
+    .dd-acts{width:auto}
+  }

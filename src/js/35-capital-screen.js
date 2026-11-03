@@ -22,7 +22,7 @@
      الجدول القديم والسجل والشرح لسه موجودين تحت في «جدول الشركاء وسجل كل
      الحركات». الكروت بتقرا من نفس الدوال (capitalOf/currentOf/ratioOf)،
      فالأرقام هي هي. */
-  var CAP_CLR = ["#4A2545","#B07AA1","#7FA68F","#C8963E","#5B7DB1","#9A1333"];
+  var CAP_CLR = ["#7A2637","#B07A47","#7FA68F","#C8963E","#5B7DB1","#9A1333"];
   function capClr(i){ return CAP_CLR[i % CAP_CLR.length]; }
   var capOpen = null;       // الشريك المفتوح حركاته في الكارت
   function capPct(r){ return (r*100).toFixed(2).replace(/\.?0+$/, "") + "%"; }

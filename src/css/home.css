@@ -96,8 +96,8 @@
   /* ═══ v124 — الرئيسية بالتصميم الجديد: كل حاجة في مكانها، وبنفس الترتيب في كل شاشة ═══
      (١) التحية والفترة و«+ أوردر جديد» · (٢) صافي الربح كارت كبير + ٤ كروت بنفس الحجم ·
      (٣) «محتاج منك» يمين، و«الأوردرات فين؟» و«أكتر الأصناف» جنبها · (٤) التفاصيل مطوية تحت */
-  :root{ --hm-r:18px; --hm-s1:#C9A0C3; --hm-s2:#8A5A00; --hm-s3:#4A2545; --hm-s4:#2B7558 }
-  [data-theme="dark"]{ --hm-s1:#8E6A88; --hm-s2:#D4A93F; --hm-s3:#C9A7C4; --hm-s4:#78BF92 }
+  :root{ --hm-r:18px; --hm-s1:#D9B48C; --hm-s2:#8A5A00; --hm-s3:#7A2637; --hm-s4:#2B7558 }
+  [data-theme="dark"]{ --hm-s1:#9A7350; --hm-s2:#D4A93F; --hm-s3:#D88A9C; --hm-s4:#78BF92 }
   .hm-hello{align-items:center}
   .hm-hello h2{font-size:var(--fs-6)}
   .hm-per .hm-new{border-radius:12px;min-height:40px;padding-inline:18px}

@@ -9,35 +9,34 @@
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* ═══ ثيم Lora Plum ═══ ألوان البراند الثابتة — كل لون في السيستم بييجي من هنا.
-       دول مابيتغيروش في الوضع الليلي، فالتقارير المطبوعة بتاخد منهم على طول. */
-    --lp-plum:#4A2545; --lp-night:#2F1530; --lp-petal:#C9A7C4; --lp-mist:#F6F2F5;
-    --lp-gold:#D4A93F; --lp-ink:#241E26; --lp-soft:#6E6472; --lp-line:#E4DDE6;
-    --lp-card:#FBFAFB; --lp-gain:#327B63; --lp-wine:#9A1333;
+    /* ═══ ثيم «ألوان البضاعة» (v179) ═══ الألوان جاية من الشوز نفسها:
+       نبيتي للهوية والزراير · جملي لعلامات التقدّم · رصاصي فاتح للخلفية.
+       --lp-* ثابتة في الليلي كمان، فالتقارير المطبوعة بتاخد منها على طول. */
+    --lp-plum:#4E1B27; --lp-night:#2E1018; --lp-petal:#D9B48C; --lp-mist:#F4F5F6;
+    --lp-gold:#B07A47; --lp-ink:#1D1A1C; --lp-soft:#5D6166; --lp-line:#DCDFE2;
+    --lp-card:#FFFFFF; --lp-gain:#2A7348; --lp-wine:#B93D0B;
     --font:"Alexandria","Segoe UI",Tahoma,sans-serif;
 
-    /* برقوقي البوتيك — أساس التصميم */
-    --ink:var(--lp-ink);    /* حبر مائل للبرقوقي بدل الأسود الميت */
+    --ink:var(--lp-ink);
     --ink-soft:var(--lp-soft);
-    --paper:#F6F3F7;        /* ورق ليلكي فاتح */
+    --paper:#ECEEF0;        /* رصاصي فاتح */
     --card:#FFFFFF;
     --line:var(--lp-line);
-    --teal:var(--lp-plum);  /* البرقوقي العميق: الهوية */
-    --teal-deep:#361A33;
-    --teal-soft:#F0E8F0;
-    --on-accent:#FFFFFF;    /* النص فوق الزرار البرقوقي */
-    /* الاتنين دول بيفرّقوا بين «ليك» و«عليك». واحد من كل ١٢ راجل عنده
-       عمى ألوان، فمش كفاية إنهم مختلفين بالنسبالنا — لازم يفضلوا مختلفين
-       بعد محاكاة deutan/protan/tritan. القياس: أسوأ ΔE بقى 16.1 بعد ما
-       كان 8.2، والتباين مع الخلفية 5.06 و8.35 (المطلوب ≥4.5). */
-    --gain:var(--lp-gain);  /* أخضر مطفي متناغم مع البرقوقي */
-    --due:var(--lp-wine);   /* نبيذي بدل الأحمر الصارخ */
-    --warn:#8A6212;
-    --shadow:0 1px 2px rgba(36,30,38,.05);
-    /* خلفيات الحالات: ليك · عليك · تنبيه · التبديل مع المورد.
-       كانت أرقام ثابتة في ٢٠ مكان، وفي الليلي كانت بقع فاتحة أو كلها نفس اللون. */
-    --gain-soft:#E3F1EA; --due-soft:#F6E3E8; --warn-soft:#F7EEDB;
-    --gain-ink:#28644F;     /* أخضر الكلام فوق خلفية خضرا فاتحة (≥٤٫٥:١) */
+    --teal:#7A2637;         /* نبيتي: الهوية والزراير والمختار — لون التفاعل الوحيد */
+    --teal-deep:#5E1C2A;
+    --teal-soft:#F6EBEE;
+    --on-accent:#FFFFFF;
+    --shell:var(--lp-plum); /* الشريط اللي فوق */
+    --camel:#9A6638;        /* جملي: الخطوات اللي خلصت (خط الخياطة) */
+    --seam-off:#C9CDD1;     /* غُرزة لسه ما جاتش */
+    /* «ليك» و«عليك» لازم يفضلوا مختلفين مع عمى الألوان:
+       ΔE بعد محاكاة deutan 39.6 وprotan 23.8 (كان 16.1)، والتباين مع الكارت 5.8 و5.6 (المطلوب ≥4.5). */
+    --gain:var(--lp-gain);
+    --due:var(--lp-wine);   /* برتقالي محروق — مختلف عن النبيتي بتاع الزراير */
+    --warn:#875F10;
+    --shadow:0 1px 2px rgba(29,26,28,.05);
+    --gain-soft:#E3F1E8; --due-soft:#FBE9E1; --warn-soft:#F7EEDB;
+    --gain-ink:#24613D;
     --xg:#5B4A9A; --xg-soft:#ECE8F7;
 
     /* ═══ سلّم الخطوط ═══
@@ -63,22 +62,24 @@
   }
   /* الوضع الليلي — للجلسات الطويلة */
   [data-theme="dark"]{
-    --ink:#EDE7EF;
-    --ink-soft:#A79DAB;
-    --paper:#191419;
-    --card:#221C24;
-    --line:#362E38;
-    --teal:#C9A7C4;
-    --teal-deep:#E0C6DC;
-    --teal-soft:#2E2431;
-    /* الوضع الليلي كان أسوأ بكتير: أسوأ ΔE كان 2.2 — يعني عند عمى
-       الألوان الأخضر والوردي كانوا شبه نفس اللون. بقى 16.4. */
-    --gain:#78BF92;
-    --due:#DC89B5;
-    --warn:#D4A93F;
+    --ink:#F2EDEF;
+    --ink-soft:#A59DA1;
+    --paper:#131113;
+    --card:#1C191B;
+    --line:#2E2A2D;
+    --teal:#D88A9C;
+    --teal-deep:#EBB3C0;
+    --teal-soft:#2C1B21;
+    --shell:#241016;
+    --camel:#C99561;
+    --seam-off:#433D41;
+    /* ΔE بين الأخضر والبرتقالي مع عمى الألوان: deutan 29.8 · protan 16.8 (كان 2.2 زمان) */
+    --gain:#6CC08F;
+    --due:#F08A5D;
+    --warn:#E0AE5C;
     --shadow:none;
-    --on-accent:#1A141C;
-    --gain-soft:#303636; --due-soft:#402D3B; --warn-soft:#3E3328;
+    --on-accent:#230C12;
+    --gain-soft:#22302A; --due-soft:#3A2620; --warn-soft:#3A3226;
     --gain-ink:var(--gain);
     --xg:#A99BE0; --xg-soft:#383042;
   }
@@ -183,11 +184,11 @@
   .vz-plot .vz-gx{transform-origin:right;animation-name:vzSide}
 
   header.top{
-    background:var(--teal-deep);color:#fff;
+    background:var(--shell);color:#fff;
     padding:0 var(--sp-4);min-height:50px;
     display:flex;align-items:center;gap:var(--sp-3);
   }
-  [data-theme="dark"] header.top{ background:#120F14;border-bottom:1px solid var(--line) }
+  [data-theme="dark"] header.top{ background:var(--shell);border-bottom:1px solid var(--line) }
   [data-theme="dark"] header.top h1{ color:var(--teal-deep) }
   header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr;white-space:nowrap}
   /* رقم الإصدار جنب الاسم فوق على اليمين — بيبان على طول من غير ما تفتح حاجة */
@@ -233,11 +234,11 @@
     header.top .nav-groups{flex:1;align-self:stretch;padding:0}
     header.top .nav-groups button{align-self:stretch;padding:0 var(--sp-4);color:rgba(255,255,255,.72)}
     header.top .nav-groups button:hover{color:#fff}
-    header.top .nav-groups button.on{color:#fff;border-bottom-color:#fff}
-    [data-theme="dark"] header.top .nav-groups button{color:var(--ink-soft)}
+    header.top .nav-groups button.on{color:#fff;border-bottom-color:var(--lp-petal)}
+    [data-theme="dark"] header.top .nav-groups button{color:#B9A9AE}
     [data-theme="dark"] header.top .nav-groups button:hover{color:var(--ink)}
-    [data-theme="dark"] header.top .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal)}
-    header.top .nav-groups .badge{box-shadow:0 0 0 2px var(--teal-deep)}
+    [data-theme="dark"] header.top .nav-groups button.on{color:var(--ink);border-bottom-color:var(--camel)}
+    header.top .nav-groups .badge{box-shadow:0 0 0 2px var(--shell)}
     [data-theme="dark"] header.top .nav-groups .badge{box-shadow:none}
   }
   .nav-groups button .ic{font-size:15px;line-height:1}
@@ -603,8 +604,8 @@
   /* ═══ v124 — الرئيسية بالتصميم الجديد: كل حاجة في مكانها، وبنفس الترتيب في كل شاشة ═══
      (١) التحية والفترة و«+ أوردر جديد» · (٢) صافي الربح كارت كبير + ٤ كروت بنفس الحجم ·
      (٣) «محتاج منك» يمين، و«الأوردرات فين؟» و«أكتر الأصناف» جنبها · (٤) التفاصيل مطوية تحت */
-  :root{ --hm-r:18px; --hm-s1:#C9A0C3; --hm-s2:#8A5A00; --hm-s3:#4A2545; --hm-s4:#2B7558 }
-  [data-theme="dark"]{ --hm-s1:#8E6A88; --hm-s2:#D4A93F; --hm-s3:#C9A7C4; --hm-s4:#78BF92 }
+  :root{ --hm-r:18px; --hm-s1:#D9B48C; --hm-s2:#8A5A00; --hm-s3:#7A2637; --hm-s4:#2B7558 }
+  [data-theme="dark"]{ --hm-s1:#9A7350; --hm-s2:#D4A93F; --hm-s3:#D88A9C; --hm-s4:#78BF92 }
   .hm-hello{align-items:center}
   .hm-hello h2{font-size:var(--fs-6)}
   .hm-per .hm-new{border-radius:12px;min-height:40px;padding-inline:18px}
@@ -1329,30 +1330,34 @@
     .s-head h2{margin:0;white-space:nowrap}
     .s-head .toolbar{flex:1;margin:0}
   }
-  /* ═══ v124 — المراحل كروت منفصلة بنفس الحجم (زي التصميم)، والمختارة مليانة بلون الهوية ═══ */
-  #s-stagebox .sg-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;background:none;border:0;border-radius:0;overflow:visible}
+  /* ═══ v179 — المراحل تبويبات رفيعة تحت العنوان: اسم · رقم · (شرح صغير لو فيه حاجة) ═══
+     المختار عليه خط نبيتي تحت — زي أي تبويب، من غير كروت ولا ألوان مليانة. */
+  #s-stagebox .sg-strip{display:flex;gap:2px;background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;
+    margin-bottom:var(--sp-4);overflow-x:auto;scrollbar-width:none}
+  #s-stagebox .sg-strip::-webkit-scrollbar{display:none}
   #s-stagebox .sg-strip .sg-bar{display:contents}
-  #s-stagebox .sg-strip .sg-card{border:1px solid var(--line);border-radius:14px;padding:11px 13px;min-height:78px;background:var(--card);
-    grid-template-columns:auto minmax(0,1fr);grid-template-areas:"n t" "c c" "s s";align-content:start;row-gap:2px;box-shadow:none}
-  #s-stagebox .sg-strip .sg-all{grid-template-areas:"t" "c" "s";grid-template-columns:minmax(0,1fr);min-width:0}
-  #s-stagebox .sg-strip .sg-card .t{font-size:var(--fs-2)}
-  #s-stagebox .sg-strip .sg-card .c{font-size:var(--fs-6);margin-top:2px}
-  #s-stagebox .sg-strip .sg-card:hover{background:var(--card);border-color:var(--teal)}
-  #s-stagebox .sg-strip .sg-card.on{background:var(--teal);border-color:var(--teal);box-shadow:none}
-  #s-stagebox .sg-strip .sg-card.on .t,#s-stagebox .sg-strip .sg-card.on .c,
-  #s-stagebox .sg-strip .sg-card.on .s,#s-stagebox .sg-strip .sg-card.on .s.bad{color:var(--card)}
-  #s-stagebox .sg-strip .sg-card.on .n{background:var(--card);color:var(--teal)}
-  .s-head h2{font-size:var(--fs-6)}
-  .s-head .s-search input{min-height:44px;border-radius:12px}
-  .s-head .toolbar .tbtn{min-height:44px;border-radius:12px;padding-inline:16px}
-  #tab-sales .sg-panel{border-radius:18px}
+  #s-stagebox .sg-strip .sg-card,#s-stagebox .sg-strip .sg-all{flex:0 0 auto;display:flex;align-items:baseline;gap:7px;
+    min-height:0;min-width:0;padding:10px 14px 12px;border:0;border-radius:0;background:none;box-shadow:none;
+    position:relative;white-space:nowrap;font:inherit;color:var(--ink-soft);cursor:pointer}
+  #s-stagebox .sg-strip .sg-card .n{display:none}
+  #s-stagebox .sg-strip .sg-card .t{font-size:var(--fs-3);font-weight:400;color:inherit;overflow:visible}
+  #s-stagebox .sg-strip .sg-card .c{font-size:var(--fs-3);font-weight:600;margin:0;color:var(--ink)}
+  #s-stagebox .sg-strip .sg-card .s{display:inline;font-size:var(--fs-2);color:var(--ink-soft)}
+  #s-stagebox .sg-strip .sg-card .s.bad,#s-stagebox .sg-strip .sg-card.alert .c{color:var(--due)}
+  #s-stagebox .sg-strip .sg-card:hover{background:none;color:var(--ink);transform:none;box-shadow:none}
+  #s-stagebox .sg-strip .sg-card.on{background:none;color:var(--ink);box-shadow:none}
+  #s-stagebox .sg-strip .sg-card.on .t{color:var(--ink);font-weight:500}
+  #s-stagebox .sg-strip .sg-card.on::after{content:"";position:absolute;inset-inline:10px;bottom:-1px;height:2px;border-radius:2px 2px 0 0;background:var(--teal)}
+  #s-stagebox .sg-strip .sg-card:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  #s-stagebox .sg-strip .sg-card.spot-on{background-image:none}
+  .s-head h2{font-size:var(--fs-6);letter-spacing:-.02em}
+  .s-head .s-search input{min-height:42px;border-radius:10px}
+  .s-head .toolbar .tbtn{min-height:42px;border-radius:10px;padding-inline:16px}
+  #tab-sales .sg-panel{border-radius:14px}
   @media (max-width:760px){
-    #s-stagebox .sg-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;overflow:visible}
-    #s-stagebox .sg-strip .sg-card,#s-stagebox .sg-strip .sg-all{padding:9px 10px;min-height:70px;grid-template-areas:"t" "c" "s";grid-template-columns:minmax(0,1fr)}
-    #s-stagebox .sg-strip .sg-card .n{display:none}
-    #s-stagebox .sg-strip .sg-card .s{display:block;font-size:10.5px}
-    #s-stagebox .sg-strip .sg-card .t{font-size:var(--fs-1);overflow:hidden}
-    #s-stagebox .sg-strip .sg-card .c{font-size:var(--fs-5)}
+    #s-stagebox .sg-strip{margin-inline:calc(-1 * var(--sp-2));padding-inline:var(--sp-1)}
+    #s-stagebox .sg-strip .sg-card,#s-stagebox .sg-strip .sg-all{padding:10px 10px 12px}
+    #s-stagebox .sg-strip .sg-card .s:not(.bad){display:none}
   }
   #filters-panel .stabs{grid-column:1 / -1;margin:0}
   .sel-tip{display:none}
@@ -1401,8 +1406,8 @@
   .vz-legend b{color:var(--ink);font-weight:600;direction:ltr;unicode-bidi:isolate}
   .vz-foot{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3);padding-top:var(--sp-2);border-top:1px solid var(--line);font-size:var(--fs-1);color:var(--ink-soft)}
   .vz-go{border:0;background:none;color:var(--teal);font:inherit;font-weight:700;cursor:pointer;padding:2px 0}
-  .vz-tip{position:fixed;z-index:60;pointer-events:none;background:#241E26;color:#fff;border-radius:var(--r-sm);padding:8px 11px;font-size:var(--fs-2);line-height:1.7;box-shadow:0 6px 18px rgba(0,0,0,.2);min-width:170px}
-  [data-theme="dark"] .vz-tip{background:#EDE7EF;color:#191419}
+  .vz-tip{position:fixed;z-index:60;pointer-events:none;background:#1D1A1C;color:#fff;border-radius:var(--r-sm);padding:8px 11px;font-size:var(--fs-2);line-height:1.7;box-shadow:0 6px 18px rgba(0,0,0,.2);min-width:170px}
+  [data-theme="dark"] .vz-tip{background:#F2EDEF;color:#131113}
   .vz-tip b{display:block;font-size:var(--fs-3)} .vz-tip .r{display:flex;justify-content:space-between;gap:14px} .vz-tip .r span:first-child{opacity:.75}
   .vz-tip i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-inline-end:6px}
   .vz-tip .r span:last-child{direction:ltr;unicode-bidi:isolate}
@@ -2392,6 +2397,129 @@
   .co-okb{background:rgba(50,123,99,.14);color:var(--gain-ink);border-radius:99px;padding:2px 10px;font-weight:700;font-size:var(--fs-1)}
   .co-badb{border:0;background:rgba(154,19,51,.12);color:var(--due);border-radius:99px;padding:2px 10px;font:inherit;font-weight:700;font-size:var(--fs-1);cursor:pointer}
   @media (max-width:760px){ .co-two{grid-template-columns:1fr} .co-vd{flex-wrap:wrap} .co-exp{margin-inline-start:0;width:100%} }
+  /* ═══ v179 — شاشة الأوردرات بشكل «ألوان البضاعة» ═══
+     السطر: رقم · عميل · صنف بدواير ألوانه · مبلغ · المرحلة (خط خياطة) · زرار واحد.
+     الملف ده آخر حاجة في الـCSS عشان يكسب القواعد القديمة من غير ما نلمسها كلها. */
+  #s-stats[hidden]{display:none}
+  /* دواير ألوان الأصناف */
+  .sw{display:inline-flex;flex:0 0 auto;align-items:center;vertical-align:middle}
+  .sw i{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--card);box-shadow:0 0 0 1px var(--line);margin-inline-start:-4px}
+  .sw i:first-child{margin-inline-start:0}
+  /* خط الخياطة: ٥ غُرز — اللي خلص جملي، اللي دلوقتي نبيتي، الباقي رمادي */
+  .seam{display:flex;gap:3px;margin:0 0 5px}
+  .seam i{width:15px;height:3px;border-radius:2px;background:var(--seam-off)}
+  .seam i.d{background:var(--camel)} .seam i.n{background:var(--teal)}
+
+  /* ---- الجدول ---- */
+  #t-sales{border-collapse:separate;border-spacing:0}
+  #t-sales thead th{font-size:var(--fs-2);font-weight:400;color:var(--ink-soft);background:var(--paper);border-bottom:1px solid var(--line)}
+  #t-sales tbody tr.order td{border-bottom:1px solid var(--line);vertical-align:middle;padding-top:12px;padding-bottom:12px}
+  #t-sales tr[data-st] td.lead{border-inline-start-color:transparent}
+  #t-sales tbody tr.order:hover td{background:color-mix(in srgb,var(--teal-soft) 55%,var(--card))}
+  #t-sales tbody tr.order.open td{background:var(--teal-soft)}
+  #t-sales tbody tr.order.open td.lead{box-shadow:inset -3px 0 0 var(--teal)}
+  #t-sales td.selcell input{opacity:.35;transition:opacity .15s}
+  #t-sales tr.order:hover td.selcell input,#t-sales td.selcell input:checked,#t-sales.sel-mode td.selcell input,
+  #t-sales td.selcell input:focus-visible{opacity:1}
+  #t-sales td.lead .ono{font-weight:600;color:var(--ink)}
+  #t-sales td.cust .primary{font-size:var(--fs-3);font-weight:500;color:var(--ink)}
+  #t-sales .goods{display:flex;align-items:center;gap:10px}
+  #t-sales .goods .sw i{width:13px;height:13px}
+  #t-sales .g1 .nm{font-weight:500;color:var(--ink)}
+  #t-sales td.total{text-align:end}
+  #t-sales td.total .primary{font-size:var(--fs-4);font-weight:600}
+  #t-sales td.total s{opacity:.5;font-weight:400}
+  #t-sales td.total .secondary{display:block;margin-top:3px}
+  #t-sales td.total .pill{font-size:var(--fs-1);padding:1px 8px}
+  #t-sales td.total .pill.wait{background:var(--warn-soft);color:var(--warn)}
+  #t-sales td.stat{min-width:170px}
+  #t-sales td.stat .stg{display:block;font-size:var(--fs-2);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #t-sales td.stat .stg em{font-style:normal;color:var(--ink-soft)}
+  #t-sales td.stat .stg.ok{color:var(--gain)}
+  #t-sales td.stat .stg.off{color:var(--ink-soft)}
+  #t-sales td.stat .stg.late em{color:var(--due)}
+  #t-sales td.stat .cf-tag{display:inline-block;margin-top:3px}
+  #t-sales .rownext{border-radius:var(--r-sm);padding:5px 12px;font-size:var(--fs-2);background:var(--card);color:var(--teal);border-color:var(--line)}
+  /* زرار واحد في كل سطر، بإطار بس — لو كلهم مليانين العمود بيبقى بقعة لون */
+  #t-sales .rownext.primary{background:var(--card);color:var(--teal);border-color:var(--line)}
+  #t-sales .rownext:hover,#t-sales .rownext.primary:hover{background:var(--teal);color:var(--on-accent);border-color:var(--teal)}
+
+  /* ---- تفاصيل الأوردر ---- */
+  .dd-head{align-items:flex-start;flex-wrap:nowrap}
+  .dd-id{display:block;min-width:0}
+  .dd-t{margin:0;font-size:var(--fs-5);font-weight:600;letter-spacing:-.01em;line-height:1.35}
+  .dd-t .dd-no{font-size:inherit;font-weight:inherit}
+  .dd-sub{margin:3px 0 0;font-size:var(--fs-2);color:var(--ink-soft)}
+  .dd-sub .dd-code{font:inherit;color:var(--teal);background:none;border:0;padding:0;cursor:copy;text-decoration:underline dotted;text-underline-offset:3px}
+  .dd-acts{flex-wrap:nowrap;gap:4px}
+  .dd-ic{width:36px;height:36px;padding:0!important;justify-content:center;color:var(--ink-soft)}
+  .dd-ic svg.i{width:18px;height:18px}
+  .dd-more > div{display:flex;flex-direction:column;gap:6px;min-width:190px;padding:8px}
+  .dd-more > div .tbtn{color:var(--ink);justify-content:flex-start}
+  .dd-more > div .tbtn.dd-del{color:var(--due)}
+  .dd-stl{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-1);color:var(--ink-soft);margin:0 0 2px}
+  .dd-stl select{width:100%}
+  /* الخطوة الجاية: كارت واحد بلون الهوية الفاتح، من غير إطار سميك */
+  .ostep.dd-step{border:0;border-radius:var(--r-md);background:var(--teal-soft);padding:var(--sp-4);margin:var(--sp-4) 0 0}
+  .ostep.dd-step.done{background:var(--gain-soft)}
+  .dd-step .dd-k{font-size:var(--fs-2)}
+  .dd-step-t b{font-size:var(--fs-4)}
+  .dd-step .dd-step-b .tbtn{min-height:40px}
+  .dd-step .dd-step-b .tbtn:not(.primary){background:var(--card)}
+  .dd-seam{grid-column:1 / -1;display:grid!important;grid-template-columns:repeat(5,1fr);gap:4px;margin:var(--sp-3) 0 0!important}
+  .dd-seam li i{height:4px!important;border-radius:3px;background:var(--seam-off)!important}
+  .dd-seam li.ok i{background:var(--camel)!important}
+  .dd-seam li.now i{background:var(--teal)!important}
+  .dd-seam li span{text-align:center}
+  /* الأصناف بعد الخطوة على طول — دايرة اللون مكان الصورة لو مفيش صورة */
+  .dd-items{margin-top:var(--sp-4)}
+  .dd-items h5,.dd-card h5{font-size:var(--fs-2);font-weight:500;color:var(--ink-soft)}
+  .dd-it > .sw{justify-self:center}
+  .dd-it > .sw i{width:16px;height:16px}
+  .dd-card{border:0;border-top:1px solid var(--line);border-radius:0;padding:var(--sp-4) 0 0;background:none}
+  .dd-cards{margin-top:var(--sp-4);gap:var(--sp-4)}
+
+  /* ---- الموبايل: كل أوردر ٣ سطور — مين وبكام · إيه · فين ---- */
+  @media (max-width:760px){
+    #t-sales thead{display:none}
+    #t-sales tbody tr.order{border:1px solid var(--line);border-inline-start-width:1px;border-radius:var(--r-md);background:var(--card);
+      grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"lead cust total" "items items acts" "stat stat acts";gap:2px var(--sp-2);padding:12px 14px}
+    #t-sales tr.order[data-st]{border-inline-start-color:var(--line)}
+    #t-sales.sel-mode tbody tr.order{grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"sel lead cust total" "sel items items acts" "sel stat stat acts"}
+    #t-sales tbody tr.order td{border:0;padding:0}
+    #t-sales td.lead{grid-area:lead;align-self:baseline}
+    #t-sales td.lead .ono{font-size:var(--fs-2);color:var(--ink-soft);font-weight:500}
+    #t-sales td.cust .primary{display:inline;font-weight:600}
+    #t-sales td.cust .secondary{display:inline;margin-inline-start:6px}
+    #t-sales td.items{margin:0}
+    #t-sales .goods{gap:8px}
+    #t-sales .g1{display:flex;gap:6px;align-items:baseline}
+    #t-sales .g1 .secondary{margin:0}
+    #t-sales td.stat{display:block;min-width:0}
+    #t-sales td.stat .seam{margin:4px 0 4px}
+    #t-sales td.rowacts{align-self:end}
+  }
+  /* صنف في سطر: دايرة اللون · الاسم واللون والمقاس · العدد × السعر */
+  #t-sales tr.detail .dd-it{grid-template-columns:28px minmax(0,1fr) auto;gap:2px var(--sp-3);padding:10px 0;align-items:center}
+  #t-sales tr.detail .dd-it > :nth-child(1){grid-column:1;grid-row:1 / 3}
+  #t-sales tr.detail .dd-it > span:nth-child(2){grid-column:2;grid-row:1}
+  #t-sales tr.detail .dd-it > span:nth-child(3){grid-column:3;grid-row:1;text-align:end;white-space:nowrap}
+  #t-sales tr.detail .dd-it > span:nth-child(4){grid-column:2 / -1;grid-row:2}
+  #t-sales tr.detail .dd-it > span:nth-child(4):empty{display:none}
+  #t-sales tr.detail .dd-it .dd-ia{grid-column:2 / -1;grid-row:3}
+  #t-sales tr.detail .dd-it .dd-ia:empty{display:none}
+  #t-sales tr.detail .dd-it .thumb{width:28px;height:28px}
+  @media (max-width:760px){
+    .dd-it{grid-template-columns:28px minmax(0,1fr) auto!important;gap:2px var(--sp-3)!important}
+    .dd-it > :nth-child(1){grid-column:1;grid-row:1 / 3}
+    .dd-it > span:nth-child(2){grid-column:2;grid-row:1}
+    .dd-it > span:nth-child(3){grid-column:3;grid-row:1;text-align:end}
+    .dd-it > span:nth-child(4){grid-column:2 / -1;grid-row:2}
+    .dd-it > span:nth-child(4):empty,.dd-it .dd-ia:empty{display:none}
+    .dd-it .dd-ia{grid-column:2 / -1;grid-row:3}
+    .dd-head{flex-wrap:nowrap}
+    .dd-acts{width:auto}
+  }
 </style>
 </head>
 <body>
@@ -2623,7 +2751,7 @@
   </div>
 
   <div class="chips" id="flt-chips"></div>
-  <div class="band" id="s-stats"></div>
+  <div class="band" id="s-stats" hidden></div>
 
   <div class="panel" id="s-kpi-panel" hidden>
     <div class="dhead">
@@ -4193,8 +4321,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "178";
+  var VERSION = "179";
   var CHANGELOG = [
+    { v:"179", d:"2026-11-03", items:[
+      "شكل جديد «ألوان البضاعة»: الشريط اللي فوق نبيتي، والخلفية رصاصي فاتح، وعلامات التقدّم جملي — نهاري وليلي",
+      "الأوردرات: المراحل بقت سطر رفيع (الكل · جديد · مع المندوب · فلوسك عند الشركة · مرتجع · خلص) بدل الكروت الكبيرة، وسطر الأرقام المالية اتشال (موجود في الرئيسية والتقارير)",
+      "كل أوردر: الرقم · العميل والمحافظة · الصنف بدواير ألوانه الحقيقية · المبلغ · المرحلة كخط خياطة من ٥ غُرز · زرار واحد للخطوة الجاية",
+      "تفاصيل الأوردر: «#الرقم · اسم العميل» فوق وزرارين بس (تعديل · ⋯) — كرّر والبوليصة والحالة والحذف جوه ⋯ · الأصناف بعد الخطوة الجاية على طول",
+      "مفيش أي رقم أو حساب اتغيّر"
+    ]},
     { v:"178", d:"2026-11-03", items:[
       "إعادة هندسة — المرحلة 1: الكود اتقسّم 72 ملف منظّم حسب الموضوع (الحسابات · الشحن · الأوردرات · المخزون · التقارير · الشاشات · التصميم) وبيتجمّع في ملف واحد زي الأول. مفيش أي حاجة اتغيّرت في الشاشات ولا الأرقام"
     ]},
@@ -10891,7 +11026,7 @@
 
   /* ================= جدول الأوردرات ================= */
   // ٥ أعمدة بتتقري بنظرة. الشحن والربح والتحصيل نزلوا سطر التفاصيل.
-  var SALE_HEAD = ["","الأوردر","العميل","الأصناف","الإجمالي","الحالة",""];
+  var SALE_HEAD = ["","الأوردر","العميل","الأصناف","المبلغ","المرحلة",""];
   var openRows = {};        // الأوردرات المفتوح سطر تفاصيلها
   var selSales = {};        // الأوردرات المختارة للإجراء الجماعي
   function selIds(){ return Object.keys(selSales); }
@@ -10903,51 +11038,38 @@
     var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
     var isOpen = !!openRows[s.id];
 
-    /* الأصناف في سطر واحد: كل صنف باسمه وعدد قطعه، والألوان والمقاسات تحت —
-       كده ارتفاع السطر ثابت مهما كان عدد الأصناف. التفصيل الكامل بسعره في اللوحة. */
-    var grp = [], byI = {}, backN = 0, pcs = 0;
+    /* v179 — السطر بيجاوب على ٤ أسئلة بس: مين · إيه · بكام · وصل لفين.
+       الألوان دواير بلون الحتة، والمقاسات والتليفون والشحن في التفاصيل. */
+    var grp = [], byI = {}, backN = 0, pcs = 0, cols = [];
     lines.forEach(function(l){
       var q = Number(l.qty)||0, k = l.itemId || "?";
-      if(!byI[k]){ byI[k] = { id:l.itemId, q:0, v:[] }; grp.push(byI[k]); }
+      if(!byI[k]){ byI[k] = { id:l.itemId, q:0 }; grp.push(byI[k]); }
       byI[k].q += q; pcs += q;
-      var vl = vLabel(vColor(l), vSize(l)); if(vl && byI[k].v.indexOf(vl) < 0) byI[k].v.push(vl);
-      backN += canc ? q : lineRet(l);
+      if(vColor(l)) cols.push(vColor(l));
+      backN += canc ? 0 : lineRet(l);
     });
-    var goods = grp.length ? "<div class='goods'>" + thumbHTML(grp[0].id) +
-      "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){
-          return esc(itemName(g.id)) + " <b class='num'>×" + qty(g.q) + "</b>"; }).join(" · ") +
-        (grp.length > 2 ? " <span class='more'>و" + qty(grp.length - 2) + " صنف تاني</span>" : "") + "</span>" +
-      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : nPcs(pcs)) +
-        (shipIn(s) ? " · شحن " + qty(shipIn(s)) : "") +
-        (backN ? " · <span class='v-due'>مرتجع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
+    var goods = grp.length ? "<div class='goods'>" + (thumbHTML(grp[0].id) || swatchHTML(cols)) +
+      "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){ return esc(itemName(g.id)); }).join(" · ") +
+        (grp.length > 2 ? " <span class='more'>+" + qty(grp.length - 2) + "</span>" : "") + "</span>" +
+      "<span class='secondary'>" + nPcs(pcs) +
+        (backN ? " · <span class='v-due'>رجّع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
 
-    var collected = canc ? shipIn(s) : (Number(s.paid)||0);
-    // الملغي إجماليه صفر فعلاً، بس عرض 0.00 لوحده بيضلّل —
-    // بنوري قيمته الأصلية مشطوبة عشان تعرف الأوردر ده كان بكام.
+    // الملغي إجماليه صفر فعلاً — بنوري قيمته الأصلية مشطوبة عشان تعرف كان بكام
     var rawGoods = lines.reduce(function(a,l){
       return a + (Number(l.qty)||0) * (Number(l.price)||0); },0);
+    // تحت المبلغ: حاجة بس لو فيه فلوس مستنية (مش «خالص» و«لسه ما استلمش» في كل سطر)
+    var pill = "";
+    if(viaShip(s) && isDelivered(s)){
+      if(shipPaidGap(s)) pill = "<span class='pill due'>سجّل دفع العميل</span>";
+      else if(shipPend(s).left > 0.009)
+        pill = "<span class='pill wait'>عند " + esc(squish(s.shipCo) || "الشحن") + " " + money(shipPend(s).left) + "</span>";
+    } else if(!viaShip(s) && isDelivered(s)){
+      if(due > 0.009) pill = "<span class='pill due'>باقي " + money(due) + "</span>";
+      else if(due < -0.009) pill = "<span class='pill due'>ترجّعله " + money(-due) + "</span>";
+    }
     var totalCell = "<span class='primary num'>" +
-        (canc ? "<s style='opacity:.5;font-weight:500'>" + money(rawGoods) + "</s>"
-              : money(saleTotal(s))) + "</span>" +
-      "<span class='secondary num'>" +
-        (viaShip(s)
-          /* أوردر الشركة: العميل دفع للمندوب وخرج — اللي يهمّك هنا
-             هل الفلوس لسه عند الشركة ولا وصلتك */
-          ? (shipPaidGap(s) && isDelivered(s)
-              ? "<span class='pill due'>سجّل دفع العميل</span>"
-              : (isDelivered(s)
-                  ? (shipPend(s).left > 0.009
-                      ? "العميل دفع · <span class='pill due'>عند " + esc(squish(s.shipCo) || "الشحن") + " " +
-                        money(shipPend(s).left) + "</span>"
-                      : "العميل دفع · وصلك")
-                  : (canc ? "ملغي · شحن " + money(shipOut(s)) : "لسه ما استلمش")))
-          : (isDelivered(s)
-              ? (due > 0.009
-                  ? "محصّل " + money(collected) + " <span class='pill due'>باقي " + money(due) + "</span>"
-                  // حصّل أكتر من المطلوب (العميل رجّع بعد ما دفع) — دي مش «خالص»
-                  : (due < -0.009 ? "<span class='pill due'>ترجّعله " + money(-due) + "</span>" : "خالص"))
-              : (canc ? "ملغي · شحن " + money(shipOut(s)) : "لسه ما اتحصّلش"))) +
-      "</span>";
+        (canc ? "<s>" + money(rawGoods) + "</s>" : money(saleTotal(s))) + "</span>" +
+      (pill ? "<span class='secondary num'>" + pill + "</span>" : "");
 
     var row = "<tr class='order" + (isOpen ? " open" : "") + (s.id === freshId ? " fresh" : "") +
         (selSales[s.id] ? " sel" : "") +
@@ -10956,28 +11078,45 @@
         (selSales[s.id] ? " checked" : "") + " aria-label='اختار أوردر " + esc(s.no||"") + "'></td>" +
       "<td class='lead'><span class='ono'>" + (s.no ? "#"+esc(s.no) : "—") + "</span>" +
         "<span class='secondary num' title='" + esc(s.date||"") + "'>" + esc(dShort(s.date) || "—") + "</span></td>" +
-      "<td class='cust'><span class='primary' style='font-size:var(--fs-3)'>" + esc(partyName(s.partyId)) + "</span>" +
-        (p.gov||p.phone ? "<span class='secondary'>" + esc([p.gov,p.phone].filter(Boolean).join(" · ")) + "</span>" : "") + "</td>" +
+      "<td class='cust'><span class='primary'>" + esc(partyName(s.partyId)) + "</span>" +
+        (p.gov ? "<span class='secondary'>" + esc(p.gov) + "</span>" : "") + "</td>" +
       "<td class='items'>" + (goods || "—") + "</td>" +
       "<td class='total'>" + totalCell + "</td>" +
-      /* الحالة بتتغيّر من السطر على طول — كانت محتاجة تفتح التفاصيل
-         أو درج التعديل. المعالج والحواجز (المخزون والفترة المقفولة)
-         هم هم اللي شغّالين من التفاصيل. */
-      "<td class='stat'><select class='rowst st st-" + st + "' data-status='" + s.id + "'" +
-        (canEdit() ? "" : " disabled") + " aria-label='حالة الأوردر'>" +
-        stChoices(st).map(function(k){
-          return "<option value='" + k + "'" + (k === st ? " selected" : "") + ">" +
-                 esc(stOptTxt(s, k)) + "</option>"; }).join("") +
-      "</select>" + (function(){
-        var sp = orderStep(s);
-        return "<span class='stepline" + (sp.done ? " done" : "") + "'>" + esc(stepTxt(sp)) + "</span>";
-      })() + delTag(s) + cfTag(s) + "</td>" +
-      "<td class='rowacts'>" + rowNextBtn(s) +
-        "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل' aria-label='تعديل'>✎</button>" +
-        "<span class='chev' aria-hidden='true'>▾</span></td></tr>";
+      "<td class='stat'>" + stageCell(s) + "</td>" +
+      "<td class='rowacts'>" + rowNextBtn(s) + "</td></tr>";
 
     if(!isOpen) return row;
     return row + detailRowHTML(s);
+  }
+
+  /* v179 — المرحلة في السطر: «خط خياطة» من ٥ غُرز (اللي خلص جملي · اللي دلوقتي نبيتي)
+     وتحته اسم المرحلة بكلمتين. نفس الخطوات اللي في التفاصيل (orderStep) — مفيش حساب جديد. */
+  function sinceTxt(d){
+    var n = daysSince(d);
+    return n <= 0 ? "النهارده" : n === 1 ? "من يوم" : n === 2 ? "من يومين" : "من " + qty(n) + (n <= 10 ? " أيام" : " يوم");
+  }
+  function seamHTML(n, done){
+    var h = "<span class='seam' aria-hidden='true'>";
+    for(var i = 1; i <= STEP_N; i++) h += "<i class='" + (done || i < n ? "d" : (i === n ? "n" : "")) + "'></i>";
+    return h + "</span>";
+  }
+  function stageCell(s){
+    var sp = orderStep(s), co = squish(s.shipCo) || "الشركة", canc = isCancelled(s);
+    var t = "", sub = "", cls = "";
+    if(sp.k === "ship"){ t = "جديد"; sub = s.selfDel ? "توصيل بنفسك" : squish(s.shipCo); }
+    else if(sp.k === "inspect"){
+      var since = s.date;           // نفس حساب «متأخرين» في التبويب فوق
+      t = "مع المندوب"; sub = (s.selfDel ? squish(s.courier) || "توصيل بنفسك" : co) + " · " + sinceTxt(since);
+      if(daysSince(since) >= SG_STALE) cls = " late";
+    }
+    else if(sp.k === "custpaid") t = "سجّل دفع العميل";
+    else if(sp.k === "collect") t = "باقي على العميل";
+    else if(sp.k === "refund") t = "محصّل زيادة";
+    else if(sp.k === "draw") t = "فلوسك عند " + co;
+    else if(sp.k === "back") t = "مرتجع عند " + co;
+    else { t = canc ? (preShip(s) ? "اتلغى" : "اترفض") : "خلص"; sub = s.selfDel && !canc ? "توصيل بنفسك" : ""; cls = canc ? " off" : " ok"; }
+    return (canc && sp.done ? "" : seamHTML(sp.n, sp.done)) +
+      "<span class='stg" + cls + "'>" + esc(t) + (sub ? " <em>· " + esc(sub) + "</em>" : "") + "</span>" + cfTag(s);
   }
 
   // مين بيوصّل الأوردر — بيبان في السطر جنب الحالة
@@ -11050,23 +11189,33 @@
     var p = db.parties.find(function(x){ return x.id === s.partyId; }) || {};
     var ed = canEdit() && !saleLocked(s);
 
-    /* ---- ١ الرأس ---- */
+    /* ---- ١ الرأس (v179): مين · وفين — وزرارين بس: تعديل و⋯ ----
+       «كرّر» و«بوليصة» والحالة والحذف جوه ⋯ — بتتداس قليل، ومكانها مش لازم يبان على طول.
+       الحالة رجعت هنا بعد ما اتشالت من السطر: نفس data-status فبتعدّي على نفس الحواجز. */
+    var sub = [co, (s.selfDel ? "توصيل بنفسك" + (s.courier ? " · " + squish(s.courier) : "") : ""),
+               s.shippedAt ? "اتبعت " + dShort(s.shippedAt) : "اتسجّل " + dShort(s.date),
+               squish(s.owner) ? "المسؤول " + squish(s.owner) : ""].filter(Boolean);
     var head = "<div class='dd-head'><div class='dd-id'>" +
-        "<span class='dd-no'>#" + esc(s.no || "—") + "</span>" +
-        "<span class='st st-" + st + "'>" + esc(saleStateTxt(s)) + "</span>" +
-        (co ? "<span>" + esc(co) + "</span>" : "") +
+        "<h3 class='dd-t'><span class='dd-no'>#" + esc(s.no || "—") + "</span> · " + esc(partyName(s.partyId)) + "</h3>" +
+        "<p class='dd-sub'>" + sub.map(esc).join(" · ") +
         (squish(s.shipCode)
-          ? "<button type='button' class='dd-code num' data-copy='" + esc(squish(s.shipCode)) +
-            "' title='دوس تنسخ الكود'>" + esc(squish(s.shipCode)) + " ⧉</button>" : "") +
+          ? " · <button type='button' class='dd-code num' data-copy='" + esc(squish(s.shipCode)) +
+            "' title='دوس تنسخ الكود'>" + esc(squish(s.shipCode)) + "</button>" : "") + "</p>" +
       "</div><div class='dd-acts'>" +
-        "<span class='dd-nav'><button class='tbtn' type='button' data-snav='prev' title='الأوردر اللي فوقه' aria-label='اللي فوقه'>→</button>" +
-        "<button class='tbtn' type='button' data-snav='next' title='الأوردر اللي تحته' aria-label='اللي تحته'>←</button></span>" +
-        "<button class='tbtn' type='button' data-edit='sales|" + s.id + "'>✎ تعديل</button>" +
-        "<button class='tbtn' type='button' data-repeat='" + s.id + "'>كرّر</button>" +
-        "<button class='tbtn' type='button' data-label='" + s.id + "'>بوليصة</button>" +
-        "<details class='dd-more'><summary class='tbtn' aria-label='حاجات تانية'>⋯</summary>" +
-          "<div><button class='tbtn' type='button' data-del='sales' data-id='" + s.id + "'>حذف الأوردر</button></div></details>" +
-        "<button class='tbtn dd-x' type='button' data-sclose='1' aria-label='اقفل التفاصيل'>✕</button>" +
+        "<button class='tbtn dd-ic' type='button' data-edit='sales|" + s.id + "' aria-label='تعديل' title='تعديل'>" +
+          "<svg class='i' viewBox='0 0 24 24'><path d='M4 20h4L19 9l-4-4L4 16z'/></svg></button>" +
+        "<details class='dd-more'><summary class='tbtn dd-ic' aria-label='حاجات تانية' title='حاجات تانية'>" +
+          "<svg class='i' viewBox='0 0 24 24'><circle cx='5' cy='12' r='1'/><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/></svg></summary>" +
+          "<div><label class='dd-stl'>الحالة<select class='rowst st st-" + st + "' data-status='" + s.id + "'" +
+            (canEdit() ? "" : " disabled") + ">" +
+            stChoices(st).map(function(k){
+              return "<option value='" + k + "'" + (k === st ? " selected" : "") + ">" + esc(stOptTxt(s, k)) + "</option>"; }).join("") +
+          "</select></label>" +
+          "<button class='tbtn' type='button' data-repeat='" + s.id + "'>كرّر الأوردر</button>" +
+          "<button class='tbtn' type='button' data-label='" + s.id + "'>اطبع البوليصة</button>" +
+          "<button class='tbtn dd-del' type='button' data-del='sales' data-id='" + s.id + "'>حذف الأوردر</button></div></details>" +
+        "<button class='tbtn dd-ic dd-x' type='button' data-sclose='1' aria-label='اقفل التفاصيل' title='اقفل'>" +
+          "<svg class='i' viewBox='0 0 24 24'><path d='M6 6l12 12M18 6 6 18'/></svg></button>" +
       "</div></div>";
 
     /* ---- ٢ الخطوة الجاية ---- */
@@ -11103,15 +11252,13 @@
     };
     var step = "<div class='ostep dd-step" + (sp.done ? " done" : "") + "'>" +
       "<div class='dd-step-t'>" + (sp.done ? "<b>✓ الأوردر خلص</b>"
-          : "<span class='dd-k'>الخطوة الجاية · " + sp.n + " من " + STEP_N + "</span><b>" + esc(sp.t) + "</b>") +
-        (sp.hint ? "<p>" + esc(sp.hint) + "</p>" : "") +
+          : "<span class='dd-k'>الخطوة الجاية</span><b>" + esc(sp.t) + "</b>") +
+        // «خد كله · خد جزء · رفض» مكتوبة على الزراير نفسها — الشرح بيبان بس لو بيقول حاجة جديدة
+        (sp.hint && sp.k !== "inspect" ? "<p>" + esc(sp.hint) + "</p>" : "") +
         (sp.also ? "<p>" + esc(sp.also) + "</p>" : "") + "</div>" +
       (btns ? "<div class='ostep-b dd-step-b'>" + btns + "</div>" : "") +
-      "<div class='ostep-ph' aria-hidden='true'>" +
-        "<div><em>مع العميل</em><ol class='ostep-dots'>" + [1,2,3].map(dot).join("") + "</ol></div>" +
-        "<div><em>" + (via ? "مع شركة الشحن" : "بعد الاستلام") + "</em><ol class='ostep-dots'>" +
-          [4,5].map(dot).join("") + "</ol></div>" +
-      "</div></div>";
+      "<ol class='ostep-dots dd-seam' aria-hidden='true'>" + [1,2,3,4,5].map(dot).join("") + "</ol>" +
+      "</div>";
 
     /* ---- ٣أ العميل ---- */
     var ph = squish(p.phone || "");
@@ -11240,21 +11387,22 @@
       if(stt.k === "back" && ed)
         acts += "<button class='tbtn ghostx' type='button' data-heldback='" + esc(s.id) + "|" + i + "' data-undo='1'>تراجع</button>";
       return "<div class='dd-it'>" +
-        (thumbHTML(l.itemId) || "<span class='dd-noimg' aria-hidden='true'>" + esc(itemName(l.itemId).charAt(0)) + "</span>") +
+        (thumbHTML(l.itemId) || swatchHTML([vColor(l)]) || "<span class='dd-noimg' aria-hidden='true'>" + esc(itemName(l.itemId).charAt(0)) + "</span>") +
         "<span><span class='dd-in'>" + esc(itemName(l.itemId)) + "</span>" +
           (vl ? "<span class='sub'>" + esc(vl) + "</span>" : "") + "</span>" +
         "<span class='num'><span" + (allBack ? " class='dd-dim'" : "") + ">" + qty(q0) + " × " + esc(money(l.price)) + "</span>" +
           (allBack ? "<span class='sub'>رجّعها</span>"
                    : (gp !== null ? "<span class='sub money-only'>ربح " + esc(money(gp)) + "</span>" : "")) + "</span>" +
-        "<span><span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
-          (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "") + "</span>" +
+        // حالة الصنف بتفرق بعد التسليم بس (رجع؟ لسه عند الشركة؟) — قبلها هي هي الخطوة اللي فوق
+        (deliv || canc ? "<span><span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
+          (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "") + "</span>" : "<span></span>") +
         "<span class='dd-ia'>" + acts + "</span></div>";
     }).join("");
 
     return "<tr class='detail' data-detail='" + s.id + "'><td colspan='" + SALE_HEAD.length + "'><div class='detail-in dd'>" +
       head + (ed ? shipAskHTML(s) : "") + step +
-      "<div class='dd-cards'>" + cust + money_ + tl + "</div>" +
-      "<div class='dd-items'><h5>الأصناف</h5>" + items + "</div>" +
+      "<div class='dd-items'><h5>الأصناف · " + nPcs(SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0)) + "</h5>" + items + "</div>" +
+      "<div class='dd-cards'>" + money_ + cust + tl + "</div>" +
       "</div></td></tr>";
   }
 
@@ -11499,7 +11647,7 @@
     var list = filteredSales().slice().sort(byDate);
     renderStatusTabs();
     renderChips();
-    renderSaleStats(list);
+    // v179: سطر الأرقام المالية اتشال من هنا — نفس الأرقام في الرئيسية والتقارير
 
     // الأوردر المفتوح سطر تفاصيله واختفى بالفلتر ما يفضلش محفوظ للأبد
     Object.keys(openRows).forEach(function(id){
@@ -11608,22 +11756,22 @@
     var due3 = g.direct.reduce(function(a, s){ return a + Math.max(0, sDue(s)); }, 0);
     var held = g.st[4].reduce(function(a, s){ return a + heldLeft(s); }, 0);
     var stale = g.st[2].filter(function(s){ return daysSince(s.date) >= SG_STALE; }).length;
+    /* v179: المراحل بقت تبويبات رفيعة (اسم · رقم) بدل ٦ كروت كبيرة —
+       الشرح الصغير بيظهر بس لو فيه حاجة محتاجاك (متأخرين) أو وحدة (قطعة). */
     var cards = [
-      ["1", "جديد", qty(g.st[1].length), "ناقصه شحن أو كود", ""],
-      ["2", "مع المندوب", qty(g.st[2].length),
-        stale ? qty(stale) + " بقالهم " + SG_STALE + " أيام أو أكتر" : "مستني نتيجة التسليم", stale ? "bad" : ""],
-      ["3", "فلوسك عند الشركة", sgNum(left3),
-        "من " + qty(g.st[3].length) + " أوردرات" + (due3 > 0.009 ? " · و" + sgNum(due3) + " عند عملاء" : ""), ""],
-      ["4", "مرتجع عند الشركة", qty(held) + " قطع", "من " + qty(g.st[4].length) + " أوردر", ""],
+      ["1", "جديد", qty(g.st[1].length), "", ""],
+      ["2", "مع المندوب", qty(g.st[2].length), stale ? qty(stale) + " متأخرين" : "", stale ? "bad" : ""],
+      ["3", "فلوسك عند الشركة", sgNum(left3), due3 > 0.009 ? "و" + sgNum(due3) + " عند عملاء" : "", ""],
+      ["4", "مرتجع عند الشركة", qty(held), "قطعة", held ? "bad" : ""],
       ["5", "خلص", qty(g.st[5].length), "الشهر ده", ""]
     ];
     bar.innerHTML = cards.map(function(c){
       return "<button type='button' class='sg-card" + (sView === c[0] ? " on" : "") +
         (c[0] === "4" && held ? " alert" : "") + "' data-sgview='" + c[0] + "' aria-pressed='" +
         (sView === c[0] ? "true" : "false") + "'>" +
-        "<span class='n'>" + "١٢٣٤٥"[Number(c[0]) - 1] + "</span><span class='t'>" + esc(c[1]) + "</span>" +
+        "<span class='t'>" + esc(c[1]) + "</span>" +
         "<span class='c num'>" + esc(c[2]) + "</span>" +
-        "<span class='s" + (c[4] ? " " + c[4] : "") + "'>" + esc(c[3]) + "</span></button>";
+        (c[3] ? "<span class='s" + (c[4] ? " " + c[4] : "") + "'>" + esc(c[3]) + "</span>" : "") + "</button>";
     }).join("");
 
     pnl.hidden = all;
@@ -14520,8 +14668,8 @@
      وبنرسمها فاتحة دايمًا حتى لو السيستم ليلي — الصورة بتتشارك. */
   var CI = { W:760, PAD:28, S:3 };          // العرض بالنقط · الهامش · درجة الوضوح
   var CI_C = {
-    bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
-    brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
+    bg:"#FFFFFF", card:"#F7F8F9", line:"#DCDFE2", ink:"#1D1A1C", soft:"#5D6166",
+    brand:"#4E1B27", gain:"#1E6F50", due:"#A32846", chip:"#F1F2F4"
   };
   function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
   function ciRound(ctx, x, y, w, h, r){
@@ -19079,6 +19227,31 @@
     return "<img class='thumb"+(big?" thumb-lg":"")+"' data-zoom='"+esc(src)+"' src='"+esc(src)+"' alt='' loading='lazy'>";
   }
 
+  /* v179 — دايرة بلون الحتة الحقيقي جنب الصنف: الفريق يشوف ألوان الأوردر من غير ما يفتحه.
+     اسم اللون بيتكتب بإيد (جملى/جملي · بنى/بني · نبيتى) — بنوحّده الأول، واللي مش معروف ما بيترسمش. */
+  var SW_HEX = { "اسود":"#1D1A1C", "ابيض":"#F7F7F4", "اوف وايت":"#EEE8DC", "كريمي":"#EADFC8", "بيج":"#D8C2A4",
+    "جملي":"#B07A47", "كاميل":"#B07A47", "عسلي":"#B5843A", "هافان":"#7A4A2A", "كافيه":"#8A6A4F", "بني":"#6B4429",
+    "نبيتي":"#6E1F2F", "احمر":"#C0262D", "بينك":"#E8A6B8", "روز":"#D9A0A8", "موف":"#8E6BA8",
+    "رصاصي":"#8E9399", "رصاصي فاتح":"#C3C7CB", "رصاصي غامق":"#5E6369", "فضي":"#B8BCC2", "سيلفر":"#B8BCC2",
+    "ذهبي":"#C9A14A", "دهبي":"#C9A14A", "جولد":"#C9A14A", "نحاسي":"#B0683A",
+    "اصفر":"#E3B832", "زيتي":"#5E6B3A", "اخضر":"#2F7D4F", "مينت جرين":"#A8DCC5", "مينت":"#A8DCC5",
+    "لبني":"#A9CBE6", "ازرق":"#2F5DA8", "كحلي":"#1F2A44", "تايجر":"#C08A3E" };
+  function swNorm(c){
+    return squish(c).replace(/[ىي]/g, "ي").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/\s+(سادة|ساده|lv|LV)$/i, "");
+  }
+  function swHex(c){
+    var k = swNorm(c); if(!k) return "";
+    return SW_HEX[k] || SW_HEX[k.split(" ")[0]] || "";
+  }
+  // لحد ٣ دواير — الباقي مش بيضيف معلومة في السطر
+  function swatchHTML(colors){
+    var seen = {}, out = [];
+    (colors || []).forEach(function(c){ var h = swHex(c); if(h && !seen[h]){ seen[h] = 1; out.push([h, squish(c)]); } });
+    if(!out.length) return "";
+    return "<span class='sw' aria-hidden='true'>" + out.slice(0, 3).map(function(x){
+      return "<i style='background:" + x[0] + "' title='" + esc(x[1]) + "'></i>"; }).join("") + "</span>";
+  }
+
   // تكبير الصورة بالضغط
   document.body.addEventListener("click", function(e){
     var t = e.target.closest("[data-zoom]");
@@ -19465,7 +19638,7 @@
      الجدول القديم والسجل والشرح لسه موجودين تحت في «جدول الشركاء وسجل كل
      الحركات». الكروت بتقرا من نفس الدوال (capitalOf/currentOf/ratioOf)،
      فالأرقام هي هي. */
-  var CAP_CLR = ["#4A2545","#B07AA1","#7FA68F","#C8963E","#5B7DB1","#9A1333"];
+  var CAP_CLR = ["#7A2637","#B07A47","#7FA68F","#C8963E","#5B7DB1","#9A1333"];
   function capClr(i){ return CAP_CLR[i % CAP_CLR.length]; }
   var capOpen = null;       // الشريك المفتوح حركاته في الكارت
   function capPct(r){ return (r*100).toFixed(2).replace(/\.?0+$/, "") + "%"; }

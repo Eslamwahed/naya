@@ -314,6 +314,31 @@
     return "<img class='thumb"+(big?" thumb-lg":"")+"' data-zoom='"+esc(src)+"' src='"+esc(src)+"' alt='' loading='lazy'>";
   }
 
+  /* v179 — دايرة بلون الحتة الحقيقي جنب الصنف: الفريق يشوف ألوان الأوردر من غير ما يفتحه.
+     اسم اللون بيتكتب بإيد (جملى/جملي · بنى/بني · نبيتى) — بنوحّده الأول، واللي مش معروف ما بيترسمش. */
+  var SW_HEX = { "اسود":"#1D1A1C", "ابيض":"#F7F7F4", "اوف وايت":"#EEE8DC", "كريمي":"#EADFC8", "بيج":"#D8C2A4",
+    "جملي":"#B07A47", "كاميل":"#B07A47", "عسلي":"#B5843A", "هافان":"#7A4A2A", "كافيه":"#8A6A4F", "بني":"#6B4429",
+    "نبيتي":"#6E1F2F", "احمر":"#C0262D", "بينك":"#E8A6B8", "روز":"#D9A0A8", "موف":"#8E6BA8",
+    "رصاصي":"#8E9399", "رصاصي فاتح":"#C3C7CB", "رصاصي غامق":"#5E6369", "فضي":"#B8BCC2", "سيلفر":"#B8BCC2",
+    "ذهبي":"#C9A14A", "دهبي":"#C9A14A", "جولد":"#C9A14A", "نحاسي":"#B0683A",
+    "اصفر":"#E3B832", "زيتي":"#5E6B3A", "اخضر":"#2F7D4F", "مينت جرين":"#A8DCC5", "مينت":"#A8DCC5",
+    "لبني":"#A9CBE6", "ازرق":"#2F5DA8", "كحلي":"#1F2A44", "تايجر":"#C08A3E" };
+  function swNorm(c){
+    return squish(c).replace(/[ىي]/g, "ي").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/\s+(سادة|ساده|lv|LV)$/i, "");
+  }
+  function swHex(c){
+    var k = swNorm(c); if(!k) return "";
+    return SW_HEX[k] || SW_HEX[k.split(" ")[0]] || "";
+  }
+  // لحد ٣ دواير — الباقي مش بيضيف معلومة في السطر
+  function swatchHTML(colors){
+    var seen = {}, out = [];
+    (colors || []).forEach(function(c){ var h = swHex(c); if(h && !seen[h]){ seen[h] = 1; out.push([h, squish(c)]); } });
+    if(!out.length) return "";
+    return "<span class='sw' aria-hidden='true'>" + out.slice(0, 3).map(function(x){
+      return "<i style='background:" + x[0] + "' title='" + esc(x[1]) + "'></i>"; }).join("") + "</span>";
+  }
+
   // تكبير الصورة بالضغط
   document.body.addEventListener("click", function(e){
     var t = e.target.closest("[data-zoom]");

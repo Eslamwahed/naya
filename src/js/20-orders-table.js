@@ -1,6 +1,6 @@
   /* ================= جدول الأوردرات ================= */
   // ٥ أعمدة بتتقري بنظرة. الشحن والربح والتحصيل نزلوا سطر التفاصيل.
-  var SALE_HEAD = ["","الأوردر","العميل","الأصناف","الإجمالي","الحالة",""];
+  var SALE_HEAD = ["","الأوردر","العميل","الأصناف","المبلغ","المرحلة",""];
   var openRows = {};        // الأوردرات المفتوح سطر تفاصيلها
   var selSales = {};        // الأوردرات المختارة للإجراء الجماعي
   function selIds(){ return Object.keys(selSales); }
@@ -12,51 +12,38 @@
     var due = isDelivered(s) ? (saleTotal(s) + shipIn(s) - (Number(s.paid)||0)) : 0;
     var isOpen = !!openRows[s.id];
 
-    /* الأصناف في سطر واحد: كل صنف باسمه وعدد قطعه، والألوان والمقاسات تحت —
-       كده ارتفاع السطر ثابت مهما كان عدد الأصناف. التفصيل الكامل بسعره في اللوحة. */
-    var grp = [], byI = {}, backN = 0, pcs = 0;
+    /* v179 — السطر بيجاوب على ٤ أسئلة بس: مين · إيه · بكام · وصل لفين.
+       الألوان دواير بلون الحتة، والمقاسات والتليفون والشحن في التفاصيل. */
+    var grp = [], byI = {}, backN = 0, pcs = 0, cols = [];
     lines.forEach(function(l){
       var q = Number(l.qty)||0, k = l.itemId || "?";
-      if(!byI[k]){ byI[k] = { id:l.itemId, q:0, v:[] }; grp.push(byI[k]); }
+      if(!byI[k]){ byI[k] = { id:l.itemId, q:0 }; grp.push(byI[k]); }
       byI[k].q += q; pcs += q;
-      var vl = vLabel(vColor(l), vSize(l)); if(vl && byI[k].v.indexOf(vl) < 0) byI[k].v.push(vl);
-      backN += canc ? q : lineRet(l);
+      if(vColor(l)) cols.push(vColor(l));
+      backN += canc ? 0 : lineRet(l);
     });
-    var goods = grp.length ? "<div class='goods'>" + thumbHTML(grp[0].id) +
-      "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){
-          return esc(itemName(g.id)) + " <b class='num'>×" + qty(g.q) + "</b>"; }).join(" · ") +
-        (grp.length > 2 ? " <span class='more'>و" + qty(grp.length - 2) + " صنف تاني</span>" : "") + "</span>" +
-      "<span class='secondary'>" + (grp.length === 1 && grp[0].v.length ? esc(grp[0].v.join(" · ")) : nPcs(pcs)) +
-        (shipIn(s) ? " · شحن " + qty(shipIn(s)) : "") +
-        (backN ? " · <span class='v-due'>مرتجع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
+    var goods = grp.length ? "<div class='goods'>" + (thumbHTML(grp[0].id) || swatchHTML(cols)) +
+      "<span class='g1'><span class='nm'>" + grp.slice(0, 2).map(function(g){ return esc(itemName(g.id)); }).join(" · ") +
+        (grp.length > 2 ? " <span class='more'>+" + qty(grp.length - 2) + "</span>" : "") + "</span>" +
+      "<span class='secondary'>" + nPcs(pcs) +
+        (backN ? " · <span class='v-due'>رجّع " + qty(backN) + "</span>" : "") + "</span></span></div>" : "";
 
-    var collected = canc ? shipIn(s) : (Number(s.paid)||0);
-    // الملغي إجماليه صفر فعلاً، بس عرض 0.00 لوحده بيضلّل —
-    // بنوري قيمته الأصلية مشطوبة عشان تعرف الأوردر ده كان بكام.
+    // الملغي إجماليه صفر فعلاً — بنوري قيمته الأصلية مشطوبة عشان تعرف كان بكام
     var rawGoods = lines.reduce(function(a,l){
       return a + (Number(l.qty)||0) * (Number(l.price)||0); },0);
+    // تحت المبلغ: حاجة بس لو فيه فلوس مستنية (مش «خالص» و«لسه ما استلمش» في كل سطر)
+    var pill = "";
+    if(viaShip(s) && isDelivered(s)){
+      if(shipPaidGap(s)) pill = "<span class='pill due'>سجّل دفع العميل</span>";
+      else if(shipPend(s).left > 0.009)
+        pill = "<span class='pill wait'>عند " + esc(squish(s.shipCo) || "الشحن") + " " + money(shipPend(s).left) + "</span>";
+    } else if(!viaShip(s) && isDelivered(s)){
+      if(due > 0.009) pill = "<span class='pill due'>باقي " + money(due) + "</span>";
+      else if(due < -0.009) pill = "<span class='pill due'>ترجّعله " + money(-due) + "</span>";
+    }
     var totalCell = "<span class='primary num'>" +
-        (canc ? "<s style='opacity:.5;font-weight:500'>" + money(rawGoods) + "</s>"
-              : money(saleTotal(s))) + "</span>" +
-      "<span class='secondary num'>" +
-        (viaShip(s)
-          /* أوردر الشركة: العميل دفع للمندوب وخرج — اللي يهمّك هنا
-             هل الفلوس لسه عند الشركة ولا وصلتك */
-          ? (shipPaidGap(s) && isDelivered(s)
-              ? "<span class='pill due'>سجّل دفع العميل</span>"
-              : (isDelivered(s)
-                  ? (shipPend(s).left > 0.009
-                      ? "العميل دفع · <span class='pill due'>عند " + esc(squish(s.shipCo) || "الشحن") + " " +
-                        money(shipPend(s).left) + "</span>"
-                      : "العميل دفع · وصلك")
-                  : (canc ? "ملغي · شحن " + money(shipOut(s)) : "لسه ما استلمش")))
-          : (isDelivered(s)
-              ? (due > 0.009
-                  ? "محصّل " + money(collected) + " <span class='pill due'>باقي " + money(due) + "</span>"
-                  // حصّل أكتر من المطلوب (العميل رجّع بعد ما دفع) — دي مش «خالص»
-                  : (due < -0.009 ? "<span class='pill due'>ترجّعله " + money(-due) + "</span>" : "خالص"))
-              : (canc ? "ملغي · شحن " + money(shipOut(s)) : "لسه ما اتحصّلش"))) +
-      "</span>";
+        (canc ? "<s>" + money(rawGoods) + "</s>" : money(saleTotal(s))) + "</span>" +
+      (pill ? "<span class='secondary num'>" + pill + "</span>" : "");
 
     var row = "<tr class='order" + (isOpen ? " open" : "") + (s.id === freshId ? " fresh" : "") +
         (selSales[s.id] ? " sel" : "") +
@@ -65,28 +52,45 @@
         (selSales[s.id] ? " checked" : "") + " aria-label='اختار أوردر " + esc(s.no||"") + "'></td>" +
       "<td class='lead'><span class='ono'>" + (s.no ? "#"+esc(s.no) : "—") + "</span>" +
         "<span class='secondary num' title='" + esc(s.date||"") + "'>" + esc(dShort(s.date) || "—") + "</span></td>" +
-      "<td class='cust'><span class='primary' style='font-size:var(--fs-3)'>" + esc(partyName(s.partyId)) + "</span>" +
-        (p.gov||p.phone ? "<span class='secondary'>" + esc([p.gov,p.phone].filter(Boolean).join(" · ")) + "</span>" : "") + "</td>" +
+      "<td class='cust'><span class='primary'>" + esc(partyName(s.partyId)) + "</span>" +
+        (p.gov ? "<span class='secondary'>" + esc(p.gov) + "</span>" : "") + "</td>" +
       "<td class='items'>" + (goods || "—") + "</td>" +
       "<td class='total'>" + totalCell + "</td>" +
-      /* الحالة بتتغيّر من السطر على طول — كانت محتاجة تفتح التفاصيل
-         أو درج التعديل. المعالج والحواجز (المخزون والفترة المقفولة)
-         هم هم اللي شغّالين من التفاصيل. */
-      "<td class='stat'><select class='rowst st st-" + st + "' data-status='" + s.id + "'" +
-        (canEdit() ? "" : " disabled") + " aria-label='حالة الأوردر'>" +
-        stChoices(st).map(function(k){
-          return "<option value='" + k + "'" + (k === st ? " selected" : "") + ">" +
-                 esc(stOptTxt(s, k)) + "</option>"; }).join("") +
-      "</select>" + (function(){
-        var sp = orderStep(s);
-        return "<span class='stepline" + (sp.done ? " done" : "") + "'>" + esc(stepTxt(sp)) + "</span>";
-      })() + delTag(s) + cfTag(s) + "</td>" +
-      "<td class='rowacts'>" + rowNextBtn(s) +
-        "<button class='rowact' type='button' data-edit='sales|" + s.id + "' title='تعديل' aria-label='تعديل'>✎</button>" +
-        "<span class='chev' aria-hidden='true'>▾</span></td></tr>";
+      "<td class='stat'>" + stageCell(s) + "</td>" +
+      "<td class='rowacts'>" + rowNextBtn(s) + "</td></tr>";
 
     if(!isOpen) return row;
     return row + detailRowHTML(s);
+  }
+
+  /* v179 — المرحلة في السطر: «خط خياطة» من ٥ غُرز (اللي خلص جملي · اللي دلوقتي نبيتي)
+     وتحته اسم المرحلة بكلمتين. نفس الخطوات اللي في التفاصيل (orderStep) — مفيش حساب جديد. */
+  function sinceTxt(d){
+    var n = daysSince(d);
+    return n <= 0 ? "النهارده" : n === 1 ? "من يوم" : n === 2 ? "من يومين" : "من " + qty(n) + (n <= 10 ? " أيام" : " يوم");
+  }
+  function seamHTML(n, done){
+    var h = "<span class='seam' aria-hidden='true'>";
+    for(var i = 1; i <= STEP_N; i++) h += "<i class='" + (done || i < n ? "d" : (i === n ? "n" : "")) + "'></i>";
+    return h + "</span>";
+  }
+  function stageCell(s){
+    var sp = orderStep(s), co = squish(s.shipCo) || "الشركة", canc = isCancelled(s);
+    var t = "", sub = "", cls = "";
+    if(sp.k === "ship"){ t = "جديد"; sub = s.selfDel ? "توصيل بنفسك" : squish(s.shipCo); }
+    else if(sp.k === "inspect"){
+      var since = s.date;           // نفس حساب «متأخرين» في التبويب فوق
+      t = "مع المندوب"; sub = (s.selfDel ? squish(s.courier) || "توصيل بنفسك" : co) + " · " + sinceTxt(since);
+      if(daysSince(since) >= SG_STALE) cls = " late";
+    }
+    else if(sp.k === "custpaid") t = "سجّل دفع العميل";
+    else if(sp.k === "collect") t = "باقي على العميل";
+    else if(sp.k === "refund") t = "محصّل زيادة";
+    else if(sp.k === "draw") t = "فلوسك عند " + co;
+    else if(sp.k === "back") t = "مرتجع عند " + co;
+    else { t = canc ? (preShip(s) ? "اتلغى" : "اترفض") : "خلص"; sub = s.selfDel && !canc ? "توصيل بنفسك" : ""; cls = canc ? " off" : " ok"; }
+    return (canc && sp.done ? "" : seamHTML(sp.n, sp.done)) +
+      "<span class='stg" + cls + "'>" + esc(t) + (sub ? " <em>· " + esc(sub) + "</em>" : "") + "</span>" + cfTag(s);
   }
 
   // مين بيوصّل الأوردر — بيبان في السطر جنب الحالة
@@ -159,23 +163,33 @@
     var p = db.parties.find(function(x){ return x.id === s.partyId; }) || {};
     var ed = canEdit() && !saleLocked(s);
 
-    /* ---- ١ الرأس ---- */
+    /* ---- ١ الرأس (v179): مين · وفين — وزرارين بس: تعديل و⋯ ----
+       «كرّر» و«بوليصة» والحالة والحذف جوه ⋯ — بتتداس قليل، ومكانها مش لازم يبان على طول.
+       الحالة رجعت هنا بعد ما اتشالت من السطر: نفس data-status فبتعدّي على نفس الحواجز. */
+    var sub = [co, (s.selfDel ? "توصيل بنفسك" + (s.courier ? " · " + squish(s.courier) : "") : ""),
+               s.shippedAt ? "اتبعت " + dShort(s.shippedAt) : "اتسجّل " + dShort(s.date),
+               squish(s.owner) ? "المسؤول " + squish(s.owner) : ""].filter(Boolean);
     var head = "<div class='dd-head'><div class='dd-id'>" +
-        "<span class='dd-no'>#" + esc(s.no || "—") + "</span>" +
-        "<span class='st st-" + st + "'>" + esc(saleStateTxt(s)) + "</span>" +
-        (co ? "<span>" + esc(co) + "</span>" : "") +
+        "<h3 class='dd-t'><span class='dd-no'>#" + esc(s.no || "—") + "</span> · " + esc(partyName(s.partyId)) + "</h3>" +
+        "<p class='dd-sub'>" + sub.map(esc).join(" · ") +
         (squish(s.shipCode)
-          ? "<button type='button' class='dd-code num' data-copy='" + esc(squish(s.shipCode)) +
-            "' title='دوس تنسخ الكود'>" + esc(squish(s.shipCode)) + " ⧉</button>" : "") +
+          ? " · <button type='button' class='dd-code num' data-copy='" + esc(squish(s.shipCode)) +
+            "' title='دوس تنسخ الكود'>" + esc(squish(s.shipCode)) + "</button>" : "") + "</p>" +
       "</div><div class='dd-acts'>" +
-        "<span class='dd-nav'><button class='tbtn' type='button' data-snav='prev' title='الأوردر اللي فوقه' aria-label='اللي فوقه'>→</button>" +
-        "<button class='tbtn' type='button' data-snav='next' title='الأوردر اللي تحته' aria-label='اللي تحته'>←</button></span>" +
-        "<button class='tbtn' type='button' data-edit='sales|" + s.id + "'>✎ تعديل</button>" +
-        "<button class='tbtn' type='button' data-repeat='" + s.id + "'>كرّر</button>" +
-        "<button class='tbtn' type='button' data-label='" + s.id + "'>بوليصة</button>" +
-        "<details class='dd-more'><summary class='tbtn' aria-label='حاجات تانية'>⋯</summary>" +
-          "<div><button class='tbtn' type='button' data-del='sales' data-id='" + s.id + "'>حذف الأوردر</button></div></details>" +
-        "<button class='tbtn dd-x' type='button' data-sclose='1' aria-label='اقفل التفاصيل'>✕</button>" +
+        "<button class='tbtn dd-ic' type='button' data-edit='sales|" + s.id + "' aria-label='تعديل' title='تعديل'>" +
+          "<svg class='i' viewBox='0 0 24 24'><path d='M4 20h4L19 9l-4-4L4 16z'/></svg></button>" +
+        "<details class='dd-more'><summary class='tbtn dd-ic' aria-label='حاجات تانية' title='حاجات تانية'>" +
+          "<svg class='i' viewBox='0 0 24 24'><circle cx='5' cy='12' r='1'/><circle cx='12' cy='12' r='1'/><circle cx='19' cy='12' r='1'/></svg></summary>" +
+          "<div><label class='dd-stl'>الحالة<select class='rowst st st-" + st + "' data-status='" + s.id + "'" +
+            (canEdit() ? "" : " disabled") + ">" +
+            stChoices(st).map(function(k){
+              return "<option value='" + k + "'" + (k === st ? " selected" : "") + ">" + esc(stOptTxt(s, k)) + "</option>"; }).join("") +
+          "</select></label>" +
+          "<button class='tbtn' type='button' data-repeat='" + s.id + "'>كرّر الأوردر</button>" +
+          "<button class='tbtn' type='button' data-label='" + s.id + "'>اطبع البوليصة</button>" +
+          "<button class='tbtn dd-del' type='button' data-del='sales' data-id='" + s.id + "'>حذف الأوردر</button></div></details>" +
+        "<button class='tbtn dd-ic dd-x' type='button' data-sclose='1' aria-label='اقفل التفاصيل' title='اقفل'>" +
+          "<svg class='i' viewBox='0 0 24 24'><path d='M6 6l12 12M18 6 6 18'/></svg></button>" +
       "</div></div>";
 
     /* ---- ٢ الخطوة الجاية ---- */
@@ -212,15 +226,13 @@
     };
     var step = "<div class='ostep dd-step" + (sp.done ? " done" : "") + "'>" +
       "<div class='dd-step-t'>" + (sp.done ? "<b>✓ الأوردر خلص</b>"
-          : "<span class='dd-k'>الخطوة الجاية · " + sp.n + " من " + STEP_N + "</span><b>" + esc(sp.t) + "</b>") +
-        (sp.hint ? "<p>" + esc(sp.hint) + "</p>" : "") +
+          : "<span class='dd-k'>الخطوة الجاية</span><b>" + esc(sp.t) + "</b>") +
+        // «خد كله · خد جزء · رفض» مكتوبة على الزراير نفسها — الشرح بيبان بس لو بيقول حاجة جديدة
+        (sp.hint && sp.k !== "inspect" ? "<p>" + esc(sp.hint) + "</p>" : "") +
         (sp.also ? "<p>" + esc(sp.also) + "</p>" : "") + "</div>" +
       (btns ? "<div class='ostep-b dd-step-b'>" + btns + "</div>" : "") +
-      "<div class='ostep-ph' aria-hidden='true'>" +
-        "<div><em>مع العميل</em><ol class='ostep-dots'>" + [1,2,3].map(dot).join("") + "</ol></div>" +
-        "<div><em>" + (via ? "مع شركة الشحن" : "بعد الاستلام") + "</em><ol class='ostep-dots'>" +
-          [4,5].map(dot).join("") + "</ol></div>" +
-      "</div></div>";
+      "<ol class='ostep-dots dd-seam' aria-hidden='true'>" + [1,2,3,4,5].map(dot).join("") + "</ol>" +
+      "</div>";
 
     /* ---- ٣أ العميل ---- */
     var ph = squish(p.phone || "");
@@ -349,21 +361,22 @@
       if(stt.k === "back" && ed)
         acts += "<button class='tbtn ghostx' type='button' data-heldback='" + esc(s.id) + "|" + i + "' data-undo='1'>تراجع</button>";
       return "<div class='dd-it'>" +
-        (thumbHTML(l.itemId) || "<span class='dd-noimg' aria-hidden='true'>" + esc(itemName(l.itemId).charAt(0)) + "</span>") +
+        (thumbHTML(l.itemId) || swatchHTML([vColor(l)]) || "<span class='dd-noimg' aria-hidden='true'>" + esc(itemName(l.itemId).charAt(0)) + "</span>") +
         "<span><span class='dd-in'>" + esc(itemName(l.itemId)) + "</span>" +
           (vl ? "<span class='sub'>" + esc(vl) + "</span>" : "") + "</span>" +
         "<span class='num'><span" + (allBack ? " class='dd-dim'" : "") + ">" + qty(q0) + " × " + esc(money(l.price)) + "</span>" +
           (allBack ? "<span class='sub'>رجّعها</span>"
                    : (gp !== null ? "<span class='sub money-only'>ربح " + esc(money(gp)) + "</span>" : "")) + "</span>" +
-        "<span><span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
-          (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "") + "</span>" +
+        // حالة الصنف بتفرق بعد التسليم بس (رجع؟ لسه عند الشركة؟) — قبلها هي هي الخطوة اللي فوق
+        (deliv || canc ? "<span><span class='st st-" + stt.cls + "'>" + esc(stt.t) + "</span>" +
+          (stt.sub ? "<span class='sub'>" + esc(stt.sub) + "</span>" : "") + "</span>" : "<span></span>") +
         "<span class='dd-ia'>" + acts + "</span></div>";
     }).join("");
 
     return "<tr class='detail' data-detail='" + s.id + "'><td colspan='" + SALE_HEAD.length + "'><div class='detail-in dd'>" +
       head + (ed ? shipAskHTML(s) : "") + step +
-      "<div class='dd-cards'>" + cust + money_ + tl + "</div>" +
-      "<div class='dd-items'><h5>الأصناف</h5>" + items + "</div>" +
+      "<div class='dd-items'><h5>الأصناف · " + nPcs(SL(s).reduce(function(a, l){ return a + (Number(l.qty)||0); }, 0)) + "</h5>" + items + "</div>" +
+      "<div class='dd-cards'>" + money_ + cust + tl + "</div>" +
       "</div></td></tr>";
   }
 
@@ -608,7 +621,7 @@
     var list = filteredSales().slice().sort(byDate);
     renderStatusTabs();
     renderChips();
-    renderSaleStats(list);
+    // v179: سطر الأرقام المالية اتشال من هنا — نفس الأرقام في الرئيسية والتقارير
 
     // الأوردر المفتوح سطر تفاصيله واختفى بالفلتر ما يفضلش محفوظ للأبد
     Object.keys(openRows).forEach(function(id){
