@@ -4145,8 +4145,12 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "173";
+  var VERSION = "174";
   var CHANGELOG = [
+    { v:"174", d:"2026-11-03", items:[
+      "كارت «طابق كشوف QP 27/10 · 29/10 · 2/11» في شركات الشحن: مرتجعات #52 #83 #70 تتخصم في استلام 27/10، استلام #101 كله يوم 27/10، شحنة «Lora Collection» 200 مصروف يوم 29/10، واستلام 2/11 يتربط بأوردراته الـ14 — والخزنة تبقى زي اللي وصلك (12,665)",
+      "#70 كريم عفيفي ما دفعش شحن والبوليصة 23326462 · #106 مها رضوان دفعت 360 (شحن 30) · #126 أمل عصمت شحن QP 110"
+    ]},
     { v:"173", d:"2026-10-25", items:[
       "ترتيب جديد: 14 شاشة بدل 23 — «التحليل» بقى «التقارير» فيه 4 بس: قايمة الدخل (جدول ↔ رسمة) · الميزانية · الأداء (الأصناف · العملاء والمحافظات · الفريق) · ماشي إزاي؟ (مؤشراتك · القرارات والمخاطر · الحسابات سليمة؟)",
       "«المشتريات والموردين» شاشة واحدة: الفواتير ↔ الموردين بمفتاح تحت العنوان",
@@ -6720,6 +6724,8 @@
         line({ ic:"book", cls: AC.bad ? "bad" : "warn", t:"مراجع الحسابات لقى حاجات محتاجة تبصّلها",
                s:(AC.bad ? qty(AC.bad) + " لازم تتصلح" : "") + (AC.bad && AC.warn ? " · " : "") + (AC.warn ? qty(AC.warn) + " محتاجة مراجعة" : ""), v:qty(AC.bad + AC.warn), go:"audit" });
     }
+    if(canTab("ship") && fix174Pending())
+      line({ ic:"truck", cls:"bad", t:"طابق كشوف QP", s:"27/10 · 29/10 · 2/11 — الخزنة زيادة 500 عن الكشوف · دوسة واحدة", v:"", go:"ship" });
     var sq = canEdit() ? shipQList() : [];
     if(canTab("sales") && sq.length)
       line({ ic:"truck", cls:"warn", t:sq.length === 1 ? "#" + (sq[0].no || "") + " اترفض — العميل دفع كام من الشحن؟" : sq.length + " أوردرات اترفضت — العملاء دفعوا كام من الشحن؟",
@@ -13855,9 +13861,87 @@
   var shcOpen = {};                      // {co: "orders"|"held"|"stmt"}
   var shcPart = null;                    // الشركة اللي مفتوح فيها «استلم جزء»
   var shcSel = {};                       // v146: {co: {saleId:1}} — الأوردرات اللي هتستلم فلوسها
+  /* v174 — كشوف QP 27/10 (4,275) · 28/10 (−200) · 29/10 (3,040) · 2/11 (5,350). اتسجّلت باليد 13,165:
+     · المرتجعات اللي QP خصمت شحنها في 27/10 (#52 #83 #70) ما اتخصمتش — بتدخل في استلام #101 (615 − 300 = 315)
+     · #101 اتسجّل 215 يوم 27/10 و400 يوم 29/10 — الكشف دفعه كله 27/10
+     · 29/10: شحنة «Lora Collection» (بوليصة 23685952) 200 اتخصمت من الكشف — مصروف من غير أوردر
+     · 2/11 اتسجّل مبلغ واحد — بيتربط بأوردراته الـ14 عشان ما يتوزّعش على #79 و#115 اللي لسه ما اتحاسبوش
+     · #70 رفض وما دفعش شحن (البوليصة في الكشف 23326462) · #106 دفعت 360 (شحن 30) · #126 شحن QP للمنيا 110
+     مرتجعات 28/10 (#96 #97 −200) بتفضل على QP لحد ما تتخصم — إسلام: اللي وصل 3,040 يوم 29/10. */
+  var FIX174 = {
+    s101a:{ id:"mvqpiuk8ad0ow", was:215, now:315, o:["mvla9mou6xnnf", "mv2ta6dizh0pc", "mve32atm2ir6t", "mv74xgcwwkcrn"] },
+    s101b:{ id:"mvu1tucj67w9t", amt:400 },
+    lump:{ id:"mvzhyutedvgpx", amt:5350, o:["mvnudfezbfqol", "mvu1h92fmma5m", "mvusp4gllk0u6", "mvvegqjpyo2rn", "mvtwu25tkb6vs", "mvqx6laladdbe", "mvttud8fc0o0d",
+      "mvusr5owd67ta", "mvw724h05trdc", "mvtutjbqbtpy0", "mvr9gwih0ike9", "mvr80729ia115", "mvwbyyp86yxny", "mvw6z600fgfsw"] },
+    ord:[ { id:"mv74xgcwwkcrn", no:70, f:"shipIn", was:75, now:0, code:"23326462" },
+          { id:"mvp26c3efobkq", no:106, f:"shipIn", was:60, now:30 },
+          { id:"mvu1h92fmma5m", no:126, f:"shipOut", was:80, now:110 } ],
+    fee:{ d:"2026-10-29", amt:200, note:"شحنة «Lora Collection» على QP — بوليصة 23685952 (اتخصمت من كشف 29/10)" }
+  }, fix174Later = false;
+  function fx174C(id){ return live("cash").find(function(c){ return c.id === id; }); }
+  function fx174S(id){ return live("sales").find(function(x){ return x.id === id; }); }
+  function fix174Why(){
+    var w = [], F = FIX174, a = fx174C(F.s101a.id), b = fx174C(F.s101b.id), L = fx174C(F.lump.id);
+    if(!a || a.type !== "settle" || Math.abs(a.amount - F.s101a.was) > 0.009 || (a.orders || []).join() !== F.s101a.o[0]) w.push("استلام #101 (215) اتغيّر");
+    if(!b || b.type !== "settle" || Math.abs(b.amount - F.s101b.amt) > 0.009) w.push("استلام #101 (400) اتغيّر");
+    if(!L || L.type !== "settle" || Math.abs(L.amount - F.lump.amt) > 0.009 || (L.orders || []).length) w.push("استلام 2/11 اتغيّر");
+    F.ord.forEach(function(x){ var r = fx174S(x.id); if(!r || Number(r[x.f]) !== x.was) w.push("#" + x.no + " اتعدّل"); });
+    F.lump.o.concat(F.s101a.o).forEach(function(id){ var r = fx174S(id); if(!r || squish(r.shipCo) !== "QP") w.push("أوردر اتشال"); });
+    if(live("cash").some(function(c){ return c.type === "settle" && c.id !== F.s101a.id && (c.orders || []).some(function(o){ return F.lump.o.indexOf(o) >= 0 || F.s101a.o.slice(1).indexOf(o) >= 0; }); })) w.push("أوردر متسجّل في استلام تاني");
+    if(live("cash").some(function(c){ return c.type === "expense" && /23685952/.test(c.note || ""); })) w.push("مصروف الـ200 متسجّل");
+    if(isLocked("2026-10-27")) w.push("فترة 27/10 مقفولة");
+    return w;
+  }
+  function fix174Pending(){ return !settings.fix174 && !fix174Later && canEdit() && canMoney() && !fix174Why().length; }
+  function fix174Run(dry){
+    var F = FIX174, a = fx174C(F.s101a.id), b = fx174C(F.s101b.id), L = fx174C(F.lump.id);
+    var R = F.ord.map(function(x){ return fx174S(x.id); }), keep = [a, b, L].concat(R).map(function(o){ return JSON.stringify(o); }), n0 = db.cash.length, out;
+    var back = function(o, j){ Object.keys(o).forEach(function(k){ delete o[k]; }); Object.assign(o, JSON.parse(j)); };
+    var mark = function(o){ if(!dry){ o.editedBy = me || "غير محدد"; o.at = Date.now(); } };
+    try{
+      F.ord.forEach(function(x, i){ var r = R[i]; r[x.f] = x.now; if(x.code) r.shipCode = x.code; syncShipPaid(r); mark(r); });
+      a.amount = F.s101a.now; a.orders = F.s101a.o.slice(); a.fx = "174"; a.note = "كشف 27/10 من QP: #101 ومرتجعات #52 و#83 و#70"; mark(a);
+      b.deleted = true; mark(b);
+      L.orders = F.lump.o.slice(); L.fx = "174"; L.note = "كشف 2/11 من QP: 14 أوردر"; mark(L);
+      db.cash.push(stamp({ date:F.fee.d, type:"expense", partyId:"", amount:F.fee.amt, note:F.fee.note, cat:"othervar", costKind:"var", paidBy:"", svcDays:"", credit:"", fx:"174" }));
+      pendCache = null; clearStockIdx();
+      out = { qp:walletOf("QP"), cash:cashBox() };
+    } finally {
+      if(dry){ [a, b, L].concat(R).forEach(function(o, i){ back(o, keep[i]); }); db.cash.length = n0; pendCache = null; clearStockIdx(); }
+    }
+    return out;
+  }
+  function fix174HTML(){
+    if(!fix174Pending()) return "";
+    var bf = { qp:walletOf("QP"), cash:cashBox() }, af = fix174Run(true), n = function(x){ return "<span class='num'>" + esc(qty(x)) + "</span>"; };
+    return "<div class='panel fx-card' id='fx174'><h3>طابق كشوف QP 27/10 · 29/10 · 2/11</h3>" +
+      "<p class='hint'>الكشوف دفعت " + n(12665) + " والمتسجّل " + n(13165) + " — زيادة " + n(500) + " في الخزنة.</p>" +
+      "<div class='fx-eff'><div><small>الخزنة</small><b class='num'>" + esc(money(bf.cash)) + " ← " + esc(money(af.cash)) + "</b></div>" +
+        "<div><small>QP</small><b class='num'>" + esc(money(bf.qp)) + " ← " + esc(money(af.qp)) + "</b></div></div>" +
+      "<ul class='fx-ul'>" +
+        "<li><b>27/10</b> — مرتجعات <b>#52 #83 #70</b> (" + n(300) + ") تتخصم، واستلام <b>#101</b> كله في اليوم ده: " + n(4275) + " زي الكشف</li>" +
+        "<li><b>29/10</b> — شحنة «Lora Collection» " + n(200) + " مصروف (بوليصة 23685952)، واستلام #101 التاني يتشال: " + n(3040) + " زي اللي وصلك</li>" +
+        "<li><b>2/11</b> — " + n(5350) + " تتربط بأوردراتها الـ14، فـ<b>#132</b> يبان " + n(535) + " كامل</li>" +
+        "<li><b>#70</b> ما دفعش شحن (البوليصة 23326462) · <b>#106</b> دفعت 360 (شحن 30) · <b>#126</b> شحن QP " + n(110) + "</li>" +
+        "<li>مرتجعات <b>#96 #97</b> (كشف 28/10، " + n(-200) + ") بتفضل على QP لحد ما تتخصم من فلوسك</li>" +
+      "</ul>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx174'>طابق</button><button class='tbtn' type='button' id='x-fx174'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx174")){ fix174Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx174")) return;
+    if(!canEdit()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(fix174Why().length){ renderAll(); return; }
+    var r = fix174Run(false);
+    settings.fix174 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتطابقت كشوف QP — رصيد QP " + money(r.qp), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
+    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix174HTML();
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
