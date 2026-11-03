@@ -27,13 +27,18 @@
 
 ## قبل أي كوميت
 ```bash
-npm test            # أو: node tests/run.js  (اختبار واحد: node tests/run.js statement)
+node build.js       # يجمّع src/ في index.html
+npm test            # بيتأكد إن index.html = src/ وبعدين الاختبارات (اختبار واحد: node tests/run.js statement)
 ```
 لازم كله يعدّي. لو بتصلّح غلطة: اكتب اختبار بيطلّعها الأول، وبعدين صلّحها. نفس الاختبارات بتشتغل على GitHub مع كل push (`.github/workflows/tests.yml`).
 وفي الآخر جرّب على **آخر باك أب بعته إسلام** (من غير ما يتحفظ في المشروع) وقوله إيه اللي هيتغيّر في أرقامه بالظبط.
 
-## الملف
-كل السيستم في `index.html` (HTML + CSS + JS في ملف واحد، من غير build، بيشتغل offline).
+## الملفات
+**التعديل في `src/` بس — وبعدين `node build.js`.** `index.html` بيتجمّع من `src/` (هو اللي بيتنشر وبيشتغل offline) — ما تعدّلوش بإيدك؛ `node build.js --check` والاختبارات والفحص على GitHub بيرفضوا أي فرق.
+- `src/app.html` — الهيكل وترتيب الأجزاء (`<!--@include ... -->`). ملف جديد في `src/` لازم يتضاف هنا.
+- `src/css/*.css` — التصميم بالشاشة (`base.css` فيه المتغيّرات والوضع الليلي).
+- `src/html/` — الهيدر والقايمة (`header-nav.html`)، شاشة لكل ملف في `screens/`، والأدراج (`drawers.html`).
+- `src/js/NN-*.js` — الكود بالموضوع وبالترتيب (كلهم جوه نفس `(function(){ ... })()` — الترتيب مهم). `02-changelog.js` فيه `VERSION` و`CHANGELOG`.
 - الـ JS جوه `(function(){ ... })()` — مدخل الاختبارات `window.__T` بيتفتح بس لو `window.__NAYA_TEST__`.
 - أهم الدوال: `periodStats` `projStats` (قايمة الدخل) · `finBS` (الميزانية) · `cashBox` `cashLedger` (الخزنة) ·
   `shipPendMap` `walletOf` (فلوسك عند شركات الشحن) · `stampDelivery` (تثبيت التكلفة وقت التسليم — متوسط متحرّك) ·

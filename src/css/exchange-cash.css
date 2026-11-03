@@ -1,0 +1,70 @@
+  /* ================= استبدال مع المورد ================= */
+  .fset.xg-out{border-inline-start:4px solid var(--due)}
+  .fset.xg-in{border-inline-start:4px solid var(--gain)}
+  .fset h3 small{font-weight:400;font-size:var(--fs-1);color:var(--ink-soft);margin-inline-start:6px}
+  .xl-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) 80px 90px 90px 28px;gap:6px;align-items:end;
+    padding:6px 0;border-top:1px dashed var(--line)}
+  .xl-row:first-child{border-top:0}
+  .xl-row label{font-size:var(--fs-1)}
+  .xl-row .tt{text-align:end;font-weight:700;padding-bottom:8px;white-space:nowrap}
+  .xl-row .rm{border:0;background:none;color:var(--due);font-size:18px;cursor:pointer;padding-bottom:6px}
+  .xg-diff{background:var(--xg-soft);border-radius:var(--r-md);padding:var(--sp-3);margin:var(--sp-3) 0}
+  .xg-diff .eq{font-size:var(--fs-2);color:var(--ink-soft)}
+  .xg-diff .big{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);margin-top:4px;flex-wrap:wrap}
+  .xg-diff .big b{font-size:var(--fs-6);color:var(--xg)}
+  .xg-pay{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+  .xg-btns{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+  .xg-pay:empty{display:none}
+  .pill.xg,.pt-flag.xg{background:var(--xg-soft);color:var(--xg)}
+  .pv.xg{border-inline-start:4px solid var(--xg)}
+  .pv-flow{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--sp-3);align-items:center;padding:0 var(--sp-4) var(--sp-3)}
+  .pv-flow .side{background:var(--paper);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-2)}
+  .pv-flow .side small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .pv-flow .side b{font-size:var(--fs-4);display:block}
+  .pv-flow .arr{font-size:22px;color:var(--xg)}
+  .pv-ln .xgd{display:block;font-size:var(--fs-1);color:var(--xg)}
+  @media (max-width:760px){
+    .xl-row{grid-template-columns:1fr 1fr 1fr;row-gap:4px}
+    .xl-row > :first-child{grid-column:1 / -1}
+    .xl-row .tt{grid-column:1 / 3;text-align:start;padding:0}
+    .xl-row .rm{grid-column:3;text-align:end;padding:0}
+    .xg-pay{grid-template-columns:1fr}
+    .pv-flow{grid-template-columns:1fr;padding:0 var(--sp-3) var(--sp-3)}
+    .pv-flow .arr{text-align:center;transform:rotate(-90deg)}
+  }
+
+  /* ================= الخزنة بالأيام ================= */
+  .cq{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:var(--sp-2);margin:var(--sp-3) 0 var(--sp-4)}
+  .cq .tbtn{padding:12px 14px;justify-content:center;gap:8px;font-size:var(--fs-3)}
+  .cq .tbtn .ic{font-size:18px;line-height:1}
+  .cash-kinds{margin-bottom:var(--sp-3)}
+  .cash-kinds button b{font-weight:700;margin-inline-start:4px}
+  .cd-empty{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-5);text-align:center;color:var(--ink-soft)}
+  .cd-day{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .cd-h{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);flex-wrap:wrap;
+    padding:10px var(--sp-4);background:var(--teal-soft);font-size:var(--fs-2);color:var(--ink-soft)}
+  .cd-h > b{font-size:var(--fs-3);color:var(--ink)}
+  .cd-mv{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:var(--sp-3);align-items:center;
+    padding:10px var(--sp-4);border-top:1px solid var(--line)}
+  .cd-h + .cd-mv{border-top:0}
+  .cd-h .v-gain{color:var(--gain-ink)}   /* إجمالي اليوم على خلفية برقوقي فاتح */
+  .cd-mv .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:var(--teal-soft)}
+  .cd-mv.in .ic{background:var(--gain-soft)} .cd-mv.out .ic{background:var(--due-soft)}
+  .cd-t b{display:block;font-weight:600}
+  .cd-t .sub{display:block}
+  .cd-tag{font-size:10px;font-weight:400;color:var(--ink-soft);border:1px solid var(--line);border-radius:var(--r-pill);padding:0 6px;margin-inline-start:6px}
+  .cd-a{font-weight:700;white-space:nowrap}
+  .cd-mv.in .cd-a{color:var(--gain)} .cd-mv.out .cd-a{color:var(--due)}
+  .cd-x{display:flex;gap:4px;white-space:nowrap}
+  @media (max-width:760px){
+    .cq{grid-template-columns:1fr 1fr 1fr}
+    .cq .tbtn{flex-direction:column;gap:2px;padding:10px 4px;font-size:var(--fs-2)}
+    .cq .tbtn[data-openentry]{grid-column:1 / -1;flex-direction:row}
+    .cash-kinds{flex-wrap:nowrap;overflow-x:auto}
+    .cash-kinds button{flex:0 0 auto}
+    .cd-h{flex-direction:column;align-items:flex-start;gap:0;padding:8px var(--sp-3)}
+    .cd-mv{grid-template-columns:34px minmax(0,1fr) auto;gap:4px 10px;padding:10px var(--sp-3)}
+    .cd-x{grid-column:2 / -1}
+    .cd-x:empty{display:none}
+  }
+

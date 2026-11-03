@@ -1,0 +1,70 @@
+<!-- الأصناف -->
+<section id="tab-items" hidden>
+  <div class="quick ip-sw" role="group" aria-label="الأصناف والتسعير"><button type="button" class="on" data-navgo="items">الأصناف</button><button type="button" class="money-only" data-navgo="price">التسعير</button></div>
+  <h2>الأصناف<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>سعر البيع هنا بيتحط تلقائي في شاشة البيع، وتقدر تغيّره في أي عملية.</p>
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="items">+ صنف جديد</button>
+  </div>
+
+  <div class="panel" id="entry-items" hidden>
+    <div class="dhead">
+      <h3 id="title-items">صنف جديد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-items" hidden></p>
+    <form class="grid" id="f-item">
+      <div><label for="i-name">اسم الصنف</label><input id="i-name" required autocomplete="off"></div>
+      <div><label for="i-unit">الوحدة</label><input id="i-unit" placeholder="قطعة، كرتونة، كيلو" autocomplete="off"></div>
+      <div><label for="i-price">سعر بيع القطعة</label><input type="number" id="i-price" step="any" min="0" value="0"></div>
+      <div><label for="i-min">حد التنبيه</label><input type="number" id="i-min" step="any" min="0" value="0" placeholder="نبّهني لما يقل عن"></div>
+      <div><label for="i-colors">الألوان</label><input id="i-colors" placeholder="بني، أسود" autocomplete="off"></div>
+      <div><label for="i-sizes">المقاسات</label><input id="i-sizes" placeholder="37، 38-39" autocomplete="off"></div>
+      <div><label for="i-img-file">صورة الصنف</label>
+        <input type="file" id="i-img-file" accept="image/*" style="padding:var(--sp-2)"></div>
+      <div style="grid-column:span 2"><label for="i-img">أو الصق رابط صورة</label>
+        <input id="i-img" placeholder="https://..." autocomplete="off" dir="ltr"></div>
+      <div><label>&nbsp;</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <img id="i-img-prev" alt="" hidden style="width:46px;height:46px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--line)">
+          <button class="act ghost" type="button" id="b-img-clear" hidden style="padding:var(--sp-2) 12px;font-size:var(--fs-2)">شيل الصورة</button>
+        </div></div>
+      <div><button class="act" type="button" id="b-item">إضافة صنف</button> <button class="act ghost" type="button" id="x-item" hidden>إلغاء</button></div>
+    </form>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table id="t-items"></table></div>
+
+  <div class="panel" id="vars-panel" hidden>
+    <h3 id="vars-title"></h3>
+    <p class="hint" style="margin-bottom:12px">اكتب الألوان والمقاسات مفصولة بفاصلة. الجدول تحت بيوريك رصيد كل لون ومقاس اشتريته فعلاً. ومش لازم تكتبهم هنا — أي لون أو مقاس جديد بتكتبه في فاتورة الشراء بيتسجّل لوحده.</p>
+    <form class="grid" id="f-vars">
+      <div style="grid-column:span 2"><label for="v-colors">الألوان</label>
+        <input id="v-colors" placeholder="بني، أسود، أزرق" autocomplete="off"></div>
+      <div style="grid-column:span 2"><label for="v-sizes">المقاسات</label>
+        <input id="v-sizes" placeholder="37، 38، 39، 40" autocomplete="off"></div>
+      <div><button class="act" type="button" id="b-savevars">حفظ</button></div>
+    </form>
+    <div class="tbl-wrap" style="margin-top:14px"><table id="t-vars"></table></div>
+    <details class="explain" id="vars-rest" hidden style="margin-top:10px">
+      <summary>ألوان ومقاسات معرّفة لسه ما اشتريتش منها (<span id="vars-rest-n">0</span>)</summary>
+      <p class="hintline">دي مش في مخزنك — بتظهر هنا بس عشان تقدر تحطّ لها كود قبل ما توصلك. مش بتتحسب في المخزون ولا في تنبيهات النواقص.</p>
+      <div class="tbl-wrap"><table id="t-vars-rest"></table></div>
+    </details>
+  </div>
+
+  <div class="panel" id="offers-panel" hidden>
+    <h3 id="offers-title"></h3>
+    <p class="hintline" id="offers-cnote" hidden style="margin-top:0"></p>
+    <p class="hint" style="margin-bottom:12px">اكتب سعر القطعة أو إجمالي العرض — التاني بيتحسب لوحده. الكميات الأكبر من آخر شريحة بتاخد سعرها.</p>
+    <form class="grid" id="f-offer">
+      <div><label for="o-qty">من كمية</label><input type="number" id="o-qty" step="any" min="1" value="2"></div>
+      <div><label for="o-unit">سعر القطعة</label><input type="number" id="o-unit" step="any" min="0"></div>
+      <div><label for="o-total">إجمالي العرض</label><input type="number" id="o-total" step="any" min="0"></div>
+      <div><button class="act" type="button" id="b-offer">إضافة شريحة</button></div>
+    </form>
+    <div class="tbl-wrap" style="margin-top:14px"><table id="t-offers"></table></div>
+  </div>
+</section>
+

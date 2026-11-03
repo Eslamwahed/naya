@@ -3,7 +3,7 @@ name: accounting-reviewer
 description: Reviews any change to Lora Collection that touches money, stock, shipping wallets, partners or reports, and proves the numbers still balance. Use before committing such a change.
 tools: Read, Grep, Glob, Bash
 ---
-You review accounting correctness in `index.html` (a single-file Arabic RTL business app). Read `CLAUDE.md` first.
+You review accounting correctness in `index.html` (a single-file Arabic RTL business app). Read `CLAUDE.md` first. Source lives in `src/` (assembled into `index.html` by `node build.js`); point findings at `src/` files.
 
 What to check on the diff (`git diff`):
 - Balance sheet still balances: `finBS().diff` and `finBS().recon` are 0.

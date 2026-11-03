@@ -1,0 +1,225 @@
+<!-- نسخة احتياطية -->
+<section id="tab-backup" hidden>
+  <h2>الإعدادات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>البيانات محفوظة ومشتركة بين كل من يفتح هذا الملف. خُد نسخة كل فترة.</p>
+  <div class="panel">
+    <h3>المزامنة بين الأجهزة</h3>
+    <p class="note ok" id="sync-state"></p>
+    <p class="hint" style="margin:8px 0 12px">
+      لما تشغّلها، كل الأجهزة بتشوف نفس البيانات وبتتحدّث لوحدها كل ٤ ثواني. الإعداد بيتعمل مرة واحدة، وبعدها تحط نفس الرابط والمفتاح في كل جهاز.
+    </p>
+    <form class="grid" id="f-sync" onsubmit="return false">
+      <div style="grid-column:span 2"><label for="sb-url">رابط المشروع (Project URL) — كامل بالشكل https://xxxx.supabase.co</label>
+        <input id="sb-url" placeholder="https://xxxx.supabase.co" autocomplete="off" dir="ltr"></div>
+      <div style="grid-column:span 2"><label for="sb-key">المفتاح العام (Publishable key)</label>
+        <input id="sb-key" placeholder="sb_publishable_..." autocomplete="off" dir="ltr"></div>
+    </form>
+    <div class="row-actions">
+      <button class="act" type="button" id="b-sync-on">تشغيل المزامنة</button>
+      <button class="act ghost" type="button" id="b-sync-off" hidden>إيقاف</button>
+      <button class="act ghost" type="button" id="b-sync-now">مزامنة دلوقتي</button>
+      <button class="act ghost" type="button" id="b-sync-all">اسحب كل البيانات</button>
+      <button class="act ghost" type="button" id="b-sql">نسخ كود التجهيز (SQL)</button>
+      <button class="act ghost" type="button" id="b-sql-img">كود الصور (SQL)</button>
+    </div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;font-size:var(--fs-3);color:var(--teal)">خطوات التجهيز مرة واحدة</summary>
+      <ol style="font-size:var(--fs-3);line-height:1.9;padding-inline-start:20px;color:var(--ink-soft)">
+        <li>افتح <span dir="ltr">supabase.com</span> واعمل حساب مجاني، وبعدين New project. استنى دقيقتين لحد ما يخلص.</li>
+        <li>من القايمة اليمين افتح <span dir="ltr">SQL Editor</span>، اضغط زرار "نسخ كود التجهيز" فوق، الصق الكود، واضغط Run.</li>
+        <li>من <span dir="ltr">Project Settings › API Keys</span> افتح تبويب <span dir="ltr">Publishable and secret API keys</span> وانسخ الـ <span dir="ltr">Publishable key</span> (اللي بيبدأ بـ <span dir="ltr">sb_publishable_</span>). لو المشروع قديم، خُد الـ <span dir="ltr">anon</span> من تبويب <span dir="ltr">Legacy API Keys</span>. والـ Project URL من صفحة المشروع.</li>
+        <li style="color:var(--due)">خُد الـ Publishable بس — أي مفتاح فيه كلمة <span dir="ltr">secret</span> أو <span dir="ltr">service_role</span> ما يتحطش هنا خالص.</li>
+        <li>اضغط "تشغيل المزامنة". كرّر الخطوة دي على كل جهاز بنفس الرابط والمفتاح.</li>
+      </ol>
+    </details>
+    <textarea id="sql-box" rows="3" dir="ltr" readonly style="margin-top:10px;font-family:monospace;font-size:var(--fs-1);display:none"></textarea>
+  </div>
+
+  <div class="panel">
+    <h3>التخزين</h3>
+    <p class="hint" style="margin-top:0">إصدار السيستم: <strong id="ver-num"></strong> — <span id="ver-date"></span></p>
+    <div id="changelog" style="margin-top:12px"></div>
+    <p class="note ok" id="storage-state"></p>
+    <p class="hint" style="margin:8px 0 12px">
+      البيانات بتتحفظ لوحدها في ذاكرة المتصفح مع كل حركة. لو ربطت ملف على جهازك، هيتكتب فيه نسخة كاملة بعد كل تعديل — ودي أضمن طريقة، لأنها بتفضل موجودة حتى لو مسحت بيانات المتصفح أو نقلت الملف لجهاز تاني.
+    </p>
+    <div class="row-actions">
+      <button class="act ghost" id="b-link">ربط ملف جديد على الجهاز</button>
+      <button class="act ghost" id="b-open">فتح ملف بيانات موجود</button>
+      <button class="act ghost" id="b-unlink" hidden>فك الارتباط</button>
+    </div>
+    <p class="hint" id="fs-note" style="margin:12px 0 0"></p>
+  </div>
+  <div class="panel" id="users-panel">
+    <h3>مين بيشوف إيه</h3>
+    <p class="hint" style="margin-bottom:10px">
+      كل واحد في الفريق بحساب ورقم سري، وإنت اللي بتحدّد الشاشات اللي يشوفها.
+      <strong>مهم تعرف:</strong> ده قفل على الشاشة — بيمنع الفضول والغلط، بس حد بيفهم في
+      التقنية يقدر يتخطّاه. للأمان الحقيقي محتاجين سيرفر.
+    </p>
+    <p class="note" id="users-state" style="margin-bottom:12px"></p>
+    <div class="tbl-wrap"><table id="t-users"></table></div>
+    <div class="row-actions">
+      <button class="act ghost" type="button" id="b-user-new">+ مستخدم جديد</button>
+      <button class="act ghost" type="button" id="b-logout" hidden>تسجيل خروج</button>
+    </div>
+
+    <div id="user-box" hidden style="margin-top:14px;border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-3)">
+      <h4 id="user-title" style="margin:0 0 10px;font-size:var(--fs-4)">مستخدم جديد</h4>
+      <p class="note" id="us-first" hidden style="margin-top:0">
+        <strong>ده أول حساب — اعمله باسمك إنت.</strong>
+        سيب كل الشاشات متعلّمة، لأن «الإعدادات» هي اللي بتضيف منها باقي الفريق.
+        بعد ما تدخل، ضيفهم واحد واحد بالصلاحيات اللي تحبها.
+      </p>
+      <div class="fgrid">
+        <div><label for="us-name">الاسم</label><input id="us-name" autocomplete="off"></div>
+        <div><label for="us-pin">الرقم السري</label>
+          <input id="us-pin" inputmode="numeric" autocomplete="off" placeholder="٤ أرقام على الأقل"></div>
+      </div>
+      <p class="hintline" id="us-pinnote" hidden>سيبها فاضية لو مش عايز تغيّر الرقم السري.</p>
+
+      <p class="hintline" style="margin:12px 0 2px"><strong>الشاشات اللي يشوفها</strong></p>
+      <div class="perm-groups" id="us-tabs"></div>
+      <div class="row-actions" style="margin:4px 0 4px">
+        <button class="rowact" type="button" data-permset="all">اختار الكل</button>
+        <button class="rowact" type="button" data-permset="none">شيل الكل</button>
+        <button class="rowact" type="button" data-permset="sales">الأوردرات بس</button>
+      </div>
+      <p class="hintline" style="margin:0 0 10px">¹ محتاجة «يشوف الأرباح والتكاليف» — من غيرها مش هتظهر حتى لو متعلّم عليها ·
+        ² قايمة الدخل · الأصناف · العملاء والمحافظات · الفريق (والقوايم المالية والمدير المالي لو بيشوف الأرباح)</p>
+
+      <p class="hintline" style="margin:10px 0 2px"><strong>صلاحيات إضافية</strong></p>
+      <div class="permgrid">
+        <label><input type="checkbox" id="us-money"> يشوف الأرباح والتكاليف</label>
+        <label><input type="checkbox" id="us-edit"> يقدر يعدّل ويحذف</label>
+      </div>
+      <p class="hintline">لو شيلت «يشوف الأرباح والتكاليف»، أرقام الربح وتكلفة الشراء هتختفي من الشاشات اللي بيشوفها.</p>
+
+      <p class="note bad" id="us-err" hidden></p>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-user-save">حفظ</button>
+        <button class="act ghost" type="button" id="b-user-cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>ترقيم الأوردرات</h3>
+    <p class="hint" style="margin-bottom:10px">
+      كل أوردر بياخد رقم تسلسلي، والرقم ما بيترجّعش حتى لو حذفت الأوردر — عشان
+      ما يبقاش في أوردرين بنفس الرقم على بوليصتين. لو كنت بتجرّب السيستم وحذفت
+      اللي سجّلته، الترقيم هيفضل ماشي من فوق. الزرار ده بيرجّعه من ١.
+    </p>
+    <p class="note" id="sno-state" style="margin-bottom:12px"></p>
+    <div class="row-actions">
+      <button class="act ghost" type="button" id="b-renum">أعد الترقيم من ١</button>
+    </div>
+    <div id="renum-box" hidden style="margin-top:14px;border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--sp-3)">
+      <p class="note bad" id="renum-warn" style="margin-top:0"></p>
+      <p class="hint" style="margin:8px 0 12px">
+        الأوردرات الموجودة هتتعاد ترقيمها بترتيب التاريخ. لو طبعت بوالص فيها
+        الأرقام القديمة، الأرقام اللي عليها مش هتطابق السيستم بعد كده.
+      </p>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-renum-do">تأكيد إعادة الترقيم</button>
+        <button class="act ghost" type="button" id="b-renum-cancel">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="border-color:var(--due)">
+    <h3 style="color:var(--due)">تهيئة السيستم</h3>
+    <p class="hint" style="margin-bottom:12px">
+      بيمسح <strong>كل</strong> الحركات: الأوردرات والمشتريات والخزنة والأصناف والعملاء والموردين — من الجهاز ومن السحابة ومن أجهزة الفريق كلها.
+      الإعدادات وبيانات المزامنة بتفضل زي ما هي. <strong>مفيش تراجع بعد التأكيد.</strong>
+    </p>
+    <div class="row-actions">
+      <button class="act ghost" type="button" id="b-reset-open" style="color:var(--due);border-color:var(--due)">تهيئة السيستم</button>
+    </div>
+
+    <div id="reset-box" hidden style="margin-top:14px;border:1px solid var(--due);border-radius:var(--r-sm);padding:var(--sp-3)">
+      <p class="note bad" id="reset-count" style="margin-top:0"></p>
+      <p class="hint" style="margin:8px 0 12px">هننزّل نسخة احتياطية تلقائيًا قبل المسح. اكتب كلمة <strong>مسح</strong> في الخانة عشان الزرار يشتغل.</p>
+      <div class="grid">
+        <div><label for="reset-word">اكتب: مسح</label><input id="reset-word" autocomplete="off"></div>
+        <div><button class="act" type="button" id="b-reset-do" disabled
+          style="background:var(--due)">تأكيد المسح</button>
+          <button class="act ghost" type="button" id="b-reset-cancel">إلغاء</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>الأرصدة الافتتاحية</h3>
+    <p class="hint">لو بدأت تستخدم السيستم والبيزنس شغّال قبل كده، سجّل هنا اللي كان موجود يوم البداية: فلوس الخزنة، البضاعة اللي عندك، وأرصدة العملاء والموردين. من غيرها التقارير هتبدأ من الصفر وأرقامك هتبقى ناقصة.</p>
+    <p class="note" id="opening-state" style="margin-bottom:12px"></p>
+
+    <div class="fgroup">
+      <span class="glabel">رصيد الخزنة يوم البداية</span>
+      <div class="grid">
+        <div><label for="ob-date">تاريخ البداية</label><input type="date" id="ob-date"></div>
+        <div><label for="ob-cash">المبلغ</label><input type="number" id="ob-cash" step="any" autocomplete="off"></div>
+        <div><button class="tbtn primary" type="button" id="b-ob-cash">سجّل رصيد الخزنة</button></div>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <span class="glabel">بضاعة موجودة عندك</span>
+      <p class="hint" style="margin:0 0 10px">بتتسجّل كفاتورة شراء بمدفوع صفر — فبتدخل في متوسط التكلفة من غير ما تأثّر على الخزنة ولا تعمل مديونية لمورد.</p>
+      <div class="grid">
+        <div><label for="ob-item">الصنف</label><select id="ob-item"></select></div>
+        <div><label for="ob-color">اللون</label><select id="ob-color"></select></div>
+        <div><label for="ob-size">المقاس</label><select id="ob-size"></select></div>
+        <div><label for="ob-qty">الكمية</label><input type="number" id="ob-qty" step="any" min="0" autocomplete="off"></div>
+        <div><label for="ob-cost">تكلفة القطعة</label><input type="number" id="ob-cost" step="any" min="0" autocomplete="off"></div>
+        <div><button class="tbtn primary" type="button" id="b-ob-stock">سجّل البضاعة</button></div>
+      </div>
+    </div>
+
+    <div class="fgroup">
+      <span class="glabel">أرصدة العملاء والموردين</span>
+      <div class="grid">
+        <div><label for="ob-party">الجهة</label><select id="ob-party"></select></div>
+        <div><label for="ob-dir">الاتجاه</label>
+          <select id="ob-dir">
+            <option value="1">ليك عنده</option>
+            <option value="-1">عليك له</option>
+          </select></div>
+        <div><label for="ob-amount">المبلغ</label><input type="number" id="ob-amount" step="any" min="0" autocomplete="off"></div>
+        <div><button class="tbtn primary" type="button" id="b-ob-party">سجّل الرصيد</button></div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:14px"><table id="t-opening"></table></div>
+  </div>
+
+  <div class="panel">
+    <h3>إقفال الفترة</h3>
+    <p class="hint">بعد ما تقفل شهر، مفيش أي حركة تاريخها في الفترة دي تتعدّل أو تتحذف. ده اللي بيخلي الرقم اللي وزّعت عليه أرباح ثابت — ومن غيره أي تعديل قديم بيغيّر تقارير قفلتها خلاص.</p>
+    <p class="note" id="lock-state" style="margin-bottom:12px"></p>
+    <div class="grid">
+      <div><label for="lock-until">مقفولة لحد تاريخ</label><input type="date" id="lock-until"></div>
+      <div><button class="tbtn primary" type="button" id="b-lock">اقفل الفترة</button></div>
+      <div><button class="tbtn" type="button" id="b-unlock" hidden>افتح الفترة</button></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>الإعدادات</h3>
+    <form class="grid" id="f-settings">
+      <div><label for="cur">رمز العملة</label><input id="cur" value="ج.م" autocomplete="off"></div>
+      <div><button class="act" type="button" id="b-settings">حفظ</button></div>
+    </form>
+  </div>
+  <div class="panel">
+    <h3>تصدير واستيراد</h3>
+    <div class="row-actions">
+      <button class="act ghost" id="b-export">تنزيل نسخة (JSON)</button>
+      <button class="act ghost" id="b-csv">تنزيل المبيعات (CSV)</button>
+      <button class="act ghost" id="b-import">استرجاع من ملف</button>
+      <input type="file" id="file-import" accept=".json" hidden>
+    </div>
+    <p class="hint" style="margin:12px 0 0">الاسترجاع بيضيف السجلات الناقصة ولا يمسح الموجود.</p>
+  </div>
+</section>
+

@@ -1,8 +1,10 @@
 // قواعد المشروع اللي ما ينفعش تتكسر: رقم الإصدار · مفاتيح التخزين · مفيش مفاتيح سرية
-const { SRC } = require("./lib");
+const { SRC } = require("./lib"), cp = require("child_process"), path = require("path");
 module.exports = async ({ ok }) => {
   const v = (SRC.match(/var VERSION = "(\d+)"/) || [])[1];
   const c = (SRC.match(/var CHANGELOG = \[\s*\{ v:"(\d+)"/) || [])[1];
+  let built = true; try{ cp.execSync("node " + path.join(__dirname, "..", "build.js") + " --check", { stdio:"pipe" }); }catch(e){ built = false; }
+  ok(built, "index.html متجمّع من src/ (التعديل في src/ وبعدين node build.js)");
   ok(v && v === c, "رقم الإصدار (" + v + ") = أول سطر في سجل التغييرات (" + c + ")");
   ["naya:data", "naya:me", "naya:sync", "naya:theme", "naya:pushed", "naya:auth", "naya:sview", "naya:calc", "naya:rtab", "trade:items", "trade:sales", "trade:cash"]
     .forEach(k => ok(SRC.includes('"' + k + '"'), "مفتاح التخزين " + k + " موجود زي ما هو"));

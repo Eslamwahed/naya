@@ -1,0 +1,162 @@
+
+<div class="scrim" id="sale-scrim" hidden></div>
+<div class="scrim" id="gen-scrim" hidden></div>
+<!-- v114: تحليل صافي الربح المتوقع — كل أوردر: بيع · شراء · شحن · ربح -->
+<div class="panel as-drawer" id="exp-drawer" hidden role="dialog" aria-labelledby="exp-title">
+  <div class="dhead"><h3 id="exp-title">صافي الربح المتوقع</h3>
+    <button class="dclose" type="button" data-expclose aria-label="قفل">&times;</button></div>
+  <div class="dbody"><p class="hint" id="exp-note" style="margin-top:0"></p>
+    <div class="tbl-wrap"><table id="t-exp"></table></div></div>
+</div>
+<aside class="drawer" id="sale-drawer" hidden aria-label="بيانات الأوردر">
+  <div class="drawer-head">
+    <h2 id="sd-title">أوردر جديد</h2>
+    <span class="ono" id="sd-no">—</span>
+    <button class="sd-close" type="button" id="b-closedraft" aria-label="قفل">&times;</button>
+  </div>
+
+  <div class="drawer-body" id="sd-body">
+    <div class="fset">
+      <h3>الأوردر</h3>
+      <div class="fgrid">
+        <div class="span2"><label for="e-party">العميل</label>
+          <div class="withbtn">
+            <select id="e-party" data-f="partyId"></select>
+            <button type="button" class="tbtn" id="b-newcust">+ عميل</button>
+          </div></div>
+        <div><label for="e-date">التاريخ</label>
+          <input id="e-date" type="date" data-f="date"></div>
+        <div><label for="e-status">الحالة</label>
+          <select id="e-status" data-f="status"></select></div>
+        <div><label for="e-src">جه منين؟</label>
+          <select id="e-src" data-f="src"></select></div>
+        <div id="e-camp-wrap" hidden><label for="e-camp">الحملة</label>
+          <input id="e-camp" data-f="camp" list="camp-list" autocomplete="off" placeholder="مثلاً فرو أكتوبر"></div>
+      </div>
+      <p class="hintline" id="e-cust"></p>
+      <p class="hintline bad" id="e-repeat" hidden></p>
+      <p class="hintline bad" id="e-conflict" hidden></p>
+      <div class="cfbox" id="e-cfbox">
+        <span class="cf-l">التأكيد مع العميل</span>
+        <div class="quick" id="e-cf" role="group" aria-label="التأكيد مع العميل">
+          <button type="button" data-cf="">لسه</button><button type="button" data-cf="ok">✓ اتأكد</button><button type="button" data-cf="nr">ما ردّش</button></div>
+        <a class="tbtn" id="e-wa" href="#" target="_blank" rel="noopener" hidden>ابعت تأكيد واتساب</a>
+      </div>
+      <div class="rsnbox" id="e-rsnbox" hidden>
+        <span class="cf-l">سبب الإلغاء</span>
+        <div class="quick" id="e-rsn" role="group" aria-label="سبب الإلغاء"></div>
+      </div>
+
+      <div class="newcust" id="newcust-box" hidden>
+        <h4>عميل جديد</h4>
+        <div class="fgrid">
+          <div><label for="nc-name">الاسم</label><input id="nc-name" autocomplete="off"></div>
+          <div><label for="nc-phone">التليفون</label><input id="nc-phone" autocomplete="off"></div>
+          <div><label for="nc-gov">المحافظة</label><select id="nc-gov"></select></div>
+          <div><label for="nc-fb">اسم فيسبوك</label><input id="nc-fb" autocomplete="off"></div>
+          <div class="span2"><label for="nc-address">العنوان</label><input id="nc-address" autocomplete="off"></div>
+        </div>
+        <div class="row-actions">
+          <button class="tbtn primary" type="button" id="b-savecust">حفظ العميل</button>
+          <button class="tbtn" type="button" id="b-cancelcust">إلغاء</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fset">
+      <h3>الأصناف</h3>
+      <div id="e-lines"></div>
+      <button class="addline" type="button" id="b-addline">+ صنف تاني</button>
+      <p class="hintline bad" id="s-note-msg" hidden></p>
+      <label id="s-allow-wrap" class="allow" hidden>
+        <input type="checkbox" id="s-allow">
+        البضاعة موجودة عندي بس لسه ما سجّلتش شراءها — اسمح بالبيع
+      </label>
+    </div>
+
+    <div class="fset">
+      <h3>الشحن</h3>
+      <div class="delmode" id="e-delmode" role="group" aria-label="مين هيوصّله">
+        <button type="button" data-delmode="ship">شركة شحن</button>
+        <button type="button" data-delmode="self">🛵 أنا / مندوبي</button>
+      </div>
+      <div class="fgrid">
+        <div id="e-shipco-wrap"><label for="e-shipco">شركة الشحن</label>
+          <input id="e-shipco" list="ship-list" data-f="shipCo" autocomplete="off"></div>
+        <div id="e-shipcode-wrap"><label for="e-shipcode">كود البوليصة</label>
+          <input id="e-shipcode" data-f="shipCode" autocomplete="off" placeholder="بتكتبه لما تحجز الشحنة"></div>
+        <div id="e-courier-wrap" hidden><label for="e-courier">مين هيوصّله</label>
+          <input id="e-courier" list="courier-list" data-f="courier" autocomplete="off" placeholder="مثلاً احمد">
+          <datalist id="courier-list"></datalist></div>
+        <div><label for="e-shipin">شحن على العميل</label>
+          <input id="e-shipin" type="number" step="any" min="0" data-f="shipIn"></div>
+        <div><label for="e-shipout" id="e-shipout-lab">شحن هتدفعه للشركة</label>
+          <input id="e-shipout" type="number" step="any" min="0" data-f="shipOut"></div>
+      </div>
+      <p class="hintline" id="e-selfnote" hidden></p>
+      <p class="hintline" id="e-shipnote" hidden></p>
+      <p class="hintline" id="e-pocket" hidden></p>
+
+      <!-- اللي بيتملّى بعدين: البوليصة والتحصيل والملاحظة. مش وإنت
+           بتكتب الأوردر، فمطوي — وبيتفتح لوحده لو فيه حاجة متكتوبة. -->
+      <details class="rsec" id="e-more">
+        <summary>تفاصيل زيادة <b id="e-more-sum">التحصيل · المحصّل · المسؤول · ملاحظة</b></summary>
+        <div class="fgrid">
+          <div><label for="e-payvia">التحصيل بيتم عن طريق</label>
+            <select id="e-payvia" data-f="payVia">
+              <option value="ship">شركة الشحن</option>
+              <option value="direct">مباشر ليك</option>
+            </select></div>
+          <div><label for="e-paid" id="e-paid-lab">المحصّل من العميل</label>
+            <input id="e-paid" type="number" step="any" min="0" data-f="paid"></div>
+          <div><label for="e-owner">مسؤول الأوردر</label>
+            <input id="e-owner" list="owner-list" data-f="owner" autocomplete="off"></div>
+          <div class="span2"><label for="e-note">ملاحظة</label>
+            <input id="e-note" data-f="note" autocomplete="off"></div>
+        </div>
+      </details>
+      <div class="paybox" id="e-paybox" hidden></div>
+    </div>
+  </div>
+
+  <div class="drawer-foot">
+    <div class="sums">
+      <div>العميل عليه<strong class="num" id="e-goods">—</strong></div>
+      <div id="e-due-wrap" hidden>باقي عليه<strong class="num" id="e-due">—</strong></div>
+      <div id="e-profit-wrap" class="money-only" hidden><span id="e-profit-lab">صافي ربح الأوردر</span><strong class="num" id="e-profit">—</strong></div>
+    </div>
+    <button class="tbtn" type="button" id="b-canceldraft">تفريغ</button>
+    <button class="tbtn primary" type="button" id="b-savedraft">حفظ الأوردر</button>
+  </div>
+</aside>
+
+<div id="lock" hidden>
+  <div class="lockbox">
+    <h2>Lora Collection</h2>
+    <p class="hint" id="lock-hint">اختار اسمك واكتب رقمك السري.</p>
+    <div id="lock-pick"></div>
+    <div id="lock-pin" hidden>
+      <p class="lockwho" id="lock-who"></p>
+      <input id="lock-code" inputmode="numeric" autocomplete="off" placeholder="الرقم السري">
+      <p class="note bad" id="lock-err" hidden></p>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-lock-in">دخول</button>
+        <button class="act ghost" type="button" id="b-lock-back">رجوع</button>
+      </div>
+    </div>
+    <div id="lock-first" hidden>
+      <p class="hint">مفيش مستخدمين لسه. اعمل حسابك إنت الأول — هيبقى ليه كل الصلاحيات.</p>
+      <div class="fgrid">
+        <div><label for="lf-name">اسمك</label><input id="lf-name" autocomplete="off"></div>
+        <div><label for="lf-pin">رقم سري (٤ أرقام على الأقل)</label>
+          <input id="lf-pin" inputmode="numeric" autocomplete="off"></div>
+      </div>
+      <p class="note bad" id="lf-err" hidden></p>
+      <div class="row-actions"><button class="act" type="button" id="b-lock-create">ابدأ</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="img-zoom" hidden><img id="img-zoom-src" alt=""></div>
+

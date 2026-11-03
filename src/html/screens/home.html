@@ -1,0 +1,91 @@
+
+<!-- لوحة المتابعة -->
+<section id="tab-dash">
+  <!-- الرئيسية: اللي مستنيك · الأرقام الأساسية · الفترة — والتفاصيل كلها مطوية تحت -->
+  <div class="hm-hello">
+    <div><h2 id="hm-hi">أهلًا</h2><p id="hm-date"></p></div>
+    <div class="hm-per">
+      <button type="button" class="tbtn primary hm-new" id="hm-new" data-hgo="newsale">+ أوردر جديد</button>
+      <select id="per-home" class="per" aria-label="الفترة">
+        <option value="all">كل الفترات</option>
+        <option value="month">الشهر ده</option>
+        <option value="prev">الشهر اللي فات</option>
+        <option value="d30">آخر ٣٠ يوم</option>
+        <option value="custom">فترة محددة</option>
+      </select>
+      <span class="per-cust" hidden><input type="date" id="per-from-home" class="per-from" aria-label="من"></span>
+      <span class="per-cust" hidden><input type="date" id="per-to-home" class="per-to" aria-label="لـ"></span>
+    </div>
+  </div>
+  <!-- v103: الأرقام المهمة الأول، وبعدها «محتاج منك» كروت صغيرة جنب بعض -->
+  <section class="hm-big" id="hm-big"></section>
+  <!-- v124: «محتاج منك» يمين، و«الأوردرات فين؟» و«أكتر الأصناف طلباً» جنبها -->
+  <div class="hm-row2">
+    <section class="hm-todo" id="hm-todo"></section>
+    <div class="hm-side">
+      <section class="hm-month" id="hm-month"></section>
+      <section class="hm-month hm-topit" id="hm-topit" hidden></section>
+    </div>
+  </div>
+
+  <details class="hm-more" id="dash-more">
+  <summary>كل الأرقام والجداول بالتفصيل</summary>
+  <p class="hint">أرقام اليوم مبنية على كل الحركات المسجلة. التكلفة محسوبة بمتوسط سعر الشراء لكل صنف.</p>
+  <div class="panel" style="padding:12px 14px">
+    <div class="grid" style="align-items:end">
+      <div><label for="per-dash">الفترة</label>
+        <select id="per-dash" class="per">
+          <option value="all">كل الفترات</option>
+          <option value="month">الشهر ده</option>
+          <option value="prev">الشهر اللي فات</option>
+          <option value="d30">آخر ٣٠ يوم</option>
+          <option value="custom">فترة محددة</option>
+        </select></div>
+      <div class="per-cust" hidden><label for="per-from-dash">من</label><input type="date" id="per-from-dash" class="per-from"></div>
+      <div class="per-cust" hidden><label for="per-to-dash">لـ</label><input type="date" id="per-to-dash" class="per-to"></div>
+      <div style="grid-column:span 2"><p class="note ok" id="per-label" style="margin:0"></p></div>
+    </div>
+  </div>
+  <div id="kpis"></div>
+
+  <div class="panel" id="kpi-panel" hidden>
+    <div class="dhead">
+      <h3 id="kpi-title">التفاصيل</h3>
+      <button class="dclose" type="button" id="b-kpi-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hint" id="kpi-note" style="margin-top:0"></p>
+      <div class="tbl-wrap"><table id="t-kpi"></table></div>
+    </div>
+  </div>
+
+  <p class="hint" style="margin:-8px 0 18px">المخزون وأرصدة العملاء والموردين والخزنة أرقام تراكمية دايمًا — الفترة بتأثر على المبيعات والأرباح والمصاريف والشحن بس.</p>
+
+  <div class="panel" id="low-panel" hidden>
+    <h3>أصناف قربت تخلص</h3>
+    <div class="tbl-wrap"><table id="t-low"></table></div>
+  </div>
+
+  <div class="panel">
+    <h3>الأصناف: الرصيد والربح</h3>
+    <div class="tbl-wrap"><table id="t-stock"></table></div>
+  </div>
+
+  <div class="panel">
+    <h3>شركات الشحن</h3>
+    <div class="tbl-wrap"><table id="t-ship"></table></div>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <h3>لك عند العملاء</h3>
+      <div class="tbl-wrap"><table id="t-recv"></table></div>
+    </div>
+    <div class="panel">
+      <h3>عليك للموردين</h3>
+      <div class="tbl-wrap"><table id="t-pay"></table></div>
+    </div>
+  </div>
+  </details>
+</section>
+

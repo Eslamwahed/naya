@@ -1,0 +1,56 @@
+<!-- العملاء والموردين -->
+<section id="tab-parties" hidden>
+  <div class="pt-head">
+    <h2 id="pt-title">العملاء</h2>
+    <button class="tbtn primary" type="button" data-openentry="parties">+ عميل أو مورد</button>
+  </div>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
+  <div class="pt-tabs" id="pt-tabs" role="tablist" aria-label="عملاء أو موردين" hidden></div>
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="pt-q" type="search" placeholder="دوّر بالاسم أو التليفون أو المحافظة…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+  </div>
+  <div class="quick" id="pt-chips" role="group" aria-label="فلتر"></div>
+
+  <div class="panel" id="entry-parties" hidden>
+    <div class="dhead">
+      <h3 id="title-parties">جهة جديدة</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-parties" hidden></p>
+    <form class="grid" id="f-party">
+      <div><label for="pt-name">الاسم</label><input id="pt-name" required autocomplete="off"></div>
+      <div><label for="pt-type">النوع</label>
+        <select id="pt-type"><option value="customer">عميل</option><option value="supplier">مورد</option></select>
+      </div>
+      <div><label for="pt-phone">التليفون</label><input id="pt-phone" autocomplete="off"></div>
+      <div><label for="pt-gov">المحافظة</label><select id="pt-gov"></select></div>
+      <div style="grid-column:span 2"><label for="pt-address">العنوان</label><input id="pt-address" autocomplete="off"></div>
+      <div><label for="pt-fb">اسم فيسبوك</label><input id="pt-fb" autocomplete="off"></div>
+      <div><label for="pt-note">ملاحظة</label><input id="pt-note" autocomplete="off"></div>
+      <div><button class="act" type="button" id="b-party">إضافة</button> <button class="act ghost" type="button" id="x-pty" hidden>إلغاء</button></div>
+    </form>
+    </div>
+  </div>
+  <!-- كارت لكل عميل أو مورد، وكشف حسابه بيتفتح جوّاه -->
+  <div id="pt-cards"></div>
+
+  <details class="hm-more" id="pt-more">
+  <summary>الجدول القديم وكشف الحساب بالمدين والدائن</summary>
+  <div class="tbl-wrap"><table id="t-parties"></table></div>
+  <div class="panel" id="statement-panel" hidden>
+    <div class="dhead">
+      <h3 id="statement-title"></h3>
+      <button class="dclose" type="button" id="b-stmt-close" aria-label="قفل الكشف">&times;</button>
+    </div>
+    <p class="note" id="statement-sum"></p>
+    <div class="tbl-wrap"><table id="t-statement"></table></div>
+  </div>
+  </details>
+</section>
+

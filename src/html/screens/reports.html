@@ -1,0 +1,185 @@
+<!-- التقارير -->
+<section id="tab-rep" hidden>
+  <h2>تقارير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
+  <p class="hint" data-infotxt hidden>كل الأرقام هنا بتتبع نفس فترة لوحة المتابعة.</p>
+  <div class="panel" style="padding:12px 14px">
+    <div class="grid" style="align-items:end">
+      <div><label for="per-rep">الفترة</label>
+        <select id="per-rep" class="per">
+          <option value="all">كل الفترات</option>
+          <option value="month">الشهر ده</option>
+          <option value="prev">الشهر اللي فات</option>
+          <option value="d30">آخر ٣٠ يوم</option>
+          <option value="custom">فترة محددة</option>
+        </select></div>
+      <div class="per-cust" hidden><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
+      <div class="per-cust" hidden><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
+      <div style="grid-column:1/-1"><p class="note ok" id="per-label-rep" style="margin:0"></p></div>
+      <div class="money-only" style="grid-column:1/-1;display:flex;justify-content:flex-start"><button class="tbtn primary" type="button" id="b-prt">⎙ تقرير الشهر للشركاء</button></div>
+    </div>
+  </div>
+
+  <!-- v126: التقارير تبويبات بدل صفحة طويلة — كل تبويب فيه حاجته بس -->
+  <div class="rep-tabs" id="rep-tabs" role="tablist" aria-label="أقسام التقارير">
+    <button type="button" role="tab" data-rtab="sum">ملخص</button>
+    <button type="button" role="tab" data-rtab="fin" class="money-only">القوايم المالية</button>
+    <button type="button" role="tab" data-rtab="cfo" class="money-only">المدير المالي</button>
+    <button type="button" role="tab" data-rtab="items">الأصناف</button>
+    <button type="button" role="tab" data-rtab="cust">العملاء والمحافظات</button>
+    <button type="button" role="tab" data-rtab="team">الفريق</button>
+  </div>
+
+  <!-- v132: القوايم المالية — الميزانية العمومية وقايمة الدخل على أساس التسليم (IFRS 15) -->
+  <div class="panel money-only" id="fin-panel" data-rt="fin">
+    <div class="fin-head"><h3>الميزانية العمومية <small id="fin-asof"></small></h3><span class="fin-ok" id="fin-ok"></span></div>
+    <div class="tbl-wrap"><table id="t-fin-bs" class="fin-t"></table></div>
+    <h3 style="margin-top:var(--sp-5)">قايمة الدخل <small id="fin-per"></small></h3>
+    <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div>
+    <p class="hint" id="fin-note" style="margin:var(--sp-3) 0 0"></p>
+  </div>
+
+  <!-- v135: المدير المالي — تقييم الأداء وخطة زيادة الربح. كله محسوب من الحركات وبيتحدّث لوحده -->
+  <div class="panel money-only cfo-top" id="cfo-panel" data-rt="cfo">
+    <div id="cfo-verdict"></div>
+    <h3>تقييم الأداء <small id="cfo-score-s"></small></h3>
+    <div class="tbl-wrap"><table id="t-cfo-score" class="fin-t cfo-score"></table></div>
+    <h3 style="margin-top:var(--sp-5)">الأوردر الواحد — دلوقتي وبعد الخطة</h3>
+    <div class="tbl-wrap"><table id="t-cfo-unit" class="fin-t cfo-unit"></table></div>
+    <p class="hint" id="cfo-basis" style="margin:var(--sp-3) 0 0"></p>
+  </div>
+  <div class="panel money-only" data-rt="cfo">
+    <h3 style="margin-top:0">القرارات اللي بتزوّد الربح <small id="cfo-acts-sum"></small></h3>
+    <div class="cfo-acts" id="cfo-acts"></div>
+    <details class="rsec" id="cfo-prices-d">
+      <summary>أسعار البيع الجديدة لكل صنف <b id="cfo-prices-s"></b></summary>
+      <p class="hint" id="cfo-prices-h" style="margin:0 0 var(--sp-3)"></p>
+      <div class="tbl-wrap"><table id="t-cfo-prices" class="cfo-prices"></table></div>
+    </details>
+  </div>
+  <div class="panel money-only" data-rt="cfo">
+    <h3 style="margin-top:0">الإعلان حسب المصدر <small id="cfo-src-s"></small></h3>
+    <p class="hint" id="cfo-src-h" style="margin:0 0 var(--sp-3)"></p>
+    <div class="tbl-wrap"><table id="t-cfo-src" class="cfo-prices"></table></div>
+  </div>
+  <div class="cfo-two money-only" data-rt="cfo">
+    <div class="panel"><h3 style="margin-top:0">المخاطر</h3><div id="cfo-risk"></div></div>
+    <div class="panel"><h3 style="margin-top:0">المخزون والكاش</h3><div id="cfo-stock"></div></div>
+  </div>
+  <div class="panel money-only" data-rt="cfo">
+    <h3 style="margin-top:0">ملاحظات محاسبية</h3><ul class="cfo-notes" id="cfo-notes"></ul>
+  </div>
+
+  <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
+  <div class="panel money-only" id="pis-panel" data-rt="sum">
+    <div class="pis-head"><h3>قايمة الدخل <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
+      <div class="quick" id="pis-mode" role="group" aria-label="الأوردرات">
+        <button type="button" data-pism="exp" class="on">لو كله اتسلّم</button>
+        <button type="button" data-pism="act">اتسلّم فعلاً</button>
+        <button type="button" data-pism="noads">من غير إعلانات</button>
+      </div></div>
+    <div class="pis-na" id="pis-na" hidden></div>
+    <p class="hint" id="pis-note" style="margin:0 0 var(--sp-3)"></p>
+    <div class="tbl-wrap"><table id="t-pis"></table></div>
+  </div>
+
+  <!-- السؤال الأهم: أبيع بكام؟ -->
+  <div class="panel" data-rt="sum">
+    <div class="fold-h"><h3>عشان تبدأ تكسب <small id="rep-be-sum"></small></h3>
+      <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">عشان أكسب مبلغ معيّن ▾</button></div>
+    <div class="money3" id="rep-be"></div>
+    <div id="rep-be-body" data-fold hidden>
+    <div class="fset" style="margin-top:14px">
+      <h3>وعشان أكسب مبلغ معيّن؟</h3>
+      <div class="fgrid">
+        <div><label for="be-target">صافي الربح اللي عايزه</label>
+          <input id="be-target" inputmode="decimal" placeholder="0"></div>
+        <div><label for="be-days">على كام يوم</label>
+          <input id="be-days" inputmode="decimal" placeholder="30"></div>
+      </div>
+      <div class="money3" id="rep-target" style="margin-top:12px"></div>
+    </div>
+    <details class="rsec">
+      <summary>تفاصيل التكاليف — إيه الثابت وإيه المتغيّر</summary>
+      <p class="hint">التكاليف <strong>المتغيّرة</strong> بتزيد كل ما تبيع أكتر (تكلفة البضاعة، الشحن، التغليف).
+        و<strong>الثابتة</strong> بتتدفع مهما حصل (إيجار، مرتبات). اللي بيفضل من كل جنيه بعد المتغيّر اسمه
+        <strong>هامش المساهمة</strong> — وهو اللي بيغطّي الثابت، واللي يزيد بعده يبقى ربح.</p>
+      <div class="tbl-wrap"><table id="t-rep-cost"></table></div>
+    </details>
+    </div>
+  </div>
+
+  <!-- الأداء -->
+  <div class="panel" data-rt="sum">
+    <h3>تقييم الأداء</h3>
+    <div class="stats" id="rep-kpi"></div>
+    <p class="hint" id="rep-kpi-wait" hidden style="margin:var(--sp-2) 0 0"></p>
+  </div>
+
+  <!-- v126: ربح كل صنف بعد الإعلان والشحن -->
+  <div class="panel money-only" id="rep-itp-panel" data-rt="items">
+    <h3>ربح كل صنف بعد تكلفة التشغيل والشحن</h3>
+    <p class="hint" id="rep-itp-note" style="margin:0 0 var(--sp-3)"></p>
+    <div class="tbl-wrap"><table id="t-rep-itp"></table></div>
+    <p class="hint rep-itp-leg" style="margin:var(--sp-3) 0 0">
+      <span class="itp-st go">أعلن عليه</span> بيكسب بعد الإعلان والشحن ·
+      <span class="itp-st pair">بيعه مع قطعة تانية</span> بضاعته بتكسب بس الإعلان بياكله لوحده ·
+      <span class="itp-st bad">راجع سعره</span> بيخسر في كل قطعة ·
+      <span class="itp-st idle">واقف</span> عندك منه ومحدش طلبه</p>
+  </div>
+
+  <!-- الباقي مطوي -->
+  <div class="panel rsecs">
+    <details class="rsec" open data-rt="sum">
+      <summary>الربح شهر بشهر <b>هل بتتحسّن ولا بتتراجع؟</b></summary>
+      <div class="tbl-wrap"><table id="t-rep-months"></table></div>
+    </details>
+
+    <details class="rsec" data-rt="items">
+      <summary>أنهي صنف بيكسّب وأنهي بيخسّر <b>هامش كل صنف ومساهمته</b></summary>
+      <p class="hint">هامش القطعة = سعر بيعها − تكلفتها. الصنف اللي هامشه سالب بتخسر في كل قطعة بتبيعها.</p>
+      <div class="tbl-wrap"><table id="t-rep-itembe"></table></div>
+    </details>
+
+    <details class="rsec" data-rt="cust">
+      <summary>مين عليه فلوس وبقاله قد إيه <b>أعمار الديون</b></summary>
+      <div class="stats" id="age-stats"></div>
+      <div class="tbl-wrap"><table id="t-fs-age"></table></div>
+    </details>
+
+
+    <details class="rsec" data-rt="sum">
+      <summary>لو حصل كذا يبقى إيه؟ <b>تحليل الحساسية</b></summary>
+      <p class="hint">غيّر النسب وشوف الربح والتعادل بيتحرّكوا إزاي. اكتب <strong>10</strong> لزيادة ١٠٪ و<strong>-10</strong> لنقص ١٠٪. الأرقام تقديرية وما بتتسجّلش.</p>
+      <div class="fgrid" id="sens-in">
+        <div><label for="sn-price">سعر البيع %</label><input id="sn-price" class="sn" inputmode="decimal" placeholder="0"></div>
+        <div><label for="sn-cost">تكلفة الشراء %</label><input id="sn-cost" class="sn" inputmode="decimal" placeholder="0"></div>
+        <div><label for="sn-vol">حجم المبيعات %</label><input id="sn-vol" class="sn" inputmode="decimal" placeholder="0"></div>
+        <div><label for="sn-fixed">المصاريف الثابتة %</label><input id="sn-fixed" class="sn" inputmode="decimal" placeholder="0"></div>
+      </div>
+      <div class="tbl-wrap" style="margin-top:10px"><table id="t-rep-sens"></table></div>
+      <div class="row-actions"><button class="tbtn" type="button" id="b-sens-reset">صفّر الكل</button></div>
+    </details>
+
+    <details class="rsec" data-rt="items">
+      <summary>أفضل الأصناف <b>المبيعات والربح والمرتجع لكل صنف</b></summary>
+      <div class="tbl-wrap"><table id="t-rep-items"></table></div>
+    </details>
+
+    <details class="rsec" data-rt="cust">
+      <summary>أفضل العملاء <b>مين بيشتري أكتر</b></summary>
+      <div class="tbl-wrap"><table id="t-rep-cust"></table></div>
+    </details>
+
+    <details class="rsec" data-rt="cust">
+      <summary>أداء المحافظات <b>مين بيجيب إلغاءات</b></summary>
+      <div class="tbl-wrap"><table id="t-rep-gov"></table></div>
+    </details>
+
+    <details class="rsec" data-rt="team">
+      <summary>أداء المسؤولين <b>شغل كل واحد في الفريق</b></summary>
+      <div class="tbl-wrap"><table id="t-rep-owner"></table></div>
+    </details>
+  </div>
+</section>
+

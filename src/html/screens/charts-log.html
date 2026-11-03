@@ -1,0 +1,59 @@
+<!-- السجل -->
+<!-- v123 — رسومات: نفس أرقام قايمة الدخل في شكل رسمة -->
+<section id="tab-viz" hidden>
+  <h2>قايمة الدخل<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pseg" role="group" aria-label="العرض" hidden></div>
+  <p class="hint" data-infotxt hidden>نفس أرقام «قايمة الدخل» في التقارير بس في شكل رسمة، وبتتحدّث لوحدها بعد كل حركة. قف على أي عمود (أو دوس عليه في الموبايل) تشوف تفاصيله. كل بند ليه لون واحد في كل الرسومات — الإعلان أخضر في التلاتة.</p>
+  <div class="panel" style="padding:12px 14px">
+    <div class="grid" style="align-items:end">
+      <div><label for="per-viz">الفترة</label>
+        <select id="per-viz" class="per">
+          <option value="all">كل الفترات</option>
+          <option value="month">الشهر ده</option>
+          <option value="prev">الشهر اللي فات</option>
+          <option value="d30">آخر ٣٠ يوم</option>
+          <option value="custom">فترة محددة</option>
+        </select></div>
+      <div class="per-cust" hidden><label for="per-from-viz">من</label><input type="date" id="per-from-viz" class="per-from"></div>
+      <div class="per-cust" hidden><label for="per-to-viz">لـ</label><input type="date" id="per-to-viz" class="per-to"></div>
+      <div style="grid-column:1/-1"><p class="note ok" id="per-label-viz" style="margin:0"></p></div>
+    </div>
+  </div>
+
+  <div class="panel vz-card" id="vz1">
+    <div class="vz-hd"><div><h3>فلوسك راحت فين؟</h3><p class="vz-lead" id="vz1-lead"></p></div>
+      <div class="quick vz-seg" id="vz-mode" role="group" aria-label="الأوردرات">
+        <button type="button" data-vzm="exp" class="on">لو كله اتسلّم</button>
+        <button type="button" data-vzm="act">اتسلّم فعلاً</button>
+      </div></div>
+    <div class="vz-stats" id="vz1-stats"></div>
+    <div class="vz-plot vz-wide" id="vz-wf" tabindex="0" role="region" aria-label="رسمة فلوسك راحت فين — بتتسحب بالعرض"></div>
+    <div class="vz-foot"><span>نفس أرقام «قايمة الدخل» · بتتحدّث بعد كل حركة</span><button type="button" class="vz-go" data-vzgo="rep">قايمة الدخل ←</button></div>
+  </div>
+
+  <div class="panel vz-card" id="vz2">
+    <div class="vz-hd"><div><h3>الأوردر الواحد: بيدخل كام وبيكلّف كام؟</h3><p class="vz-lead" id="vz2-lead"></p></div></div>
+    <div class="vz-plot" id="vz-po"></div>
+    <div class="vz-legend" id="vz2-leg"></div>
+    <div class="vz-foot"><span>من عمود «على الأوردر» في قايمة الدخل</span><button type="button" class="vz-go" data-vzgo="rep">عشان تبدأ تكسب ←</button></div>
+  </div>
+
+  <div class="panel vz-card" id="vz3">
+    <div class="vz-hd"><div><h3>الإعلان بيجيب أوردرات؟</h3><p class="vz-lead">أيام الإعلان متعلّمة بخلفية وردي في الرسمتين. الإعلان بيتسجّل يوم الدفع، فالأوردرات ممكن تيجي بعده بيوم أو اتنين.</p></div>
+      <div class="quick vz-seg" id="vz-days" role="group" aria-label="الأيام">
+        <button type="button" data-vzd="7">آخر 7 أيام</button>
+        <button type="button" data-vzd="30" class="on">آخر 30 يوم</button>
+      </div></div>
+    <div class="vz-stats" id="vz3-stats"></div>
+    <div class="vz-plot" id="vz-ad"></div>
+    <div class="vz-foot"><span>رسمتين بنفس الأيام بدل رسمة بمقياسين — الجنيه والأوردر مش بيتقاسوا ببعض</span><button type="button" class="vz-go" data-vzgo="cash">مصاريف الخزنة ←</button></div>
+  </div>
+  <div class="vz-tip" id="vz-tip" role="tooltip" hidden></div>
+</section>
+
+<section id="tab-log" hidden>
+  <h2>سجل الحركات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>آخر ١٠٠ حركة، وكل واحدة مسجّل عليها اسم اللي أدخلها ووقتها.</p>
+  <div class="tbl-wrap"><table id="t-log"></table></div>
+</section>
+

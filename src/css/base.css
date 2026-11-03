@@ -1,0 +1,394 @@
+  :root{
+    /* ═══ ثيم Lora Plum ═══ ألوان البراند الثابتة — كل لون في السيستم بييجي من هنا.
+       دول مابيتغيروش في الوضع الليلي، فالتقارير المطبوعة بتاخد منهم على طول. */
+    --lp-plum:#4A2545; --lp-night:#2F1530; --lp-petal:#C9A7C4; --lp-mist:#F6F2F5;
+    --lp-gold:#D4A93F; --lp-ink:#241E26; --lp-soft:#6E6472; --lp-line:#E4DDE6;
+    --lp-card:#FBFAFB; --lp-gain:#327B63; --lp-wine:#9A1333;
+    --font:"Alexandria","Segoe UI",Tahoma,sans-serif;
+
+    /* برقوقي البوتيك — أساس التصميم */
+    --ink:var(--lp-ink);    /* حبر مائل للبرقوقي بدل الأسود الميت */
+    --ink-soft:var(--lp-soft);
+    --paper:#F6F3F7;        /* ورق ليلكي فاتح */
+    --card:#FFFFFF;
+    --line:var(--lp-line);
+    --teal:var(--lp-plum);  /* البرقوقي العميق: الهوية */
+    --teal-deep:#361A33;
+    --teal-soft:#F0E8F0;
+    --on-accent:#FFFFFF;    /* النص فوق الزرار البرقوقي */
+    /* الاتنين دول بيفرّقوا بين «ليك» و«عليك». واحد من كل ١٢ راجل عنده
+       عمى ألوان، فمش كفاية إنهم مختلفين بالنسبالنا — لازم يفضلوا مختلفين
+       بعد محاكاة deutan/protan/tritan. القياس: أسوأ ΔE بقى 16.1 بعد ما
+       كان 8.2، والتباين مع الخلفية 5.06 و8.35 (المطلوب ≥4.5). */
+    --gain:var(--lp-gain);  /* أخضر مطفي متناغم مع البرقوقي */
+    --due:var(--lp-wine);   /* نبيذي بدل الأحمر الصارخ */
+    --warn:#8A6212;
+    --shadow:0 1px 2px rgba(36,30,38,.05);
+    /* خلفيات الحالات: ليك · عليك · تنبيه · التبديل مع المورد.
+       كانت أرقام ثابتة في ٢٠ مكان، وفي الليلي كانت بقع فاتحة أو كلها نفس اللون. */
+    --gain-soft:#E3F1EA; --due-soft:#F6E3E8; --warn-soft:#F7EEDB;
+    --gain-ink:#28644F;     /* أخضر الكلام فوق خلفية خضرا فاتحة (≥٤٫٥:١) */
+    --xg:#5B4A9A; --xg-soft:#ECE8F7;
+
+    /* ═══ سلّم الخطوط ═══
+       كان في ٣١ قيمة خط مختلفة في الـCSS و١٣ مقاس ظاهر على الشاشة
+       الواحدة. ده اللي بيخلي الشكل «مش مظبوط» من غير ما حد يعرف ليه.
+       بقى ٦ درجات، وكل حاجة بتاخد من هنا.
+       v100: السلّم كله نزل درجة (السيستم كان باين زحمة) */
+    --fs-1:11px;   /* تسميات وأكواد */
+    --fs-2:12px;   /* نص مساعد وتلميحات */
+    --fs-3:13px;   /* النص العادي والأزرار */
+    --fs-4:15px;   /* خانات الإدخال وعناوين اللوحات */
+    --fs-5:18px;   /* عناوين الشاشات */
+    --fs-6:21px;   /* أرقام الكروت */
+    --fs-7:28px;   /* الرقم البطل — اللي بتشوفه الأول */
+
+    /* ═══ سلّم المسافات ═══ كانت ١٩ قيمة حشو مختلفة — v100: أضيق شوية */
+    --sp-1:4px; --sp-2:8px; --sp-3:10px; --sp-4:14px; --sp-5:20px; --sp-6:26px;
+
+    /* ═══ أنصاف الأقطار ═══ */
+    --r-sm:8px; --r-md:12px; --r-pill:999px;
+    --radius:var(--r-md);
+    font-size:15px;
+  }
+  /* الوضع الليلي — للجلسات الطويلة */
+  [data-theme="dark"]{
+    --ink:#EDE7EF;
+    --ink-soft:#A79DAB;
+    --paper:#191419;
+    --card:#221C24;
+    --line:#362E38;
+    --teal:#C9A7C4;
+    --teal-deep:#E0C6DC;
+    --teal-soft:#2E2431;
+    /* الوضع الليلي كان أسوأ بكتير: أسوأ ΔE كان 2.2 — يعني عند عمى
+       الألوان الأخضر والوردي كانوا شبه نفس اللون. بقى 16.4. */
+    --gain:#78BF92;
+    --due:#DC89B5;
+    --warn:#D4A93F;
+    --shadow:none;
+    --on-accent:#1A141C;
+    --gain-soft:#303636; --due-soft:#402D3B; --warn-soft:#3E3328;
+    --gain-ink:var(--gain);
+    --xg:#A99BE0; --xg-soft:#383042;
+  }
+  *{box-sizing:border-box}
+  html{scrollbar-color:color-mix(in srgb,var(--ink-soft) 40%,transparent) transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    /* v104: رجعنا لـ Alexandria — جرّبنا IBM Plex Sans Arabic في v100 وما عجبش.
+       المقاسات الأصغر من v100 فاضلة زي ما هي. */
+    font-family:var(--font);
+    line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+  /* v109 — أيقونات خط رفيع بلون الكلام اللي جنبها */
+  svg.i{width:1.15em;height:1.15em;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+    vertical-align:-.2em;flex:0 0 auto}
+  /* v109 — المبلغ: الرقم بارز والقروش والعملة هادية — العين بتقرا المبلغ على طول */
+  /* !important: كروت زي .stats و.band بتدّي أي span جوّاها مقاس ولون التسمية وسطر لوحده */
+  .m,.m-i,.m-d,.m-c{display:inline!important;margin:0!important;padding:0!important;color:inherit!important;letter-spacing:inherit!important}
+  .m{font-size:1em!important;white-space:nowrap}
+  .m-n{unicode-bidi:isolate;direction:ltr;display:inline-block!important;color:inherit!important;margin:0!important;padding:0!important;font-size:1em!important}
+  .m-i{font-size:1em!important}
+  /* v138 (polish): الكسور و«ج.م» أخف بالحجم والوزن بس، بنفس لون الرقم — الـopacity كانت بتنزّل التباين لـ٢–٣:١ */
+  .m-d{font-size:max(11px,.8em)!important;font-weight:400!important}
+  .m-c{font-size:max(11px,.7em)!important;font-weight:400!important}
+  /* v109 — شارات الحالة بنقطة لون قبل الكلمة، نفس الشكل في كل الشاشات */
+  span.st::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;
+    margin-inline-end:5px;vertical-align:middle}
+  select.rowst.st{background-image:radial-gradient(circle, currentColor 2.6px, transparent 3.2px);background-repeat:no-repeat;
+    background-size:10px 10px;background-position:right 7px center;padding-inline-start:20px}
+  /* v109 — حركة خفيفة: الشاشة بتظهر بنعومة، والأزرار والكروت بتستجيب للمس */
+  /* opacity بس — transform على الـsection بيخلّي اللوحات الثابتة (تفاصيل الأوردر) تتحرك معاه */
+  @keyframes tabIn{from{opacity:0}to{opacity:1}}
+  main > section:not([hidden]){animation:tabIn .18s ease-out}
+  .tbtn,.hm-k,.hm-ti,.sg-card,.iv,.pv,.cpc{transition:background-color .15s,border-color .15s,box-shadow .15s,transform .12s}
+  .tbtn:active,.hm-k:active,.hm-ti:active,.sg-card:active{transform:scale(.97)}
+  /* ═══ v125 — حركات ═══ كلها أقل من ثلث ثانية، وبتتلغي لوحدها مع «تقليل الحركة» (القاعدة تحت).
+     ١ فتح شاشة: الكروت بتظهر واحد ورا التاني — بس لما الشاشة تتفتح (class enter لحظة)، مش مع كل
+       حفظ، وإلا كانت هتتحرك بعد كل حركة. transform على الكارت نفسه مش على الـsection، والأدراج
+       الثابتة (as-drawer) بره الحركة عشان مكانها ما يتحركش. */
+  @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  main > section.enter :is(.hm-hero,.hm-k,.hm-row2 > .hm-todo,.hm-side > section,.sg-card,.sg-panel,.co-vd,.co-t,.vz-card,.kpi,.iv,.pv,.stats > div):not([hidden]),
+  main > section.enter > .panel:not(.as-drawer):not([hidden]){
+    animation:cardIn .28s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 32ms)}
+  /* ٢ الوقوف على كارت: بيطلع حبة لفوق وضله يبان — على الكمبيوتر بس (الموبايل مالوش hover) */
+  @media (hover:hover){
+    .hm-hero,.hm-k,.sg-card,.co-t,.kpi,.iv,.pv{transition:background-color .15s,border-color .15s,box-shadow .2s,transform .2s}
+    .hm-hero:hover,.hm-k:hover,#s-stagebox .sg-strip .sg-card:hover,.co-t:hover,.kpi:hover,.iv:hover,.pv:hover{
+      transform:translateY(-2px);box-shadow:0 8px 22px rgba(36,30,38,.09)}
+    [data-theme="dark"] :is(.hm-hero,.hm-k,.sg-card,.co-t,.kpi,.iv,.pv):hover{box-shadow:0 8px 22px rgba(0,0,0,.35)}
+    .hm-row2 .hm-ti .ic,.hm-srow em{transition:transform .2s}
+    .hm-row2 .hm-ti:hover .ic{transform:scale(1.08)}
+  }
+  /* ═══ v137 — من React Bits (منقولة لـCSS عادي) ═══
+     ShinyText: لمعة ذهبي بتعدّي على الاسم مرة لما السيستم يفتح، وتاني لما تقف عليه.
+     SpotlightCard: نور خفيف بلون الثيم بيمشي ورا الماوس على الكروت اللي بتتداس — على الكمبيوتر بس.
+     AnimatedList/FadeContent: اللحظة الوحيدة اللي ليها حركة مقصودة — قرارات «المدير المالي» بتدخل
+       واحدة ورا التانية من غشاوة لوضوح (الخطة بتتجمّع قدامك). باقي الشاشات دخولها سريع وهادي زي ما هو.
+     كلهم بيتلغوا مع «تقليل الحركة» (القاعدة العامة تحت). */
+  header.top{--h1c:#fff} [data-theme="dark"] header.top{--h1c:var(--teal-deep)}
+  /* مرة واحدة لما السيستم يفتح، وتاني لو وقفت على الاسم — مش لفّة على طول (حركة أطول من ٥ ثواني محتاجة زرار يوقفها) */
+  @keyframes shine{from{background-position:100% 0}to{background-position:0 0}}
+  @keyframes shine2{from{background-position:100% 0}to{background-position:0 0}}
+  @supports (background-clip:text) or (-webkit-background-clip:text){
+    header.top h1 .shiny{background:linear-gradient(110deg,var(--h1c) 0 42%,var(--lp-gold) 50%,var(--h1c) 58% 100%);
+      background-size:300% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;
+      -webkit-text-fill-color:transparent;animation:shine 1.6s cubic-bezier(.16,1,.3,1) 1s both}
+    header.top h1:hover .shiny{animation:shine2 1.6s cubic-bezier(.16,1,.3,1) both}
+  }
+  /* التباين العالي في الويندوز بيشيل الخلفيات — الاسم يرجع لونه العادي عشان ما يختفيش */
+  @media (forced-colors:active){ header.top h1 .shiny{background:none;-webkit-text-fill-color:currentColor;animation:none} }
+  @media (hover:hover){
+    :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card){--spot:color-mix(in srgb,var(--teal) 7%,transparent)}
+    [data-theme="dark"] :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card){--spot:color-mix(in srgb,var(--teal) 13%,transparent)}
+    /* :is(...) عشان يغلب background اللي على الكروت نفسها تحت في الملف */
+    :is(.hm-k,.hm-hmain,.iv,.pv,.sg-card).spot-on,
+    body .sg-strip .sg-card.spot-on,#s-stagebox .sg-strip .sg-card.spot-on{background-image:radial-gradient(380px circle at var(--mx,50%) var(--my,50%),var(--spot),transparent 70%)}   /* كروت المراحل ليها :hover و.on أقوى */
+  }
+  @keyframes listIn{from{opacity:0;transform:translateY(6px);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+  #cfo-acts.in > .cfo-act{animation:listIn .36s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(120ms + var(--k,0) * 50ms)}
+  /* أرقام رسومات وماشي إزاي؟ مالهاش .num — عرض الأرقام ثابت عشان ما تترجّش وهي بتعدّ */
+  :is(.vz-st b,.co-t b){font-variant-numeric:tabular-nums}
+  ::selection{background:color-mix(in srgb,var(--teal) 24%,transparent)}
+  input,textarea{caret-color:var(--teal)}
+  /* ٣ التبديل بين مراحل الأوردرات: اللوحة بتبدّل بنعومة (opacity بس على القايمة — جواها لوحات ثابتة) */
+  @keyframes swapIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  #s-stage-panel.swap{animation:swapIn .22s cubic-bezier(.2,.7,.2,1)}
+  #s-allview.swap{animation:fadeIn .2s ease-out}
+  #tab-rep .swap{animation:swapIn .22s cubic-bezier(.2,.7,.2,1)}
+  /* ٤ الأدراج: الخلفية بتغمق مع غشاوة خفيفة وهو داخل */
+  .scrim{backdrop-filter:blur(0);transition:opacity .2s,backdrop-filter .24s}
+  .scrim.on{backdrop-filter:blur(2px)}
+  /* ٥ رسومات: الأعمدة بتطلع من خط الأساس (لفوق أو لتحت، أو من اليمين في الأفقي) */
+  @keyframes vzUp{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  @keyframes vzSide{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .vz-plot .vz-gu,.vz-plot .vz-gd,.vz-plot .vz-gx{transform-box:fill-box;animation:vzUp .45s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0) * 28ms)}
+  .vz-plot .vz-gu{transform-origin:bottom} .vz-plot .vz-gd{transform-origin:top}
+  .vz-plot .vz-gx{transform-origin:right;animation-name:vzSide}
+
+  header.top{
+    background:var(--teal-deep);color:#fff;
+    padding:0 var(--sp-4);min-height:50px;
+    display:flex;align-items:center;gap:var(--sp-3);
+  }
+  [data-theme="dark"] header.top{ background:#120F14;border-bottom:1px solid var(--line) }
+  [data-theme="dark"] header.top h1{ color:var(--teal-deep) }
+  header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr;white-space:nowrap}
+  /* رقم الإصدار جنب الاسم فوق على اليمين — بيبان على طول من غير ما تفتح حاجة */
+  header.top .ver-b{font-weight:400;font-size:var(--fs-1);opacity:.75;padding-inline-start:6px;letter-spacing:0;direction:rtl;display:inline-block}
+  header.top .who{margin-inline-start:auto;display:flex;align-items:center;gap:var(--sp-3);font-size:var(--fs-2)}
+  /* حالة الحفظ: نقطة ملوّنة بدل شارة — أخضر محفوظ · أصفر بيزامن · أحمر مش محفوظ */
+  .savep{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;opacity:.85}
+  .savep::before{content:"";width:8px;height:8px;border-radius:50%;background:#78BF92;flex:0 0 auto}
+  .savep.warn::before{background:var(--lp-gold)}
+  .savep.bad{opacity:1;font-weight:700}
+  .savep.bad::before{background:#E5484D}
+  /* قايمة «اسمك ▾»: الاسم والوضع الليلي والتحديث */
+  .me-wrap{position:relative}
+  #b-me{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--r-pill);
+    padding:3px 12px;font:inherit;font-size:var(--fs-2);cursor:pointer;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+  [data-theme="dark"] #b-me{background:var(--card);border-color:var(--line);color:var(--ink)}
+  #b-me:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .me-menu{position:absolute;left:0;top:calc(100% + 6px);z-index:45;width:230px;background:var(--card);color:var(--ink);
+    border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-2);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .me-menu[hidden]{display:none}
+  .me-hd{font-size:var(--fs-1);color:var(--ink-soft);padding:2px 6px 8px;border-bottom:1px solid var(--line);margin-bottom:var(--sp-2)}
+  .me-menu label{display:block;font-size:var(--fs-1);color:var(--ink-soft);margin:0 6px 3px}
+  header.top .me-menu input{width:100%;background:var(--paper);border:1px solid var(--line);color:var(--ink);
+    border-radius:var(--r-sm);padding:6px 8px;font:inherit;font-size:var(--fs-3);margin-bottom:var(--sp-2)}
+  .me-it{display:block;width:100%;text-align:start;background:none;border:0;border-radius:var(--r-sm);padding:8px;
+    font:inherit;font-size:var(--fs-3);color:var(--ink);cursor:pointer}
+  .me-it:hover{background:var(--teal-soft)}
+  .me-it:disabled{opacity:.5;cursor:default}
+
+  nav{
+    display:block;background:var(--card);border-bottom:1px solid var(--line);
+  }
+  nav:has(> .nav-sub.solo){border-bottom:0}
+  /* ٥ أقسام فوق، وتحتها شاشات القسم المفتوح */
+  .nav-groups{display:flex;justify-content:center;gap:var(--sp-1);padding:0 var(--sp-3);overflow-x:auto}
+  /* الأقسام بقت جوه الهيدر — فقواعد «nav button» ما بقتش بتوصلها */
+  .nav-groups button{display:flex;align-items:center;gap:8px;padding:var(--sp-3) var(--sp-4);
+    background:none;border:none;border-bottom:3px solid transparent;font:inherit;font-size:var(--fs-3);
+    color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+  .nav-groups button:hover{color:var(--ink)}
+  .nav-groups button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  @media (min-width:761px){
+    header.top .nav-groups{flex:1;align-self:stretch;padding:0}
+    header.top .nav-groups button{align-self:stretch;padding:0 var(--sp-4);color:rgba(255,255,255,.72)}
+    header.top .nav-groups button:hover{color:#fff}
+    header.top .nav-groups button.on{color:#fff;border-bottom-color:#fff}
+    [data-theme="dark"] header.top .nav-groups button{color:var(--ink-soft)}
+    [data-theme="dark"] header.top .nav-groups button:hover{color:var(--ink)}
+    [data-theme="dark"] header.top .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal)}
+    header.top .nav-groups .badge{box-shadow:0 0 0 2px var(--teal-deep)}
+    [data-theme="dark"] header.top .nav-groups .badge{box-shadow:none}
+  }
+  .nav-groups button .ic{font-size:15px;line-height:1}
+  .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
+  .nav-groups .badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+    background:var(--due);color:#fff;font-size:10px;font-weight:700;line-height:1}
+  .nav-groups .badge[hidden]{display:none}
+  .nav-sub{display:flex;justify-content:center;gap:6px;padding:6px var(--sp-3);
+    overflow-x:auto;background:var(--paper)}
+  .nav-sub.solo{display:none}
+  .nav-sub button{border:1px solid var(--line);border-radius:var(--r-pill);background:var(--card);padding:4px 13px;font-size:var(--fs-2)}
+  .nav-sub button.grp-off{display:none}
+  .nav-sub button.nav-alias{display:none !important}
+  .ip-sw{margin:0 0 var(--sp-3)}
+  .nav-sub button[aria-current="true"]{background:var(--teal);border-color:var(--teal);color:var(--card);font-weight:600}
+  nav button{
+    background:none;border:none;border-bottom:3px solid transparent;
+    padding:var(--sp-3) var(--sp-3);font:inherit;font-size:var(--fs-3);color:var(--ink-soft);
+    cursor:pointer;white-space:nowrap;
+  }
+  nav button:hover{color:var(--ink)}
+  nav button[aria-current="true"]{color:var(--teal);border-bottom-color:var(--teal);font-weight:600}
+  [data-theme="dark"] nav{background:var(--card)}
+  nav button:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+
+  main{max-width:1280px;margin:0 auto;padding:var(--sp-5) var(--sp-4) 80px}
+  section[hidden]{display:none}
+  h2{font-size:var(--fs-5);font-weight:600;margin:0 0 4px}
+  .hint{color:var(--ink-soft);font-size:var(--fs-3);margin:0 0 18px}
+  /* الشرح تحت العنوان بقى ورا «ⓘ» — بيبان لما تحتاجه بس */
+  .info-b{border:0;background:none;color:var(--ink-soft);font:inherit;font-size:var(--fs-4);cursor:pointer;
+    padding:0 6px;vertical-align:middle;line-height:1}
+  .info-b:hover,.info-b[aria-expanded="true"]{color:var(--teal)}
+  .tmore-row{border:1px dashed var(--line);border-radius:var(--r-md);padding:var(--sp-2) var(--sp-3);margin:0 0 var(--sp-3)}
+  .tmore-row[hidden]{display:none}
+  .tmore-row .tbar{margin:0 0 var(--sp-2)}
+  .fold-h{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
+  .fold-h h3{margin:0}
+  .fold-h .quick{margin:0}
+  .fold-h h3 small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft);margin-inline-start:var(--sp-2)}
+  .fold-h + [data-fold]{margin-top:var(--sp-3)}
+  [data-fold][hidden]{display:none}
+
+  /* الشريط الرقمي في لوحة المتابعة */
+  /* الخط الفاصل بين الكروت بيتم بظل 1px حوالين كل كارت بدل حدود
+     بـnth-child. السبب: nth-child بيفترض عدد أعمدة ثابت، وأول ما
+     العدد يختلف بتظهر خانة فاضية بخلفية مختلفة وسط الشبكة. */
+  .band{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:1px;overflow:hidden;margin-bottom:var(--sp-4);
+  }
+  /* عنوان المجموعة — بيفصل «فلوسك» عن «حركة الفترة» عن «الأوردرات» */
+  .bandhead{
+    margin:var(--sp-5) 0 var(--sp-2);font-size:var(--fs-1);font-weight:600;
+    color:var(--ink-soft);letter-spacing:.4px;
+  }
+  .bandhead:first-child{margin-top:0}
+  /* الرقمين اللي بيقرّروا شغلك: أكبر، وبحافة برقوقية تسحب العين */
+  .band-hero{border-top:3px solid var(--teal);grid-template-columns:repeat(2,1fr)}
+  .band-hero .kpi{padding:var(--sp-4);display:flex;flex-direction:column;justify-content:center}
+  .band-hero .kpi > strong{font-size:var(--fs-7);letter-spacing:-.6px}
+  .band-hero .kpi > span{font-size:var(--fs-3);font-weight:600;color:var(--ink)}
+  /* على الموبايل minmax(190px) بيدّي عمود واحد — كارتين أحسن، والرقم
+     البطل بيفضل عمود واحد عشان يفضل هو أكبر حاجة على الشاشة */
+  @media (max-width:560px){
+    .band{grid-template-columns:repeat(2,1fr)}
+    .band-hero{grid-template-columns:1fr}
+  }
+  .band > div{padding:var(--sp-4) var(--sp-4);background:var(--card);
+    box-shadow:0 0 0 1px var(--line)}
+  .band span{display:block;color:var(--ink-soft);font-size:var(--fs-2);margin-bottom:var(--sp-1)}
+  .band strong{font-size:var(--fs-6);font-weight:600;letter-spacing:-.4px}
+  .band div{transition:background .12s}
+  .band div:hover{background:var(--teal-soft)}
+  .v-gain{color:var(--gain)} .v-due{color:var(--due)}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:var(--sp-4) var(--sp-4);margin-bottom:var(--sp-4);box-shadow:var(--shadow)}
+  .panel > h3{margin:0 0 13px;font-size:var(--fs-4);font-weight:600;letter-spacing:-.1px}
+  /* شاشة إدخال الأوردر هي البطل: حافة برقوقية بتميّزها عن باقي اللوحات */
+  #panel-entry{border-top:3px solid var(--teal);padding-top:19px}
+
+  form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--sp-2);align-items:end}
+  label{display:block;font-size:var(--fs-2);color:var(--ink-soft);margin-bottom:var(--sp-1)}
+  input,select,textarea{
+    width:100%;padding:var(--sp-2) var(--sp-3);font:inherit;font-size:var(--fs-3);
+    border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);color:var(--ink);
+    transition:border-color .12s;
+  }
+  input:hover,select:hover{border-color:var(--ink-soft)}
+  input:disabled{background:var(--paper);color:var(--ink-soft)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:-1px;border-color:var(--teal)}
+  button.act{
+    background:var(--teal);color:var(--on-accent);border:none;border-radius:var(--r-sm);
+    padding:var(--sp-2) var(--sp-4);font:inherit;font-size:var(--fs-3);font-weight:600;cursor:pointer;
+    transition:background .12s;
+  }
+  button.act:hover{background:var(--teal-deep)}
+  button.ghost{background:#fff;color:var(--teal);border:1px solid var(--teal)}
+  button.ghost:hover{background:var(--teal-soft)}
+  button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .row-actions{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)}
+
+  .note{font-size:var(--fs-2);color:var(--warn);margin-top:var(--sp-2);min-height:1.2em}
+  .fgroup{border:1px solid var(--line);border-radius:var(--r-sm);padding:var(--sp-3) var(--sp-3) var(--sp-3);margin-bottom:var(--sp-3);position:relative}
+  .fgroup .glabel{position:absolute;top:-9px;inset-inline-start:14px;background:var(--card);
+    padding:0 var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
+  input.calc{background:var(--teal-soft);color:var(--ink);font-weight:600;border-style:dashed;border-color:var(--line)}
+  .filters label{font-size:var(--fs-2)}
+  .filters select,.filters input{padding:var(--sp-1) var(--sp-2);font-size:var(--fs-3)}
+  .st{display:inline-block;padding:var(--sp-1) var(--sp-2);border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:600;white-space:nowrap}
+  .st-proposed{background:#EDE9EE;color:#6E6472}
+  .st-progress{background:#FAEFD6;color:#8A6212}
+  .st-delivered{background:#DCEDE4;color:#2F6D53}
+  .st-cancelled{background:var(--due-soft);color:#9E2B3F}
+  [data-theme="dark"] .st-proposed{background:#332B36;color:#B9AFBD}
+  [data-theme="dark"] .st-progress{background:#3A3018;color:#E3C169}
+  [data-theme="dark"] .st-delivered{background:#1E3A2C;color:#7FCBA2}
+  [data-theme="dark"] .st-cancelled{color:#EE97AA}
+  select.stsel{font:inherit;font-size:var(--fs-2);font-weight:600;padding:var(--sp-1) var(--sp-2);
+    cursor:pointer;border-radius:var(--r-sm);max-width:150px}
+  .sub{display:block;font-size:var(--fs-1);color:var(--ink-soft);margin-top:var(--sp-1)}
+  .thumb{width:34px;height:34px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--line);
+    vertical-align:middle;margin-inline-end:8px;background:var(--paper);cursor:zoom-in}
+  .thumb-lg{width:58px;height:58px}
+  #img-zoom{position:fixed;inset:0;background:rgba(20,15,22,.82);display:flex;align-items:center;
+    justify-content:center;z-index:60;padding:var(--sp-5);cursor:zoom-out}
+  /* لازم تكون بعد اللي فوقها: خاصية hidden لوحدها مش بتغلب محدِّد الـid */
+  #img-zoom[hidden]{display:none}
+  #img-zoom img{max-width:92vw;max-height:88vh;border-radius:var(--r-md);box-shadow:0 8px 40px rgba(0,0,0,.5)}
+  .note.bad{color:var(--due)}
+  .note.ok{color:var(--teal);font-weight:500}
+
+  .tbl-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+  table{width:100%;border-collapse:collapse;font-size:var(--fs-3)}
+  th,td{padding:var(--sp-2) var(--sp-3);text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:var(--paper);font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);letter-spacing:.1px}
+  tbody tr:hover{background:var(--teal-soft)}
+  /* السطر اللي لسه اتسجّل بيلمع لحظة واحدة */
+  @keyframes justSaved{ from{background:var(--teal-soft)} to{background:transparent} }
+  tbody tr.fresh{animation:justSaved 1.4s ease-out}
+  @media (prefers-reduced-motion:reduce){ tbody tr.fresh{animation:none} }
+  tbody tr:last-child td{border-bottom:none}
+  td.wide{white-space:normal;min-width:160px}
+  .del{background:none;border:none;color:var(--due);cursor:pointer;font:inherit;font-size:var(--fs-3);padding:var(--sp-1) var(--sp-1)}
+  .empty{padding:var(--sp-6) var(--sp-4);color:var(--ink-soft);font-size:var(--fs-3);text-align:center;line-height:1.8}
+
+  .pill{display:inline-block;padding:var(--sp-1) var(--sp-2);border-radius:var(--r-pill);font-size:var(--fs-2);background:var(--teal-soft);color:var(--teal)}
+  .pill.due{background:var(--due-soft);color:var(--due)}
+
+  #toast{
+    position:fixed;inset-block-end:20px;inset-inline-start:50%;transform:translateX(50%);
+    /* v111: الكلام بلون الخلفية العكسي — كان #fff ثابت، وفي الليلي --ink فاتح فبقى أبيض على أبيض */
+    background:var(--ink);color:var(--paper);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-sm);font-size:var(--fs-3);
+    font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.28);max-width:min(560px,calc(100vw - 32px));text-align:center;
+    opacity:0;pointer-events:none;transition:opacity .18s;z-index:50;
+  }
+  #toast.show{opacity:1}
+  /* الموبايل: فوق شريط الأقسام اللي تحت بدل ما تغطّيه */
+  @media (max-width:760px){ #toast{inset-block-end:calc(76px + env(safe-area-inset-bottom,0px))} }
+
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)}
+

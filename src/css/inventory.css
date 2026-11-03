@@ -1,0 +1,56 @@
+  /* ================= المخزون: كارت لكل صنف ================= */
+  #inv-quick button b{font-weight:700;margin-inline-start:4px}
+  .iv{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .iv-h{display:grid;grid-template-columns:52px minmax(0,1.3fr) minmax(0,2fr) 18px;gap:var(--sp-3);align-items:center;width:100%;
+    padding:var(--sp-3) var(--sp-4);border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .iv-h:hover{background:var(--teal-soft)}
+  .iv-h .thumb,.iv-h .dd-noimg{width:52px;height:52px;margin:0}
+  .iv-n b{font-size:var(--fs-4);font-weight:700}
+  .iv-n .sub{display:block}
+  .iv-pill{display:inline-block;font-size:10px;font-weight:600;padding:1px 8px;border-radius:var(--r-pill);margin-inline-start:6px;vertical-align:middle}
+  .iv-pill.w{background:var(--warn-soft);color:var(--warn)} .iv-pill.r{background:var(--due-soft);color:var(--due)}
+  .iv-cs{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-2)}
+  .iv-cs small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
+  .iv-cs b{font-size:var(--fs-4)}
+  .iv-cs b.w{color:var(--warn)} .iv-cs b.r{color:var(--due)}
+  .iv-chev{color:var(--ink-soft)}
+  .iv-b{padding:0 var(--sp-4) var(--sp-4)}
+  .iv-b h4{margin:0 0 var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
+  .iv-b h4 small{font-weight:400;margin-inline-start:6px}
+  .iv-wrap{overflow-x:auto}
+  table.iv-mx{border-collapse:separate;border-spacing:4px;width:auto;margin:0}
+  table.iv-mx th{font-size:var(--fs-2);color:var(--ink-soft);font-weight:600;padding:4px 10px;text-align:center;background:none;border:0}
+  table.iv-mx th.rh{text-align:start}
+  table.iv-mx td{min-width:66px;padding:0;border:0;border-radius:var(--r-sm);text-align:center}
+  table.iv-mx td button{width:100%;border:0;background:none;font:inherit;color:inherit;cursor:pointer;padding:6px 8px;border-radius:var(--r-sm)}
+  table.iv-mx td button:hover{outline:2px solid var(--teal)}
+  table.iv-mx td b{display:block;font-size:var(--fs-4)}
+  table.iv-mx td small{display:block;font-size:10px;color:var(--ink-soft)}
+  table.iv-mx td.ok{background:var(--gain-soft);color:var(--gain)}
+  table.iv-mx td.low{background:var(--warn-soft);color:var(--warn)}
+  table.iv-mx td.out{background:var(--due-soft);color:var(--due)}
+  table.iv-mx td.none{background:var(--paper);color:var(--ink-soft);padding:10px 8px}
+  .iv-lg{display:flex;gap:var(--sp-3);font-size:var(--fs-1);color:var(--ink-soft);margin-top:var(--sp-2);flex-wrap:wrap}
+  .iv-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle;border:1px solid var(--line)}
+  .iv-lg i.ok{background:var(--gain-soft)} .iv-lg i.low{background:var(--warn-soft)} .iv-lg i.out{background:var(--due-soft)} .iv-lg i.none{background:var(--paper)}
+  @media (max-width:760px){
+    .iv-h{grid-template-columns:52px minmax(0,1fr) 18px;gap:6px var(--sp-3);padding:var(--sp-3)}
+    .iv-chev{grid-row:1;grid-column:3}
+    .iv-cs{grid-column:1 / -1;gap:4px}
+    .iv-cs > span{background:var(--paper);border-radius:var(--r-sm);padding:4px 2px;text-align:center}
+    .iv-cs b{font-size:var(--fs-3)}
+    .iv-b{padding:0 var(--sp-3) var(--sp-3)}
+    #inv-quick{flex-wrap:nowrap;overflow-x:auto}
+    #inv-quick button{flex:0 0 auto}
+    /* جدول اللون × المقاس يفضل جدول — مش كروت زي باقي الجداول على الموبايل */
+    table.iv-mx thead{display:table-header-group}
+    table.iv-mx tbody tr{display:table-row;background:none;border:0;border-radius:0;margin:0;padding:0}
+    table.iv-mx th,table.iv-mx tbody td{display:table-cell;border:0;padding:0}
+    table.iv-mx tbody td::before{content:none}
+    table.iv-mx td.none{padding:10px 8px}
+    table.iv-mx td{min-width:58px}
+    /* الأرقام اللي فوق: اتنين جنب بعض بدل عمود طويل */
+    #inv-top,#cash-stats,#cap-stats,#pu-top{display:grid;grid-template-columns:1fr 1fr}
+    #inv-top > div:last-child:nth-child(odd),#cash-stats > div:last-child:nth-child(odd){grid-column:1 / -1}
+  }
+

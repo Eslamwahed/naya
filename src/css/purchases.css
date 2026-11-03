@@ -1,0 +1,61 @@
+  /* ================= المشتريات: كارت لكل فاتورة ================= */
+  .pu-owe:empty{display:none}
+  .pu-owe{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
+  .pu-owe h3{margin:0;padding:var(--sp-3) var(--sp-4) 0;font-size:var(--fs-3)}
+  .pu-ow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:var(--sp-3);align-items:center;padding:10px var(--sp-4);border-top:1px dashed var(--line)}
+  .pu-owe h3 + .pu-ow{border-top:0}
+  .pu-ow .sub{display:block}
+  .pu-ow > b{font-size:var(--fs-4);color:var(--due);white-space:nowrap}
+  .pu-ow .a{display:flex;gap:6px}
+  #pu-only button b{font-weight:700;margin-inline-start:4px}
+  .pu-mo{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);margin:var(--sp-4) 2px var(--sp-2);font-weight:600}
+  .pu-mo b{color:var(--ink)}
+  .pv{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-2);overflow:hidden}
+  .pv.ret{border-inline-start:4px solid var(--due)}
+  .pv.fresh{box-shadow:0 0 0 2px var(--teal)}
+  .pv-h{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 140px 18px;gap:4px var(--sp-3);align-items:center;width:100%;
+    padding:var(--sp-3) var(--sp-4);border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .pv-h:hover{background:var(--teal-soft)}
+  .pv-h .t{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+  .pv-h .t b{font-size:var(--fs-3)}
+  .pv-h .ono{color:var(--teal);font-weight:700}
+  .pv-h .it{grid-column:1;grid-row:2}
+  .pv-h .pay{grid-row:1 / span 2;grid-column:2}
+  .pv-h .tot{grid-row:1 / span 2;grid-column:3;text-align:end}
+  .pv-h .tot b{font-size:var(--fs-4);white-space:nowrap;display:block}
+  .pv-h .tot small{font-size:var(--fs-1);color:var(--ink-soft)}
+  .pv-h .chev{grid-row:1 / span 2;grid-column:4;color:var(--ink-soft)}
+  .pv-h .pay{display:block;min-width:0}
+  .pv-bar{display:block;height:6px;border-radius:var(--r-pill);background:var(--due-soft);overflow:hidden;margin:2px 0 3px}
+  .pv-bar i{display:block;height:100%;background:var(--gain)}
+  .pv-pay{display:flex;justify-content:space-between;gap:6px;font-size:var(--fs-1);color:var(--ink-soft)}
+  .pv-pay .g{color:var(--gain);font-weight:600} .pv-pay .r{color:var(--due)}
+  .pv-b{border-top:1px solid var(--line);background:var(--paper);padding:var(--sp-2) var(--sp-4) var(--sp-3)}
+  .pv-ln{display:grid;grid-template-columns:minmax(0,1fr) 60px 120px 110px 100px;gap:var(--sp-2);padding:8px 0;border-top:1px dashed var(--line);font-size:var(--fs-2);align-items:center}
+  .pv-ln.hd{border-top:0;color:var(--ink-soft);font-size:var(--fs-1)}
+  .pv-ln .n{text-align:end;white-space:nowrap}
+  .pv-ln .sub{display:block}
+  .pv-ln .del{font-size:var(--fs-1)}
+  .pv-sum{display:flex;gap:var(--sp-4);flex-wrap:wrap;font-size:var(--fs-2);padding:var(--sp-2) 0 0;border-top:2px solid var(--line);margin-top:4px}
+  .pv-f{display:flex;gap:6px;flex-wrap:wrap;margin-top:var(--sp-2)}
+  @media (max-width:760px){
+    .pu-owe h3{padding:var(--sp-3) var(--sp-3) 0}
+    .pu-ow{grid-template-columns:minmax(0,1fr) auto;padding:10px var(--sp-3)}
+    .pu-ow .a{grid-column:1 / -1} .pu-ow .a .tbtn{flex:1;justify-content:center}
+    #pu-only{flex-wrap:nowrap;overflow-x:auto} #pu-only button{flex:0 0 auto}
+    .pv-h{grid-template-columns:minmax(0,1fr) auto;padding:var(--sp-3);gap:6px var(--sp-2)}
+    .pv-h .t{grid-column:1;grid-row:1}
+    .pv-h .tot{grid-column:2;grid-row:1}
+    .pv-h .it{grid-column:1 / -1;grid-row:2}
+    .pv-h .pay{grid-column:1 / -1;grid-row:3}
+    .pv-h .chev{display:none}
+    .pv-b{padding-inline:var(--sp-3)}
+    .pv-ln{grid-template-columns:minmax(0,1fr) auto auto}
+    .pv-ln.hd{display:none}
+    .pv-ln .q{grid-column:2;grid-row:1}
+    .pv-ln .tt{grid-column:3;grid-row:1}
+    .pv-ln .c{grid-column:1 / 3;text-align:start}
+    .pv-ln .x{grid-column:3;text-align:end}
+    .pv-f .tbtn{flex:1;justify-content:center}
+  }
+
