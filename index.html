@@ -4193,8 +4193,11 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "176";
+  var VERSION = "177";
   var CHANGELOG = [
+    { v:"177", d:"2026-11-03", items:[
+      "من جوه: اختبارات تلقائية للسيستم كله في المشروع (الحسابات · كشوف QP · الرفض · الصلاحيات · الشاشات على الموبايل والكمبيوتر) بتشتغل لوحدها على GitHub مع كل تعديل — وقواعد الشغل ودليل التصميم مكتوبين في المشروع. مفيش حاجة اتغيّرت في الشاشات"
+    ]},
     { v:"176", d:"2026-11-03", items:[
       "الرئيسية أهدى: 4 أرقام بس فوق (صافي الربح · الخزنة · عند شركات الشحن · المخزون) بنفس الحجم",
       "«المطلوب منك النهارده» متقسّم: الأوردرات · الفلوس والمرتجع · المخزون · الحسابات — مترتّب بالأهم بنقطة (أحمر لازم · أصفر مهم · أخضر فلوس) وكل سطر زراره بفعل واضح",
@@ -20818,6 +20821,14 @@
       if(!document.hidden && sync.on) syncTick();
     });
   })();
+  /* v177 — مدخل الاختبارات (tests/) بس: بيتفتح لما الاختبار يحط window.__NAYA_TEST__ قبل ما الصفحة تحمّل.
+     في الاستخدام العادي مش موجود ومش بيغيّر حاجة. */
+  if(window.__NAYA_TEST__) window.__T = {
+    db:function(){ return db; }, settings:function(){ return settings; }, clearStockIdx:clearStockIdx, stampDelivery:stampDelivery,
+    periodStats:periodStats, projStats:projStats, finIS:finIS, finBS:finBS, stockBookValue:stockBookValue, cashBox:cashBox,
+    cashLedger:cashLedger, partyBalance:partyBalance, walletOf:walletOf, avgCostVB:avgCostVB, costTrueUps:costTrueUps,
+    addPay:addPay, openPRet:openPRet, computeShares:computeShares, weightedRatio:weightedRatio, revDate:revDate, canTab:canTab
+  };
 })();
 </script>
 </body>
