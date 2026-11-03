@@ -1,0 +1,82 @@
+<!-- مبيعات -->
+<section id="tab-sales" hidden>
+  <div class="s-head">
+  <h2>الأوردرات</h2>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="flt-text" type="search" placeholder="رقم أوردر · كود بوليصة · كود صنف · اسم عميل · تليفون · تاريخ" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+    <button class="tbtn" type="button" id="b-filters" aria-expanded="false" aria-controls="filters-panel">
+      فلاتر <span class="fcount" id="flt-count" hidden>0</span>
+    </button>
+    <button class="tbtn primary" type="button" id="b-newsale">+ أوردر<span class="lg"> جديد</span></button>
+  </div>
+  </div>
+
+  <!-- مراحل الأوردر: شريط واحد — «الكل» وبعدها المراحل الخمسة، وكل مرحلة ليها بانل فيها الحاجة اللي تخصها بس -->
+  <div id="s-stagebox">
+    <div class="sg-strip">
+      <button class="sg-card sg-all" type="button" id="b-sall" aria-pressed="false"><span class="t">الكل</span><span class="c num" id="sall-n"></span></button>
+      <div class="sg-bar" id="s-stages" role="group" aria-label="مراحل الأوردر"></div>
+    </div>
+    <div class="sg-panel" id="s-stage-panel"></div>
+  </div>
+
+  <div id="s-allview">
+  <input type="hidden" id="flt-status" value="">
+
+  <!-- فلتر الحالة (جاري/مسلّم/مرتجع/ملغي) بقى جوه «فلاتر» — ولو شغال بيبان chip تحت -->
+  <div class="filters" id="filters-panel" hidden>
+    <div class="stabs" id="s-tabs" role="group" aria-label="فلتر سريع بالحالة"></div>
+    <div><label for="flt-party">العميل</label><select id="flt-party"></select></div>
+    <div><label for="flt-item">الصنف</label><select id="flt-item"></select></div>
+    <div><label for="flt-ship">شركة الشحن</label><select id="flt-ship"></select></div>
+    <div><label for="flt-owner">المسؤول</label><select id="flt-owner"></select></div>
+    <div><label for="flt-from">من تاريخ</label><input type="date" id="flt-from"></div>
+    <div><label for="flt-to">لتاريخ</label><input type="date" id="flt-to"></div>
+  </div>
+
+  <div class="chips" id="flt-chips"></div>
+  <div class="band" id="s-stats"></div>
+
+  <div class="panel" id="s-kpi-panel" hidden>
+    <div class="dhead">
+      <h3 id="s-kpi-title">التفاصيل</h3>
+      <button class="dclose" type="button" id="b-skpi-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hint" id="s-kpi-note" style="margin-top:0"></p>
+      <div class="tbl-wrap"><table id="t-skpi"></table></div>
+    </div>
+  </div>
+
+
+  <div class="tbl-wrap s-wrap"><table id="t-sales"></table></div>
+  <p class="sel-tip">دوسة طويلة على أوردر بتختاره — وتقدر تختار كذا واحد وتغيّرهم مع بعض.</p>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="sales" hidden></button></p>
+  <div class="bulkbar" id="s-bulk" hidden>
+    <span class="bcount" id="s-bcount">0</span>
+    <!-- أوردرات الشركة: «استلموا» = دفعوا للمندوب، فالزرارين واحد. الفرق في التحصيل المباشر بس. -->
+    <button class="tbtn primary" type="button" data-bulk="deliverpay" title="العملاء استلموا ودفعوا (للمندوب أو ليك)">استلموا ودفعوا</button>
+    <button class="tbtn" type="button" data-bulk="deliver" title="للتحصيل المباشر: استلموا ولسه ما دفعولكش">استلموا بس</button>
+    <button class="tbtn" type="button" data-bulk="collect" title="التحصيل المباشر: العميل دفعلك الباقي">حصّل الباقي</button>
+    <select id="s-bulk-st" aria-label="غيّر الحالة">
+      <option value="">غيّر الحالة لـ…</option>
+      <option value="proposed">مقترح</option>
+      <option value="progress">جاري</option>
+      <option value="delivered">مسلّم</option>
+      <option value="cancelled">ملغي</option>
+    </select>
+    <button class="tbtn ghostx" type="button" id="b-bulk-clear">شيل الاختيار</button>
+  </div>
+  <p class="note" id="s-bulk-res" hidden></p>
+  </div>
+  <datalist id="ship-list"></datalist>
+  <datalist id="owner-list"></datalist>
+  <datalist id="camp-list"></datalist>
+</section>
+

@@ -1,0 +1,183 @@
+<!-- المخزون -->
+<section id="tab-prepaid" hidden>
+  <h2>المدفوع مقدّماً <span class="pp-tot num" id="pp-total"></span><button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>فلوس طلعت من الخزنة عن حاجة لسه هتستفيد منها: رصيد فيسبوك اللي الإعلانات لسه ما صرفتوش، واشتراك اتدفع عن شهر لسه أيامه ما خلصتش. قايمة الدخل بتحسبها <strong>يوم بيوم وانت بتستخدمها</strong> مش يوم الدفع — والباقي هنا، وبيظهر في الميزانية «مصروفات مدفوعة مقدّماً».</p>
+  <div id="pp-fix"></div>
+  <div class="panel pp" id="pp-body"></div>
+</section>
+
+<section id="tab-capital" hidden>
+  <div class="pt-head"><h2>رأس المال والشركاء</h2><button class="tbtn primary" type="button" data-openentry="capital">+ حركة رأس مال</button></div>
+
+  <div class="cap-recon" id="cap-recon"></div>
+  <details class="hm-more" id="cap-recon-more">
+    <summary>تفاصيل الميزانية</summary>
+    <p class="hint">صافي الأصول لازم يساوي حقوق الملكية. لو في فرق، يبقى في حاجة مش مسجّلة — غالباً أرصدة افتتاحية ما اتسجّلتش كرأس مال شركاء.</p>
+    <div class="tbl-wrap"><table id="t-recon"></table></div>
+  </details>
+
+<div class="stats" id="cap-stats"></div>
+
+  <h3 class="cap-h">الشركاء <small>النسبة بتتحسب لوحدها من رأس مال كل واحد</small></h3>
+  <div class="cap-own" id="cap-own"></div>
+  <div class="cap-grid" id="cap-cards"></div>
+  <p class="hint" style="margin:0 0 var(--sp-3)">شريك جديد؟ من <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة.</p>
+
+  <!-- نصيب كل شريك من ربح الفترة — للفرجة، والتوزيع الفعلي من «وزّع أرباح» تحته -->
+  <div class="panel" id="cap-share-panel">
+    <div class="fold-h"><h3>نصيب الشركاء من ربح الفترة</h3>
+      <div class="quick" id="cs-per" role="group" aria-label="الفترة">
+        <button type="button" data-csper="month" aria-pressed="false">الشهر ده</button>
+        <button type="button" data-csper="prev" aria-pressed="false">الشهر اللي فات</button>
+        <button type="button" data-csper="all" aria-pressed="true" class="on">من البداية</button>
+      </div></div>
+    <p class="hint" id="cs-note"></p>
+    <div class="tbl-wrap"><table id="t-cap-share"></table></div>
+  </div>
+
+  <div class="panel" id="dist-panel">
+    <div class="fold-h"><h3>توزيع أرباح</h3>
+      <button class="tbtn" type="button" data-foldbtn="dist-body" aria-expanded="false" aria-controls="dist-body">وزّع أرباح ▾</button></div>
+    <div id="dist-body" data-fold hidden>
+    <div class="dsteps" id="dist-steps"><span class="on">الفترة والمبلغ</span><span>الأنصبة</span><span>تأكيد</span></div>
+    <div class="quick" id="dist-per" role="group" aria-label="الفترة">
+      <button type="button" data-distper="month">الشهر ده</button>
+      <button type="button" data-distper="prev">الشهر اللي فات</button>
+      <button type="button" data-distper="all">من البداية</button>
+    </div>
+    <div class="grid">
+      <div><label for="dist-from">من تاريخ</label><input type="date" id="dist-from"></div>
+      <div><label for="dist-to">لتاريخ</label><input type="date" id="dist-to"></div>
+      <div><label for="dist-amount">المبلغ اللي هيتوزّع</label><input type="number" id="dist-amount" step="any" min="0" autocomplete="off"></div>
+      <div class="dist-fill"><button class="tbtn" type="button" data-distfill="all">كل المتاح</button><button class="tbtn" type="button" data-distfill="half">النص</button></div>
+      <div><button class="tbtn primary" type="button" id="b-dist-calc">احسب الأنصبة ←</button></div>
+    </div>
+    <p class="note" id="dist-limits" style="margin-top:10px"></p>
+
+    <div id="dist-box" hidden>
+      <div class="tbl-wrap" style="margin-top:12px"><table id="t-dist"></table></div>
+      <details class="explain why" id="dist-why">
+        <summary>ليه النسب دي؟</summary>
+        <div class="xbody">
+          <p>الفترة بتتقسّم عند كل تاريخ اتغيّر فيه رأس مال أي شريك، وكل شريحة بتاخد وزن بعدد أيامها.</p>
+          <div class="tbl-wrap"><table id="t-why"></table></div>
+        </div>
+      </details>
+      <p class="note" id="dist-check" style="margin-top:10px"></p>
+      <div class="row-actions">
+        <button class="tbtn primary" type="button" id="b-dist-do">أكّد التوزيع ✓</button>
+        <button class="tbtn" type="button" id="b-dist-cancel">→ رجوع</button>
+      </div>
+    </div>
+    </div>
+    <p class="note ok" id="dist-done" hidden></p>
+  </div>
+
+<div class="panel" id="entry-capital" hidden>
+    <div class="dhead">
+      <h3 id="title-capital">حركة رأس مال</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-capital" hidden></p>
+    <form class="grid" id="f-cap">
+      <div><label for="cp-date">التاريخ</label><input type="date" id="cp-date"></div>
+      <div><label for="cp-partner">الشريك</label>
+        <div class="withbtn">
+          <select id="cp-partner" style="flex:1"></select>
+          <button type="button" class="tbtn" id="b-newpartner">+ شريك</button>
+        </div></div>
+      <div><label for="cp-type">النوع</label>
+        <select id="cp-type">
+          <option value="cap_in">الشريك دفع رأس مال — نسبته تزيد</option>
+          <option value="cap_out">الشريك سحب من رأس ماله — نسبته تقل</option>
+          <option value="cap_payout">صرف أرباح للشريك — نسبته ما تتغيّرش</option>
+          <option value="cap_reinvest">الشريك ساب أرباحه رأس مال — نسبته تزيد</option>
+          <option value="cap_repay">رجّعنا للشريك مصروف دفعه من جيبه — نسبته ما تتغيّرش</option>
+        </select></div>
+      <div><label for="cp-amount">المبلغ</label><input type="number" id="cp-amount" step="any" min="0" autocomplete="off"></div>
+      <div><label for="cp-note">البيان</label><input id="cp-note" autocomplete="off"></div>
+      <div><button class="tbtn primary" type="button" id="b-cap">حفظ الحركة</button>
+        <button class="tbtn" type="button" id="x-cap" hidden>إلغاء التعديل</button></div>
+    </form>
+
+    <div class="newcust" id="newpartner-box" hidden style="margin-top:12px">
+      <h4 id="np-title">شريك جديد</h4>
+      <div class="fgrid">
+        <div><label for="np-name">الاسم</label><input id="np-name" autocomplete="off"></div>
+        <div><label for="np-phone">التليفون (اختياري)</label><input id="np-phone" autocomplete="off"></div>
+      </div>
+      <div class="row-actions">
+        <button class="tbtn primary" type="button" id="b-savepartner">حفظ الشريك</button>
+        <button class="tbtn" type="button" id="b-cancelpartner">إلغاء</button>
+      </div>
+    </div>
+
+    <p class="hintline" id="cap-hint" style="margin-top:10px"></p>
+    </div>
+  </div>
+
+  <details class="hm-more" id="cap-more">
+    <summary>جدول الشركاء وسجل كل الحركات والشرح</summary>
+    <p class="hint">فلوس الشريك نوعين: <strong>رأس ماله</strong> (اللي حطّه، وبيحدّد نسبته) و<strong>أرباح مستحقة له</strong> (أرباح بقت ملكه ولسه ما أخدهاش، ومابتأثّرش على نسبته). لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي دفع فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
+
+  <details class="explain">
+    <summary>إزاي بيتحسب نصيب الشريك؟</summary>
+    <div class="xbody">
+
+      <p><strong>فلوس الشريك نوعين، والفرق بينهم مهم:</strong></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th></th><th>رأس ماله</th><th>أرباح مستحقة له</th></tr></thead>
+        <tbody>
+          <tr><td class="wide">إيه ده</td><td>الفلوس اللي حطّها</td><td>أرباح بقت ملكه ولسه ما أخدهاش</td></tr>
+          <tr><td class="wide">بيتحدّد إزاي</td><td>هو اللي بيدفعه</td><td>بيتحسب لما توزّع أرباح</td></tr>
+          <tr><td class="wide">بيأثّر على نسبته</td><td><span class="v-gain">أيوه</span></td><td><span class="v-due">لأ</span></td></tr>
+        </tbody>
+      </table></div>
+
+      <p><strong>الأربع حركات وأثر كل واحدة:</strong></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>الحركة</th><th>الخزنة</th><th>رأس ماله</th><th>أرباحه المستحقة</th><th>نسبته</th></tr></thead>
+        <tbody>
+          <tr><td class="wide">دفع رأس مال</td><td class="num v-gain">+</td><td class="num v-gain">+</td><td class="num">—</td><td>تزيد</td></tr>
+          <tr><td class="wide">سحب من رأس ماله</td><td class="num v-due">−</td><td class="num v-due">−</td><td class="num">—</td><td>تقل</td></tr>
+          <tr><td class="wide">صرف أرباح له</td><td class="num v-due">−</td><td class="num">—</td><td class="num v-due">−</td><td>ما تتغيّرش</td></tr>
+          <tr><td class="wide">ساب أرباحه رأس مال</td><td class="num">—</td><td class="num v-gain">+</td><td class="num v-due">−</td><td>تزيد</td></tr>
+        </tbody>
+      </table></div>
+      <p>خد بالك من الفرق بين <strong>سحب من رأس ماله</strong> و<strong>صرف أرباح له</strong>: الاتنين بيطلّعوا فلوس من الخزنة، بس الأول بيقلّل حصّته في الشركة والتاني لأ. القاعدة: بياخد من أرباحه؟ صرف أرباح. بيقلّل حصّته؟ سحب من رأس ماله.</p>
+
+      <p><strong>ليه النسبة مرجّحة بالزمن؟</strong></p>
+      <p>لأن النسب بتتغيّر. لو شريك كان ٢٠٪ من يناير لمايو وبعدين دفع فلوس فبقى ٣٣٪، مينفعش ياخد ٣٣٪ من أرباح السنة كلها — هو مكانش شريك بالنسبة دي في نص السنة الأولانية. السيستم بيقسّم الفترة عند كل تغيير وبيرجّح كل شريحة بعدد أيامها.</p>
+      <p>وقت التوزيع، اضغط <strong>«ليه النسب دي؟»</strong> تحت الجدول عشان تشوف الشرائح بتواريخك الحقيقية.</p>
+
+      <p><strong>الأرباح المحتجزة</strong> = كل الأرباح من البداية ناقص اللي اتوزّع. ودي السقف الأعلى للتوزيع. بس <strong>الصرف النقدي سقفه رصيد الخزنة</strong>، لأن جزء من الأرباح ممكن يكون محبوس في مخزون أو عند عملاء.</p>
+
+      <p><strong>رأس مال ≠ ربح.</strong> لو سجّلت رأس مال ١٥٠ ألف، الخزنة هتبقى ١٥٠ ألف بس الأرباح المحتجزة صفر — دي فلوس الشركاء نفسهم مش مكسب. الربح مبيظهرش غير لما تبيع بضاعة بأكتر من تكلفتها. عشان كده زرار «احسب الأنصبة» بيرفض أي مبلغ أكبر من الأرباح المحتجزة، مهما كان في الخزنة فلوس. لو شريك عايز يسترجع من فلوسه قبل ما يبقى في أرباح، ده <strong>«سحب من رأس ماله»</strong> مش توزيع أرباح — وبيقلّل نسبته.</p>
+
+    </div>
+  </details>
+
+  <div class="panel">
+    <h3>الشركاء</h3>
+    <p class="hint" style="margin-bottom:10px">«الاسم» بيغيّر اسم الشريك وتليفونه. «المبالغ» بتوديك لحركاته عشان تعدّل مبلغ أو تاريخ. والنسب بتتحسب لوحدها بعد أي تعديل.</p>
+    <div class="tbl-wrap"><table id="t-partners"></table></div>
+    <p class="hint" style="margin-top:10px">سجّل الشريك ورأس ماله من زرار <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة لو الشريك لسه مش مسجّل.</p>
+  </div>
+
+  <div class="panel">
+    <h3 id="caplog-title">سجل حركات رأس المال</h3>
+    <div class="tbl-wrap"><table id="t-cap-log"></table></div>
+  </div>
+  </details>
+
+  <!-- v132: استرداد رأس المال اتنقل هنا من التقارير — كل حاجة عن الشركاء في مكان واحد -->
+  <div class="panel rsecs" style="margin-top:var(--sp-3)">
+    <details class="rsec" open>
+      <summary>استرداد رأس المال للشركاء <b>كل شريك كسب كام ورجعله كام</b></summary>
+      <p class="hint" id="rep-pb-note"></p>
+      <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
+    </details>
+  </div>
+</section>
+

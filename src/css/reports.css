@@ -1,0 +1,144 @@
+  /* v132: القوايم المالية */
+  .fin-head{display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap}
+  .fin-head h3,#fin-panel h3{margin:0 0 var(--sp-2)}
+  #fin-panel h3 small{font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)}
+  .fin-ok{margin-inline-start:auto;font-size:var(--fs-2);font-weight:600;border-radius:99px;padding:3px 12px}
+  .fin-ok.ok{background:rgba(50,123,99,.14);color:var(--gain)} .fin-ok.bad{background:rgba(154,19,51,.12);color:var(--due)}
+  .fin-t td.num{white-space:nowrap}
+  .fin-t tr.fs-sec td{font-weight:700;background:var(--paper);color:var(--teal)}
+  .fin-t tr.fs-sub td{font-weight:600;border-top:1px solid var(--line)}
+  .fin-t tr.fs-tot td{font-weight:700;background:var(--teal-soft);border-top:2px solid var(--line)}
+  .fin-t tr.fs-grand td{font-weight:700;font-size:var(--fs-4);background:var(--teal-soft);border-top:2px solid var(--line)}
+  .fin-t td.ind{padding-inline-start:var(--sp-5)}
+  /* v130: «من غير إعلانات» — ٣ أرقام فوق القايمة */
+  .pis-na{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-2);margin:0 0 var(--sp-3)}
+  .pis-na[hidden]{display:none}
+  .pis-na > div{border:1px solid var(--line);border-radius:var(--r-md);padding:10px 14px;background:var(--paper)}
+  .pis-na > div.hi{background:var(--teal-soft)}
+  .pis-na span{display:block;font-size:var(--fs-2);color:var(--ink-soft)}
+  .pis-na b{display:block;font-size:var(--fs-6);font-weight:700}
+  .pis-na small{font-size:var(--fs-1);color:var(--ink-soft);font-weight:400}
+  .pis-na > .pis-nab{grid-column:1/-1;border:0;background:none;padding:0;display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+  .pis-na > .pis-nab > span:first-child{display:inline;font-size:var(--fs-2)}
+  @media (max-width:760px){ .pis-na{grid-template-columns:1fr 1fr} .pis-na > div:nth-child(3){grid-column:1/-1} .pis-na b{font-size:var(--fs-5)} }
+  /* v135: المدير المالي */
+  .cfo-vd{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;justify-content:space-between;
+    border-radius:var(--r-md);padding:var(--sp-4);margin-bottom:var(--sp-4);background:var(--warn-soft)}
+  .cfo-vd.good{background:var(--gain-soft)} .cfo-vd.bad{background:var(--due-soft)}
+  .cfo-vd h3{margin:0;font-size:var(--fs-5)} .cfo-vd p{margin:4px 0 0;color:var(--ink-soft);font-size:var(--fs-2)}
+  .cfo-hero{display:flex;align-items:baseline;gap:var(--sp-2);flex-wrap:wrap}
+  .cfo-hero b{font-size:var(--fs-7);line-height:1} .cfo-hero .ar{color:var(--ink-soft);font-size:var(--fs-5)}
+  .cfo-hero small{display:block;width:100%;color:var(--ink-soft);font-size:var(--fs-2)}
+  table.cfo-unit th{font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);text-align:start;padding:6px 8px}
+  table.cfo-unit td.tg{color:var(--ink-soft);font-size:var(--fs-2)}
+  table.cfo-score th{font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);text-align:start;padding:6px 8px}
+  table.cfo-score tr.grp td{font-weight:700;color:var(--teal);background:var(--teal-soft);font-size:var(--fs-2)}
+  table.cfo-score td.cm{color:var(--ink-soft);font-size:var(--fs-2);line-height:1.6;min-width:220px}
+  table.cfo-score td.bm{color:var(--ink-soft);font-size:var(--fs-2);white-space:nowrap}
+  .cfo-sc{display:inline-flex;align-items:baseline;gap:4px;border-radius:var(--r-pill);padding:4px 12px;background:var(--card);font-weight:700}
+  .cfo-sc b{font-size:var(--fs-5)} .cfo-sc span{font-size:var(--fs-2);color:var(--ink-soft);font-weight:400}
+  .cfo-acts{display:flex;flex-direction:column;gap:var(--sp-2)}
+  table.cfo-prices th{font-weight:600;color:var(--ink-soft);font-size:var(--fs-2);text-align:start;padding:6px 8px}
+  table.cfo-prices td.np{font-weight:700;font-size:var(--fs-4)} table.cfo-prices td.why{color:var(--ink-soft);font-size:var(--fs-2)}
+  table.cfo-prices .arr{color:var(--ink-soft);margin:0 4px}
+  .cfo-act{display:grid;grid-template-columns:28px 1fr auto;gap:var(--sp-3);align-items:start;border:1px solid var(--line);
+    border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);background:var(--card)}
+  .cfo-act .no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:var(--fs-2);
+    background:var(--teal-soft);color:var(--teal)}
+  .cfo-act h4{margin:0;font-size:var(--fs-4)} .cfo-act p{margin:4px 0 0;font-size:var(--fs-2);color:var(--ink-soft);line-height:1.7}
+  .cfo-act .imp{text-align:end;white-space:nowrap} .cfo-act .imp b{display:block;font-size:var(--fs-5);color:var(--gain)}
+  .cfo-act .imp small{font-size:var(--fs-1);color:var(--ink-soft)}
+  .cfo-act.done{opacity:.75} .cfo-act.done .no{background:var(--gain-soft);color:var(--gain)}
+  .cfo-two{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)} .cfo-two > .panel{margin:0}
+  @media (max-width:760px){ .cfo-two{grid-template-columns:1fr} table.cfo-unit th:last-child,table.cfo-unit td.tg{display:none} table.cfo-score thead,table.cfo-score .bm{display:none} table.cfo-prices .cst,table.cfo-prices .why{display:none}
+    table.cfo-score tr:not(.grp){display:grid;grid-template-columns:1fr auto auto;align-items:center;column-gap:var(--sp-2)}
+    table.cfo-score tr.grp,table.cfo-score tr.grp td{display:block}
+    #t-cfo-score td{border:0} #t-cfo-score tr:not(.grp){border-bottom:1px solid var(--line)}
+    table.cfo-score td.cm{grid-column:1/-1;min-width:0;padding-top:0} .cfo-act{grid-template-columns:24px 1fr} .cfo-act .imp{grid-column:2;text-align:start} }
+  .cfo-ln{padding:var(--sp-2) 0;border-bottom:1px solid var(--line);font-size:var(--fs-3);line-height:1.7}
+  .cfo-ln:last-child{border-bottom:0} .cfo-ln small{display:block;color:var(--ink-soft);font-size:var(--fs-2)}
+  .cfo-notes{margin:0;padding-inline-start:18px;font-size:var(--fs-3);line-height:1.8}
+  .cfo-notes small{color:var(--ink-soft);font-size:var(--fs-2)}
+
+  /* v139: جه منين؟ · التأكيد · سبب الإلغاء */
+  .cf-tag{display:inline-block;font-size:var(--fs-1);font-weight:600;border-radius:var(--r-pill);padding:1px 8px;margin-inline-start:4px;vertical-align:middle;white-space:nowrap}
+  .cf-tag.ok{background:var(--gain-soft);color:var(--gain-ink)}
+  .cf-tag.wait{background:var(--warn-soft);color:var(--warn)}
+  .cf-tag.nr{background:var(--due-soft);color:var(--due)}
+  .cf-btns{display:inline-flex;gap:4px;margin-inline-start:6px;vertical-align:middle}
+  .cf-btns button{font:inherit;font-size:var(--fs-1);font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);
+    border-radius:var(--r-pill);padding:2px 9px;cursor:pointer}
+  .cf-btns button.ok{border-color:var(--gain);color:var(--gain-ink)}
+  .cf-btns button:hover{background:var(--teal-soft)}
+  .cfbox[hidden],.rsnbox[hidden],.c-src[hidden]{display:none}
+  .cfbox,.rsnbox{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-3) 0 0}
+  .cfbox .cf-l,.rsnbox .cf-l{font-size:var(--fs-2);color:var(--ink-soft);font-weight:600}
+  .cfbox .quick button[data-cf="ok"].on{background:var(--gain);border-color:var(--gain);color:var(--on-accent)}
+  .cfbox .quick button[data-cf="nr"].on{background:var(--due);border-color:var(--due);color:var(--on-accent)}
+  .rsn-ask{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);background:var(--due-soft);border-radius:var(--r-md);
+    padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-3)}
+  .rsn-ask b{color:var(--due)}
+  .rsn-ask .quick{display:flex;flex-wrap:wrap;gap:4px}
+  .ship-ask .sub{color:var(--ink-soft);font-size:var(--fs-2)}
+  .ship-ask .sq-part{display:flex;gap:4px;align-items:center}
+  .ship-ask .sq-part input{width:110px}
+  #t-cfo-src tr.cfo-src-na td{color:var(--ink-soft)}
+  /* v143: تكلفة التشغيل في الحاسبة — السطر بيفتح التفصيل */
+  .pc-op > summary{list-style:none;cursor:pointer}
+  .pc-op > summary::-webkit-details-marker{display:none}
+  .pc-op > summary .pc-row > span:first-child::after{content:" ▾";color:var(--ink-soft);font-size:.85em}
+  .pc-op[open] > summary .pc-row > span:first-child::after{content:" ▴"}
+  .pc-opd{display:grid;grid-template-columns:1fr auto;gap:4px var(--sp-3);padding:var(--sp-2) var(--sp-3) var(--sp-3);margin:0 0 var(--sp-2);
+    background:var(--teal-soft);border-radius:var(--r-md);font-size:var(--fs-2)}
+  .pc-opd span{color:var(--ink-soft)}
+  .pc-opd small{grid-column:1/-1;color:var(--ink-soft);margin-top:4px}
+  /* v142: المدفوع مقدّماً */
+  .pp-tot{font-size:var(--fs-4);font-weight:700;color:var(--ink-soft);margin-inline-start:var(--sp-2)}
+  .pp{display:grid;gap:var(--sp-5)}
+  .pp h3{margin:0 0 4px;font-size:var(--fs-4)}
+  .pp .hint{margin:0}
+  .pp-mh{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--sp-4);flex-wrap:wrap}
+  .pp-mv{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .pp-mv b{font-size:var(--fs-6, 28px);line-height:1.1;font-weight:700;letter-spacing:-0.02em}
+  .pp-st{font-size:var(--fs-1);font-weight:600;border-radius:var(--r-pill);padding:2px 10px;background:var(--line);color:var(--ink-soft);white-space:nowrap}
+  .pp-st.ok{background:var(--gain-soft);color:var(--gain-ink)}
+  .pp-st.warn{background:var(--warn-soft);color:var(--warn)}
+  .pp-rec{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:var(--sp-3);align-items:end;margin-top:var(--sp-4);
+    padding:var(--sp-4);background:var(--teal-soft);border-radius:var(--r-md)}
+  .pp-rec label{display:block;font-size:var(--fs-2);color:var(--ink-soft);margin-bottom:4px}
+  .pp-rec .pp-prev{grid-column:1/-1;margin:0}
+  .pp-hist{margin-top:var(--sp-4)}
+  .pp-hist summary{cursor:pointer;font-weight:600;font-size:var(--fs-2);color:var(--ink-soft);padding:4px 0}
+  .pp-t{width:100%}
+  .pp-t td .sub{display:block}
+  .pp-bar{display:block;height:4px;border-radius:2px;background:var(--line);margin-top:6px;max-width:180px;overflow:hidden}
+  .pp-bar i{display:block;height:100%;width:var(--u);background:var(--teal)}
+  .pp-sub{border-top:1px solid var(--line);padding-top:var(--sp-5)}
+  .c-xtra{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-3)}
+  .c-xtra > [hidden]{display:none}
+  .c-xtra label{display:block}
+  .c-xtra .hintline{margin:4px 0 0}
+  .cpc-owe{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;margin:var(--sp-3) 0 0;
+    padding:var(--sp-3) var(--sp-4);background:var(--warn-soft);border-radius:var(--r-md)}
+  .cpc-owe span{display:flex;flex-direction:column;gap:2px;font-size:var(--fs-2)}
+  .cpc-owe b{font-size:var(--fs-4)}
+  .cpc-owe small{color:var(--ink-soft)}
+  @media (max-width:760px){
+    .pp-rec{grid-template-columns:1fr 1fr}
+    .pp-rec > div:nth-child(3){grid-column:1/-1}
+    .pp-rec .act{width:100%}
+    .c-xtra{grid-template-columns:1fr}
+    .pp-mv{align-items:flex-start}
+  }
+  .fx-card{border-color:var(--warn)}
+  .fx-card h3{margin:0 0 4px;font-size:var(--fs-4)}
+  .fx-eff{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-3);margin:var(--sp-4) 0}
+  .fx-eff div{background:var(--paper);border-radius:var(--r-md);padding:var(--sp-3)}
+  .fx-eff small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .fx-eff b{font-size:var(--fs-3)}
+  .fx-card details summary{cursor:pointer;font-weight:600;font-size:var(--fs-2);color:var(--ink-soft);padding:4px 0}
+  .fx-a{display:flex;gap:var(--sp-2);margin-top:var(--sp-4)}
+  @media (max-width:760px){ .fx-eff{grid-template-columns:1fr 1fr} }
+
+  .c-src{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);grid-column:1/-1;margin-top:var(--sp-3)}
+  @media (max-width:760px){ .c-src{grid-template-columns:1fr} }

@@ -1,0 +1,61 @@
+<!-- شركات الشحن -->
+<section id="tab-ship" hidden>
+  <div class="pt-head"><h2>شركات الشحن</h2>
+    <button class="tbtn primary" type="button" id="b-stm">⬆ ارفع كشف QP</button>
+    <input type="file" id="stm-file" accept=".xlsx" multiple hidden></div>
+  <div id="stm-box"></div>
+  <div class="stats" id="shc-top"></div>
+  <!-- كارت لكل شركة: لك عندها كام، وأوردراتها، والمرتجع، والكشف -->
+  <div id="shc-fix"></div>
+  <div id="shc-cards"></div>
+
+  <details class="hm-more" id="ship-more">
+  <summary>كل الأرقام والجداول القديمة</summary>
+  <div class="band" id="sh-stats"></div>
+
+  <div class="panel" id="sh-kpi-panel" hidden>
+    <div class="dhead">
+      <h3 id="sh-kpi-title">التفاصيل</h3>
+      <button class="dclose" type="button" id="b-shkpi-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hint" id="sh-kpi-note" style="margin-top:0"></p>
+      <div class="tbl-wrap"><table id="t-shkpi"></table></div>
+    </div>
+  </div>
+
+  <div class="tbl-wrap"><table id="t-shipco"></table></div>
+
+  <div class="panel" id="held-panel">
+    <h3>بضاعة عند شركات الشحن</h3>
+    <p class="hint">العميل عاين ورفض؟ البضاعة بترجع لشركة الشحن مش لمخزنك على طول. القطع دي <strong>لسه ملكك ومحسوبة في المخزون</strong> — بس مكانها برّه. سجّل «رجعت المخزن» أول ما تستلمها عشان تعرف اللي لسه معلّق.</p>
+    <div class="quick" id="held-quick">
+      <button type="button" data-heldonly="open" class="on">لسه عندهم</button>
+      <button type="button" data-heldonly="back">رجعت المخزن</button>
+      <button type="button" data-heldonly="all">الكل</button>
+    </div>
+    <div class="tbl-wrap"><table id="t-held"></table></div>
+  </div>
+
+  <div class="panel" id="shstmt-panel" hidden>
+    <div class="dhead">
+      <h3 id="shstmt-title">كشف حساب</h3>
+      <button class="dclose" type="button" id="b-shstmt-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <div class="money3" id="shstmt-money"></div>
+      <div class="quickpay" id="shstmt-draw">
+        <label for="sh-draw-amt">استلمت من الشركة</label>
+        <input id="sh-draw-amt" inputmode="decimal" placeholder="0">
+        <input id="sh-draw-date" type="date">
+        <button class="tbtn primary" type="button" id="b-sh-draw">سجّل الاستلام</button>
+        <button class="tbtn" type="button" id="b-sh-drawall">استلم الرصيد كله</button>
+        <p class="hintline" id="sh-draw-note"></p>
+      </div>
+      <div class="tbl-wrap"><table id="t-shstmt"></table></div>
+    </div>
+  </div>
+  </details>
+</section>
+
+

@@ -1,0 +1,26 @@
+<!-- v121: ماشي إزاي؟ — تقييم الشغل من الحركات نفسها، بيتحدّث بعد كل حركة -->
+<section id="tab-audit" hidden>
+  <h2>ماشي إزاي؟ <button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>السيستم بيراجع كل حساباتك لوحده كل ما تفتحه: المصاريف ومعالجتها، الأوردرات وشركات الشحن، المخزون، والميزانية. الفحص بيقرا بس — مش بيغيّر حاجة. دوس على أي مشكلة تشوف الأوردرات أو المصاريف اللي فيها، ودوس على السطر يفتحهولك تصلّحه.</p>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
+  <div id="aud-why"></div>
+  <div class="aud-sum" id="aud-sum"></div>
+  <div id="aud-body"></div>
+</section>
+
+<section id="tab-coach" hidden>
+  <div class="co-head"><h2>ماشي إزاي؟<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+    <div class="quick" id="co-per" role="group" aria-label="الفترة">
+      <button type="button" data-coper="7">آخر 7 أيام</button>
+      <button type="button" data-coper="30">آخر 30 يوم</button>
+      <button type="button" data-coper="all" class="on">من البداية</button>
+    </div></div>
+  <p class="hint" data-infotxt hidden>الشاشة دي بتقرا حركاتك وتقولك إنت ماشي صح ولا لأ، وتعمل إيه. بتتحدّث لوحدها بعد كل حركة. المسطرة: <strong>هامش البضاعة</strong> ✓ 40% أو أكتر · ✗ أقل من 30% — <strong>الإعلان على الأوردر</strong> (مصاريف الخزنة اللي نوعها «إعلانات») ✓ أقل من تلت ربح بضاعة الأوردر · ✗ أكتر من النص — <strong>الشحن</strong> ✓ العميل بيدفع زي الشركة · ✗ أكتر من 25 من جيبك في الأوردر — <strong>الرفض والإلغاء</strong> بيتحسب من 5 أوردرات خلصوا: ✓ أقل من 10% · ✗ 20% أو أكتر.</p>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
+  <div id="co-verdict"></div>
+  <div class="panel"><h3 style="margin-top:0">مؤشراتك</h3><div class="co-tiles" id="co-tiles"></div></div>
+  <div class="co-two"><div class="panel" id="co-good"></div><div class="panel" id="co-bad"></div></div>
+  <div class="panel"><h3 style="margin-top:0">نصايح المشتريات</h3><div class="co-todo" id="co-todo"></div></div>
+  <div class="panel"><h3 style="margin-top:0">فلوسك فين <span id="co-bal-badge"></span></h3><div class="co-bal" id="co-bal"></div></div>
+</section>
+

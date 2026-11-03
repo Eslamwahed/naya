@@ -1,0 +1,139 @@
+  /* ================= توصيل بنفسك ================= */
+  .delmode{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;margin-bottom:var(--sp-3)}
+  .delmode button{font:inherit;font-size:var(--fs-2);border:0;background:var(--card);color:var(--ink);padding:9px;cursor:pointer}
+  .delmode button.on{background:var(--teal);color:var(--card);font-weight:700}
+  [data-theme="dark"] .delmode button.on{color:var(--paper)}
+  .sg-pill.self{background:var(--teal-soft);color:var(--teal)}
+  .sg-pill.self,.sg-inl [data-sgout]{white-space:nowrap}
+
+  /* ================= قايمة الأوردرات: سطر ثابت + لوحة تفاصيل ================= */
+  #t-sales .goods{margin:0}
+  #t-sales .goods .thumb,#t-sales .goods .dd-noimg{width:34px;height:34px}
+  #t-sales .g1{min-width:0}
+  /* سطر واحد بـ«…» من غير ما يوسّع العمود (nowrap كان بيفرض عرض الجملة كلها على الجدول) */
+  #t-sales .g1 .nm,#t-sales .g1 .secondary,#t-sales .dtag{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;white-space:normal;word-break:break-word}
+  #t-sales .g1 .secondary{margin-top:2px}
+  #t-sales .g1 .more{display:inline;margin:0}
+  #t-sales td.items{max-width:320px}
+  #t-sales tbody td{padding-top:var(--sp-2);padding-bottom:var(--sp-2)}
+  #t-sales .dtag{font-size:11px;color:var(--ink-soft);margin-top:2px}
+  #t-sales td.rowacts{text-align:end}
+  #t-sales .rownext{display:inline-block;vertical-align:middle;margin:0;padding:4px 10px;font-size:var(--fs-2);white-space:normal;max-width:130px;line-height:1.3}
+  /* v102: الحالة في سطر واحد — الشارة وبعدها الخطوة وبعدها مين بيوصّل */
+  #t-sales td.stat{white-space:normal;min-width:180px}
+  #t-sales td.stat select.rowst{vertical-align:baseline}
+  #t-sales td.stat .stepline{display:inline;margin:0 0 0 0;margin-inline-start:6px}
+  #t-sales td.stat .dtag{display:inline;margin:0;margin-inline-start:6px}
+  #t-sales td.stat .dtag::before{content:"· "}
+  #t-sales td.rowacts{white-space:nowrap}
+  .dd-nav{display:inline-flex;gap:4px}
+  .dd-x{display:none}
+  /* الملخص فوق: سطر واحد، وكل رقم بيفتح تفاصيله زي ما هو */
+  /* v102: سطر نص صغير بدل صف كروت — وكل رقم لسه بيفتح تفاصيله */
+  #s-stats{display:flex;flex-wrap:wrap;gap:2px 4px;margin:0 0 var(--sp-2);background:none;border:0;border-radius:0}
+  #s-stats > .kpi{display:flex;align-items:baseline;gap:5px;padding:2px 8px;flex:0 1 auto;min-width:0;
+    background:none;box-shadow:none;border-radius:var(--r-sm)}
+  #s-stats > .kpi > span:first-child{margin:0;font-size:var(--fs-1)}
+  #s-stats > .kpi > strong{font-size:var(--fs-3);margin:0}
+  #s-stats > .kpi > .sub,#s-stats > .kpi > .kpi-go{display:none}
+  /* شريط الاختيار: سطر رفيع لازق تحت */
+  #s-bulk{position:sticky;bottom:12px;z-index:15;padding:8px 12px;margin-top:var(--sp-2);box-shadow:0 6px 24px rgba(0,0,0,.18)}
+  #s-bulk select{width:auto}
+  /* الشاشة الواسعة: التفاصيل لوحة جنب القايمة، والصفحة بتاخد عرض الشاشة كله وهي مفتوحة */
+  @media (min-width:1366px){
+    main:has(#tab-sales:not([hidden]) #s-allview.side-on){max-width:1760px}
+    /* عرض اللوحة بيكبر مع الشاشة: 400 على اللابتوب لحد 560 على الشاشة الكبيرة */
+    #s-allview{--sidew:clamp(400px, 29vw, 560px)}
+    #s-allview.side-on .s-wrap{margin-inline-end:calc(var(--sidew) + 14px)}
+    #s-allview.side-on .more-wrap,#s-allview.side-on #s-bulk{margin-inline-end:calc(var(--sidew) + 14px)}
+    #s-allview.side-on #t-sales .goods .thumb,#s-allview.side-on #t-sales .goods .dd-noimg{display:none}
+    #s-allview.side-on #t-sales td.items{max-width:200px}
+    #s-allview.side-on #t-sales td.cust .secondary,#s-allview.side-on #t-sales .stepline{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+    #s-allview.side-on #t-sales td.rowacts .chev{display:none}
+    #s-allview.side-on #t-sales tbody td{padding-inline:8px}
+    #t-sales tr.detail td{padding:0;border:0;height:0}
+    #t-sales tr.detail .detail-in{position:fixed;width:var(--sidew);z-index:25;overflow-y:auto;overflow-x:hidden;margin:0;padding:var(--sp-3);
+      background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 10px 32px rgba(0,0,0,.18)}
+    #t-sales tr.detail .dd-x{display:inline-flex}
+    /* جوّه اللوحة: عمود واحد زي الموبايل */
+    #t-sales tr.detail .dd-cards{grid-template-columns:1fr}
+    #t-sales tr.detail .dd-step{grid-template-columns:1fr}
+    #t-sales tr.detail .dd-step .dd-step-b{justify-content:stretch}
+    #t-sales tr.detail .dd-step .dd-step-b .tbtn{flex:1;justify-content:center}
+    #t-sales tr.detail .dd-it{grid-template-columns:44px 1fr auto;gap:4px var(--sp-2)}
+    #t-sales tr.detail .dd-it > span:nth-child(3){grid-column:2 / 3}
+    #t-sales tr.detail .dd-it > span:nth-child(4){grid-column:3 / 4;grid-row:1 / 3;align-self:start}
+    #t-sales tr.detail .dd-it .dd-ia{grid-column:1 / -1;justify-content:space-between}
+    #t-sales tr.detail .ostep-ph{grid-template-columns:1fr;gap:6px}
+    #t-sales tr.detail .ostep-ph > div + div{border-inline-start:0;padding-inline-start:0}
+  }
+  @media (max-width:760px){
+    #s-stats > .kpi{padding:1px 4px}
+    #s-stats > .kpi > strong{white-space:nowrap}
+    /* البحث والفلاتر و«+ أوردر» في صف واحد */
+    .s-search{min-width:0}
+    #b-newsale .lg{display:none}
+    .s-head h2{margin-bottom:var(--sp-2)}
+
+    #s-bulk{bottom:78px}
+    #t-sales td.items{max-width:none}
+    #t-sales td.rowacts{display:flex;gap:4px;justify-content:flex-end;align-items:center;flex-wrap:wrap}
+    /* التفاصيل على الموبايل بتاخد الشاشة كلها، و«✕» بيرجّعك للقايمة */
+    /* فوق المحتوى بس تحت الدرج (40/41) والرسايل (50) والصورة (60) وشاشة القفل (200) */
+    #t-sales tr.detail .detail-in{position:fixed;inset:0;z-index:40;margin:0;border-radius:0;overflow:auto;padding:var(--sp-3);
+      background:var(--paper)}
+    #t-sales tr.detail .dd-x{display:inline-flex;order:-1}
+    /* من الحالة الظاهرة نفسها مش من كلاس يتنسي: بيتشال لوحده لما تسيب شاشة الأوردرات */
+    body:has(#tab-sales:not([hidden]) #t-sales tr.detail){overflow:hidden}
+    body:has(#tab-sales:not([hidden]) #t-sales tr.detail) .nav-groups{display:none}
+  }
+
+  #prc-tabs{margin-bottom:var(--sp-3)}
+  .pcalc{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--sp-3);align-items:start}
+  .pcalc .panel{margin:0}
+  .pc-ln{display:grid;grid-template-columns:minmax(0,1.6fr) 96px 64px 84px 96px 24px;gap:8px;align-items:center;padding:8px 0;border-top:1px dashed var(--line)}
+  .pc-ln.hd{border-top:0;padding:0;font-size:var(--fs-1);color:var(--ink-soft)}
+  .pc-ln input,.pc-ln select{width:100%;padding:6px 8px;font-size:var(--fs-2)}
+  .pc-ln .pc-c{text-align:center;font-size:var(--fs-2);white-space:nowrap}
+  .pc-ln .pc-c small,.pc-ln .pc-p small{display:block;font-size:11px;color:var(--ink-soft)}
+  .pc-ln .pc-p{text-align:end;white-space:nowrap}
+  .pc-ln .pc-tier{display:block;font-size:11px;color:var(--warn);text-align:center}
+  .pc-ln .pc-col{margin-top:4px}
+  .pc-ln .pc-c small.pc-avg{color:var(--warn);white-space:normal}
+  .pc-ln .rm{border:0;background:none;color:var(--due);font-size:18px;cursor:pointer}
+  .pc-ship{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .pc-res .big{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:2px 0}
+  .pc-res .big b{font-size:var(--fs-6)}
+  .pc-bar{display:flex;height:12px;border-radius:999px;overflow:hidden;margin:10px 0 4px;background:var(--line)}
+  .pc-bar i{display:block;height:100%}
+  .pc-lg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--ink-soft)}
+  .pc-lg em{display:inline-block;width:9px;height:9px;border-radius:2px;margin-inline-end:4px}
+  .pc-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:var(--fs-2);border-top:1px dashed var(--line)}
+  .pc-row.t{font-weight:700;border-top:1px solid var(--line);font-size:var(--fs-3)}
+  .pc-floor{margin-top:10px;background:var(--teal-soft);border-radius:var(--r-sm);padding:8px 10px;font-size:var(--fs-2)}
+  .pc-btns{display:flex;gap:6px;margin-top:10px} .pc-btns .tbtn{flex:1;justify-content:center}
+  @media (max-width:900px){
+    .pcalc{grid-template-columns:1fr}
+    .pc-ln{grid-template-columns:minmax(0,1fr) 56px 76px 24px}
+    .pc-ln.hd{display:none}
+    .pc-ln .pc-c{grid-column:1;grid-row:2;text-align:start}
+    .pc-ln .pc-p{grid-column:2 / 4;grid-row:2}
+    .pc-ln .pc-sel{grid-column:1;grid-row:1}
+    .pc-ship{grid-template-columns:1fr 1fr}
+  }
+  #t-price input.prin{width:76px}
+  #t-price input.prx{width:62px}
+  #t-price tr.prc-sub[hidden]{display:none}
+  #t-price tr.prc-sub td{background:var(--teal-soft);font-size:var(--fs-2)}
+  #t-price tr.prc-sub .prc-cn{padding-inline-start:14px;color:var(--ink-soft)}
+  #t-price tr.prc-sub .prc-cn::before{content:"↳ "}
+  #t-price .prc-dim{color:var(--ink-soft)}
+  #t-price small.prc-avg{display:block;font-size:11px;color:var(--warn);white-space:normal}
+  #t-price small.prc-avgn{color:var(--ink-soft);font-weight:400}
+  /* الموبايل: كارت اللون من غير خانات المصاريف المتكررة (هي هي بتاعة الصنف) */
+  @media (max-width:760px){ #t-price tr.prc-sub td.prc-dim{display:none} }
+  .prc-tog{border:0;background:var(--teal-soft);color:var(--teal);font:inherit;font-size:var(--fs-1);font-weight:600;border-radius:999px;padding:1px 8px;cursor:pointer;margin-inline-start:4px}
+  #t-price th,#t-price td{padding-inline:8px}
+  #t-price thead th{white-space:normal;line-height:1.3;vertical-align:bottom}
+  #t-price td.prc-cost{white-space:nowrap}
+

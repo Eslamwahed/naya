@@ -1,0 +1,72 @@
+<section id="tab-inv" hidden>
+  <h2>المخزون</h2>
+  <div class="stats" id="inv-top"></div>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="inv-q" type="search" placeholder="دوّر بالصنف أو اللون أو المقاس أو الكود…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+    <button class="tbtn" type="button" id="b-invfilters" aria-expanded="false" aria-controls="inv-filters">
+      فلاتر <span class="fcount" id="inv-count" hidden>0</span>
+    </button>
+  </div>
+
+  <div class="quick" id="inv-quick">
+    <button type="button" data-invonly="all" class="on">الكل</button>
+    <button type="button" data-invonly="instock">فيه رصيد</button>
+    <button type="button" data-invonly="low">قرب يخلص</button>
+    <button type="button" data-invonly="out">خلصان</button>
+    <button type="button" data-invonly="rsv">محجوز</button>
+  </div>
+
+  <div class="filters" id="inv-filters" hidden>
+    <div><label for="inv-item">الصنف</label><select id="inv-item"></select></div>
+    <div><label for="inv-color">اللون</label><select id="inv-color"></select></div>
+    <div><label for="inv-size">المقاس</label><select id="inv-size"></select></div>
+    <div><label for="per-inv">فترة الحركة</label>
+      <select id="per-inv" class="per">
+        <option value="all">كل الفترات</option>
+        <option value="month">الشهر ده</option>
+        <option value="prev">الشهر اللي فات</option>
+        <option value="d30">آخر ٣٠ يوم</option>
+        <option value="custom">فترة محددة</option>
+      </select></div>
+    <div class="per-cust" hidden><label for="per-from-inv">من</label><input type="date" id="per-from-inv" class="per-from"></div>
+    <div class="per-cust" hidden><label for="per-to-inv">لـ</label><input type="date" id="per-to-inv" class="per-to"></div>
+  </div>
+
+  <div class="chips" id="inv-chips"></div>
+
+  <!-- كل صنف كارت، ودوسة بتفتح جدول الألوان في المقاسات -->
+  <div id="inv-cards"></div>
+
+  <div class="panel" id="move-panel" hidden>
+    <h3 id="move-title"></h3>
+    <div class="tbl-wrap"><table id="t-move"></table></div>
+  </div>
+
+  <details class="hm-more" id="inv-more">
+  <summary>الجدول الكامل بالتفصيل · وكل الأرقام</summary>
+  <div class="panel">
+    <h3>الرصيد بكل لون ومقاس</h3>
+    <div class="tbl-wrap"><table id="t-inv"></table></div>
+  </div>
+
+  <div class="band" id="inv-kpis"></div>
+
+  <div class="panel" id="inv-kpi-panel" hidden>
+    <div class="dhead">
+      <h3 id="inv-kpi-title">التفاصيل</h3>
+      <button class="dclose" type="button" id="b-invkpi-close" aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hint" id="inv-kpi-note" style="margin-top:0"></p>
+      <div class="tbl-wrap"><table id="t-invkpi"></table></div>
+    </div>
+  </div>
+  </details>
+</section>
+

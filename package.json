@@ -3,7 +3,8 @@
   "private": true,
   "description": "Lora Collection — single-file business app (index.html). Tests: npm test",
   "scripts": {
-    "test": "node tests/run.js"
+    "build": "node build.js",
+    "test": "node build.js --check && node tests/run.js"
   },
   "devDependencies": {
     "playwright": "1.56.1"

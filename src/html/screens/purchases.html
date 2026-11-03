@@ -1,0 +1,226 @@
+<!-- مشتريات -->
+<section id="tab-purch" hidden>
+  <h2>المشتريات والموردين<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pseg" role="group" aria-label="الجزء" hidden></div>
+  <p class="hint" data-infotxt hidden>الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
+  <div class="tbar">
+    <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
+    <button class="tbtn" type="button" data-foldbtn="pu-tools" aria-expanded="false" aria-controls="pu-tools">⋯ أكتر</button>
+    <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
+  </div>
+  <!-- الحاجات اللي مش كل يوم: استبدال مع مورد وشيت الفاتورة — ورا «⋯ أكتر» -->
+  <div class="tmore-row" id="pu-tools" data-fold hidden>
+    <div class="tbar">
+      <button class="tbtn" type="button" id="b-xchg-open">⇄ استبدال مع مورد</button>
+      <button class="tbtn" type="button" id="b-pu-tpl">نزّل شيت الفاتورة</button>
+      <button class="tbtn" type="button" id="b-pu-up">ارفع الشيت بعد ما تملاه</button>
+    </div>
+    <p class="hint" style="margin:0">الشيت بيفتح في إكسل عادي. املا رأس الفاتورة فوق وسطر لكل لون ومقاس تحت، واحفظه <strong>CSV</strong> زي ما هو، وبعدين ارفعه — هيتفتح قدامك في فورم الشراء تراجعه وتحفظه.</p>
+  </div>
+  <p class="note" id="pu-msg" hidden></p>
+
+  <div class="stats" id="pu-top"></div>
+  <div id="pu-fix"></div>
+  <div class="pu-owe money-only" id="pu-owe"></div>
+
+  <div class="panel" id="entry-purchases" hidden>
+    <div class="dhead">
+      <h3 id="title-purchases">شراء جديد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+    <p class="impact" id="impact-purchases"></p>
+    <form id="f-purch">
+      <p class="note" id="p-draft-note" hidden style="margin-top:0">
+        بتكمّل فاتورة لسه ما اتحفظتش — بياناتها محفوظة لحد ما تحفظها أو تفرّغها.
+        <button class="rowact" type="button" id="b-pclear">فرّغ وابدأ من جديد</button>
+      </p>
+      <div class="fset">
+        <h3>الفاتورة</h3>
+        <div class="grid">
+          <div><label for="p-date">التاريخ</label><input type="date" id="p-date" required></div>
+          <div><label for="p-party">المورد</label><select id="p-party" required></select></div>
+          <div><label for="p-inv">رقم فاتورة المورد</label><input id="p-inv" autocomplete="off" placeholder="اختياري"></div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <h3>البضاعة</h3>
+        <div id="p-lines"></div>
+        <div class="row-actions" style="gap:8px">
+          <button class="addline" type="button" id="b-addpline" style="flex:1">+ صنف تاني</button>
+          <button class="tbtn" type="button" id="b-newitem">+ صنف جديد</button>
+        </div>
+        <div class="newcust" id="newitem-box" hidden>
+          <h4>صنف جديد</h4>
+          <p class="hintline">سجّله من هنا على طول ومش محتاج تروح تبويب الأصناف. هيتختار في السطر اللي إنت واقف عليه.</p>
+          <div class="fgrid">
+            <div class="span2"><label for="ni-name">اسم الصنف</label>
+              <input id="ni-name" autocomplete="off" placeholder="شبشب صيفي، شنطة كتف…"></div>
+            <div><label for="ni-price">سعر بيع القطعة</label>
+              <input type="number" id="ni-price" step="any" min="0" placeholder="0"></div>
+            <div><label for="ni-unit">وحدة البيع</label>
+              <input id="ni-unit" autocomplete="off" placeholder="قطعة"></div>
+            <div><label for="ni-colors">الألوان</label>
+              <input id="ni-colors" autocomplete="off" placeholder="بني، أسود، أحمر"></div>
+            <div><label for="ni-sizes">المقاسات</label>
+              <input id="ni-sizes" autocomplete="off" placeholder="38، 39، 40"></div>
+            <div class="span2"><p class="hintline">افصل بينهم بفاصلة. سيبهم فاضيين لو الصنف مالوش ألوان ولا مقاسات.</p></div>
+          </div>
+          <div class="row-actions">
+            <button class="tbtn primary" type="button" id="b-saveitem2">حفظ الصنف</button>
+            <button class="tbtn" type="button" id="b-cancelitem2">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fset">
+        <h3>النقل والدفع</h3>
+        <div class="grid">
+          <div><label for="p-freight">مصاريف النقل للشحنة</label>
+            <input type="number" id="p-freight" step="any" min="0" value="0" placeholder="0"></div>
+          <div><label for="p-paid">المدفوع للمورد</label>
+            <input type="number" id="p-paid" step="any" min="0" value="0"></div>
+          <div><label for="p-note">ملاحظة</label><input id="p-note" autocomplete="off"></div>
+        </div>
+        <p class="hintline" id="p-paid-hint"></p>
+        <p class="hintline">النقل بيتوزّع على الأصناف بنسبة قيمة كل صنف، وبيتخصم من الخزنة لوحده — مش بيتحسب دَين للمورد.</p>
+      </div>
+
+      <div id="p-total" class="ptot"></div>
+      <div id="p-over" hidden>
+        <p class="note bad" id="p-over-msg" style="margin-top:0"></p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-2);cursor:pointer;margin-top:6px">
+          <input type="checkbox" id="p-force" style="width:auto;margin:0">
+          <span>أنا متأكد — سجّلها برضه</span>
+        </label>
+      </div>
+      <div class="grid">
+        <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="act" type="button" id="b-purch">حفظ الشراء</button>
+          <button class="act ghost" type="button" id="b-purch-next">حفظ وابدأ واحدة جديدة</button>
+          <button class="act ghost" type="button" id="x-purch" hidden>إلغاء</button>
+        </div>
+      </div>
+    </form>
+    <p class="note" id="p-note-msg"></p>
+    </div>
+  </div>
+  <div class="panel" id="entry-pret" hidden>
+    <div class="dhead">
+      <h3 id="title-pret">مرتجع للمورد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="impact" id="impact-pret" hidden></p>
+      <div class="ptot" id="pr-src" style="margin-bottom:12px"></div>
+      <form class="grid" id="f-pret">
+        <div><label for="pr-date">تاريخ المرتجع</label><input type="date" id="pr-date" required></div>
+        <div><label for="pr-qty">الكمية المرجّعة</label>
+          <input type="number" id="pr-qty" step="any" min="0" required autocomplete="off"></div>
+        <div><label for="pr-unit">اللي المورد هيرجّعه للقطعة</label>
+          <input type="number" id="pr-unit" step="any" min="0" required autocomplete="off"></div>
+        <div><label for="pr-mode">الفلوس رجعت إزاي</label>
+          <select id="pr-mode">
+            <option value="cash">استلمتها كاش دلوقتي</option>
+            <option value="credit">اتحسبت على حسابه (هيخصمها بعدين)</option>
+          </select></div>
+        <div style="grid-column:span 2"><label for="pr-note">سبب المرتجع</label>
+          <input id="pr-note" placeholder="بضاعة معيبة، مقاس غلط…" autocomplete="off"></div>
+        <div style="grid-column:1/-1"><p class="note" id="pr-msg" style="margin-top:0"></p></div>
+        <div><button class="act" type="button" id="b-pret">سجّل المرتجع</button>
+          <button class="act ghost" type="button" data-closeentry>إلغاء</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel" id="entry-xchg" hidden>
+    <div class="dhead">
+      <h3 id="title-xchg">⇄ استبدال مع مورد</h3>
+      <button class="dclose" type="button" data-closeentry aria-label="قفل">&times;</button>
+    </div>
+    <div class="dbody">
+      <p class="hintline" style="margin-top:0">بضاعة ما اتباعتش؟ رجّعها لنفس المورد وخد بدالها بضاعة تانية وادفع الفرق — المخزون والخزنة وحساب المورد بيتظبطوا لوحدهم.</p>
+      <div class="grid">
+        <div><label for="x-date">التاريخ</label><input type="date" id="x-date"></div>
+        <div><label for="x-party">المورد</label><select id="x-party"></select></div>
+        <div><label for="x-note">ملاحظة</label><input id="x-note" autocomplete="off" placeholder="الموديل ما اتباعش"></div>
+      </div>
+
+      <div class="fset xg-out">
+        <h3>↩ اللي هترجّعه <small>بيخرج من المخزون</small></h3>
+        <div><label for="x-src">الصنف (من اللي اشتريته من المورد ده)</label><select id="x-src"></select></div>
+        <div class="ptot" id="x-srcinfo" hidden></div>
+        <div class="grid">
+          <div><label for="x-qty">هترجّع كام قطعة</label><input type="number" id="x-qty" step="any" min="0" autocomplete="off"></div>
+          <div><label for="x-unit">المورد هيحسبلك القطعة بكام</label><input type="number" id="x-unit" step="any" min="0" autocomplete="off"></div>
+        </div>
+        <p class="hintline" id="x-loss"></p>
+      </div>
+
+      <div class="fset xg-in">
+        <h3>↪ اللي هتاخده بداله <small>بيدخل المخزون</small></h3>
+        <div id="x-lines"></div>
+        <div class="xg-btns">
+          <button class="addline" type="button" id="b-xaddline">+ صنف تاني</button>
+          <button class="addline" type="button" id="b-xsheet">⇪ ارفع شيت بالبضاعة الجديدة</button>
+          <input type="file" id="x-file" accept=".csv,text/csv" hidden>
+        </div>
+        <p class="hintline" id="x-sheetmsg">عندك ألوان ومقاسات كتير؟ املا «شيت الفاتورة» (من «نزّل شيت الفاتورة» فوق) وارفعه هنا بدل ما تكتبهم سطر سطر.</p>
+      </div>
+
+      <div class="xg-diff" id="x-diff"></div>
+      <div class="xg-pay" id="x-paybox">
+        <div id="x-paywrap"><label for="x-paid" id="x-paid-lbl">المدفوع للمورد دلوقتي</label>
+          <input type="number" id="x-paid" step="any" min="0" autocomplete="off">
+          <p class="hintline" id="x-paid-hint"></p></div>
+        <div id="x-modewrap" hidden><label for="x-mode">الفرق اللي ليك</label>
+          <select id="x-mode">
+            <option value="cash">رجّعهولي كاش دلوقتي</option>
+            <option value="credit">يفضل رصيد عنده (أخصمه بعدين)</option>
+          </select></div>
+      </div>
+      <div class="ptot" id="x-eff"></div>
+      <div id="x-over" hidden>
+        <p class="note bad" id="x-over-msg" style="margin-top:0"></p>
+        <label style="display:flex;align-items:center;gap:8px;font-size:var(--fs-2);cursor:pointer;margin-top:6px">
+          <input type="checkbox" id="x-force" style="width:auto;margin:0"><span>أنا متأكد — سجّله برضه</span></label>
+      </div>
+      <div class="row-actions">
+        <button class="act" type="button" id="b-xchg">حفظ الاستبدال</button>
+        <button class="act ghost" type="button" data-closeentry>إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="pu-text" placeholder="دوّر بالمورد أو الصنف أو اللون أو المقاس أو الكود أو رقم الفاتورة…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+    <button class="tbtn" type="button" id="b-pufilters" aria-expanded="false" aria-controls="pu-filters">
+      فلاتر <span class="fcount" id="pu-count" hidden>0</span>
+    </button>
+  </div>
+
+  <div class="filters" id="pu-filters" hidden>
+    <div><label for="pu-party">المورد</label><select id="pu-party"></select></div>
+    <div><label for="pu-item">الصنف</label><select id="pu-item"></select></div>
+    <div><label for="pu-color">اللون</label><select id="pu-color"></select></div>
+    <div><label for="pu-size">المقاس</label><select id="pu-size"></select></div>
+    <div><label for="pu-from">من تاريخ</label><input type="date" id="pu-from"></div>
+    <div><label for="pu-to">لـ تاريخ</label><input type="date" id="pu-to"></div>
+  </div>
+  <div class="chips" id="pu-chips"></div>
+  <div class="quick" id="pu-only" role="group" aria-label="فلتر الفواتير"></div>
+  <div id="pu-cards"></div>
+  <p class="more-wrap"><button class="tbtn" type="button" data-more="purch" hidden></button></p>
+
+  <details class="hm-more" id="pu-more">
+    <summary>كل الفواتير في جدول</summary>
+    <div class="tbl-wrap"><table id="t-purch"></table></div>
+  </details>
+</section>
+

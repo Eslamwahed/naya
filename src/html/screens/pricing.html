@@ -1,0 +1,67 @@
+<!-- التسعير -->
+<section id="tab-price" hidden>
+  <div class="quick ip-sw" role="group" aria-label="الأصناف والتسعير"><button type="button" data-navgo="items">الأصناف</button><button type="button" class="on" data-navgo="price">التسعير</button></div>
+  <h2>التسعير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <p class="hint" data-infotxt hidden>الشاشة دي بتجاوب على سؤال واحد: <strong>أبيع الصنف ده بكام؟</strong> قدّامك تكلفة القطعة <strong>واصلة مخزنك</strong> (سعر المورد + نصيبها من النقل)، واكتب سعر البيع — أو اكتب نسبة الربح اللي عايزها والسعر يتحسب لوحده. مفيش حركة بتتسجّل في الدفاتر من هنا؛ اللي بيتغيّر هو <strong>سعر البيع المسجّل على الصنف</strong>، اللي بينزل لوحده في الأوردر وبيتحسب منه الربح.</p>
+
+  <div class="quick" id="prc-tabs" role="tablist" aria-label="التسعير">
+    <button type="button" data-prctab="list" class="on">أسعار الأصناف</button>
+    <button type="button" data-prctab="calc">🧮 احسب أوردر</button>
+  </div>
+
+  <div id="prc-calc" hidden>
+    <div class="pcalc">
+      <div class="panel pc-in">
+        <h3 style="margin-top:0">🧮 احسب أوردر — من غير ما يتسجّل حاجة</h3>
+        <p class="hint" style="margin-top:0">اختار الأصناف والكميات، والسعر بيتملي لوحده من سعر الصنف (أو سعر الجملة لو الكمية توصله) — وغيّره لو هتعمل سعر خاص. الصنف اللي ليه كذا لون: اختار اللون، والتكلفة والسعر بيبقوا بتوع اللون ده. التكلفة = تكلفة القطعة الواصلة + «المصاريف الإضافية» اللي في جدول الأسعار.</p>
+        <div id="pc-lines"></div>
+        <button class="addline" type="button" id="b-pc-add">+ صنف تاني</button>
+        <div class="pc-ship">
+          <div><label for="pc-disc">خصم على الأوردر</label><input id="pc-disc" inputmode="decimal" placeholder="0"></div>
+          <div><label for="pc-sin">شحن على العميل</label><input id="pc-sin" inputmode="decimal" placeholder="0"></div>
+          <div><label for="pc-sout">شحن هتدفعه للشركة</label><input id="pc-sout" inputmode="decimal" placeholder="0"></div>
+        </div>
+        <p class="hintline" style="margin-bottom:0">الشحن بيتحسب مرة على الأوردر كله، مش على كل قطعة.</p>
+      </div>
+      <div class="panel pc-res" id="pc-res"></div>
+    </div>
+  </div>
+
+  <div id="prc-listview">
+  <div class="band" id="prc-kpis"></div>
+  <p class="note" id="prc-note"></p>
+
+  <div class="toolbar">
+    <div class="s-search">
+      <input id="prc-q" type="search" placeholder="دوّر باسم الصنف…" autocomplete="off">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path>
+      </svg>
+    </div>
+  </div>
+
+  <div class="quick" id="prc-quick">
+    <button type="button" data-prconly="all" class="on">كل الأصناف</button>
+    <button type="button" data-prconly="noprice">لسه من غير سعر</button>
+    <button type="button" data-prconly="loss">السعر أقل من التكلفة</button>
+    <button type="button" data-prconly="instock">اللي في المخزن</button>
+  </div>
+
+  <div class="filters" id="prc-bulk">
+    <div><label for="prc-bulk-pct">سعّر اللي ظاهر: زيادة على التكلفة الكلية %</label>
+      <input id="prc-bulk-pct" inputmode="decimal" placeholder="50"></div>
+    <div><label for="prc-bulk-round">قرّب السعر لأقرب</label>
+      <select id="prc-bulk-round">
+        <option value="0">من غير تقريب</option>
+        <option value="1">جنيه</option>
+        <option value="5" selected>٥ جنيه</option>
+        <option value="10">١٠ جنيه</option>
+      </select></div>
+    <div><label for="b-prc-apply">طبّق على كل اللي ظاهر</label>
+      <button class="tbtn" type="button" id="b-prc-apply">طبّق</button></div>
+  </div>
+
+  <div class="tbl-wrap"><table id="t-price"></table></div>
+  </div>
+</section>
+

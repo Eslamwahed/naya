@@ -3,7 +3,7 @@ name: test-writer
 description: Writes Playwright tests in tests/ for a new Lora Collection feature or a bug that was just fixed, using synthetic data only. Use when a change lands without a test.
 tools: Read, Grep, Glob, Bash, Edit, Write
 ---
-You write tests for `index.html`. Read `CLAUDE.md` and the existing files in `tests/` first and match their style (plain Node + Playwright, Arabic messages, one file per area, `module.exports = async ({ browser, ok }) => { ... }`).
+You write tests for the app (source in `src/`, assembled into `index.html` by `node build.js` — tests load `index.html`, so run the build first). Read `CLAUDE.md` and the existing files in `tests/` first and match their style (plain Node + Playwright, Arabic messages, one file per area, `module.exports = async ({ browser, ok }) => { ... }`).
 
 Rules:
 - Data comes from `tests/fixtures.js` (`shop()`, `blank()`, `sale`, `line`, `buy`) — fake names and numbers only, never anything from a backup.

@@ -1,0 +1,261 @@
+  /* ---------- درج موحّد: أي لوحة إدخال بتتحوّل لدرج بنفس شكل المبيعات ---------- */
+  .panel.as-drawer{
+    position:fixed;inset-block:0;inset-inline-start:0;width:min(600px,100%);
+    z-index:41;margin:0;border-radius:0;border:none;
+    display:flex;flex-direction:column;padding:0;
+    box-shadow:0 8px 30px rgba(36,30,38,.2);
+    transform:translateX(100%);transition:transform .24s cubic-bezier(.32,.72,0,1);
+  }
+  [data-theme="dark"] .panel.as-drawer{box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  .panel.as-drawer.on{transform:translateX(0)}
+  .panel.as-drawer[hidden]{display:none}
+  .panel.as-drawer > .dhead{
+    display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;
+    padding:var(--sp-4) var(--sp-4);border-bottom:1px solid var(--line);flex:0 0 auto;
+  }
+  .panel.as-drawer > .dhead h3{margin:0;font-size:var(--fs-4);font-weight:600}
+  .panel.as-drawer > .dbody{
+    overflow:auto;padding:var(--sp-4);flex:1;
+    padding-block-end:calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+  .panel.as-drawer .grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  /* الهيدر والجسم مايبانوش وهي لوحة عادية (مش درج) */
+  .panel:not(.as-drawer) > .dhead{padding:0 0 var(--sp-1);border:none}
+  .dclose{
+    margin-inline-start:auto;background:none;border:none;color:var(--ink-soft);
+    font-size:var(--fs-5);line-height:1;padding:var(--sp-1) var(--sp-2);border-radius:var(--r-sm);cursor:pointer;
+  }
+  .dclose:hover{background:var(--paper);color:var(--ink)}
+  .panel:not(.as-drawer) .dclose{display:none}
+  /* كشف الشركة لوحة بتتفتح وبتتقفل، فالـ× لازم يبان */
+  #shstmt-panel > .dhead,#statement-panel > .dhead{display:flex;align-items:center;gap:var(--sp-3)}
+  #shstmt-panel .dclose,#statement-panel .dclose{display:block}
+
+  /* شريط الإجراء فوق كل جدول */
+  .tbar{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-bottom:var(--sp-3)}
+  .tbar .spacer{margin-inline-start:auto}
+
+  /* الرصيد اللي الحركة هتأثّر عليه — بيبان وانت بتكتب */
+  .impact{
+    background:var(--teal-soft);border-radius:var(--r-md);padding:var(--sp-3) var(--sp-3);
+    font-size:var(--fs-3);display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:baseline;
+  }
+  .impact b{font-weight:600;font-variant-numeric:tabular-nums}
+  .impact .arrow{color:var(--ink-soft)}
+
+  /* أقسام الشرح اللي بتتطوي */
+  details.explain{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);overflow:hidden;margin-bottom:var(--sp-4);
+  }
+  details.explain > summary{
+    padding:var(--sp-3) var(--sp-4);font-weight:600;font-size:var(--fs-3);cursor:pointer;
+    list-style:none;display:flex;align-items:center;gap:var(--sp-2);color:var(--ink);
+  }
+  details.explain > summary::-webkit-details-marker{display:none}
+  details.explain > summary::before{
+    content:"\25BE";color:var(--teal);display:inline-block;transition:transform .16s;
+  }
+  details.explain:not([open]) > summary::before{transform:rotate(-90deg)}
+  details.explain .xbody{padding:0 var(--sp-4) var(--sp-4);display:grid;gap:var(--sp-3)}
+  details.explain p{margin:0;font-size:var(--fs-3);color:var(--ink-soft);line-height:1.7}
+  details.explain p strong{color:var(--ink);font-weight:600}
+  details.explain table{font-size:var(--fs-3)}
+  details.explain th{font-size:var(--fs-1)}
+  .why{margin-top:var(--sp-3)}
+  .why > summary{font-size:var(--fs-3);padding:var(--sp-2) 0;color:var(--teal)}
+  .why .xbody{padding:0}
+
+  /* الموبايل: الجدول كروت، والدرج ياخد الشاشة */
+  @media (max-width:760px){
+    .s-wrap{overflow:visible;max-height:none;border:none;background:none}
+    #t-sales thead{display:none}
+    /* v102: كارت الأوردر ٣ سطور — (الرقم والعميل والمبلغ) / (الأصناف) / (الحالة وزرار الخطوة الجاية).
+       الحافة الملوّنة على الجنب بتقول الحالة من بعيد. */
+    #t-sales tbody tr.order{
+      display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+      grid-template-areas:"lead cust total" "items items items" "stat stat acts";
+      gap:2px var(--sp-2);background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+      border-inline-start:3px solid var(--line);
+      margin-bottom:var(--sp-2);padding:var(--sp-2) var(--sp-3);align-items:center;
+      -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+    }
+    #t-sales td.cust .secondary{-webkit-user-select:text;user-select:text}
+    #t-sales tr.order[data-st="delivered"]{border-inline-start-color:var(--gain)}
+    #t-sales tr.order[data-st="progress"]{border-inline-start-color:var(--warn)}
+    #t-sales tr.order[data-st="cancelled"]{border-inline-start-color:var(--due)}
+    #t-sales tr.order.sel{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal)}
+    #t-sales tbody tr.order td{border:none;padding:0;background:none!important;min-width:0}
+    #t-sales{width:100%;table-layout:fixed}
+    #t-sales td.selcell{display:none!important}
+    #t-sales.sel-mode tbody tr.order{grid-template-columns:auto auto minmax(0,1fr) auto;
+      grid-template-areas:"sel lead cust total" "sel items items items" "sel stat stat acts"}
+    #t-sales.sel-mode td.selcell{display:block!important;grid-area:sel;align-self:center}
+    #t-sales td.lead{border-inline-start:none;grid-area:lead;align-self:start}
+    #t-sales td.lead .secondary{display:none}
+    #t-sales td.cust{grid-area:cust;align-self:start}
+    #t-sales td.cust .primary{font-weight:700}
+    #t-sales td.items{grid-area:items;margin:2px 0 4px}
+    #t-sales td.items .goods .thumb,#t-sales td.items .goods .dd-noimg{display:none}
+    #t-sales td.total{grid-area:total;align-self:start;text-align:end}
+    #t-sales td.stat{grid-area:stat}
+    /* كارت الأوردر على الموبايل: من غير تسمية قبل كل خانة (الكارت
+       واضح لوحده)، والحالة ما تتقصّش، والمبلغ ما يتكسرش على سطرين */
+    #t-sales tbody tr.order td{display:block}
+    #t-sales tbody tr.order td::before{content:none}
+    #t-sales td.stat{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;text-align:start}
+    #t-sales td.stat select.rowst{flex:0 0 auto;max-width:100%}
+    #t-sales td.stat .stepline,#t-sales td.stat .dtag{margin:0}
+    #t-sales td.total .pill,#t-sales td.total .primary{white-space:nowrap}
+    #t-sales td.cust .primary{display:block}
+    #t-sales td.rowacts{grid-area:acts;text-align:left;align-self:center}
+    #t-sales td.rowacts .chev{display:none}
+    #t-sales tr.detail td{background:none;border:none}
+    .detail-in{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+      margin:-4px 0 10px;padding:var(--sp-3)}
+    .drawer{width:100%}
+    /* v58 — الشبكة هنا بتفضل عمودين على 390px، فـ«span 1» كانت بتحشر
+       العميل وطريقة التحصيل والملاحظة في نص سطر وتقطّع نصّهم */
+    .fgrid .span2{grid-column:1 / -1}
+    .drawer-foot{padding-block-end:calc(13px + env(safe-area-inset-bottom, 0px))}
+  }
+  /* الجداول بتتحول لكروت على الموبايل */
+  @media (max-width:760px){
+    main{padding:var(--sp-4) var(--sp-2) 70px}
+    header.top{padding:var(--sp-2) var(--sp-3);gap:var(--sp-2);min-height:0}
+    header.top h1{font-size:var(--fs-4)}
+    /* الأقسام شريط ثابت تحت زي التطبيقات — صباعك بيوصله */
+    .nav-groups{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--card);border-top:1px solid var(--line);
+      display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
+      box-shadow:0 -2px 10px rgba(0,0,0,.05)}
+    .nav-groups button{flex-direction:column;gap:1px;padding:6px 0;font-size:11px;border-bottom:none;position:relative}
+    .nav-groups button[hidden]{display:none}
+    .nav-groups button .ic{font-size:20px}
+    .nav-groups button.on{border-bottom:none}
+    .nav-groups .badge{position:absolute;top:2px;inset-inline-start:calc(50% + 4px)}
+    .nav-sub{justify-content:flex-start;border-top:none}
+    .nav-sub button{flex:0 0 auto}
+    body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+    .panel{padding:var(--sp-3) var(--sp-3)}
+    .fgroup{padding:var(--sp-3) var(--sp-2) var(--sp-2)}
+    form.grid{grid-template-columns:1fr;gap:var(--sp-2)}
+    .fgroup .grid > div[style*="span 2"]{grid-column:span 1 !important}
+    input,select{padding:var(--sp-2);font-size:var(--fs-4)}      /* أسهل في اللمس */
+    .tbl-wrap{border:none;background:none;overflow:visible}
+    table{font-size:var(--fs-3)}
+    thead{display:none}
+    tbody tr{display:block;background:var(--card);border:1px solid var(--line);
+      border-radius:var(--r-md);margin-bottom:var(--sp-2);padding:var(--sp-1) var(--sp-1)}
+    tbody td{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);
+      border:none;border-bottom:1px dashed var(--line);white-space:normal;padding:var(--sp-2) var(--sp-3)}
+    tbody tr td:last-child{border-bottom:none}
+    tbody td::before{content:attr(data-l);color:var(--ink-soft);font-size:var(--fs-2);flex:0 0 auto}
+    tbody td:empty,tbody td[data-l=""]{display:none}
+    tbody td.wide{flex-direction:column;align-items:flex-start;gap:var(--sp-1)}
+    tbody td.wide::before{margin-bottom:var(--sp-1)}
+    /* v122: قايمة الدخل تفضل جدول — كروت لكل بند كانت بتطوّلها ١٢ كارت. «من المبيعات» بتستخبى */
+    #t-pis thead{display:table-header-group}
+    #t-pis tbody tr{display:table-row;background:none;border:0;border-radius:0;margin:0;padding:0}
+    #t-pis th,#t-pis tbody td,#t-pis tbody td.wide{display:table-cell;padding:8px 6px;border-bottom:1px solid var(--line)}
+    #t-pis tbody td::before{content:none}
+    #t-pis th:nth-child(4),#t-pis td:nth-child(4){display:none}
+    #t-pis td.num{font-size:var(--fs-2)}
+    .fin-t thead{display:table-header-group}
+    .fin-t tbody tr{display:table-row;background:none;border:0;border-radius:0;margin:0;padding:0}
+    .fin-t th,.fin-t tbody td,.fin-t tbody td.wide{display:table-cell;padding:8px 6px;border-bottom:1px solid var(--line)}
+    .fin-t tbody td::before{content:none}
+    .fin-t td.num{font-size:var(--fs-2)}
+    .fin-t td.ind{padding-inline-start:var(--sp-3)}
+    .rep-tabs{flex-wrap:nowrap;overflow-x:auto;border-bottom:0;gap:6px;margin:var(--sp-3) 0;scrollbar-width:none}
+    .rep-tabs::-webkit-scrollbar{display:none}
+    .rep-tabs button{flex:0 0 auto;border:1px solid var(--line);border-radius:99px;margin:0;padding:6px 14px;min-height:38px;background:var(--card)}
+    .rep-tabs button.on{background:var(--teal);color:var(--card);border-color:var(--teal)}
+    /* كارت الصنف: الاسم والحالة + ٣ أرقام + سطر صغير بالباقي */
+    #t-rep-itp .itp-m{display:block;line-height:1.7}
+    #t-rep-itp td.itp-x{display:none}
+    #t-rep-itp tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));position:relative;padding:var(--sp-2)}
+    #t-rep-itp tbody td{border:0;padding:4px 6px;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px}
+    #t-rep-itp tbody td::before{font-size:var(--fs-1)}
+    #t-rep-itp tbody td.wide{grid-column:1/-1;order:0;padding-inline-end:120px}
+    #t-rep-itp tbody td.wide::before{content:none}
+    #t-rep-itp tbody td:nth-child(8){order:1;font-size:var(--fs-4)}
+    #t-rep-itp tbody td:nth-child(7){order:2}
+    #t-rep-itp tbody td:nth-child(2){order:3}
+    #t-rep-itp tbody td:nth-child(11){position:absolute;top:var(--sp-2);inset-inline-end:var(--sp-2);padding:4px}
+    #t-rep-itp tbody td:nth-child(11)::before{content:none}
+    #t-rep-itp tbody td:nth-child(11):empty{display:none}
+
+    .del{padding:var(--sp-1) var(--sp-2)}
+  }
+  @media (max-width:820px){
+
+    .split{grid-template-columns:1fr}
+  }
+  /* جدول أصناف الأوردر جوّه الفورم */
+  #t-lines{font-size:var(--fs-3)}
+  #t-lines th{font-size:var(--fs-1);padding:var(--sp-1) var(--sp-2)}
+  #t-lines td{padding:var(--sp-1) var(--sp-1);border-bottom:1px solid var(--line);vertical-align:middle}
+  #t-lines input,#t-lines select{padding:var(--sp-1) var(--sp-2);font-size:var(--fs-3);min-width:68px}
+  #t-lines select.l-item{min-width:170px}
+  #t-lines .l-tot{background:var(--teal-soft);border-style:dashed;font-weight:600;min-width:90px}
+  #t-lines tr.bad-row td{background:#FBEEF1}
+  [data-theme="dark"] #t-lines tr.bad-row td{background:#3A2028}
+  .lines-wrap{overflow-x:auto}
+  .ono{font-variant-numeric:tabular-nums;font-weight:700;color:var(--teal)}
+  @media (max-width:760px){
+    #t-lines{font-size:var(--fs-4)}
+    #t-lines td{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-2);padding:var(--sp-1) var(--sp-2)}
+    #t-lines td::before{content:attr(data-l);color:var(--ink-soft);font-size:var(--fs-2);flex:0 0 auto}
+    #t-lines input,#t-lines select{max-width:62%}
+    #t-lines tbody tr{display:block;background:var(--paper);border:1px solid var(--line);
+      border-radius:var(--r-md);margin-bottom:var(--sp-2);padding:var(--sp-1) var(--sp-1)}
+  }
+  /* ═══ v58 — الإدخال على الموبايل ═══
+     القياس على شاشة 390×844: ١١ خانة خطها 14px و١٣ خانة ارتفاعها أقل من 44px.
+     السبب: `input,select{font-size:var(--fs-4)}` اللي فوق كان بيتغلب بالتحديد (specificity)
+     من `.fgrid input` و`.dmeta input` وغيرهم. فالقاعدة دي بتسمّي كل واحدة بالاسم.
+     أقل من 16px = iOS بيزوّم لوحده على كل لمسة، وده بيخرّب الإدخال كل مرة. */
+  @media (max-width:760px){
+    input,select,textarea,
+    .filters input,.filters select,
+    .fgrid input,.fgrid select,
+    .dmeta input,.dmeta select,
+    .quickpay input,
+    .lmix-row input,.lmix-row select,
+    #t-lines input,#t-lines select,
+    .s-search input{ font-size:16px;min-height:44px }   /* أقل من 16 الآيفون بيعمل زوم وانت بتكتب */
+    /* شارة الحالة select برضه — من غير ده كانت بتطلع دايرة كبيرة في كارت الأوردر */
+    select.rowst{ font-size:var(--fs-2);min-height:34px;padding:2px var(--sp-3) }
+    /* مربّعات الاختيار مش خانات كتابة — الارتفاع بيوسّعها بدون داعي */
+    input[type="checkbox"]{ min-height:0;width:auto }
+    td.selcell input,th.selcell input,.allow input{ width:22px;height:22px }
+
+    /* أهداف اللمس: ٧ أزرار من ٩ كانت أصغر من 40×40 */
+    .stabs button,.seg button,.tbtn,.withbtn .tbtn,.addline,
+    .addmix,.sd-close{ min-height:42px }
+    .stabs button,.seg button,.tbtn,.addline{ font-size:var(--fs-3) }
+    .del,.rowact,.lrow .rm,.lmix-row .rm{
+      min-height:40px;min-width:40px;
+      display:inline-flex;align-items:center;justify-content:center }
+
+    /* خلّاط المقاسات: 5 أعمدة في 312px بيخنق الخانات لما الخط يبقى 16px،
+       فبقى سطرين — والعناوين مش ناقصة لأن كل خانة فيها placeholder */
+    .lmix-cols{ display:none }
+    .lmix-row{
+      grid-template-columns:1fr 1fr 40px;
+      grid-template-areas:"c z x" "q q x";
+      row-gap:var(--sp-2);border:1px dashed var(--line);border-radius:var(--r-sm);padding:var(--sp-2)}
+    .lmix-row > :nth-child(1){ grid-area:c }
+    .lmix-row > :nth-child(2){ grid-area:z }
+    .lmix-row > :nth-child(3){ grid-area:q }
+    .lmix-row > .rm{ grid-area:x;align-self:center }
+
+    /* العربي محتاج حجم أكبر من اللاتيني لنفس الوضوح — مفيش أقل من 12px */
+    .hintline,.mnote,.lmix-empty,.lmix-head,.lmix-sum,.fset > h3,
+    .fgrid label,.filters label,.stabs b,.lrow .lcost,.lrow-foot .ltot em,
+    tbody td::before,.fgroup .glabel,.band span,.mbox h4,.rowact,
+    .stats span,.stats small,.kpi-go,header.top .who,
+    .dmeta,.hint,label{ font-size:var(--fs-2) }
+  }
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
