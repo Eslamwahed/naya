@@ -558,6 +558,37 @@
   .hm-bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:var(--sp-2);display:flex}
   .hm-bar i{display:block;height:100%}
   .hm-more{margin-top:var(--sp-2)}
+  /* ═══ v176 — الرئيسية الهادية ═══ */
+  section#hm-big.hm-big,body.no-money section#hm-big.hm-big{display:block}
+  .hm-k4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  body.no-money .hm-k4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hm-k4 .hm-k{border-radius:var(--hm-r,14px);padding:14px 16px;display:flex;flex-direction:column;align-items:stretch;gap:4px;text-align:start;min-width:0}
+  .hm-k4 .hm-k > span{font-size:var(--fs-2);color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hm-k4 .hm-k strong{font-size:var(--fs-6);direction:ltr;text-align:right;margin:0;font-variant-numeric:tabular-nums}
+  .hm-k4 .hm-k small{font-size:var(--fs-1);color:var(--ink-soft);line-height:1.5}
+  .hm-grp{margin-top:var(--sp-3)}
+  .hm-grp h4{margin:0 0 6px;font-size:var(--fs-2);font-weight:600;color:var(--ink-soft)}
+  .hm-tr{display:grid;grid-template-columns:8px minmax(0,1fr) auto auto;gap:12px;align-items:center;width:100%;text-align:start;font:inherit;color:inherit;
+    background:none;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;touch-action:manipulation}
+  .hm-tr:hover{border-color:var(--teal);background:var(--teal-soft)}
+  .hm-tr:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  .hm-tr .dot{width:8px;height:8px;border-radius:99px;background:var(--ink-soft);opacity:.6}
+  .hm-tr.bad .dot{background:var(--due);opacity:1} .hm-tr.warn .dot{background:var(--warn);opacity:1} .hm-tr.money .dot{background:var(--gain);opacity:1}
+  .hm-tr .tx{min-width:0}
+  .hm-tr b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hm-tr .s{display:block;font-size:var(--fs-1);color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hm-tr .s.red{color:var(--due)}
+  .hm-tr .v{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .hm-tr .cta{border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:var(--fs-2);color:var(--teal);white-space:nowrap}
+  .hm-sum{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:var(--fs-3)}
+  .hm-sum span{color:var(--ink-soft)}
+  .hm-month h3 small{font-weight:400;color:var(--ink-soft);font-size:var(--fs-1)}
+  @media (max-width:760px){
+    .hm-k4{grid-template-columns:1fr 1fr;gap:8px}
+    .hm-k4 .hm-k strong{font-size:var(--fs-5)}
+    .hm-tr{grid-template-columns:8px minmax(0,1fr) auto;gap:10px}
+    .hm-tr .cta{display:none}
+  }
   .hm-more > summary{cursor:pointer;color:var(--teal);font-weight:600;padding:var(--sp-2) 0;font-size:var(--fs-3)}
   @media (max-width:980px){ .hm-big{grid-template-columns:repeat(3,1fr)} }
   @media (max-width:760px){
@@ -4162,8 +4193,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "175";
+  var VERSION = "176";
   var CHANGELOG = [
+    { v:"176", d:"2026-11-03", items:[
+      "الرئيسية أهدى: 4 أرقام بس فوق (صافي الربح · الخزنة · عند شركات الشحن · المخزون) بنفس الحجم",
+      "«المطلوب منك النهارده» متقسّم: الأوردرات · الفلوس والمرتجع · المخزون · الحسابات — مترتّب بالأهم بنقطة (أحمر لازم · أصفر مهم · أخضر فلوس) وكل سطر زراره بفعل واضح",
+      "سطور اتجمعت: «أكّد» و«اشحن» سطر واحد · «خلصت» و«قرّبت تخلص» سطر واحد · و«الأوردرات فين؟» اتشال لأنه بيكرر المهام — مكانه ملخص الفترة"
+    ]},
     { v:"175", d:"2026-11-03", items:[
       "جديد: «ارفع كشف QP» في شركات الشحن — ترفع ملف الإكسل زي ما بيجي من QP (ممكن كذا ملف مرة واحدة) والسيستم يطابق كل سطر بالأوردر برقم البوليصة (أو التليفون)، يعرف المرتجع والتسليم الجزئي ومصاريف QP، ويوريك أي فرق قبل ما يسجّل. دوسة واحدة والاستلام بيتسجّل بنفس المبلغ اللي وصلك",
       "الاستلامات اللي اتسجّلت باليد لأوردرات الكشف بتتشال ويتسجّل الكشف مكانها — والكشف اللي اتسجّل قبل كده ما بيتسجّلش تاني",
@@ -6652,16 +6688,14 @@
     var line = function(o){ L.push(o); };
     if(canTab("sales")){
       var g = stageLists();
-      var ncf = g.st[1].filter(cfPending).length;
-      if(ncf)
-        line({ ic:"tag", cls:"warn", t: ncf === 1 ? "أوردر لسه ما اتأكدش" : "أوردرات لسه ما اتأكدتش",
-               s:"كلّم العميل أو ابعتله واتساب قبل الشحن — بيقلّل المرتجع", v:qty(ncf), go:"sales|1", btn:"أكّدهم" });
-      if(g.st[1].length)
-        line({ ic:"tag", t: g.st[1].length === 1 ? "أوردر ناقصه شحن" : "أوردرات ناقصها شحن",
-               s:"اكتب الشركة وكود البوليصة", v:qty(g.st[1].length), go:"sales|1" });
+      var ncf = g.st[1].filter(cfPending).length, n1 = g.st[1].length;
+      // v176: «أكّد» و«اشحن» سطر واحد — نفس المرحلة ونفس الشاشة
+      if(n1)
+        line({ grp:"orders", cls: ncf ? "warn" : "", t: n1 === 1 ? "أوردر جديد مستني يتشحن" : qty(n1) + " أوردرات جديدة مستنية تتشحن",
+               s:(ncf ? qty(ncf) + " لسه ما اتأكدش — كلّم العميل قبل الشحن · " : "") + "اكتب الشركة والكود", v:qty(n1), go:"sales|1", btn: ncf ? "أكّد واشحن" : "اشحنهم" });
       if(g.st[2].length){
         var stale = g.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; }).length;
-        line({ ic:"truck", cls: stale ? "bad" : "", t:"أوردرات مع المندوب",
+        line({ grp:"orders", ic:"truck", cls: stale ? "bad" : "", t:"أوردرات مع المندوب",
                s: stale ? qty(stale) + " بقالهم " + SG_STALE + " أيام أو أكتر — كلّم الشركة" : "مستني العميل يستلم",
                red: !!stale, v:qty(g.st[2].length), go:"sales|2" });
       }
@@ -6669,13 +6703,13 @@
       g.st[3].forEach(function(x){ var c = squish(x.shipCo); (byCo[c] = byCo[c] || []).push(x); });
       Object.keys(byCo).forEach(function(c){
         var sum = byCo[c].reduce(function(a, x){ return a + shipPend(x).left; }, 0);
-        line({ ic:"cash", cls:"money", t:"فلوسك عند " + (c || "شركة من غير اسم"),
+        line({ grp:"money", ic:"cash", cls:"money", t:"فلوسك عند " + (c || "شركة من غير اسم"),
                s:"من " + qty(byCo[c].length) + " أوردر — استلمها", v:money(sum), go:"sales|3" });
       });
       if(g.direct.length){
         var due = g.direct.reduce(function(a, x){ return a + Math.max(0, sDue(x)); }, 0);
         if(due > 0.009)
-          line({ ic:"hand", cls:"money", t:"لك عند عملاء (تحصيل مباشر)",
+          line({ grp:"money", ic:"hand", cls:"money", t:"لك عند عملاء (تحصيل مباشر)",
                  s:qty(g.direct.length) + " أوردر", v:money(due), go:"sales|3" });
       }
       var held = {};
@@ -6684,7 +6718,7 @@
         var n = held[c].reduce(function(a, x){ return a + x.n; }, 0);
         var names = held[c].map(function(x){ return itemName(x.l.itemId); })
           .filter(function(v, i, a){ return a.indexOf(v) === i; });
-        line({ ic:"return", t:"مرتجع عند " + (c || "شركة من غير اسم"),
+        line({ grp:"money", ic:"return", t:"مرتجع عند " + (c || "شركة من غير اسم"),
                s:names.slice(0, 2).join(" · ") + (names.length > 2 ? " و" + qty(names.length - 2) + " تاني" : ""),
                v:qty(n) + " قطعة", go:"sales|4" });
       });
@@ -6694,7 +6728,7 @@
       var SH = shortList();
       if(SH.length){
         var shn = SH.reduce(function(a, x){ return a + x.n; }, 0);
-        line({ ic:"receipt", cls:"bad", t:"اشتري للأوردرات",
+        line({ grp:"stock", ic:"receipt", cls:"bad", t:"اشتري للأوردرات",
                s:SH.slice(0, 2).map(function(x){ var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : "") + " × " + qty(x.n); }).join(" · ") +
                  (SH.length > 2 ? " و" + qty(SH.length - 2) + " تاني" : ""),
                v:qty(shn) + " قطعة", go: canTab("purch") ? "purch" : "inv|out" });
@@ -6705,6 +6739,15 @@
          وأسماء أول اتنين — كانوا سطر لكل لون ومقاس وبيزقّوا الباقي تحت. */
       var lows = lowStockList(), lowG = { out:[], low:[] };
       lows.forEach(function(x){ lowG[x.out ? "out" : "low"].push(x); });
+      var uniq = function(xs){ return xs.map(function(x){ return x.itemId; }).filter(function(v, i, a){ return a.indexOf(v) === i; }); };
+      // v176: الاتنين موجودين؟ سطر واحد — «خلصت» و«قرّبت تخلص» نفس الشاشة ونفس القرار
+      if(lowG.out.length && lowG.low.length){
+        var io = uniq(lowG.out), il = uniq(lowG.low), all = uniq(lowG.out.concat(lowG.low));
+        line({ grp:"stock", cls:"bad", t:qty(io.length) + " صنف خلص · " + qty(il.length) + " قرّب يخلص",
+               s:all.slice(0, 2).map(itemName).join(" · ") + (all.length > 2 ? " و" + qty(all.length - 2) + " تاني" : ""),
+               v:qty(all.length), go:"inv|out", n:lowG.out.length, btn:"المخزون" });
+        lowG = { out:[], low:[] };
+      }
       ["out", "low"].forEach(function(k){
         var xs = lowG[k]; if(!xs.length) return;
         var nm = function(x){ var lb = vLabel(x.color, x.size); return x.name + (lb ? " " + lb : ""); };
@@ -6717,14 +6760,14 @@
         };
         if(xs.length === 1){
           var x = xs[0];
-          line({ ic:"alert", cls: k === "out" ? "bad" : "warn",
+          line({ grp:"stock", ic:"alert", cls: k === "out" ? "bad" : "warn",
                  t:nm(x) + (k === "out" ? " خلصت" : " قرّبت تخلص"),
                  s: k === "out"
                    ? "رصيده في المخزن صفر" + (x.rsv ? " — وعليه " + qty(x.rsv) + " لأوردرات ماشية" : "")
                    : "متاح " + qty(x.free) + (x.min ? " — حد التنبيه " + qty(x.min) : ""),
                  v:qty(k === "out" ? x.stock : x.free), go:"inv|" + k, n:1 });
         } else {
-          line({ ic:"alert", cls: k === "out" ? "bad" : "warn",
+          line({ grp:"stock", ic:"alert", cls: k === "out" ? "bad" : "warn",
                  t: k === "out" ? "أصناف خلصت" : "أصناف قرّبت تخلص",
                  s:items.slice(0, 2).map(inm).join(" · ") + (items.length > 2 ? " و" + qty(items.length - 2) + " تاني" : ""),
                  // n = عدد صفوف اللون/المقاس (زي جدول التفصيلية) — الرقم الظاهر بالأصناف
@@ -6736,32 +6779,32 @@
       live("parties").forEach(function(p){
         if(p.type !== "supplier") return;
         var b = partyBalance(p.id);
-        if(b < -0.009) line({ ic:"receipt", cls:"bad", t:"عليك لـ " + p.name, s:"من المشتريات",
+        if(b < -0.009) line({ grp:"money", btn:"الحساب", ic:"receipt", cls:"bad", t:"عليك لـ " + p.name, s:"من المشتريات",
                               v:money(-b), go:"party|" + p.id });
       });
     }
     if(canTab("audit")){
       var AC = audCount();
       if(AC.bad + AC.warn)
-        line({ ic:"book", cls: AC.bad ? "bad" : "warn", t:"مراجع الحسابات لقى حاجات محتاجة تبصّلها",
+        line({ grp:"acct", btn:"راجعها", ic:"book", cls: AC.bad ? "bad" : "warn", t:"مراجع الحسابات لقى حاجات محتاجة تبصّلها",
                s:(AC.bad ? qty(AC.bad) + " لازم تتصلح" : "") + (AC.bad && AC.warn ? " · " : "") + (AC.warn ? qty(AC.warn) + " محتاجة مراجعة" : ""), v:qty(AC.bad + AC.warn), go:"audit" });
     }
     var sq = canEdit() ? shipQList() : [];
     if(canTab("sales") && sq.length)
-      line({ ic:"truck", cls:"warn", t:sq.length === 1 ? "#" + (sq[0].no || "") + " اترفض — العميل دفع كام من الشحن؟" : sq.length + " أوردرات اترفضت — العملاء دفعوا كام من الشحن؟",
+      line({ grp:"orders", btn:"جاوب", ic:"truck", cls:"warn", t:sq.length === 1 ? "#" + (sq[0].no || "") + " اترفض — العميل دفع كام من الشحن؟" : sq.length + " أوردرات اترفضت — العملاء دفعوا كام من الشحن؟",
              s:sq.map(function(x){ return "#" + (x.no || ""); }).join(" · ") + " · دوسة على كل واحد", v:"", go:"sales" });
     if(canTab("prepaid") && canMoney()){
       var MB = metaBook(), gp = MB.last ? daysBetween(MB.last.d, today()) : null;
       if(metaTops().length && (gp === null || gp >= META_MAX_GAP))
-        line({ ic:"wallet", cls:"warn", t:"طابق رصيد فيسبوك", s: gp === null ? "لسه ما طابقتش ولا مرة" : "آخر مطابقة من " + qty(gp) + " يوم", v:money(MB.bal), go:"prepaid" });
+        line({ grp:"acct", btn:"طابق", ic:"wallet", cls:"warn", t:"طابق رصيد فيسبوك", s: gp === null ? "لسه ما طابقتش ولا مرة" : "آخر مطابقة من " + qty(gp) + " يوم", v:money(MB.bal), go:"prepaid" });
       prepaidList().forEach(function(x){
         var dl = daysBetween(today(), x.to);
-        if(dl <= 3 && expCat(x.c) === "subs") line({ ic:"receipt", cls:"warn", t:"اشتراك بيتجدد " + (dl <= 0 ? "النهارده" : "بعد " + qty(dl) + " يوم"), s:squish(x.c.note) || "اشتراك", v:dShort(addDays(x.to, 1)), go:"cash" });
+        if(dl <= 3 && expCat(x.c) === "subs") line({ grp:"acct", ic:"receipt", cls:"warn", t:"اشتراك بيتجدد " + (dl <= 0 ? "النهارده" : "بعد " + qty(dl) + " يوم"), s:squish(x.c.note) || "اشتراك", v:dShort(addDays(x.to, 1)), go:"cash" });
       });
     }
     if(canTab("capital") && canMoney()) partners().forEach(function(p){
       var ow = owedOf(p.id);
-      if(ow > 0.009) line({ ic:"hand", cls:"warn", t:"الشركة عليها لـ " + p.name, s:"مصاريف دفعها من جيبه", v:money(ow), go:"capital" });
+      if(ow > 0.009) line({ grp:"acct", btn:"رجّعله", ic:"hand", cls:"warn", t:"الشركة عليها لـ " + p.name, s:"مصاريف دفعها من جيبه", v:money(ow), go:"capital" });
     });
     /* v124 — كل سطر في «محتاج منك» جنبه اسم الحاجة اللي هيعملها (زي «استلمها»).
        جوّه نفس الزرار — زرار جوّه زرار مش مسموح، والسطر كله بيودّي نفس المكان. */
@@ -6769,15 +6812,24 @@
       var k = String(go).split("|"), m = { "sales|1":"كمّلهم", "sales|2":"تابعهم", "sales|3":"استلمها", "sales|4":"استلمه" };
       return m[k[0] + "|" + k[1]] || (k[0] === "party" ? "الحساب" : k[0] === "inv" ? "المخزون" : k[0] === "purch" ? "فاتورة شراء" : "افتح");
     };
+    /* v176 — مجموعات بالترتيب ده، وجوّه كل مجموعة الأهم الأول. النقطة بتقول الأهمية:
+       أحمر لازم النهارده · أصفر مهم · أخضر فلوس مستنياك · رمادي لما تفضى */
+    var GRP = [["orders", "الأوردرات"], ["money", "الفلوس والمرتجع"], ["stock", "المخزون"], ["acct", "الحسابات"]];
+    var RANK = { bad:0, warn:1, money:2 };
+    var row = function(o){
+      return "<button type='button' class='hm-tr" + (o.cls ? " " + o.cls : "") + "' data-hgo='" + esc(o.go) + "'" +
+        (o.n ? " data-hn='" + o.n + "'" : "") + " title='" + esc(o.t + " — " + o.s) + "'>" +
+        "<i class='dot' aria-hidden='true'></i>" +
+        "<span class='tx'><b>" + esc(o.t) + "</b><span class='s" + (o.red ? " red" : "") + "'>" + esc(o.s) + "</span></span>" +
+        "<span class='v num'>" + esc(o.v) + "</span><span class='cta' aria-hidden='true'>" + esc(o.btn || ctaOf(o.go)) + "</span></button>";
+    };
     var todo = document.getElementById("hm-todo");
-    if(todo) todo.innerHTML = "<h3>محتاج منك النهارده " + (L.length ? "<small>" + plural(L.length, "حاجة واحدة", "حاجتين", "حاجات") + "</small>" : "") + "</h3>" +
-      (L.length ? "<div class='hm-tiles'>" + L.map(function(o){
-        return "<button type='button' class='hm-ti" + (o.cls ? " " + o.cls : "") + "' data-hgo='" + esc(o.go) + "'" +
-          (o.n ? " data-hn='" + o.n + "'" : "") + " title='" + esc(o.t + " — " + o.s) + "'>" +
-          "<span class='ic' aria-hidden='true'>" + ico(o.ic) + "</span>" +
-          "<span class='tx'><b>" + esc(o.t) + "</b><span class='s" + (o.red ? " red" : "") + "'>" + esc(o.s) + "</span></span>" +
-          "<span class='v num'>" + esc(o.v) + "</span><span class='cta' aria-hidden='true'>" + esc(o.btn || ctaOf(o.go)) + "</span></button>";
-      }).join("") + "</div>" : "<p class='hm-ok'>✓ مفيش حاجة مستنياك دلوقتي</p>");
+    if(todo) todo.innerHTML = "<h3>المطلوب منك النهارده " + (L.length ? "<small>" + plural(L.length, "حاجة واحدة", "حاجتين", "حاجات") + " · مترتبة بالأهم</small>" : "") + "</h3>" +
+      (L.length ? GRP.map(function(gp){
+        var xs = L.filter(function(o){ return (o.grp || "acct") === gp[0]; })
+          .sort(function(a, b){ return (a.cls in RANK ? RANK[a.cls] : 3) - (b.cls in RANK ? RANK[b.cls] : 3); });
+        return xs.length ? "<div class='hm-grp'><h4>" + esc(gp[1]) + "</h4>" + xs.map(row).join("") + "</div>" : "";
+      }).join("") : "<p class='hm-ok'>✓ مفيش حاجة مستنياك دلوقتي</p>");
     var dt2 = document.getElementById("hm-date");
     if(dt2 && L.length) dt2.textContent += " · عندك " + plural(L.length, "حاجة واحدة", "حاجتين", "حاجات") + " محتاجاك النهارده";
     var nb = document.getElementById("hm-new");
@@ -6791,64 +6843,28 @@
     var PS = projStats(periodRange()), xv = PS.exp, xn = xv.net;
     /* v124 — صافي الربح كارت كبير لوحده (الرقم الأهم)، وتحته 3 أرقام بتشرحه.
        الباقي 4 كروت بنفس الحجم جنبه. data-hkpi زي ما هي: الدوسة بتفتح نفس التفاصيل. */
-    var hero = "<div class='hm-hero money-only'>" +
-      "<button type='button' class='hm-hmain' data-hkpi='net'>" +
-        "<span class='lb'>صافي الربح <em class='hm-pill " + (xn < 0 ? "bad" : "good") + "'>" + (xn < 0 ? "▼ خسارة" : "▲ مكسب") + "</em></span>" +
-        "<strong class='num " + (xn >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(xn)) + "</strong>" +
-        "<small>" + (PS.nOpen ? "لو الـ" + qty(PS.nOpen) + " أوردر اللي ماشيين اتسلّموا · اتسلّم فعلاً <b class='num' dir='ltr'>" + esc(money(PS.act.net)) + "</b>" : esc(perTxt)) + "</small>" +
-      "</button>" +
-      "<div class='hm-hmini'>" +
-        "<div><span>ربح البضاعة</span><b class='num'>" + esc(money(xv.gross)) + "</b></div>" +
-        "<div><span>الإعلان على الأوردر</span><b class='num" + (xv.n && unitEcon(xv) && xv.ads / xv.n > unitEcon(xv).pre ? " v-due" : "") + "'>" + (xv.n ? esc(money(xv.ads / xv.n)) : "—") + "</b></div>" +
-        "<div><span>هامش البضاعة</span><b class='num'>" + (xv.margin === null ? "—" : esc((xv.margin * 100).toFixed(1)) + "%") + "</b></div>" +
-      "</div>" +
-      (canTab("rep") ? "<button type='button' class='hm-link' data-hgo='rep'>قايمة الدخل كاملة ←</button>" : "") +
-    "</div>";
+    /* v176 — 4 أرقام بنفس الحجم. الدوسة بتفتح نفس التفاصيل تحت (data-hkpi) */
     var K = [
-      ["be", "return", "فلوس لسه ما رجعتش", cashBeTxt(), cashBeCls(), (function(){
-        // نسخة قصيرة لكارت صغير: أرقام صحيحة من غير قروش — التفاصيل كاملة بالدوسة
-        var x = cashBeSplit(); if(x.n <= 0.009) return "رجّعت فلوسك ✓ واللي بعده مكسب";
-        return [x.stock > 0.009 ? "منها " + qty(Math.round(x.stock)) + " بضاعة" : "",
-                x.rest > 0.009 ? (x.isLoss ? "و" + qty(Math.round(x.rest)) + " خسارة" : "والباقي " + qty(Math.round(x.rest))) : ""].filter(Boolean).join(" · ");
-      })(), 1],
-      ["cash", "cash", "الخزنة", money(cashBox()), cashBox() >= 0 ? "" : "v-due", "الفلوس اللي في إيدك", 0],
-      ["stock", "box", "قيمة المخزون", money(stockBookValue()), "", "بالتكلفة", 1],
-      ["wallet", "truck", "عند شركات الشحن", money(walletsTotal()), walletsTotal() > 0.009 ? "v-gain" : "", walletsTotal() > 0.009 ? "لسه ما استلمتهاش — استلمها" : "مفيش فلوس مستنياك", 0]
+      ["net", "صافي الربح · " + perTxt, money(xn), xn >= 0 ? "v-gain" : "v-due",
+        PS.nOpen ? "اتسلّم فعلاً " + money(PS.act.net) : (xv.margin === null ? "" : "هامش البضاعة " + (xv.margin * 100).toFixed(1) + "%"), 1],
+      ["cash", "الخزنة", money(cashBox()), cashBox() >= 0 ? "" : "v-due", "الفلوس اللي في إيدك", 0],
+      ["wallet", "عند شركات الشحن", money(walletsTotal()), "", walletsTotal() > 0.009 ? "لسه ما استلمتهاش" : "مفيش فلوس مستنياك", 0],
+      ["stock", "المخزون", money(stockBookValue()), "", "بالتكلفة", 1]
     ];
     var big = document.getElementById("hm-big");
-    if(big) big.innerHTML = hero + "<div class='hm-kgrid'>" + K.map(function(k){
-      return "<button type='button' class='hm-k" + (k[6] ? " money-only" : "") + "' data-hkpi='" + k[0] + "'>" +
-        "<span class='kh'><span class='kic' aria-hidden='true'>" + ico(k[1]) + "</span><span>" + esc(k[2]) + "</span></span>" +
-        "<strong class='num " + k[4] + "'>" + esc(k[3]) + "</strong>" +
-        "<small>" + esc(k[5]) + "</small></button>";
+    if(big) big.innerHTML = "<div class='hm-k4'>" + K.map(function(k){
+      return "<button type='button' class='hm-k" + (k[5] ? " money-only" : "") + (k[0] === "net" ? " main" : "") + "' data-hkpi='" + k[0] + "'>" +
+        "<span>" + esc(k[1]) + "</span><strong class='num " + k[3] + "'>" + esc(k[2]) + "</strong><small>" + esc(k[4]) + "</small></button>";
     }).join("") + "</div>";
 
-    /* ---- الأوردرات فين؟ — نفس مراحل شاشة الأوردرات (نفس رقم البادج) ---- */
+    /* ---- v176 — ملخص الفترة (المراحل نفسها في «المطلوب منك» وفي شاشة الأوردرات) ---- */
     var n = cur.list.length;
     var mo = document.getElementById("hm-month");
-    if(mo){
-      var h = "<h3><span>الأوردرات فين؟</span>" + (canTab("sales") ? "<button type='button' data-hgo='sales|all'>كلها ←</button>" : "") + "</h3>";
-      if(canTab("sales")){
-        var sg = stageLists();
-        var late = sg.st[2].filter(function(x){ return daysSince(x.date) >= SG_STALE; }).length;
-        var atCo = sg.st[3].reduce(function(a, x){ return a + shipPend(x).left; }, 0);
-        var R = [
-          { c:"var(--hm-s1)", l:"جديد", s:"ناقصه شحن", n:sg.st[1].length, go:"sales|1" },
-          { c:"var(--hm-s2)", l:"مع المندوب", s:late ? qty(late) + " متأخرين" : "", red:!!late, n:sg.st[2].length, go:"sales|2" },
-          { c:"var(--hm-s3)", l:"فلوس عند الشركة", s:atCo > 0.009 ? money(atCo) : "", n:sg.st[3].length, go:"sales|3" },
-          { c:"var(--hm-s4)", l:"خلص", s:"الشهر ده", n:sg.st[5].length, go:"sales|5" }
-        ], tot = R.reduce(function(a, r){ return a + r.n; }, 0);
-        h += (tot ? "<div class='hm-bar' aria-hidden='true'>" + R.map(function(r){ return r.n ? "<i style='flex:" + r.n + ";background:" + r.c + "'></i>" : ""; }).join("") + "</div>" : "") +
-          R.map(function(r){
-            return "<button type='button' class='hm-srow' data-hgo='" + r.go + "'><em style='background:" + r.c + "'></em><span>" + esc(r.l) + "</span>" +
-              (r.s ? "<small" + (r.red ? " class='v-due'" : "") + ">" + esc(r.s) + "</small>" : "") + "<b class='num'>" + qty(r.n) + "</b></button>";
-          }).join("");
-      }
-      // سطر الفترة اللي فوق (المبيعات اللي اتسلّمت فعلاً)
-      h += "<div class='hm-mrow'><span>" + esc(perTxt) + "</span><span>مبيعات مسلّمة <b class='num'>" + esc(money(cur.revenue)) + "</b></span>" +
-        "<span>أوردرات <b class='num'>" + qty(n) + "</b></span></div>";
-      mo.innerHTML = h;
-    }
+    if(mo) mo.innerHTML = "<h3><span>الملخص <small>" + esc(perTxt) + "</small></span></h3>" +
+      "<div class='hm-sum'><span>أوردرات</span><b class='num'>" + qty(n) + "</b></div>" +
+      "<div class='hm-sum'><span>مبيعات مسلّمة</span><b class='num'>" + esc(money(cur.revenue)) + "</b></div>" +
+      "<div class='hm-sum money-only'><span>ربح البضاعة</span><b class='num'>" + esc(money(xv.gross)) + "</b></div>" +
+      (canTab("rep") ? "<button type='button' class='hm-link' data-hgo='rep'>قايمة الدخل ←</button>" : "");
 
     /* ---- أكتر الأصناف طلباً: آخر ١٤ يوم بعدد القطع، من الأوردرات اللي مش ملغية ---- */
     var tp = document.getElementById("hm-topit");
