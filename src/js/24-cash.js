@@ -190,8 +190,8 @@
      وبنرسمها فاتحة دايمًا حتى لو السيستم ليلي — الصورة بتتشارك. */
   var CI = { W:760, PAD:28, S:3 };          // العرض بالنقط · الهامش · درجة الوضوح
   var CI_C = {
-    bg:"#FFFFFF", card:"#FAF7F9", line:"#E7DDE4", ink:"#241E26", soft:"#6E6472",
-    brand:"#4A2545", gain:"#1E6F50", due:"#A32846", chip:"#F2ECF0"
+    bg:"#FFFFFF", card:"#F7F8F9", line:"#DCDFE2", ink:"#1D1A1C", soft:"#5D6166",
+    brand:"#4E1B27", gain:"#1E6F50", due:"#A32846", chip:"#F1F2F4"
   };
   function ciFont(w, px){ return w + " " + px + "px Alexandria, system-ui, sans-serif"; }
   function ciRound(ctx, x, y, w, h, r){

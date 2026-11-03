@@ -71,22 +71,22 @@
     var due3 = g.direct.reduce(function(a, s){ return a + Math.max(0, sDue(s)); }, 0);
     var held = g.st[4].reduce(function(a, s){ return a + heldLeft(s); }, 0);
     var stale = g.st[2].filter(function(s){ return daysSince(s.date) >= SG_STALE; }).length;
+    /* v179: المراحل بقت تبويبات رفيعة (اسم · رقم) بدل ٦ كروت كبيرة —
+       الشرح الصغير بيظهر بس لو فيه حاجة محتاجاك (متأخرين) أو وحدة (قطعة). */
     var cards = [
-      ["1", "جديد", qty(g.st[1].length), "ناقصه شحن أو كود", ""],
-      ["2", "مع المندوب", qty(g.st[2].length),
-        stale ? qty(stale) + " بقالهم " + SG_STALE + " أيام أو أكتر" : "مستني نتيجة التسليم", stale ? "bad" : ""],
-      ["3", "فلوسك عند الشركة", sgNum(left3),
-        "من " + qty(g.st[3].length) + " أوردرات" + (due3 > 0.009 ? " · و" + sgNum(due3) + " عند عملاء" : ""), ""],
-      ["4", "مرتجع عند الشركة", qty(held) + " قطع", "من " + qty(g.st[4].length) + " أوردر", ""],
+      ["1", "جديد", qty(g.st[1].length), "", ""],
+      ["2", "مع المندوب", qty(g.st[2].length), stale ? qty(stale) + " متأخرين" : "", stale ? "bad" : ""],
+      ["3", "فلوسك عند الشركة", sgNum(left3), due3 > 0.009 ? "و" + sgNum(due3) + " عند عملاء" : "", ""],
+      ["4", "مرتجع عند الشركة", qty(held), "قطعة", held ? "bad" : ""],
       ["5", "خلص", qty(g.st[5].length), "الشهر ده", ""]
     ];
     bar.innerHTML = cards.map(function(c){
       return "<button type='button' class='sg-card" + (sView === c[0] ? " on" : "") +
         (c[0] === "4" && held ? " alert" : "") + "' data-sgview='" + c[0] + "' aria-pressed='" +
         (sView === c[0] ? "true" : "false") + "'>" +
-        "<span class='n'>" + "١٢٣٤٥"[Number(c[0]) - 1] + "</span><span class='t'>" + esc(c[1]) + "</span>" +
+        "<span class='t'>" + esc(c[1]) + "</span>" +
         "<span class='c num'>" + esc(c[2]) + "</span>" +
-        "<span class='s" + (c[4] ? " " + c[4] : "") + "'>" + esc(c[3]) + "</span></button>";
+        (c[3] ? "<span class='s" + (c[4] ? " " + c[4] : "") + "'>" + esc(c[3]) + "</span>" : "") + "</button>";
     }).join("");
 
     pnl.hidden = all;

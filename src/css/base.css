@@ -1,33 +1,32 @@
   :root{
-    /* ═══ ثيم Lora Plum ═══ ألوان البراند الثابتة — كل لون في السيستم بييجي من هنا.
-       دول مابيتغيروش في الوضع الليلي، فالتقارير المطبوعة بتاخد منهم على طول. */
-    --lp-plum:#4A2545; --lp-night:#2F1530; --lp-petal:#C9A7C4; --lp-mist:#F6F2F5;
-    --lp-gold:#D4A93F; --lp-ink:#241E26; --lp-soft:#6E6472; --lp-line:#E4DDE6;
-    --lp-card:#FBFAFB; --lp-gain:#327B63; --lp-wine:#9A1333;
+    /* ═══ ثيم «ألوان البضاعة» (v179) ═══ الألوان جاية من الشوز نفسها:
+       نبيتي للهوية والزراير · جملي لعلامات التقدّم · رصاصي فاتح للخلفية.
+       --lp-* ثابتة في الليلي كمان، فالتقارير المطبوعة بتاخد منها على طول. */
+    --lp-plum:#4E1B27; --lp-night:#2E1018; --lp-petal:#D9B48C; --lp-mist:#F4F5F6;
+    --lp-gold:#B07A47; --lp-ink:#1D1A1C; --lp-soft:#5D6166; --lp-line:#DCDFE2;
+    --lp-card:#FFFFFF; --lp-gain:#2A7348; --lp-wine:#B93D0B;
     --font:"Alexandria","Segoe UI",Tahoma,sans-serif;
 
-    /* برقوقي البوتيك — أساس التصميم */
-    --ink:var(--lp-ink);    /* حبر مائل للبرقوقي بدل الأسود الميت */
+    --ink:var(--lp-ink);
     --ink-soft:var(--lp-soft);
-    --paper:#F6F3F7;        /* ورق ليلكي فاتح */
+    --paper:#ECEEF0;        /* رصاصي فاتح */
     --card:#FFFFFF;
     --line:var(--lp-line);
-    --teal:var(--lp-plum);  /* البرقوقي العميق: الهوية */
-    --teal-deep:#361A33;
-    --teal-soft:#F0E8F0;
-    --on-accent:#FFFFFF;    /* النص فوق الزرار البرقوقي */
-    /* الاتنين دول بيفرّقوا بين «ليك» و«عليك». واحد من كل ١٢ راجل عنده
-       عمى ألوان، فمش كفاية إنهم مختلفين بالنسبالنا — لازم يفضلوا مختلفين
-       بعد محاكاة deutan/protan/tritan. القياس: أسوأ ΔE بقى 16.1 بعد ما
-       كان 8.2، والتباين مع الخلفية 5.06 و8.35 (المطلوب ≥4.5). */
-    --gain:var(--lp-gain);  /* أخضر مطفي متناغم مع البرقوقي */
-    --due:var(--lp-wine);   /* نبيذي بدل الأحمر الصارخ */
-    --warn:#8A6212;
-    --shadow:0 1px 2px rgba(36,30,38,.05);
-    /* خلفيات الحالات: ليك · عليك · تنبيه · التبديل مع المورد.
-       كانت أرقام ثابتة في ٢٠ مكان، وفي الليلي كانت بقع فاتحة أو كلها نفس اللون. */
-    --gain-soft:#E3F1EA; --due-soft:#F6E3E8; --warn-soft:#F7EEDB;
-    --gain-ink:#28644F;     /* أخضر الكلام فوق خلفية خضرا فاتحة (≥٤٫٥:١) */
+    --teal:#7A2637;         /* نبيتي: الهوية والزراير والمختار — لون التفاعل الوحيد */
+    --teal-deep:#5E1C2A;
+    --teal-soft:#F6EBEE;
+    --on-accent:#FFFFFF;
+    --shell:var(--lp-plum); /* الشريط اللي فوق */
+    --camel:#9A6638;        /* جملي: الخطوات اللي خلصت (خط الخياطة) */
+    --seam-off:#C9CDD1;     /* غُرزة لسه ما جاتش */
+    /* «ليك» و«عليك» لازم يفضلوا مختلفين مع عمى الألوان:
+       ΔE بعد محاكاة deutan 39.6 وprotan 23.8 (كان 16.1)، والتباين مع الكارت 5.8 و5.6 (المطلوب ≥4.5). */
+    --gain:var(--lp-gain);
+    --due:var(--lp-wine);   /* برتقالي محروق — مختلف عن النبيتي بتاع الزراير */
+    --warn:#875F10;
+    --shadow:0 1px 2px rgba(29,26,28,.05);
+    --gain-soft:#E3F1E8; --due-soft:#FBE9E1; --warn-soft:#F7EEDB;
+    --gain-ink:#24613D;
     --xg:#5B4A9A; --xg-soft:#ECE8F7;
 
     /* ═══ سلّم الخطوط ═══
@@ -53,22 +52,24 @@
   }
   /* الوضع الليلي — للجلسات الطويلة */
   [data-theme="dark"]{
-    --ink:#EDE7EF;
-    --ink-soft:#A79DAB;
-    --paper:#191419;
-    --card:#221C24;
-    --line:#362E38;
-    --teal:#C9A7C4;
-    --teal-deep:#E0C6DC;
-    --teal-soft:#2E2431;
-    /* الوضع الليلي كان أسوأ بكتير: أسوأ ΔE كان 2.2 — يعني عند عمى
-       الألوان الأخضر والوردي كانوا شبه نفس اللون. بقى 16.4. */
-    --gain:#78BF92;
-    --due:#DC89B5;
-    --warn:#D4A93F;
+    --ink:#F2EDEF;
+    --ink-soft:#A59DA1;
+    --paper:#131113;
+    --card:#1C191B;
+    --line:#2E2A2D;
+    --teal:#D88A9C;
+    --teal-deep:#EBB3C0;
+    --teal-soft:#2C1B21;
+    --shell:#241016;
+    --camel:#C99561;
+    --seam-off:#433D41;
+    /* ΔE بين الأخضر والبرتقالي مع عمى الألوان: deutan 29.8 · protan 16.8 (كان 2.2 زمان) */
+    --gain:#6CC08F;
+    --due:#F08A5D;
+    --warn:#E0AE5C;
     --shadow:none;
-    --on-accent:#1A141C;
-    --gain-soft:#303636; --due-soft:#402D3B; --warn-soft:#3E3328;
+    --on-accent:#230C12;
+    --gain-soft:#22302A; --due-soft:#3A2620; --warn-soft:#3A3226;
     --gain-ink:var(--gain);
     --xg:#A99BE0; --xg-soft:#383042;
   }
@@ -173,11 +174,11 @@
   .vz-plot .vz-gx{transform-origin:right;animation-name:vzSide}
 
   header.top{
-    background:var(--teal-deep);color:#fff;
+    background:var(--shell);color:#fff;
     padding:0 var(--sp-4);min-height:50px;
     display:flex;align-items:center;gap:var(--sp-3);
   }
-  [data-theme="dark"] header.top{ background:#120F14;border-bottom:1px solid var(--line) }
+  [data-theme="dark"] header.top{ background:var(--shell);border-bottom:1px solid var(--line) }
   [data-theme="dark"] header.top h1{ color:var(--teal-deep) }
   header.top h1{font-size:var(--fs-4);font-weight:600;margin:0;letter-spacing:.4px;direction:ltr;white-space:nowrap}
   /* رقم الإصدار جنب الاسم فوق على اليمين — بيبان على طول من غير ما تفتح حاجة */
@@ -223,11 +224,11 @@
     header.top .nav-groups{flex:1;align-self:stretch;padding:0}
     header.top .nav-groups button{align-self:stretch;padding:0 var(--sp-4);color:rgba(255,255,255,.72)}
     header.top .nav-groups button:hover{color:#fff}
-    header.top .nav-groups button.on{color:#fff;border-bottom-color:#fff}
-    [data-theme="dark"] header.top .nav-groups button{color:var(--ink-soft)}
+    header.top .nav-groups button.on{color:#fff;border-bottom-color:var(--lp-petal)}
+    [data-theme="dark"] header.top .nav-groups button{color:#B9A9AE}
     [data-theme="dark"] header.top .nav-groups button:hover{color:var(--ink)}
-    [data-theme="dark"] header.top .nav-groups button.on{color:var(--teal);border-bottom-color:var(--teal)}
-    header.top .nav-groups .badge{box-shadow:0 0 0 2px var(--teal-deep)}
+    [data-theme="dark"] header.top .nav-groups button.on{color:var(--ink);border-bottom-color:var(--camel)}
+    header.top .nav-groups .badge{box-shadow:0 0 0 2px var(--shell)}
     [data-theme="dark"] header.top .nav-groups .badge{box-shadow:none}
   }
   .nav-groups button .ic{font-size:15px;line-height:1}
