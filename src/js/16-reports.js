@@ -414,7 +414,7 @@
      و«اتسلّم فعلاً» (نفس periodStats) — وجنبه «على الأوردر» و«من المبيعات».
      المصاريف بأنواعها (expByCat): المتغيّر فوق «ربح الأوردر بعد مصاريف البيع»
      والثابت تحته. الأرقام من projStats — نفس اللي في الرئيسية و«ماشي إزاي؟». */
-  var pisMode = "exp";
+  var pisMode = "act";            // v187: بتفتح على «اللي خلص» — نفس رقم الميزانية و«فلوسكم فين؟»
   // نسبة الرفض من كل الأوردرات اللي خلصت — بتتحسب من ٥ أوردرات على الأقل
   function refusalRate(){
     var d = 0, x = 0;
@@ -430,13 +430,13 @@
     var v = noAds ? pisNoAds(base) : base;
     Array.prototype.forEach.call(document.querySelectorAll("#pis-mode [data-pism]"), function(b){
       b.classList.toggle("on", b.dataset.pism === pisMode);
-      b.textContent = b.dataset.pism === "act" ? "اتسلّم فعلاً (" + qty(P.nDone) + ")"
-        : b.dataset.pism === "noads" ? "من غير إعلانات" : "لو كله اتسلّم (" + qty(P.n) + " أوردر)";
+      b.setAttribute("aria-pressed", b.dataset.pism === pisMode ? "true" : "false");
+      b.textContent = b.dataset.pism === "act" ? "اللي خلص" : b.dataset.pism === "noads" ? "من غير إعلانات" : "لو كله اتسلّم";
     });
     var na = document.getElementById("pis-na");
     if(na) na.hidden = pisMode !== "noads";
     if(noAds) renderPisNoAds(P);
-    var n = v.n, g = v.goods;
+    var g = v.goods;
     var tag = function(k){ return k ? " <span class='pis-tag " + k + "'>" + (k === "var" ? "متغيّر" : "ثابت") + "</span>" : ""; };
     // kind "" = بند بيتطرح (أحمر لو فيه مبلغ) · "sum" = إجمالي بلون إشارته
     // dd = البند بيتفتح بالدوس ويوريك الأوردرات أو المصاريف اللي جواه (v126)
@@ -446,18 +446,18 @@
       return "<tr" + (cls ? " class='" + cls + "'" : "") +
         (dd ? " data-pisdd='" + dd + "' tabindex='0' role='button' aria-expanded='" + (pisOpen === dd) + "'" : "") +
         "><td class='wide'>" + (dd ? "<span class='pis-l'>" + label + "</span>" : label) + (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
-        "<td class='num " + c + "'>" + money(val) + "</td>" +
-        "<td class='num " + c + "'>" + (n ? money(val / n) : "—") + "</td>" +
-        "<td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "<span dir='ltr'>" + (val / g * 100).toFixed(1) + "%</span>" : "—") + "</td></tr>" +
-        (dd && pisOpen === dd ? "<tr class='pis-dd'><td colspan='4'>" + pisDrill(dd, P) + "</td></tr>" : "");
+        // v187: المبلغ من غير قروش، و«على الأوردر» اتشال (موجود في «الأوردر الواحد بيكسب كام؟» تحت)
+        "<td class='num pis-a'>" + esc(qty(Math.round(val))) + "</td>" +
+        "<td class='num pis-p'>" + (g > 0.009 ? "<span dir='ltr'>" + (Math.abs(val / g - 1) < 1e-9 ? "100" : (val / g * 100).toFixed(1)) + "%</span>" : "—") + "</td></tr>" +
+        (dd && pisOpen === dd ? "<tr class='pis-dd'><td colspan='3'>" + pisDrill(dd, P) + "</td></tr>" : "");
     };
     var rows = [];
     rows.push(row("<b>المبيعات</b>", g, "base", "", "", "goods"));
     rows.push(row("− تكلفة البضاعة", v.cost, "", "", trIdx().total > 0.009 ? "فيها نصيب القطع من انتقالات شراء البضاعة" : "", "cost"));
     rows.push(row("= ربح البضاعة", v.gross, "sum", "pis-tot"));
     rows.push(v.ship >= 0
-      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship")
-      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship"));
+      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(qty(Math.round(v.sin))) + " · الشركة " + esc(qty(Math.round(v.sout))), "ship")
+      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(qty(Math.round(v.sin))) + " · الشركة " + esc(qty(Math.round(v.sout))), "ship"));
     rows.push(noAds
       ? row("− إعلانات" + tag("var"), 0, "", "", v.adsOff > 0.009 ? "متشالة من الحسبة — اتصرف فعلاً " + esc(money(v.adsOff)) : "")
       : row("− إعلانات" + tag("var"), v.ads, "", "", "", v.ads > 0.009 ? "ads" : ""));
@@ -469,11 +469,11 @@
       if(Math.abs(v[x[0]]) > 0.009) rows.push(row("− " + x[1] + tag("fixed"), v[x[0]], "", "", "", x[0]));
     });
     rows.push(row("= صافي الربح", v.net, "sum", "pis-net"));
-    table("t-pis", ["البند", "المبلغ", "على الأوردر" + (n ? " (÷" + qty(n) + ")" : ""), "من المبيعات"], rows, "");
+    table("t-pis", ["البند", "المبلغ", "من المبيعات"], rows, "");
 
     var sm = document.getElementById("pis-sum");
-    if(sm) sm.innerHTML = "لو كله اتسلّم: <b class='num " + (P.exp.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.exp.net)) + "</b>" +
-      " · اتسلّم فعلاً: <b class='num " + (P.act.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.act.net)) + "</b>";
+    if(sm) sm.innerHTML = "صافي الربح <b class='num " + (P.act.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(qty(Math.round(P.act.net))) + "</b> على اللي خلص" +
+      (P.nOpen ? " · ولو الـ" + qty(P.nOpen) + " اللي مع المندوب اتسلّموا: <b class='num'>" + esc(qty(Math.round(P.exp.net))) + "</b>" : "");
     var rf = refusalRate(), adj = null;
     if(rf && P.nOpen){
       adj = P.c.net;
@@ -481,18 +481,13 @@
     }
     var un = unclassifiedExpenses(), T = trIdx();
     var nt = document.getElementById("pis-note");
-    if(nt) nt.innerHTML = (noAds
-        ? "<b>«من غير إعلانات»</b> = نفس قايمة <b>«" + (pisNaBase === "act" ? "اتسلّم فعلاً" : "لو كله اتسلّم") + "»</b> بالظبط بس الإعلانات صفر — بيوريك البضاعة والشحن والمصاريف التانية بيكسبوا لوحدهم ولا لأ. <b>مش معناه</b> إن الأوردرات كانت هتيجي من غير إعلان."
-        : pisMode === "act"
-        ? "<b>«اتسلّم فعلاً»</b> = الأوردرات اللي اتسلّمت أو اتلغت في الفترة بس، ومقابلها كل مصاريف الفترة."
-        : "<b>«لو كله اتسلّم»</b> = اللي اتسلّم فعلاً + الـ" + qty(P.nOpen) + " أوردر اللي لسه ماشيين لو العملاء خدوهم كلهم — <b>قبل أي رفض</b>.") +
-      (adj !== null && pisMode !== "act" ? " لو الرفض فضل " + Math.round(rf.p * 100) + "% زي ما هو (" + qty(rf.x) + " من " + qty(rf.n) + "): <b class='num " + (adj >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(adj)) + "</b>." : "") +
-      " «على الأوردر» = المبلغ ÷ عدد الأوردرات. الإعلان والتغليف <b>متغيّر</b> (بيزيد مع كل أوردر)، والباقي <b>ثابت</b>." +
-      (T.total > 0.009 ? " انتقالات شراء البضاعة (" + esc(money(T.total)) + ") اتحطت على تكلفة القطع اللي اتشرت في المشوار — اللي اتباع منها في التكلفة فوق، والباقي في قيمة المخزون." : "") +
-      (T.unlinked.length ? " <span class='v-due'>" + qty(T.unlinked.length) + " مشوار شراء مالوش فاتورة في نفس الأيام — اتحسب مصروف ثابت.</span>" : "") +
-      (un ? " <span style='color:var(--ink-soft)'>" + qty(un) + " مصروف نوعه اتعرف من البيان — لو فيه غلط عدّله من الخزنة.</span>" : "") +
-      (prepaidTotal() > 0.009 ? " المصاريف محسوبة على أيامها: <b class='num'>" + esc(money(prepaidTotal())) + "</b> اتدفعت مقدّم (رصيد فيسبوك واشتراكات) ولسه ما دخلتش — في «المدفوع مقدّماً»." : "") +
-      (P.noCost ? " <span class='v-due'>" + esc(qty(P.noCost)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
+    // v187: سطر واحد بس — الشرح الطويل كان بيزحم الشاشة. التحذيرات (لو فيه) بتفضل ظاهرة
+    if(nt) nt.innerHTML = "دوس على أي بند تشوف تفاصيله" +
+      (pisMode === "exp" && P.nOpen ? " · «لو كله اتسلّم» = نفس الحساب + الـ" + qty(P.nOpen) + " أوردر اللي مع المندوب لو العملاء خدوهم كلهم" +
+        (adj !== null ? " (ولو الرفض فضل " + Math.round(rf.p * 100) + "%: <b class='num'>" + esc(qty(Math.round(adj))) + "</b>)" : "") : "") +
+      (T.unlinked.length ? " · <span class='v-due'>" + qty(T.unlinked.length) + " مشوار شراء مالوش فاتورة — اتحسب مصروف ثابت.</span>" : "") +
+      (un ? " · " + qty(un) + " مصروف نوعه اتعرف من البيان — لو فيه غلط عدّله من الخزنة." : "") +
+      (P.noCost ? " · <span class='v-due'>" + esc(qty(P.noCost)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
   }
   /* v130: «من غير إعلانات» — نفس القايمة بالوضعين جنب بعض («لو كله اتسلّم» و«اتسلّم فعلاً»)
      والإعلانات صفر. نسخة من الأرقام، الأصل ما بيتغيّرش. */

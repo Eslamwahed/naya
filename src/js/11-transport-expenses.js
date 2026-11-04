@@ -296,6 +296,10 @@
     });
     var r0 = periodRange();
     var txt = r0 ? ("الفترة: من " + r0.from + " لـ " + r0.to) : "كل الحركات المسجّلة من البداية";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-repper]"), function(b){   // v187: تبويبات فترة التقارير
+      b.classList.toggle("on", b.dataset.repper === period.mode);
+      b.setAttribute("aria-pressed", b.dataset.repper === period.mode ? "true" : "false");
+    });
     ["per-label","per-label-rep","per-label-viz"].forEach(function(id){
       var lbl = document.getElementById(id);
       if(lbl) lbl.textContent = txt;

@@ -83,6 +83,10 @@
       syncPeriodUI(); renderAll();
     });
   });
+  document.getElementById("rep-per").addEventListener("click", function(e){
+    var b = e.target.closest("[data-repper]"); if(!b) return;
+    period.mode = b.dataset.repper; syncPeriodUI(); renderAll();
+  });
   Array.prototype.forEach.call(document.querySelectorAll(".per-from"), function(el){
     el.addEventListener("change", function(){ period.from = this.value; period.mode="custom"; syncPeriodUI(); renderAll(); });
   });
