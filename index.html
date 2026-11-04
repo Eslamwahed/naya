@@ -988,35 +988,27 @@
   .ms-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3)}
   .ms-hd h3{margin:0;font-size:var(--fs-5);font-weight:600}
   .ms-hd p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-3)}
-  .ms-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-4);align-items:stretch}
-  .ms-st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;min-width:0}
-  .ms-st .k{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--teal-soft);color:var(--teal);font-weight:600;font-size:var(--fs-3);margin-bottom:8px}
-  .ms-st h4{margin:0 0 2px;font-size:var(--fs-4);font-weight:600}
-  .ms-st .q{margin:0 0 12px;color:var(--ink-soft);font-size:var(--fs-2)}
-  .ms-ln{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:var(--fs-3)}
-  .ms-ln > span{min-width:0}
-  .ms-ln i{font-style:normal;color:var(--ink-soft);display:inline-block;width:14px}
-  .ms-ln small{display:block;color:var(--ink-soft);font-size:var(--fs-1);line-height:1.4;padding-inline-start:14px}
-  .ms-ln b{font-weight:600;white-space:nowrap}
-  .ms-tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:10px;border-top:2px solid var(--ink);font-weight:600}
-  .ms-ln:last-of-type{margin-bottom:12px}
-  .ms-tot b{font-size:var(--fs-6)}
-  .ms-st.win{background:var(--gain-soft);border-color:transparent}
-  .ms-big{font-size:40px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:4px 0 2px}
-  .ms-calc{color:var(--ink-soft);font-size:var(--fs-3);margin-bottom:10px}
-  .ms-split{margin-top:auto}
-  .ms-split p{margin:0 0 6px;font-size:var(--fs-3);font-weight:500}
-  .ms-bar{display:flex;height:30px;border-radius:8px;overflow:hidden}
-  .ms-bar i{display:grid;place-items:center;color:#fff;font-style:normal;font-size:var(--fs-2);font-weight:600;min-width:0;overflow:hidden}
-  .ms-leg{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:8px;font-size:var(--fs-2)}
-  .ms-leg span{display:flex;align-items:center;gap:6px}
-  .ms-leg span i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
-  .ms-note{margin:var(--sp-3) 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:var(--fs-3);line-height:1.8}
+  .ms-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:760px}
+  .ms-card .ms-hd h3{margin:0;font-size:var(--fs-5);font-weight:600}
+  .ms-card .ms-lead{margin:2px 0 0}
+  .ms-ln,.ms-sub,.ms-end{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:baseline}
+  .ms-ln{padding:9px 0;border-bottom:1px dashed var(--line);font-size:var(--fs-3)}
+  .ms-ln > i,.ms-sub > i,.ms-end > i{font-style:normal;color:var(--ink-soft);text-align:center;font-weight:600}
+  .ms-ln small,.ms-sub small{display:block;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.45;font-weight:400}
+  .ms-ln b{font-weight:600;font-size:var(--fs-4);white-space:nowrap}
+  .ms-tag{font-style:normal;font-size:var(--fs-1);font-weight:500;border-radius:99px;padding:1px 8px;margin-inline-start:6px;white-space:nowrap;
+    background:var(--teal-soft);color:var(--teal);vertical-align:1px}
+  .ms-tag.l{background:var(--warn-soft);color:var(--warn)}
+  .ms-tag.c{background:var(--gain-soft);color:var(--gain-ink)}
+  .ms-sub{padding:10px 12px;margin:6px -12px;border-radius:10px;background:var(--paper);font-weight:600}
+  .ms-sub b{font-size:var(--fs-4)}
+  .ms-end{margin-top:8px;padding-top:12px;border-top:2px solid var(--ink);font-weight:600}
+  .ms-end b{font-size:var(--fs-6)}
+  .ms-note{margin:14px 0 0;background:var(--gain-soft);border-radius:12px;padding:12px 16px;font-size:var(--fs-3);line-height:1.8}
   .ms-note b{font-weight:600}
   .ms-foot{margin:var(--sp-2) 2px 0;font-size:var(--fs-2);color:var(--ink-soft)}
   .ms-foot a{color:var(--teal)}
-  @media (max-width:900px){ .ms-steps{grid-template-columns:1fr} }
-  @media (max-width:760px){ .ms-hd{flex-wrap:wrap;align-items:flex-start} .ms-hd .tbtn{width:100%;justify-content:center} }
+  @media (max-width:760px){ .ms-hd{flex-wrap:wrap;align-items:flex-start} .ms-hd .tbtn{width:100%;justify-content:center} .ms-card{padding:16px} }
   /* مفتاح الجزئين — نفس شكل .pseg (اللي بيتملي من القايمة، فده كلاس لوحده عشان ما يتمسحش) */
   .lseg{display:inline-flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:99px;background:var(--card);margin:0 0 var(--sp-4);max-width:100%}
   .lseg button{font:inherit;font-size:var(--fs-3);border:0;background:none;border-radius:99px;padding:6px 16px;min-height:36px;color:var(--ink-soft);cursor:pointer;touch-action:manipulation}
@@ -4442,8 +4434,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "183";
+  var VERSION = "184";
   var CHANGELOG = [
+    { v:"184", d:"2026-11-04", items:[
+      "«فلوسكم فين؟» بقت حسبة واحدة «من الربح للخزنة» (Cash Flow): صافي الربح ± كل أصل أو التزام زاد أو قلّ = اللي الشغل طلّعه من الخزنة، + رأس المال = اللي في الخزنة بالظبط",
+      "جنب كل بند مكتوب نوعه: أصل زاد (بنطرح) · التزام زاد (بنزوّد) · رأس مال زاد — والصورة للشركاء بنفس الشكل",
+      "مفيش أي رقم أو حساب اتغيّر"
+    ]},
     { v:"183", d:"2026-11-04", items:[
       "الشركاء: جزء جديد «فلوسكم فين؟» — 3 خطوات بأرقام بتتجمع قدامكم: (1) الخزنة نزلت ليه؟ (2) بس الخزنة مش كل حاجة: البضاعة والفلوس اللي عند الناس (3) يعني كسبتوا كام؟ — ومن كل 100 جنيه بعتوا بيهم: تمن البضاعة · الشحن · المصاريف · ربحكم",
       "الربح في «فلوسكم فين؟» هو هو صافي الربح في قايمة الدخل (اتسلّم فعلاً) وفي الميزانية — وزرار «صورة للشركاء» بينزّلها صورة تتبعت على واتساب",
@@ -19771,11 +19768,13 @@
     }).join("");
   }
 
-  /* ═══ v183 — «فلوسكم فين؟» ═══
-     الشركاء كانوا بيقارنوا رأس المال بالخزنة ويفتكروا الفرق ربح. هنا الحسبة كلها في ٣ خطوات،
-     كل خطوة بتتجمع قدامهم بالظبط ومن نفس الدوال (cashLedger · finBS · projStats):
-       ١ الخزنة نزلت ليه؟  (حركة الكاش)     ٢ بس الخزنة مش كل حاجة  (الميزانية)     ٣ يعني كسبتوا كام؟
-     الأرقام بتتقرّب لجنيه، والتقريب بيتظبط على أكبر بند عشان الجمع يطلع صح قدامهم. */
+  /* ═══ v184 — «فلوسكم فين؟» = من الربح للخزنة (Cash Flow — الطريقة غير المباشرة) ═══
+     الشركاء كانوا بيقارنوا رأس المال بالخزنة ويفتكروا الفرق ربح. هنا حسبة واحدة بتبدأ بصافي الربح
+     (قايمة الدخل · اللي اتسلّم فعلاً) وتخلص برصيد الخزنة:
+       صافي الربح − أي أصل زاد (بضاعة · فلوس عند الشحن والعملاء · مدفوع مقدّم) + أي التزام زاد
+       = اللي الشغل نفسه طلّعه/دخّله الخزنة  + رأس المال − اللي اتسحب  = الخزنة.
+     السيستم بدأ والخزنة والمخزون صفر، فالزيادة = الرصيد كله. الأرقام من finBS وcashLedger،
+     والتقريب لجنيه بيتظبط على أكبر بند عشان الجمع يطلع صح قدامهم. */
   function balRound(parts, total){
     var r = parts.map(function(x){ return Math.round(x); });
     var diff = Math.round(total) - r.reduce(function(a, b){ return a + b; }, 0);
@@ -19785,144 +19784,112 @@
     }
     return r;
   }
-  // نسب من ١٠٠ مجموعها ١٠٠ بالظبط (أكبر باقي)
-  function pct100(parts, total){
-    var raw = parts.map(function(x){ return total > 0 ? x / total * 100 : 0; });
-    var f = raw.map(Math.floor), left = 100 - f.reduce(function(a, b){ return a + b; }, 0);
-    raw.map(function(x, i){ return [x - f[i], i]; }).sort(function(a, b){ return b[0] - a[0]; })
-      .slice(0, Math.max(0, left)).forEach(function(x){ f[x[1]]++; });
-    return f;
-  }
   function moneyStory(){
-    var repay = CAP.cap_repay.label, f = { open:0, cap:0, capOut:0, goods:0, orders:0, exp:0 };
+    var B = finBS(), NI = netProfitAll(), cash = cashBox();
+    var repay = CAP.cap_repay.label, f = { cap:0, out:0 };
     cashLedger().forEach(function(x){
+      if(x.kind !== "رأس مال" || x.t === repay) return;      // رجوع مصروف لشريك = تشغيل مش تمويل
       var n = (Number(x.inn)||0) - (Number(x.out)||0);
-      if(x.kind === "رأس مال"){
-        if(x.t === repay) f.exp -= n;               // رجّعنا لشريك مصروف دفعه = مصروف
-        else if(n >= 0) f.cap += n; else f.capOut -= n;
-      }
-      else if(x.kind === "افتتاحي") f.open += n;
-      else if(x.kind === "دفع" || x.t === "استرداد من مورد") f.goods -= n;
-      else if(x.kind === "مصروف") f.exp -= n;
-      else f.orders += n;                            // تحصيل من عملاء · استلام من شركات الشحن
+      if(n >= 0) f.cap += n; else f.out -= n;
     });
-    var cash = cashBox();
-    var s1 = [];
-    if(Math.abs(f.open) > 0.005) s1.push(["رصيد أول ما بدأتوا السيستم", "", f.open]);
-    s1.push(["حطّيتوا", "رأس المال", f.cap]);
-    if(f.capOut > 0.005) s1.push(["خدتوا", "رأس مال أو أرباح اتصرفت", -f.capOut]);
-    s1.push(["دفعتوا تمن بضاعة", "للموردين", -f.goods]);
-    s1.push(["وصلكم من الأوردرات", "من شركات الشحن والعملاء", f.orders]);
-    s1.push(["مصاريف", "إعلانات · تغليف · اشتراكات · نقل", -f.exp]);
-    var res = cash - s1.reduce(function(a, x){ return a + x[2]; }, 0);
-    if(Math.abs(res) > 0.5) s1.push(["حركات تانية", "", res]);
-
-    var B = finBS(), not = [];
+    var not = [];
     if(B.pay > 0.005) not.push("لموردين " + qty(Math.round(B.pay)));
     if(B.custAdv > 0.005) not.push("عربون عملاء " + qty(Math.round(B.custAdv)));
     if(B.owed > 0.005) not.push("مصاريف دفعها شريك من جيبه " + qty(Math.round(B.owed)));
-    var s2 = [["في الخزنة", "", B.cash],
-      ["بضاعة", "على الرف ومع المندوب — بالسعر اللي اشتريتوا بيه", B.stock]];
-    if(Math.abs(B.wallets) > 0.005) s2.push(["فلوس عند شركات الشحن", "", B.wallets]);
-    if(Math.abs(B.recv) > 0.005) s2.push(["فلوس عند عملاء", "", B.recv]);
-    if(Math.abs(B.supAdv) > 0.005) s2.push(["دافعين مقدّم لموردين", "", B.supAdv]);
-    if(Math.abs(B.prepaid) > 0.005) s2.push(["مدفوع مقدّم", "رصيد إعلانات واشتراكات لسه ما اتصرفش", B.prepaid]);
-    if(B.liab > 0.005) s2.push(["فلوس مش بتاعتكم", not.join(" + "), -B.liab]);
-    var worth = B.assets - B.liab, base = B.cap + B.opening, kept = worth - base;
-    var earned = netProfitAll(), took = earned - kept;
-
-    var A = projStats(null).act, split = null;
-    if(A.goods > 0.009 && A.net > 0.009 && A.ship <= 0.009){
-      var parts = [A.goods - A.gross, -A.ship, A.varExp + A.fixedExp, A.net];
-      split = pct100(parts, A.goods);
-    }
-    var r1 = balRound(s1.map(function(x){ return x[2]; }), cash);
-    var r2 = balRound(s2.map(function(x){ return x[2]; }), worth);
-    s1.forEach(function(x, i){ x[3] = r1[i]; });
-    s2.forEach(function(x, i){ x[3] = r2[i]; });
-    return { s1:s1, cash:Math.round(cash), s2:s2, worth:Math.round(worth), base:Math.round(base),
-             kept:Math.round(worth) - Math.round(base), took:took, split:split, bad:Math.abs(B.diff) >= 0.01 };
+    var op = [];       // [الاسم · الشرح · المبلغ بإشارته]
+    // x[4] = نوع البند واتجاهه (أصل/التزام · زاد/قلّ) — السيستم بدأ من صفر، فالرصيد الموجب = زاد
+    var aTag = function(v){ return v > 0 ? "أصل زاد" : "أصل قلّ"; };
+    if(Math.abs(B.stock) > 0.005) op.push(["اتحوّل بضاعة على الرف", "بضاعة لسه ما اتباعتش — على الرف ومع المندوب (بسعر الشرا)", -B.stock, 0, aTag(B.stock)]);
+    if(Math.abs(B.wallets) > 0.005) op.push(B.wallets > 0 ? ["لسه عند شركات الشحن", "العملاء دفعوها والشركة ما سلّمتهاش لسه", -B.wallets, 0, "أصل زاد"]
+                                                          : ["علينا لشركات الشحن", "مصاريف مرتجع هتتخصم من الاستلام الجاي", -B.wallets, 0, "التزام زاد"]);
+    if(Math.abs(B.recv) > 0.005) op.push(["لسه عند عملاء", "استلموا ولسه ما دفعوش", -B.recv, 0, aTag(B.recv)]);
+    if(Math.abs(B.supAdv) > 0.005) op.push(["دافعين مقدّم لموردين", "", -B.supAdv, 0, aTag(B.supAdv)]);
+    if(Math.abs(B.prepaid) > 0.005) op.push(["مدفوع مقدّم", "رصيد إعلانات واشتراكات لسه ما اتصرفش", -B.prepaid, 0, aTag(B.prepaid)]);
+    if(B.liab > 0.005) op.push(["فلوس عندنا مش بتاعتنا", not.join(" + "), B.liab, 0, "التزام زاد"]);
+    var opSum = NI + op.reduce(function(a, x){ return a + x[2]; }, 0);
+    var fin = [["رأس المال اللي حطّيتوه", "", f.cap, 0, "رأس مال زاد"]];
+    if(f.out > 0.005) fin.push(["خدتوا", "رأس مال أو أرباح اتصرفت", -f.out, 0, "رأس مال قلّ"]);
+    var res = cash - opSum - fin.reduce(function(a, x){ return a + x[2]; }, 0);
+    if(Math.abs(res) > 0.5) fin.push(["أرصدة أول المدة وحركات تانية في رأس المال", "", res, 0, ""]);
+    // تقريب: كل البنود بتتجمع لرصيد الخزنة بالظبط
+    var all = [NI].concat(op.map(function(x){ return x[2]; }), fin.map(function(x){ return x[2]; }));
+    var r = balRound(all, cash), i = 1;
+    var ni = r[0];
+    op.forEach(function(x){ x[3] = r[i++]; });
+    fin.forEach(function(x){ x[3] = r[i++]; });
+    var opR = ni + op.reduce(function(a, x){ return a + x[3]; }, 0);
+    var base = Math.round(B.cap + B.opening);
+    return { ni:ni, op:op, opR:opR, fin:fin, cash:Math.round(cash), base:base, stock:Math.round(B.stock),
+             bad:Math.abs(B.diff) >= 0.01 };
   }
-  var SPLIT_L = [["تمن البضاعة", "#9AA0A6"], ["شحن من جيبكم", "#4F6FA8"], ["إعلانات ومصاريف", "#B07A47"], ["ربحكم", "#2A7348"]];
   function storyNum(v, sign){
     var t = qty(Math.abs(v));
     return sign ? (v < 0 ? "−" : (v > 0 ? "+" : "")) + t : (v < 0 ? "−" + t : t);
   }
-  function storyLines(L, first){
-    return L.map(function(x, i){
-      var sg = (first && i === 0) ? "" : (x[3] < 0 ? "−" : "+");
-      return "<div class='ms-ln'><span><i>" + sg + "</i>" + esc(x[0]) + (x[1] ? "<small>" + esc(x[1]) + "</small>" : "") + "</span>" +
-        "<b class='num" + (sg === "+" ? " v-gain" : "") + "'>" + storyNum(x[3], !(first && i === 0)) + "</b></div>";
-    }).join("");
+  function storyLn(x){
+    return "<div class='ms-ln'><i>" + (x[3] < 0 ? "−" : "+") + "</i><span>" + esc(x[0]) +
+      (x[4] ? " <em class='ms-tag" + (/التزام/.test(x[4]) ? " l" : (/رأس مال/.test(x[4]) ? " c" : "")) + "'>" + esc(x[4]) + "</em>" : "") +
+      (x[1] ? "<small>" + esc(x[1]) + "</small>" : "") + "</span>" +
+      "<b class='num" + (x[3] > 0 ? " v-gain" : "") + "'>" + storyNum(x[3], true) + "</b></div>";
+  }
+  function storyNote(m){
+    var gap = m.base - m.cash;
+    if(gap <= 0.5 || m.ni < 0 || m.stock <= 0) return "";
+    return "يعني: الـ<b class='num'>" + qty(gap) + "</b> اللي ناقصين من رأس المال <b>مش خسارة</b> — الربح <b class='num'>" + qty(m.ni) +
+      "</b> وزيادة عليه اتحوّلوا بضاعة على الرف (<b class='num'>" + qty(m.stock) + "</b>). أول ما تتباع بترجع الخزنة.";
   }
   function renderCapStory(){
     var el = document.getElementById("cap-story");
     if(!el) return;
     if(!partners().length){ el.innerHTML = ""; return; }
-    var m = moneyStory();
-    // العنوان «فلوسكم فين؟» هو اسم الجزء في المفتاح فوق — مش بيتكرر هنا
-    el.innerHTML = "<div class='ms-hd'><p class='ms-lead'>3 خطوات — كل خطوة بتجاوب على سؤال واحد، وأرقامها بتتجمع قدامكم.</p>" +
-        "<button class='tbtn' type='button' id='b-story-img'>⇩ صورة للشركاء</button></div>" +
-      "<div class='ms-steps'>" +
-        "<div class='ms-st'><span class='k'>1</span><h4>الخزنة نزلت ليه؟</h4><p class='q'>من أول يوم لحد النهارده</p>" +
-          storyLines(m.s1, true) + "<div class='ms-tot'><span>في الخزنة دلوقتي</span><b class='num'>" + storyNum(m.cash) + "</b></div></div>" +
-        "<div class='ms-st'><span class='k'>2</span><h4>بس الخزنة مش كل حاجة</h4><p class='q'>الفلوس اللي طلعت ما ضاعتش — اتحوّلت لحاجات</p>" +
-          storyLines(m.s2, true) + "<div class='ms-tot'><span>الشركة كلها تسوى</span><b class='num'>" + storyNum(m.worth) + "</b></div></div>" +
-        "<div class='ms-st win'><span class='k'>3</span><h4>يعني كسبتوا كام؟</h4><p class='q'>اللي الشركة تسواه − اللي حطّيتوه</p>" +
-          "<div class='ms-big num " + (m.kept < 0 ? "v-due" : "v-gain") + "'>" + storyNum(m.kept, true) + "</div>" +
-          "<div class='ms-calc'><span class='num'>" + qty(m.worth) + "</span> − <span class='num'>" + qty(m.base) + "</span></div>" +
-          (m.took > 0.5 ? "<p class='q'>وده غير <b class='num'>" + qty(Math.round(m.took)) + "</b> أرباح خدتوها قبل كده.</p>" : "") +
-          (m.split ? "<div class='ms-split'><p>من كل 100 جنيه بعتوا بيهم:</p><div class='ms-bar'>" +
-              m.split.map(function(v, i){ return v ? "<i style='width:" + v + "%;background:" + SPLIT_L[i][1] + "'>" + v + "</i>" : ""; }).join("") +
-            "</div><div class='ms-leg'>" + SPLIT_L.map(function(x, i){
-              return "<span><i style='background:" + x[1] + "'></i>" + (i === 3 ? "<b>" + x[0] + "</b>" : x[0]) + "</span>"; }).join("") + "</div></div>" : "") +
-        "</div></div>" +
-      "<p class='ms-note'>الفرق بين رأس المال والخزنة (<b class='num'>" + qty(Math.abs(m.base - m.cash)) + "</b>) " +
-        (m.base > m.cash ? "<b>مش ربح ومش خسارة</b> — أغلبه بضاعة ولسه فلوس عند ناس. أول ما تتباع بترجع الخزنة ومعاها ربحها."
-                         : "مش كله ربح — الربح هو الرقم في الخطوة 3 بس.") + "</p>" +
-      "<p class='ms-foot'>من الخزنة والميزانية وقايمة الدخل · <a href='#' data-gorep='sum'>شوف الحسبة كاملة في قايمة الدخل</a>" +
+    var m = moneyStory(), note = storyNote(m);
+    el.innerHTML = "<div class='ms-card'>" +
+        "<div class='ms-hd'><div><h3>من الربح للخزنة</h3><p class='ms-lead'>ليه الخزنة فيها <span class='num'>" + qty(m.cash) +
+          "</span> والربح <span class='num'>" + qty(m.ni) + "</span>؟ — كل رقم هنا بيتجمع لحد اللي في الخزنة.</p></div>" +
+          "<button class='tbtn' type='button' id='b-story-img'>⇩ صورة للشركاء</button></div>" +
+        "<div class='ms-ln top'><i></i><span>صافي الربح<small>من قايمة الدخل — الأوردرات اللي خلصت</small></span>" +
+          "<b class='num " + (m.ni < 0 ? "v-due" : "v-gain") + "'>" + storyNum(m.ni, true) + "</b></div>" +
+        m.op.map(storyLn).join("") +
+        "<div class='ms-sub'><i>=</i><span>الشغل نفسه " + (m.opR < 0 ? "طلّع من الخزنة" : "دخّل الخزنة") +
+          (m.opR < 0 && m.stock > 0 ? "<small>عشان اشترينا بضاعة أكتر من اللي اتباع</small>" : "") + "</span>" +
+          "<b class='num'>" + storyNum(m.opR, true) + "</b></div>" +
+        m.fin.map(storyLn).join("") +
+        "<div class='ms-end'><i>=</i><span>في الخزنة دلوقتي</span><b class='num'>" + storyNum(m.cash) + "</b></div>" +
+        (note ? "<p class='ms-note'>" + note + "</p>" : "") +
+      "</div>" +
+      "<p class='ms-foot'>من قايمة الدخل والميزانية · <a href='#' data-gorep='sum'>شوف الحسبة كاملة في قايمة الدخل</a>" +
         (m.bad ? " · <span class='v-due'>⚠ الميزانية فيها فرق — الأرقام ممكن تكون مش دقيقة</span>" : "") + "</p>";
   }
-  // صورة الكارت للشركاء — بنفس رسم صورة الخزنة (canvas بعرض تليفون وخط كبير، فاتحة دايماً)
+  // صورة للشركاء — بنفس رسم صورة الخزنة (canvas بعرض تليفون وخط كبير، فاتحة دايماً)
   function drawStoryImage(){
     var m = moneyStory(), W = CI.W, P = CI.PAD, R = W - P, L = P + 8;
-    var rows = 0; [m.s1, m.s2].forEach(function(s){ rows += s.length; });
-    var H = 200 + 2 * 140 + rows * 46 + 260 + (m.split ? 120 : 0);
+    var H = 260 + (m.op.length + m.fin.length) * 52 + 300;
     var cv = document.createElement("canvas"); cv.width = W * CI.S; cv.height = H * CI.S;
     var c = cv.getContext("2d"); c.scale(CI.S, CI.S);
     c.fillStyle = CI_C.bg; c.fillRect(0, 0, W, H);
     c.fillStyle = CI_C.brand; c.fillRect(0, 0, W, 8);
     var y = 58;
-    ciR(c, "فلوسكم فين؟", R, y, ciFont(700, 32), CI_C.ink);
-    ciL(c, "Lora Collection · " + today(), P, y, ciFont(400, 16), CI_C.soft); y += 40;
-    var step = function(n, title, L0, totT, tot){
-      y += 18; ciR(c, n + "  " + title, R, y, ciFont(700, 22), CI_C.brand); y += 16;
-      L0.forEach(function(x, i){
-        y += 34;
-        ciR(c, (i ? (x[3] < 0 ? "−  " : "+  ") : "") + x[0], R, y, ciFont(500, 20), CI_C.ink);
-        ciL(c, storyNum(x[3], i > 0), L, y, ciFont(600, 21), i && x[3] > 0 ? CI_C.gain : CI_C.ink);
-        y += 12; c.fillStyle = CI_C.line; c.fillRect(P, y, W - 2 * P, 1);
-      });
-      y += 38; ciR(c, totT, R, y, ciFont(700, 22), CI_C.ink); ciL(c, storyNum(tot), L, y, ciFont(700, 26), CI_C.ink); y += 46;
+    ciR(c, "من الربح للخزنة", R, y, ciFont(700, 30), CI_C.ink);
+    ciL(c, "Lora Collection · " + today(), P, y, ciFont(400, 16), CI_C.soft); y += 34;
+    ciR(c, "ليه الخزنة فيها " + qty(m.cash) + " والربح " + qty(m.ni) + "؟", R, y, ciFont(500, 18), CI_C.soft); y += 18;
+    var line = function(t, v, color, font, bold){
+      y += 38;
+      ciR(c, t, R, y, font || ciFont(500, 20), CI_C.ink);
+      ciL(c, v, L, y, ciFont(bold ? 700 : 600, bold ? 24 : 21), color || CI_C.ink);
+      y += 14; c.fillStyle = CI_C.line; c.fillRect(P, y, W - 2 * P, 1);
     };
-    step("1", "الخزنة نزلت ليه؟", m.s1, "= في الخزنة دلوقتي", m.cash);
-    step("2", "بس الخزنة مش كل حاجة", m.s2, "= الشركة كلها تسوى", m.worth);
-    y += 18; ciR(c, "3  يعني كسبتوا كام؟", R, y, ciFont(700, 22), CI_C.brand); y += 58;
-    ciL(c, storyNum(m.kept, true), L, y, ciFont(700, 48), m.kept < 0 ? CI_C.due : CI_C.gain);
-    ciR(c, qty(m.worth) + " − " + qty(m.base), R, y, ciFont(500, 20), CI_C.soft); y += 40;
-    if(m.split){
-      ciR(c, "من كل 100 جنيه بعتوا بيهم:", R, y, ciFont(600, 19), CI_C.ink); y += 18;
-      var x0 = W - P, bw = W - 2 * P;
-      m.split.forEach(function(v, i){
-        var w = bw * v / 100; if(!w) return;
-        c.fillStyle = SPLIT_L[i][1]; c.fillRect(x0 - w, y, w, 34);
-        if(w > 30){ c.fillStyle = "#fff"; c.font = ciFont(700, 16); c.textAlign = "center"; c.fillText(String(v), x0 - w / 2, y + 23); }
-        x0 -= w;
-      });
-      y += 60;
-      ciR(c, SPLIT_L.map(function(x, i){ return m.split[i] + " " + x[0]; }).join("  ·  "), R, y, ciFont(500, 17), CI_C.soft); y += 34;
+    line("صافي الربح (من قايمة الدخل)", storyNum(m.ni, true), m.ni < 0 ? CI_C.due : CI_C.gain);
+    m.op.forEach(function(x){ line((x[3] < 0 ? "−  " : "+  ") + x[0] + (x[4] ? "  (" + x[4] + ")" : ""), storyNum(x[3], true), x[3] > 0 ? CI_C.gain : CI_C.ink); });
+    y += 8; c.fillStyle = CI_C.chip; c.fillRect(P, y + 6, W - 2 * P, 50);
+    y += 2; line("=  الشغل نفسه " + (m.opR < 0 ? "طلّع من الخزنة" : "دخّل الخزنة"), storyNum(m.opR, true), CI_C.ink, ciFont(700, 20), true);
+    m.fin.forEach(function(x){ line((x[3] < 0 ? "−  " : "+  ") + x[0] + (x[4] ? "  (" + x[4] + ")" : ""), storyNum(x[3], true), x[3] > 0 ? CI_C.gain : CI_C.ink); });
+    y += 10; c.fillStyle = CI_C.ink; c.fillRect(P, y, W - 2 * P, 2); y += 42;
+    ciR(c, "=  في الخزنة دلوقتي", R, y, ciFont(700, 24), CI_C.ink); ciL(c, storyNum(m.cash), L, y, ciFont(700, 32), CI_C.ink); y += 46;
+    if(storyNote(m)){
+      var gap = m.base - m.cash;
+      ciR(c, "الـ" + qty(gap) + " اللي ناقصين من رأس المال مش خسارة —", R, y, ciFont(600, 18), CI_C.gain); y += 30;
+      ciR(c, "الربح وزيادة عليه اتحوّلوا بضاعة على الرف (" + qty(m.stock) + ").", R, y, ciFont(500, 18), CI_C.soft); y += 10;
     }
-    ciR(c, "الفرق بين رأس المال والخزنة مش كله ربح — الربح هو رقم الخطوة 3 بس.", R, y, ciFont(500, 16), CI_C.soft);
     // الارتفاع اتحسب بالتقريب — بنقصّ الفاضي اللي تحت
     var h = Math.min(H, Math.ceil(y + 32));
     if(h >= H) return cv;

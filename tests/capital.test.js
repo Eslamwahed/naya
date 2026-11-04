@@ -1,28 +1,27 @@
-// «فلوسكم فين؟» (v183): الخطوات التلاتة بتتجمع صح قدام الشركاء · الربح = الميزانية = قايمة الدخل · المفتاح بيفصل الجزئين
+// «فلوسكم فين؟» (v184): من الربح للخزنة — صافي الربح ± التغيّر في الأصول والالتزامات = الشغل · + رأس المال = الخزنة بالظبط
 const { open, tab, MOB } = require("./lib"), F = require("./fixtures");
-const N = t => { const m = String(t).replace(/,/g, "").match(/[−-]?\d+(\.\d+)?/); return m ? Number(m[0].replace("−", "-")) : NaN; };
+const N = t => { const m = String(t).replace(/,/g, "").replace(/−/g, "-").match(/[+-]?\d+(\.\d+)?/); return m ? Number(m[0]) : NaN; };
 module.exports = async ({ browser, ok }) => {
   const p = await open(browser, { db:F.shop() });
   await tab(p, "capital");
   const v = await p.evaluate(() => {
-    const st = [...document.querySelectorAll("#cap-story .ms-st")];
-    const lines = el => [...el.querySelectorAll(".ms-ln b")].map(b => b.textContent);
-    const tot = el => el.querySelector(".ms-tot b").textContent;
-    const T = window.__T, B = T.finBS();
-    return { s1:lines(st[0]), t1:tot(st[0]), s2:lines(st[1]), t2:tot(st[1]), big:st[2].querySelector(".ms-big").textContent,
-             cash:T.cashBox(), worth:B.assets - B.liab, cap:B.cap + B.opening, net:T.periodStats(null).net,
-             mainHidden:document.getElementById("cap-main").hidden, bar:[...st[2].querySelectorAll(".ms-bar i")].map(i => Number(i.textContent)) };
+    const c = document.querySelector("#cap-story .ms-card");
+    const lns = [...c.querySelectorAll(".ms-ln")].map(x => ({ b:x.querySelector("b").textContent, tag:(x.querySelector(".ms-tag") || {}).textContent || "", top:x.classList.contains("top") }));
+    const T = window.__T;
+    return { lns, sub:c.querySelector(".ms-sub b").textContent, end:c.querySelector(".ms-end b").textContent,
+             cash:T.cashBox(), net:T.periodStats(null).net, mainHidden:document.getElementById("cap-main").hidden };
   });
-  const sum = a => a.reduce((x, y) => x + N(y), 0);
-  ok(sum(v.s1) === N(v.t1) && N(v.t1) === Math.round(v.cash), "خطوة 1 بتتجمع = الخزنة: " + JSON.stringify([v.s1, v.t1, v.cash]));
-  ok(sum(v.s2) === N(v.t2) && N(v.t2) === Math.round(v.worth), "خطوة 2 بتتجمع = الشركة تسوى: " + JSON.stringify([v.s2, v.t2]));
-  ok(N(v.big) === Math.round(v.worth) - Math.round(v.cap), "خطوة 3 = تسوى − رأس المال: " + v.big);
-  ok(Math.abs(N(v.big) - v.net) <= 1, "الربح = صافي قايمة الدخل (" + v.net + ")");
-  ok(!v.bar.length || v.bar.reduce((a, b) => a + b, 0) === 100, "شريط الـ100 جنيه مجموعه 100: " + v.bar);
+  const sum = a => a.reduce((x, y) => x + N(y.b), 0);
+  const subIdx = v.lns.findIndex(x => /رأس مال/.test(x.tag));
+  const opL = v.lns.slice(0, subIdx), finL = v.lns.slice(subIdx);
+  ok(v.lns[0].top && Math.abs(N(v.lns[0].b) - v.net) <= 1, "أول سطر = صافي الربح من قايمة الدخل: " + v.lns[0].b + " / " + v.net);
+  ok(sum(opL) === N(v.sub), "الربح ± الأصول والالتزامات = الشغل نفسه: " + JSON.stringify([opL.map(x => x.b), v.sub]));
+  ok(N(v.sub) + sum(finL) === N(v.end) && N(v.end) === Math.round(v.cash), "الشغل + رأس المال = الخزنة بالظبط: " + v.end + " / " + v.cash);
+  ok(opL.slice(1).every(x => /^(أصل|التزام) (زاد|قلّ)$/.test(x.tag)), "كل بند مكتوب عليه أصل/التزام زاد/قلّ: " + opL.map(x => x.tag));
+  ok(opL.slice(1).every(x => (/^أصل زاد|^التزام قلّ/.test(x.tag)) === (N(x.b) < 0)), "أصل زاد = بنطرح · التزام زاد = بنزوّد");
   ok(v.mainHidden, "«الشركاء» مستخبي لحد ما تدوس عليه");
   await p.click("#cap-seg [data-capseg='main']"); await p.waitForTimeout(200);
   ok(await p.evaluate(() => document.getElementById("cap-story").hidden && !document.getElementById("cap-main").hidden), "المفتاح بيبدّل الجزئين");
-  // الصورة بتتعمل من غير أخطاء
   await p.click("#cap-seg [data-capseg='story']"); await p.waitForTimeout(150);
   const dl = p.waitForEvent("download", { timeout:5000 }).catch(() => null);
   await p.click("#b-story-img"); const d = await dl;

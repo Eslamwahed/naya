@@ -76,35 +76,27 @@
   .ms-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3)}
   .ms-hd h3{margin:0;font-size:var(--fs-5);font-weight:600}
   .ms-hd p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-3)}
-  .ms-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-4);align-items:stretch}
-  .ms-st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;min-width:0}
-  .ms-st .k{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--teal-soft);color:var(--teal);font-weight:600;font-size:var(--fs-3);margin-bottom:8px}
-  .ms-st h4{margin:0 0 2px;font-size:var(--fs-4);font-weight:600}
-  .ms-st .q{margin:0 0 12px;color:var(--ink-soft);font-size:var(--fs-2)}
-  .ms-ln{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:var(--fs-3)}
-  .ms-ln > span{min-width:0}
-  .ms-ln i{font-style:normal;color:var(--ink-soft);display:inline-block;width:14px}
-  .ms-ln small{display:block;color:var(--ink-soft);font-size:var(--fs-1);line-height:1.4;padding-inline-start:14px}
-  .ms-ln b{font-weight:600;white-space:nowrap}
-  .ms-tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:auto;padding-top:10px;border-top:2px solid var(--ink);font-weight:600}
-  .ms-ln:last-of-type{margin-bottom:12px}
-  .ms-tot b{font-size:var(--fs-6)}
-  .ms-st.win{background:var(--gain-soft);border-color:transparent}
-  .ms-big{font-size:40px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:4px 0 2px}
-  .ms-calc{color:var(--ink-soft);font-size:var(--fs-3);margin-bottom:10px}
-  .ms-split{margin-top:auto}
-  .ms-split p{margin:0 0 6px;font-size:var(--fs-3);font-weight:500}
-  .ms-bar{display:flex;height:30px;border-radius:8px;overflow:hidden}
-  .ms-bar i{display:grid;place-items:center;color:#fff;font-style:normal;font-size:var(--fs-2);font-weight:600;min-width:0;overflow:hidden}
-  .ms-leg{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:8px;font-size:var(--fs-2)}
-  .ms-leg span{display:flex;align-items:center;gap:6px}
-  .ms-leg span i{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
-  .ms-note{margin:var(--sp-3) 0 0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;font-size:var(--fs-3);line-height:1.8}
+  .ms-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:760px}
+  .ms-card .ms-hd h3{margin:0;font-size:var(--fs-5);font-weight:600}
+  .ms-card .ms-lead{margin:2px 0 0}
+  .ms-ln,.ms-sub,.ms-end{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:baseline}
+  .ms-ln{padding:9px 0;border-bottom:1px dashed var(--line);font-size:var(--fs-3)}
+  .ms-ln > i,.ms-sub > i,.ms-end > i{font-style:normal;color:var(--ink-soft);text-align:center;font-weight:600}
+  .ms-ln small,.ms-sub small{display:block;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.45;font-weight:400}
+  .ms-ln b{font-weight:600;font-size:var(--fs-4);white-space:nowrap}
+  .ms-tag{font-style:normal;font-size:var(--fs-1);font-weight:500;border-radius:99px;padding:1px 8px;margin-inline-start:6px;white-space:nowrap;
+    background:var(--teal-soft);color:var(--teal);vertical-align:1px}
+  .ms-tag.l{background:var(--warn-soft);color:var(--warn)}
+  .ms-tag.c{background:var(--gain-soft);color:var(--gain-ink)}
+  .ms-sub{padding:10px 12px;margin:6px -12px;border-radius:10px;background:var(--paper);font-weight:600}
+  .ms-sub b{font-size:var(--fs-4)}
+  .ms-end{margin-top:8px;padding-top:12px;border-top:2px solid var(--ink);font-weight:600}
+  .ms-end b{font-size:var(--fs-6)}
+  .ms-note{margin:14px 0 0;background:var(--gain-soft);border-radius:12px;padding:12px 16px;font-size:var(--fs-3);line-height:1.8}
   .ms-note b{font-weight:600}
   .ms-foot{margin:var(--sp-2) 2px 0;font-size:var(--fs-2);color:var(--ink-soft)}
   .ms-foot a{color:var(--teal)}
-  @media (max-width:900px){ .ms-steps{grid-template-columns:1fr} }
-  @media (max-width:760px){ .ms-hd{flex-wrap:wrap;align-items:flex-start} .ms-hd .tbtn{width:100%;justify-content:center} }
+  @media (max-width:760px){ .ms-hd{flex-wrap:wrap;align-items:flex-start} .ms-hd .tbtn{width:100%;justify-content:center} .ms-card{padding:16px} }
   /* مفتاح الجزئين — نفس شكل .pseg (اللي بيتملي من القايمة، فده كلاس لوحده عشان ما يتمسحش) */
   .lseg{display:inline-flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:99px;background:var(--card);margin:0 0 var(--sp-4);max-width:100%}
   .lseg button{font:inherit;font-size:var(--fs-3);border:0;background:none;border-radius:99px;padding:6px 16px;min-height:36px;color:var(--ink-soft);cursor:pointer;touch-action:manipulation}
