@@ -1,7 +1,5 @@
 <section id="tab-inv" hidden>
-  <h2>المخزون</h2>
-  <div class="stats" id="inv-top"></div>
-
+  <div class="pt-head inv-head"><div><h2>المخزون</h2><p id="inv-top"></p></div>
   <div class="toolbar">
     <div class="s-search">
       <input id="inv-q" type="search" placeholder="دوّر بالصنف أو اللون أو المقاس أو الكود…" autocomplete="off">
@@ -12,13 +10,14 @@
     <button class="tbtn" type="button" id="b-invfilters" aria-expanded="false" aria-controls="inv-filters">
       فلاتر <span class="fcount" id="inv-count" hidden>0</span>
     </button>
-  </div>
+  </div></div>
 
-  <div class="quick" id="inv-quick">
+  <!-- v181: تبويبات رفيعة زي الأوردرات — «فيه رصيد» اتشال من فوق (تقريباً = الكل) وفاضل شغال من الرئيسية -->
+  <div class="quick inv-tabs" id="inv-quick" role="group" aria-label="اعرض">
     <button type="button" data-invonly="all" class="on">الكل</button>
-    <button type="button" data-invonly="instock">فيه رصيد</button>
+    <button type="button" data-invonly="instock" hidden>فيه رصيد</button>
     <button type="button" data-invonly="low">قرب يخلص</button>
-    <button type="button" data-invonly="out">خلصان</button>
+    <button type="button" data-invonly="out">فيه حاجة خلصت</button>
     <button type="button" data-invonly="rsv">محجوز</button>
   </div>
 
