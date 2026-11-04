@@ -1,13 +1,16 @@
 <!-- مشتريات -->
 <section id="tab-purch" hidden>
-  <h2>المشتريات والموردين<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pt-head pu-head"><div>
+    <h2>المشتريات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+    <p id="pu-top" class="money-only"></p></div>
+    <div class="tbar">
+      <button class="tbtn" type="button" data-foldbtn="pu-tools" aria-expanded="false" aria-controls="pu-tools" aria-label="حاجات تانية">⋯</button>
+      <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
+      <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
+    </div>
+  </div>
   <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <p class="hint" data-infotxt hidden>الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
-  <div class="tbar">
-    <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
-    <button class="tbtn" type="button" data-foldbtn="pu-tools" aria-expanded="false" aria-controls="pu-tools">⋯ أكتر</button>
-    <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
-  </div>
   <!-- الحاجات اللي مش كل يوم: استبدال مع مورد وشيت الفاتورة — ورا «⋯ أكتر» -->
   <div class="tmore-row" id="pu-tools" data-fold hidden>
     <div class="tbar">
@@ -19,7 +22,6 @@
   </div>
   <p class="note" id="pu-msg" hidden></p>
 
-  <div class="stats" id="pu-top"></div>
   <div id="pu-fix"></div>
   <div class="pu-owe money-only" id="pu-owe"></div>
 
@@ -214,7 +216,7 @@
     <div><label for="pu-to">لـ تاريخ</label><input type="date" id="pu-to"></div>
   </div>
   <div class="chips" id="pu-chips"></div>
-  <div class="quick" id="pu-only" role="group" aria-label="فلتر الفواتير"></div>
+  <div class="quick pu-tabs" id="pu-only" role="group" aria-label="فلتر الفواتير"></div>
   <div id="pu-cards"></div>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="purch" hidden></button></p>
 

@@ -764,7 +764,7 @@
     table.iv-mx td.none{padding:10px 8px}
     table.iv-mx td{min-width:58px}
     /* الأرقام اللي فوق: اتنين جنب بعض بدل عمود طويل */
-    #cash-stats,#cap-stats,#pu-top{display:grid;grid-template-columns:1fr 1fr}
+    #cash-stats,#cap-stats{display:grid;grid-template-columns:1fr 1fr}
     #cash-stats > div:last-child:nth-child(odd){grid-column:1 / -1}
   }
 
@@ -991,28 +991,48 @@
   .pu-ow > b{font-size:var(--fs-4);color:var(--due);white-space:nowrap}
   .pu-ow .a{display:flex;gap:6px}
   #pu-only button b{font-weight:700;margin-inline-start:4px}
-  .pu-mo{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);margin:var(--sp-4) 2px var(--sp-2);font-weight:600}
-  .pu-mo b{color:var(--ink)}
-  .pv{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-2);overflow:hidden}
-  .pv.ret{border-inline-start:4px solid var(--due)}
-  .pv.fresh{box-shadow:0 0 0 2px var(--teal)}
-  .pv-h{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) 140px 18px;gap:4px var(--sp-3);align-items:center;width:100%;
-    padding:var(--sp-3) var(--sp-4);border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
-  .pv-h:hover{background:var(--teal-soft)}
-  .pv-h .t{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
-  .pv-h .t b{font-size:var(--fs-3)}
-  .pv-h .ono{color:var(--teal);font-weight:700}
-  .pv-h .it{grid-column:1;grid-row:2}
-  .pv-h .pay{grid-row:1 / span 2;grid-column:2}
-  .pv-h .tot{grid-row:1 / span 2;grid-column:3;text-align:end}
-  .pv-h .tot b{font-size:var(--fs-4);white-space:nowrap;display:block}
-  .pv-h .tot small{font-size:var(--fs-1);color:var(--ink-soft)}
-  .pv-h .chev{grid-row:1 / span 2;grid-column:4;color:var(--ink-soft)}
+  /* ═══ v182 — المشتريات: قايمة واحدة، سطر لكل فاتورة، والحالة بتبان بس لو فيها حاجة ═══ */
+  .pu-head{align-items:flex-end;gap:var(--sp-4);margin-bottom:var(--sp-3)}
+  .pu-head h2{font-size:var(--fs-6);letter-spacing:-.02em}
+  .pu-head .tbar{margin:0}
+  .pu-head .tbar .tbtn{min-height:42px;border-radius:10px}
+  #pu-top{margin:2px 0 0;font-size:var(--fs-3);color:var(--ink-soft)}
+  #pu-top b{color:var(--ink);font-weight:600} #pu-top b.v-due{color:var(--due)}
+  #pu-only.pu-tabs{display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin-bottom:var(--sp-4)}
+  #pu-only.pu-tabs button{flex:0 0 auto;border:0;border-radius:0;background:none;padding:10px 14px 12px;color:var(--ink-soft);font-size:var(--fs-3);position:relative}
+  #pu-only.pu-tabs button b{color:var(--ink);font-weight:600;margin-inline-start:6px}
+  #pu-only.pu-tabs button:hover{color:var(--ink)}
+  #pu-only.pu-tabs button.on{color:var(--ink);font-weight:500;background:none}
+  #pu-only.pu-tabs button.on::after{content:"";position:absolute;inset-inline:10px;bottom:-1px;height:2px;background:var(--teal);border-radius:2px 2px 0 0}
+  #pu-cards:not(:empty){background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  #pu-cards > .cd-empty{margin:var(--sp-4)}
+  .pu-mo{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2);font-size:var(--fs-2);color:var(--ink-soft);margin:0;
+    padding:8px 18px;background:var(--paper);border-bottom:1px solid var(--line);font-weight:400}
+  .pv + .pu-mo{border-top:1px solid var(--line)}
+  .pu-mo b{color:var(--ink);font-weight:600}
+  .pv{background:none;border:0;border-top:1px solid var(--line);border-radius:0;margin:0;overflow:hidden}
+  .pu-mo + .pv{border-top:0}
+  .pv:hover{transform:none!important;box-shadow:none!important}
+  #pu-cards .pv.ret,#pu-cards .pv.xg{border-inline-start:0}
+  .pv.fresh{box-shadow:inset 0 0 0 2px var(--teal)!important}
+  .pv-h{display:grid;grid-template-columns:54px minmax(0,170px) minmax(0,1fr) 110px 170px 16px;gap:var(--sp-4);align-items:center;width:100%;
+    padding:11px 18px;border:0;background:none;font:inherit;color:inherit;text-align:start;cursor:pointer}
+  .pv-h:hover{background:color-mix(in srgb,var(--teal-soft) 55%,transparent)}
+  .pv-h:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+  .pv-h .ono{color:var(--teal);font-weight:600}
+  .pv-h .t{display:block;min-width:0}
+  .pv-h .t b{display:block;font-size:var(--fs-3);font-weight:500}
+  .pv-h .t .sub{display:block}
+  .pv-h .it{display:flex;align-items:center;gap:10px;min-width:0}
+  .pv-h .it .nm{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .pv-h .it .sub{white-space:nowrap}
+  .pv-h .tot{text-align:end}
+  .pv-h .tot b{font-size:var(--fs-4);font-weight:600;white-space:nowrap}
   .pv-h .pay{display:block;min-width:0}
-  .pv-bar{display:block;height:6px;border-radius:var(--r-pill);background:var(--due-soft);overflow:hidden;margin:2px 0 3px}
-  .pv-bar i{display:block;height:100%;background:var(--gain)}
-  .pv-pay{display:flex;justify-content:space-between;gap:6px;font-size:var(--fs-1);color:var(--ink-soft)}
-  .pv-pay .g{color:var(--gain);font-weight:600} .pv-pay .r{color:var(--due)}
+  .pv-h .chev{color:var(--ink-soft);font-size:11px}
+  .pv-tag{display:inline-block;font-size:var(--fs-2);border-radius:var(--r-pill);padding:2px 10px;white-space:nowrap}
+  .pv-tag.d{background:var(--due-soft);color:var(--due)}
+  .pv-tag.x{background:var(--xg-soft);color:var(--xg)}
   .pv-b{border-top:1px solid var(--line);background:var(--paper);padding:var(--sp-2) var(--sp-4) var(--sp-3)}
   .pv-ln{display:grid;grid-template-columns:minmax(0,1fr) 60px 120px 110px 100px;gap:var(--sp-2);padding:8px 0;border-top:1px dashed var(--line);font-size:var(--fs-2);align-items:center}
   .pv-ln.hd{border-top:0;color:var(--ink-soft);font-size:var(--fs-1)}
@@ -1025,13 +1045,20 @@
     .pu-owe h3{padding:var(--sp-3) var(--sp-3) 0}
     .pu-ow{grid-template-columns:minmax(0,1fr) auto;padding:10px var(--sp-3)}
     .pu-ow .a{grid-column:1 / -1} .pu-ow .a .tbtn{flex:1;justify-content:center}
-    #pu-only{flex-wrap:nowrap;overflow-x:auto} #pu-only button{flex:0 0 auto}
-    .pv-h{grid-template-columns:minmax(0,1fr) auto;padding:var(--sp-3);gap:6px var(--sp-2)}
-    .pv-h .t{grid-column:1;grid-row:1}
-    .pv-h .tot{grid-column:2;grid-row:1}
-    .pv-h .it{grid-column:1 / -1;grid-row:2}
-    .pv-h .pay{grid-column:1 / -1;grid-row:3}
+    .pu-head{flex-wrap:wrap;align-items:flex-start}
+    .pu-head .tbar{width:100%} .pu-head .tbar .tbtn.primary{flex:1;justify-content:center}
+    #pu-only.pu-tabs{margin-inline:calc(-1 * var(--sp-2));padding-inline:var(--sp-1)}
+    #pu-only.pu-tabs button{padding-inline:10px}
+    .pv-h{grid-template-columns:auto minmax(0,1fr) auto;padding:12px 14px;gap:3px 10px}
+    .pv-h .ono{grid-row:1;grid-column:1}
+    .pv-h .t{grid-row:1;grid-column:2}
+    .pv-h .t b{display:inline} .pv-h .t .sub{display:inline;margin-inline-start:6px}
+    .pv-h .tot{grid-row:1;grid-column:3}
+    .pv-h .it{grid-column:2 / -1;grid-row:2}
+    .pv-h .pay{grid-column:2 / -1;grid-row:3}
+    .pv-h .pay:empty{display:none}
     .pv-h .chev{display:none}
+    .pu-mo{padding:8px 14px}
     .pv-b{padding-inline:var(--sp-3)}
     .pv-ln{grid-template-columns:minmax(0,1fr) auto auto}
     .pv-ln.hd{display:none}
@@ -2894,14 +2921,17 @@
 
 <!-- مشتريات -->
 <section id="tab-purch" hidden>
-  <h2>المشتريات والموردين<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+  <div class="pt-head pu-head"><div>
+    <h2>المشتريات<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
+    <p id="pu-top" class="money-only"></p></div>
+    <div class="tbar">
+      <button class="tbtn" type="button" data-foldbtn="pu-tools" aria-expanded="false" aria-controls="pu-tools" aria-label="حاجات تانية">⋯</button>
+      <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
+      <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
+    </div>
+  </div>
   <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <p class="hint" data-infotxt hidden>الفاتورة الواحدة ممكن تبقى كذا صنف ولون. تقدر تشتري بالكرتونة وتبيع بالقطعة — اكتب عدد القطع اللي في الكرتونة والسيستم هيحسب تكلفة القطعة. ومصاريف النقل بتتوزّع على الأصناف عشان تكلفة القطعة تطلع <strong>واصلة المخزن</strong>، وده اللي بيخلّي الربح صح.</p>
-  <div class="tbar">
-    <button class="tbtn primary" type="button" data-openentry="purchases">+ شراء جديد</button>
-    <button class="tbtn" type="button" data-foldbtn="pu-tools" aria-expanded="false" aria-controls="pu-tools">⋯ أكتر</button>
-    <input type="file" id="pu-file" accept=".csv,text/csv" hidden>
-  </div>
   <!-- الحاجات اللي مش كل يوم: استبدال مع مورد وشيت الفاتورة — ورا «⋯ أكتر» -->
   <div class="tmore-row" id="pu-tools" data-fold hidden>
     <div class="tbar">
@@ -2913,7 +2943,6 @@
   </div>
   <p class="note" id="pu-msg" hidden></p>
 
-  <div class="stats" id="pu-top"></div>
   <div id="pu-fix"></div>
   <div class="pu-owe money-only" id="pu-owe"></div>
 
@@ -3108,7 +3137,7 @@
     <div><label for="pu-to">لـ تاريخ</label><input type="date" id="pu-to"></div>
   </div>
   <div class="chips" id="pu-chips"></div>
-  <div class="quick" id="pu-only" role="group" aria-label="فلتر الفواتير"></div>
+  <div class="quick pu-tabs" id="pu-only" role="group" aria-label="فلتر الفواتير"></div>
   <div id="pu-cards"></div>
   <p class="more-wrap"><button class="tbtn" type="button" data-more="purch" hidden></button></p>
 
@@ -4361,8 +4390,13 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "181";
+  var VERSION = "182";
   var CHANGELOG = [
+    { v:"182", d:"2026-11-04", items:[
+      "المشتريات: سطر واحد تحت العنوان (عليك للموردين · الشهر ده · ولو لسه ما اشتريتش: الشهر اللي فات) بدل ٤ كروت أصفار، والفلاتر تبويبات رفيعة — «خالصة» اتشالت لأنها تقريباً كله",
+      "كل فاتورة في سطر: الرقم · المورد والتاريخ · الصنف بدواير ألوانه وعدد القطع · المبلغ — والحالة بتبان بس لو فيها حاجة (باقي · مرتجع · استبدال)",
+      "مفيش أي رقم أو حساب اتغيّر"
+    ]},
     { v:"181", d:"2026-11-04", items:[
       "المخزون: سطر واحد تحت العنوان (القطع · المحجوز · القيمة بالتكلفة) بدل ٤ كروت، والفلاتر بقت تبويبات رفيعة زي الأوردرات",
       "كل صنف في سطر: الاسم والسعر · كل لون بدايرته والمتاح منه — اللون اللي خلص دايرته فاضية ورقمه متشطّب · متاح · محجوز · «خلص · قرب يخلص»",
@@ -13131,7 +13165,9 @@
   function renderPuOnly(cnt){
     var el = document.getElementById("pu-only");
     if(!el) return;
-    var kinds = [["all","الكل"],["due","عليها فلوس"],["paid","خالصة"],["ret","مرتجعات"]];
+    // v181+: «خالصة» اتشالت من فوق — تقريباً كل الفواتير، فمش بتفرز حاجة (لسه شغالة لو اتفتحت قبل كده)
+    var kinds = [["all","الكل"],["due","عليها فلوس"],["ret","مرتجعات"]];
+    if(puOnly === "paid") kinds.splice(2, 0, ["paid","خالصة"]);
     if(cnt.xchg || puOnly === "xchg") kinds.push(["xchg","استبدال"]);
     el.innerHTML = kinds.map(function(c){
       return "<button type='button' data-puonly='" + c[0] + "'" + (puOnly === c[0] ? " class='on'" : "") + ">" +
@@ -13148,26 +13184,33 @@
   function renderPuTop(){
     var el = document.getElementById("pu-top");
     if(!el) return;
-    var m = monthRange(0), buy = 0, n = 0, pcs = 0, fr = 0, ret = 0, nr = 0;
+    var m = monthRange(0), buy = 0, n = 0, fr = 0, ret = 0, nr = 0;
     puGroupsAll().forEach(function(g){
       var d = g.head.date || "";
       if(d < m.from || d > m.to) return;
       if(puKind(g) === "xchg") return;      // الاستبدال مش شراء جديد ولا مرتجع
       var t = puSum(g);
       if(isPRet(g.head)){ ret += -t.goods; nr++; return; }
-      buy += t.goods; fr += t.fr; pcs += t.pieces; n++;
+      buy += t.goods; fr += t.fr; n++;
     });
     var ow = suppliersOwed(), owe = ow.reduce(function(a, x){ return a + x.owe; }, 0);
-    var cells = [
-      ["اشتريت الشهر ده", money(buy), "", nInv(n) + " · " + qty(pcs) + " قطعة", true],
-      ["عليك للموردين", money(owe), owe > 0.009 ? "v-due" : "", owe > 0.009 ? "عند " + qty(ow.length) + " مورد" : "كله خالص", true],
-      ["نقل الشهر ده", money(fr), "", "متوزّع على تكلفة القطع", true],
-      ["مرتجع للموردين", money(ret), "", nr ? plural(nr, "مرتجع واحد", "مرتجعين", "مرتجعات") + " الشهر ده" : "مفيش مرتجعات الشهر ده", true]
-    ];
-    el.innerHTML = cells.map(function(c){
-      return "<div" + (c[4] ? " class='money-only'" : "") + "><span>" + esc(c[0]) + "</span><strong class='num " + c[2] + "'>" +
-        esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
-    }).join("");
+    /* v182: سطر واحد تحت العنوان بدل ٤ كروت — وأول الشهر (لسه ما اشتريتش) بيقولك الشهر اللي فات بدل ٤ أصفار */
+    var parts = [owe > 0.009 ? "عليك للموردين <b class='num v-due'>" + esc(money(owe)) + "</b>" : "عليك للموردين <b>ولا حاجة ✓</b>"];
+    if(n) parts.push("الشهر ده <b class='num'>" + esc(money(buy)) + "</b> في " + esc(nInv(n)));
+    else {
+      parts.push("الشهر ده لسه ما اشتريتش");
+      var pm = monthRange(-1), pb = 0, pn = 0;
+      puGroupsAll().forEach(function(g){
+        var d = g.head.date || "";
+        if(d < pm.from || d > pm.to) return;
+        pn++;                                   // نفس عدّ عنوان الشهر في القايمة (الاستبدال والمرتجع من ضمنهم)
+        if(puKind(g) !== "xchg" && !isPRet(g.head)) pb += puSum(g).goods;
+      });
+      if(pn) parts.push(esc(monthLabel(pm.from).split(" ")[0]) + " <b class='num'>" + esc(money(pb)) + "</b> في " + esc(nInv(pn)));
+    }
+    if(fr > 0.009) parts.push("نقل " + esc(money(fr)));
+    if(nr) parts.push("مرتجع للموردين " + esc(money(ret)));
+    el.innerHTML = parts.join(" · ");
 
     var box = document.getElementById("pu-owe");
     if(!box) return;
@@ -13217,12 +13260,12 @@
     else st = "<span class='pill ok'>✓ مفيش فرق</span>";
     return "<div class='pv xg" + (isFresh ? " fresh" : "") + "' data-pv='" + esc(g.key) + "'>" +
       "<button class='pv-h' type='button' data-pvopen='" + esc(g.key) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
-        "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
-          "<span class='pt-flag xg'>⇄ استبدال</span><span class='sub'>" + esc(dShort(h.date)) +
+        "<span class='ono num'>#" + esc(h.pno || "—") + "</span>" +
+        "<span class='t'><b>" + esc(partyName(h.partyId)) + "</b><span class='sub num'>" + esc(dShort(h.date)) +
           (r0.note && r0.note !== "استبدال مع المورد" ? " · " + esc(r0.note) : "") + "</span></span>" +
-        "<span class='it sub'>" + esc(lbls(outs)) + " ← " + esc(lbls(ins)) + "</span>" +
-        "<span class='pay money-only'>" + st + "</span>" +
-        "<span class='tot'><b class='num money-only'>" + esc(money(Math.abs(D))) + "</b><small>" + (D >= 0 ? "الفرق" : "الفرق ليك") + "</small></span>" +
+        "<span class='it'>" + swatchHTML(g.rows.map(vColor)) + "<span class='nm'>" + esc(lbls(outs)) + " ← " + esc(lbls(ins)) + "</span></span>" +
+        "<span class='tot'><b class='num money-only'>" + (Math.abs(D) < 0.01 ? "—" : esc(money(Math.abs(D)))) + "</b></span>" +
+        "<span class='pay money-only'><span class='pv-tag x'>استبدال · " + st.replace(/<[^>]+>/g, "").replace(/^✓\s*/, "") + "</span></span>" +
         "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
       "</button>" +
       (open ? "<div class='pv-flow'>" +
@@ -13270,32 +13313,21 @@
       if(puKind(g) === "xchg"){ html += xchgCard(g); return; }
       var t = puSum(g), isRet = isPRet(h), open = !!openPurch[g.key];
       var names = Object.keys(g.rows.reduce(function(a, x){ a[itemName(x.itemId)] = 1; return a; }, {}));
-      var vl = g.rows.length === 1 ? vLabel(vColor(h), vSize(h)) : "";
-      var it = names.slice(0,2).join(" · ") + (names.length > 2 ? " وغيرهم" : "") +
-        (g.rows.length > 1 ? " — " + qty(g.rows.length) + " لون ومقاس" : (vl ? " — " + vl : ""));
       var isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
-      var pay;
-      if(isRet){
-        pay = "<span class='pv-pay'><span>" + (t.paid < -0.009 ? "الفلوس رجعت كاش" : "اتخصمت من حسابه") + "</span></span>";
-      } else if(t.rest > 0.009){
-        var pc = t.goods > 0 ? Math.max(0, Math.min(100, t.paid / t.goods * 100)) : 0;
-        pay = "<span class='pv-bar'><i style='width:" + pc.toFixed(1) + "%'></i></span>" +
-          "<span class='pv-pay'><span>دفعت <b class='num'>" + esc(money(t.paid)) + "</b></span>" +
-          "<span class='r'>باقي <b class='num'>" + esc(money(t.rest)) + "</b></span></span>";
-      } else {
-        pay = "<span class='pv-pay'><span class='g'>✓ خالصة</span>" +
-          (t.fr > 0.009 ? "<span>نقل <b class='num'>" + esc(money(t.fr)) + "</b></span>" : "") + "</span>";
-      }
+      /* v182: سطر واحد — الحالة بتبان بس لو فيها حاجة (باقي فلوس · مرتجع)، مش «✓ خالصة» في كل سطر */
+      var pay = isRet ? "<span class='pv-tag d'>مرتجع · " + (t.paid < -0.009 ? "الفلوس رجعت كاش" : "اتخصمت من حسابه") + "</span>"
+        : (t.rest > 0.009 ? "<span class='pv-tag d'>باقي " + esc(money(t.rest)) + "</span>" : "");
+      var cols = g.rows.map(vColor);
       html += "<div class='pv" + (isRet ? " ret" : "") + (isFresh ? " fresh" : "") + "' data-pv='" + esc(g.key) + "'>" +
         "<button class='pv-h' type='button' data-pvopen='" + esc(g.key) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
-          "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
-            (isRet ? "<span class='pt-flag'>مرتجع</span>" : "") +
-            "<span class='sub'>" + esc(dShort(h.date)) + (h.inv ? " · فاتورة " + esc(h.inv) : "") +
+          "<span class='ono num'>#" + esc(h.pno || "—") + "</span>" +
+          "<span class='t'><b>" + esc(partyName(h.partyId)) + "</b>" +
+            "<span class='sub num'>" + esc(dShort(h.date)) + (h.inv ? " · فاتورة " + esc(h.inv) : "") +
             (isRet && h.note ? " · " + esc(h.note) : "") + "</span></span>" +
-          "<span class='it sub'>" + esc(it) + "</span>" +
+          "<span class='it'>" + swatchHTML(cols) + "<span class='nm'>" + esc(names.slice(0,2).join(" · ") + (names.length > 2 ? " وغيرهم" : "")) + "</span>" +
+            "<span class='sub num'>" + esc(nPcs(Math.abs(t.pieces))) + "</span></span>" +
+          "<span class='tot'><b class='num money-only" + (isRet ? " v-due" : "") + "'>" + esc(money(t.goods)) + "</b></span>" +
           "<span class='pay money-only'>" + pay + "</span>" +
-          "<span class='tot'><b class='num money-only" + (isRet ? " v-due" : "") + "'>" + esc(money(t.goods)) + "</b>" +
-            "<small>" + qty(Math.abs(t.pieces)) + " قطعة</small></span>" +
           "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
         "</button>";
       if(open){

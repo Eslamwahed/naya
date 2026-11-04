@@ -902,7 +902,9 @@
   function renderPuOnly(cnt){
     var el = document.getElementById("pu-only");
     if(!el) return;
-    var kinds = [["all","الكل"],["due","عليها فلوس"],["paid","خالصة"],["ret","مرتجعات"]];
+    // v181+: «خالصة» اتشالت من فوق — تقريباً كل الفواتير، فمش بتفرز حاجة (لسه شغالة لو اتفتحت قبل كده)
+    var kinds = [["all","الكل"],["due","عليها فلوس"],["ret","مرتجعات"]];
+    if(puOnly === "paid") kinds.splice(2, 0, ["paid","خالصة"]);
     if(cnt.xchg || puOnly === "xchg") kinds.push(["xchg","استبدال"]);
     el.innerHTML = kinds.map(function(c){
       return "<button type='button' data-puonly='" + c[0] + "'" + (puOnly === c[0] ? " class='on'" : "") + ">" +
@@ -919,26 +921,33 @@
   function renderPuTop(){
     var el = document.getElementById("pu-top");
     if(!el) return;
-    var m = monthRange(0), buy = 0, n = 0, pcs = 0, fr = 0, ret = 0, nr = 0;
+    var m = monthRange(0), buy = 0, n = 0, fr = 0, ret = 0, nr = 0;
     puGroupsAll().forEach(function(g){
       var d = g.head.date || "";
       if(d < m.from || d > m.to) return;
       if(puKind(g) === "xchg") return;      // الاستبدال مش شراء جديد ولا مرتجع
       var t = puSum(g);
       if(isPRet(g.head)){ ret += -t.goods; nr++; return; }
-      buy += t.goods; fr += t.fr; pcs += t.pieces; n++;
+      buy += t.goods; fr += t.fr; n++;
     });
     var ow = suppliersOwed(), owe = ow.reduce(function(a, x){ return a + x.owe; }, 0);
-    var cells = [
-      ["اشتريت الشهر ده", money(buy), "", nInv(n) + " · " + qty(pcs) + " قطعة", true],
-      ["عليك للموردين", money(owe), owe > 0.009 ? "v-due" : "", owe > 0.009 ? "عند " + qty(ow.length) + " مورد" : "كله خالص", true],
-      ["نقل الشهر ده", money(fr), "", "متوزّع على تكلفة القطع", true],
-      ["مرتجع للموردين", money(ret), "", nr ? plural(nr, "مرتجع واحد", "مرتجعين", "مرتجعات") + " الشهر ده" : "مفيش مرتجعات الشهر ده", true]
-    ];
-    el.innerHTML = cells.map(function(c){
-      return "<div" + (c[4] ? " class='money-only'" : "") + "><span>" + esc(c[0]) + "</span><strong class='num " + c[2] + "'>" +
-        esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
-    }).join("");
+    /* v182: سطر واحد تحت العنوان بدل ٤ كروت — وأول الشهر (لسه ما اشتريتش) بيقولك الشهر اللي فات بدل ٤ أصفار */
+    var parts = [owe > 0.009 ? "عليك للموردين <b class='num v-due'>" + esc(money(owe)) + "</b>" : "عليك للموردين <b>ولا حاجة ✓</b>"];
+    if(n) parts.push("الشهر ده <b class='num'>" + esc(money(buy)) + "</b> في " + esc(nInv(n)));
+    else {
+      parts.push("الشهر ده لسه ما اشتريتش");
+      var pm = monthRange(-1), pb = 0, pn = 0;
+      puGroupsAll().forEach(function(g){
+        var d = g.head.date || "";
+        if(d < pm.from || d > pm.to) return;
+        pn++;                                   // نفس عدّ عنوان الشهر في القايمة (الاستبدال والمرتجع من ضمنهم)
+        if(puKind(g) !== "xchg" && !isPRet(g.head)) pb += puSum(g).goods;
+      });
+      if(pn) parts.push(esc(monthLabel(pm.from).split(" ")[0]) + " <b class='num'>" + esc(money(pb)) + "</b> في " + esc(nInv(pn)));
+    }
+    if(fr > 0.009) parts.push("نقل " + esc(money(fr)));
+    if(nr) parts.push("مرتجع للموردين " + esc(money(ret)));
+    el.innerHTML = parts.join(" · ");
 
     var box = document.getElementById("pu-owe");
     if(!box) return;
@@ -988,12 +997,12 @@
     else st = "<span class='pill ok'>✓ مفيش فرق</span>";
     return "<div class='pv xg" + (isFresh ? " fresh" : "") + "' data-pv='" + esc(g.key) + "'>" +
       "<button class='pv-h' type='button' data-pvopen='" + esc(g.key) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
-        "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
-          "<span class='pt-flag xg'>⇄ استبدال</span><span class='sub'>" + esc(dShort(h.date)) +
+        "<span class='ono num'>#" + esc(h.pno || "—") + "</span>" +
+        "<span class='t'><b>" + esc(partyName(h.partyId)) + "</b><span class='sub num'>" + esc(dShort(h.date)) +
           (r0.note && r0.note !== "استبدال مع المورد" ? " · " + esc(r0.note) : "") + "</span></span>" +
-        "<span class='it sub'>" + esc(lbls(outs)) + " ← " + esc(lbls(ins)) + "</span>" +
-        "<span class='pay money-only'>" + st + "</span>" +
-        "<span class='tot'><b class='num money-only'>" + esc(money(Math.abs(D))) + "</b><small>" + (D >= 0 ? "الفرق" : "الفرق ليك") + "</small></span>" +
+        "<span class='it'>" + swatchHTML(g.rows.map(vColor)) + "<span class='nm'>" + esc(lbls(outs)) + " ← " + esc(lbls(ins)) + "</span></span>" +
+        "<span class='tot'><b class='num money-only'>" + (Math.abs(D) < 0.01 ? "—" : esc(money(Math.abs(D)))) + "</b></span>" +
+        "<span class='pay money-only'><span class='pv-tag x'>استبدال · " + st.replace(/<[^>]+>/g, "").replace(/^✓\s*/, "") + "</span></span>" +
         "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
       "</button>" +
       (open ? "<div class='pv-flow'>" +
@@ -1041,32 +1050,21 @@
       if(puKind(g) === "xchg"){ html += xchgCard(g); return; }
       var t = puSum(g), isRet = isPRet(h), open = !!openPurch[g.key];
       var names = Object.keys(g.rows.reduce(function(a, x){ a[itemName(x.itemId)] = 1; return a; }, {}));
-      var vl = g.rows.length === 1 ? vLabel(vColor(h), vSize(h)) : "";
-      var it = names.slice(0,2).join(" · ") + (names.length > 2 ? " وغيرهم" : "") +
-        (g.rows.length > 1 ? " — " + qty(g.rows.length) + " لون ومقاس" : (vl ? " — " + vl : ""));
       var isFresh = g.rows.some(function(x){ return x.batchId && x.batchId === freshBatch; });
-      var pay;
-      if(isRet){
-        pay = "<span class='pv-pay'><span>" + (t.paid < -0.009 ? "الفلوس رجعت كاش" : "اتخصمت من حسابه") + "</span></span>";
-      } else if(t.rest > 0.009){
-        var pc = t.goods > 0 ? Math.max(0, Math.min(100, t.paid / t.goods * 100)) : 0;
-        pay = "<span class='pv-bar'><i style='width:" + pc.toFixed(1) + "%'></i></span>" +
-          "<span class='pv-pay'><span>دفعت <b class='num'>" + esc(money(t.paid)) + "</b></span>" +
-          "<span class='r'>باقي <b class='num'>" + esc(money(t.rest)) + "</b></span></span>";
-      } else {
-        pay = "<span class='pv-pay'><span class='g'>✓ خالصة</span>" +
-          (t.fr > 0.009 ? "<span>نقل <b class='num'>" + esc(money(t.fr)) + "</b></span>" : "") + "</span>";
-      }
+      /* v182: سطر واحد — الحالة بتبان بس لو فيها حاجة (باقي فلوس · مرتجع)، مش «✓ خالصة» في كل سطر */
+      var pay = isRet ? "<span class='pv-tag d'>مرتجع · " + (t.paid < -0.009 ? "الفلوس رجعت كاش" : "اتخصمت من حسابه") + "</span>"
+        : (t.rest > 0.009 ? "<span class='pv-tag d'>باقي " + esc(money(t.rest)) + "</span>" : "");
+      var cols = g.rows.map(vColor);
       html += "<div class='pv" + (isRet ? " ret" : "") + (isFresh ? " fresh" : "") + "' data-pv='" + esc(g.key) + "'>" +
         "<button class='pv-h' type='button' data-pvopen='" + esc(g.key) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
-          "<span class='t'><span class='ono'>#" + esc(h.pno || "—") + "</span><b>" + esc(partyName(h.partyId)) + "</b>" +
-            (isRet ? "<span class='pt-flag'>مرتجع</span>" : "") +
-            "<span class='sub'>" + esc(dShort(h.date)) + (h.inv ? " · فاتورة " + esc(h.inv) : "") +
+          "<span class='ono num'>#" + esc(h.pno || "—") + "</span>" +
+          "<span class='t'><b>" + esc(partyName(h.partyId)) + "</b>" +
+            "<span class='sub num'>" + esc(dShort(h.date)) + (h.inv ? " · فاتورة " + esc(h.inv) : "") +
             (isRet && h.note ? " · " + esc(h.note) : "") + "</span></span>" +
-          "<span class='it sub'>" + esc(it) + "</span>" +
+          "<span class='it'>" + swatchHTML(cols) + "<span class='nm'>" + esc(names.slice(0,2).join(" · ") + (names.length > 2 ? " وغيرهم" : "")) + "</span>" +
+            "<span class='sub num'>" + esc(nPcs(Math.abs(t.pieces))) + "</span></span>" +
+          "<span class='tot'><b class='num money-only" + (isRet ? " v-due" : "") + "'>" + esc(money(t.goods)) + "</b></span>" +
           "<span class='pay money-only'>" + pay + "</span>" +
-          "<span class='tot'><b class='num money-only" + (isRet ? " v-due" : "") + "'>" + esc(money(t.goods)) + "</b>" +
-            "<small>" + qty(Math.abs(t.pieces)) + " قطعة</small></span>" +
           "<span class='chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span>" +
         "</button>";
       if(open){
