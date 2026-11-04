@@ -1787,6 +1787,62 @@
 
   .c-src{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);grid-column:1/-1;margin-top:var(--sp-3)}
   @media (max-width:760px){ .c-src{grid-template-columns:1fr} }
+  /* ═══ v187 — قايمة الدخل: الفترة تبويبات · «اللي خلص» أول ما تفتح · عمودين بس · التحليلات مطوية ═══ */
+  .rep-per{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-3);border-bottom:1px solid var(--line);margin-bottom:var(--sp-4)}
+  .rep-per-t{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+  .rep-per-t button{flex:0 0 auto;border:0;background:none;font:inherit;padding:10px 14px 12px;color:var(--ink-soft);font-size:var(--fs-3);position:relative;cursor:pointer}
+  .rep-per-t button:hover{color:var(--ink)}
+  .rep-per-t button.on{color:var(--ink);font-weight:500}
+  .rep-per-t button.on::after{content:"";position:absolute;inset-inline:10px;bottom:-1px;height:2px;background:var(--teal);border-radius:2px 2px 0 0}
+  .rep-prt{padding-bottom:8px}
+  .rep-per-in[hidden]{display:none}
+  .rep-cust{display:flex;gap:var(--sp-3);margin:-6px 0 var(--sp-4)}
+  .rep-cust[hidden]{display:none}
+  .rep-cust > div{min-width:160px}
+  #pis-panel{padding:0;overflow:hidden;border-radius:14px}
+  #pis-panel .pis-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap;padding:16px 18px 12px}
+  #pis-panel .pis-head h3{margin:0;font-size:var(--fs-4)}
+  #pis-panel .pis-head h3 small{display:block;margin-top:2px}
+  #pis-panel .pis-head h3 small b{font-weight:600}
+  .pis-seg{display:inline-flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:99px;background:var(--card)}
+  .pis-seg button{font:inherit;font-size:var(--fs-2);border:0;background:none;border-radius:99px;padding:5px 14px;color:var(--ink-soft);cursor:pointer}
+  .pis-seg button.on{background:var(--teal);color:var(--on-accent);font-weight:600}
+  .pis-seg button[data-pism="noads"]{display:none}
+  #pis-panel #pis-note{margin:0;padding:10px 18px 14px;font-size:var(--fs-2);color:var(--ink-soft);order:3}
+  #pis-panel .tbl-wrap{border:0;border-radius:0;border-top:1px solid var(--line)}
+  #t-pis{width:100%}
+  #t-pis th{background:var(--paper);font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)}
+  #t-pis td{padding-top:10px;padding-bottom:10px}
+  #t-pis td.pis-a{font-weight:600;color:var(--ink)}
+  #t-pis td.pis-p{color:var(--ink-soft);font-size:var(--fs-2)}
+  #t-pis tr.pis-tot td{background:color-mix(in srgb,var(--paper) 55%,var(--card));font-weight:600}
+  #t-pis tr.pis-net td{background:var(--gain-soft);font-weight:600;font-size:var(--fs-4)}
+  #t-pis tr.pis-net td.pis-a{color:var(--gain);font-size:var(--fs-5)}
+  #pis-panel{display:flex;flex-direction:column}
+  #pis-panel > .pis-head{order:0} #pis-panel > .pis-na{order:1} #pis-panel > .tbl-wrap{order:2}
+  details.rep-fold{padding:0;margin-bottom:var(--sp-2);border-radius:14px}
+  details.rep-fold > summary{list-style:none;cursor:pointer;padding:13px 18px;font-size:var(--fs-3);font-weight:500;display:flex;justify-content:space-between;gap:var(--sp-3)}
+  details.rep-fold > summary::-webkit-details-marker{display:none}
+  details.rep-fold > summary b,details.rep-fold > summary small{font-weight:400;color:var(--ink-soft);font-size:var(--fs-2)}
+  details.rep-fold[open] > summary{border-bottom:1px solid var(--line)}
+  details.rep-fold > :not(summary){margin-inline:18px}
+  details.rep-fold > :last-child{margin-bottom:16px}
+  details.rep-fold > .fold-h{margin-top:12px}
+  @media (max-width:760px){
+    .rep-per{flex-direction:column;align-items:stretch;gap:0}
+    .rep-per-t{margin-inline:calc(-1 * var(--sp-2));padding-inline:var(--sp-1)}
+    .rep-per-t button{padding-inline:10px}
+    .rep-prt{padding:8px 0}
+    details.rep-fold > summary{flex-direction:column;gap:2px}
+  }
+  #tab-rep .rsecs{padding:0;border-radius:14px;overflow:hidden}
+  #tab-rep .rsecs > .rsec{margin:0;border-top:1px solid var(--line)}
+  #tab-rep .rsecs > .rsec:first-child,#tab-rep .rsecs > .rsec[hidden] + .rsec{border-top:0}
+  #tab-rep .rsecs > .rsec > summary{padding:13px 18px;font-size:var(--fs-3);font-weight:500}
+  #tab-rep .rsecs > .rsec > summary b{font-weight:400;color:var(--ink-soft);font-size:var(--fs-2)}
+  #tab-rep .rsecs > .rsec[open]{padding-bottom:var(--sp-3)}
+  #tab-rep .rsecs > .rsec > :not(summary){margin-inline:18px}
+  #pis-panel .pis-head h3 small{margin:0}
   /* v133: تقرير الشركاء — ثيم Lora Plum. ألوانه من --lp-* الثابتة: التقرير بيتطبع فاتح حتى لو السيستم ليلي */
   #prt{position:fixed;inset:0;z-index:60;background:#E9E3E8;overflow:auto;direction:rtl}
   #prt[hidden]{display:none}
@@ -3871,21 +3927,30 @@
   <h2>تقارير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
   <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <p class="hint" data-infotxt hidden>كل الأرقام هنا بتتبع نفس فترة لوحة المتابعة.</p>
-  <div class="panel" style="padding:12px 14px">
-    <div class="grid" style="align-items:end">
-      <div><label for="per-rep">الفترة</label>
-        <select id="per-rep" class="per">
-          <option value="all">كل الفترات</option>
-          <option value="month">الشهر ده</option>
-          <option value="prev">الشهر اللي فات</option>
-          <option value="d30">آخر ٣٠ يوم</option>
-          <option value="custom">فترة محددة</option>
-        </select></div>
-      <div class="per-cust" hidden><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
-      <div class="per-cust" hidden><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
-      <div style="grid-column:1/-1"><p class="note ok" id="per-label-rep" style="margin:0"></p></div>
-      <div class="money-only" style="grid-column:1/-1;display:flex;justify-content:flex-start"><button class="tbtn primary" type="button" id="b-prt">⎙ تقرير الشهر للشركاء</button></div>
+  <!-- v187: الفترة تبويبات رفيعة بدل قايمة في كارت لوحده — نفس select.per من ورا عشان باقي الشاشات تفضل متزامنة -->
+  <div class="rep-per">
+    <div class="rep-per-t" id="rep-per" role="group" aria-label="الفترة">
+      <button type="button" data-repper="month">الشهر ده</button>
+      <button type="button" data-repper="prev">الشهر اللي فات</button>
+      <button type="button" data-repper="d30">آخر 30 يوم</button>
+      <button type="button" data-repper="all">كل الفترات</button>
+      <button type="button" data-repper="custom">فترة محددة</button>
     </div>
+    <div class="money-only rep-prt"><button class="tbtn" type="button" id="b-prt">⎙ تقرير للشركاء</button></div>
+  </div>
+  <div class="rep-per-in" hidden>
+    <select id="per-rep" class="per" aria-label="الفترة">
+      <option value="all">كل الفترات</option>
+      <option value="month">الشهر ده</option>
+      <option value="prev">الشهر اللي فات</option>
+      <option value="d30">آخر ٣٠ يوم</option>
+      <option value="custom">فترة محددة</option>
+    </select>
+    <p id="per-label-rep"></p>
+  </div>
+  <div class="rep-cust per-cust" hidden>
+    <div><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
+    <div><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
   </div>
 
   <!-- v126: التقارير تبويبات بدل صفحة طويلة — كل تبويب فيه حاجته بس -->
@@ -3940,11 +4005,10 @@
 
   <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
   <div class="panel money-only" id="pis-panel" data-rt="sum">
-    <div class="pis-head"><h3>قايمة الدخل <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
-      <div class="quick" id="pis-mode" role="group" aria-label="الأوردرات">
-        <button type="button" data-pism="exp" class="on">لو كله اتسلّم</button>
-        <button type="button" data-pism="act">اتسلّم فعلاً</button>
-        <button type="button" data-pism="noads">من غير إعلانات</button>
+    <div class="pis-head"><h3><small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-3);color:var(--ink-soft)"></small></h3>
+      <div class="pis-seg" id="pis-mode" role="group" aria-label="الأوردرات">
+        <button type="button" data-pism="act" class="on">اللي خلص</button>
+        <button type="button" data-pism="exp">لو كله اتسلّم</button>
       </div></div>
     <div class="pis-na" id="pis-na" hidden></div>
     <p class="hint" id="pis-note" style="margin:0 0 var(--sp-3)"></p>
@@ -3952,8 +4016,9 @@
   </div>
 
   <!-- السؤال الأهم: أبيع بكام؟ -->
-  <div class="panel" data-rt="sum">
-    <div class="fold-h"><h3>عشان تبدأ تكسب <small id="rep-be-sum"></small></h3>
+  <details class="panel rep-fold" data-rt="sum">
+    <summary>الأوردر الواحد بيكسب كام؟ وإمتى تبدأ تكسب <b id="rep-be-sum"></b></summary>
+    <div class="fold-h"><span></span>
       <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">عشان أكسب مبلغ معيّن ▾</button></div>
     <div class="money3" id="rep-be"></div>
     <div id="rep-be-body" data-fold hidden>
@@ -3975,14 +4040,14 @@
       <div class="tbl-wrap"><table id="t-rep-cost"></table></div>
     </details>
     </div>
-  </div>
+  </details>
 
   <!-- الأداء -->
-  <div class="panel" data-rt="sum">
-    <h3>تقييم الأداء</h3>
+  <details class="panel rep-fold" data-rt="sum">
+    <summary>تقييم الأداء <b>هامش البضاعة · الرفض · متوسط الأوردر</b></summary>
     <div class="stats" id="rep-kpi"></div>
     <p class="hint" id="rep-kpi-wait" hidden style="margin:var(--sp-2) 0 0"></p>
-  </div>
+  </details>
 
   <!-- v126: ربح كل صنف بعد الإعلان والشحن -->
   <div class="panel money-only" id="rep-itp-panel" data-rt="items">
@@ -3998,7 +4063,7 @@
 
   <!-- الباقي مطوي -->
   <div class="panel rsecs">
-    <details class="rsec" open data-rt="sum">
+    <details class="rsec" data-rt="sum">
       <summary>الربح شهر بشهر <b>هل بتتحسّن ولا بتتراجع؟</b></summary>
       <div class="tbl-wrap"><table id="t-rep-months"></table></div>
     </details>
@@ -4531,8 +4596,15 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "186";
+  var VERSION = "187";
   var CHANGELOG = [
+    { v:"187", d:"2026-11-04", items:[
+      "قايمة الدخل بتفتح على «اللي خلص» — نفس صافي الربح اللي في الميزانية و«فلوسكم فين؟»، و«لو كله اتسلّم» بدوسة",
+      "الفترة تبويبات رفيعة (الشهر ده · اللي فات · آخر 30 يوم · كل الفترات · فترة محددة) بدل قايمة في كارت لوحده",
+      "الجدول عمودين بس (المبلغ · من المبيعات) من غير قروش، والشرح الطويل بقى سطر واحد",
+      "الأوردر الواحد · تقييم الأداء · الربح شهر بشهر · لو حصل كذا — كلهم مطويين تحت",
+      "مفيش أي رقم أو حساب اتغيّر"
+    ]},
     { v:"186", d:"2026-11-04", items:[
       "الشركاء: جدول واحد بدل كارت لكل شريك — الاسم · نسبته بشريط · رأس ماله · نصيبه من الربح (الشهر ده · اللي فات · من البداية)، وأزرار كل شريك جوه «⋯»",
       "«الشركة عليها لشريك» تنبيه فوق بيبان بس لو فيه حاجة · «أرباح ما خدهاش» بتبان بس لو فيها رقم",
@@ -6987,6 +7059,10 @@
     });
     var r0 = periodRange();
     var txt = r0 ? ("الفترة: من " + r0.from + " لـ " + r0.to) : "كل الحركات المسجّلة من البداية";
+    Array.prototype.forEach.call(document.querySelectorAll("[data-repper]"), function(b){   // v187: تبويبات فترة التقارير
+      b.classList.toggle("on", b.dataset.repper === period.mode);
+      b.setAttribute("aria-pressed", b.dataset.repper === period.mode ? "true" : "false");
+    });
     ["per-label","per-label-rep","per-label-viz"].forEach(function(id){
       var lbl = document.getElementById(id);
       if(lbl) lbl.textContent = txt;
@@ -8971,7 +9047,7 @@
      و«اتسلّم فعلاً» (نفس periodStats) — وجنبه «على الأوردر» و«من المبيعات».
      المصاريف بأنواعها (expByCat): المتغيّر فوق «ربح الأوردر بعد مصاريف البيع»
      والثابت تحته. الأرقام من projStats — نفس اللي في الرئيسية و«ماشي إزاي؟». */
-  var pisMode = "exp";
+  var pisMode = "act";            // v187: بتفتح على «اللي خلص» — نفس رقم الميزانية و«فلوسكم فين؟»
   // نسبة الرفض من كل الأوردرات اللي خلصت — بتتحسب من ٥ أوردرات على الأقل
   function refusalRate(){
     var d = 0, x = 0;
@@ -8987,13 +9063,13 @@
     var v = noAds ? pisNoAds(base) : base;
     Array.prototype.forEach.call(document.querySelectorAll("#pis-mode [data-pism]"), function(b){
       b.classList.toggle("on", b.dataset.pism === pisMode);
-      b.textContent = b.dataset.pism === "act" ? "اتسلّم فعلاً (" + qty(P.nDone) + ")"
-        : b.dataset.pism === "noads" ? "من غير إعلانات" : "لو كله اتسلّم (" + qty(P.n) + " أوردر)";
+      b.setAttribute("aria-pressed", b.dataset.pism === pisMode ? "true" : "false");
+      b.textContent = b.dataset.pism === "act" ? "اللي خلص" : b.dataset.pism === "noads" ? "من غير إعلانات" : "لو كله اتسلّم";
     });
     var na = document.getElementById("pis-na");
     if(na) na.hidden = pisMode !== "noads";
     if(noAds) renderPisNoAds(P);
-    var n = v.n, g = v.goods;
+    var g = v.goods;
     var tag = function(k){ return k ? " <span class='pis-tag " + k + "'>" + (k === "var" ? "متغيّر" : "ثابت") + "</span>" : ""; };
     // kind "" = بند بيتطرح (أحمر لو فيه مبلغ) · "sum" = إجمالي بلون إشارته
     // dd = البند بيتفتح بالدوس ويوريك الأوردرات أو المصاريف اللي جواه (v126)
@@ -9003,18 +9079,18 @@
       return "<tr" + (cls ? " class='" + cls + "'" : "") +
         (dd ? " data-pisdd='" + dd + "' tabindex='0' role='button' aria-expanded='" + (pisOpen === dd) + "'" : "") +
         "><td class='wide'>" + (dd ? "<span class='pis-l'>" + label + "</span>" : label) + (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td>" +
-        "<td class='num " + c + "'>" + money(val) + "</td>" +
-        "<td class='num " + c + "'>" + (n ? money(val / n) : "—") + "</td>" +
-        "<td class='num' style='color:var(--ink-soft)'>" + (g > 0.009 ? "<span dir='ltr'>" + (val / g * 100).toFixed(1) + "%</span>" : "—") + "</td></tr>" +
-        (dd && pisOpen === dd ? "<tr class='pis-dd'><td colspan='4'>" + pisDrill(dd, P) + "</td></tr>" : "");
+        // v187: المبلغ من غير قروش، و«على الأوردر» اتشال (موجود في «الأوردر الواحد بيكسب كام؟» تحت)
+        "<td class='num pis-a'>" + esc(qty(Math.round(val))) + "</td>" +
+        "<td class='num pis-p'>" + (g > 0.009 ? "<span dir='ltr'>" + (Math.abs(val / g - 1) < 1e-9 ? "100" : (val / g * 100).toFixed(1)) + "%</span>" : "—") + "</td></tr>" +
+        (dd && pisOpen === dd ? "<tr class='pis-dd'><td colspan='3'>" + pisDrill(dd, P) + "</td></tr>" : "");
     };
     var rows = [];
     rows.push(row("<b>المبيعات</b>", g, "base", "", "", "goods"));
     rows.push(row("− تكلفة البضاعة", v.cost, "", "", trIdx().total > 0.009 ? "فيها نصيب القطع من انتقالات شراء البضاعة" : "", "cost"));
     rows.push(row("= ربح البضاعة", v.gross, "sum", "pis-tot"));
     rows.push(v.ship >= 0
-      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship")
-      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(money(v.sin)) + " · الشركة " + esc(money(v.sout)), "ship"));
+      ? row("+ ربح الشحن", v.ship, "sum", "", "العميل دفع " + esc(qty(Math.round(v.sin))) + " · الشركة " + esc(qty(Math.round(v.sout))), "ship")
+      : row("− فرق الشحن", -v.ship, "", "", "العميل دفع " + esc(qty(Math.round(v.sin))) + " · الشركة " + esc(qty(Math.round(v.sout))), "ship"));
     rows.push(noAds
       ? row("− إعلانات" + tag("var"), 0, "", "", v.adsOff > 0.009 ? "متشالة من الحسبة — اتصرف فعلاً " + esc(money(v.adsOff)) : "")
       : row("− إعلانات" + tag("var"), v.ads, "", "", "", v.ads > 0.009 ? "ads" : ""));
@@ -9026,11 +9102,11 @@
       if(Math.abs(v[x[0]]) > 0.009) rows.push(row("− " + x[1] + tag("fixed"), v[x[0]], "", "", "", x[0]));
     });
     rows.push(row("= صافي الربح", v.net, "sum", "pis-net"));
-    table("t-pis", ["البند", "المبلغ", "على الأوردر" + (n ? " (÷" + qty(n) + ")" : ""), "من المبيعات"], rows, "");
+    table("t-pis", ["البند", "المبلغ", "من المبيعات"], rows, "");
 
     var sm = document.getElementById("pis-sum");
-    if(sm) sm.innerHTML = "لو كله اتسلّم: <b class='num " + (P.exp.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.exp.net)) + "</b>" +
-      " · اتسلّم فعلاً: <b class='num " + (P.act.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(P.act.net)) + "</b>";
+    if(sm) sm.innerHTML = "صافي الربح <b class='num " + (P.act.net >= 0 ? "v-gain" : "v-due") + "'>" + esc(qty(Math.round(P.act.net))) + "</b> على اللي خلص" +
+      (P.nOpen ? " · ولو الـ" + qty(P.nOpen) + " اللي مع المندوب اتسلّموا: <b class='num'>" + esc(qty(Math.round(P.exp.net))) + "</b>" : "");
     var rf = refusalRate(), adj = null;
     if(rf && P.nOpen){
       adj = P.c.net;
@@ -9038,18 +9114,13 @@
     }
     var un = unclassifiedExpenses(), T = trIdx();
     var nt = document.getElementById("pis-note");
-    if(nt) nt.innerHTML = (noAds
-        ? "<b>«من غير إعلانات»</b> = نفس قايمة <b>«" + (pisNaBase === "act" ? "اتسلّم فعلاً" : "لو كله اتسلّم") + "»</b> بالظبط بس الإعلانات صفر — بيوريك البضاعة والشحن والمصاريف التانية بيكسبوا لوحدهم ولا لأ. <b>مش معناه</b> إن الأوردرات كانت هتيجي من غير إعلان."
-        : pisMode === "act"
-        ? "<b>«اتسلّم فعلاً»</b> = الأوردرات اللي اتسلّمت أو اتلغت في الفترة بس، ومقابلها كل مصاريف الفترة."
-        : "<b>«لو كله اتسلّم»</b> = اللي اتسلّم فعلاً + الـ" + qty(P.nOpen) + " أوردر اللي لسه ماشيين لو العملاء خدوهم كلهم — <b>قبل أي رفض</b>.") +
-      (adj !== null && pisMode !== "act" ? " لو الرفض فضل " + Math.round(rf.p * 100) + "% زي ما هو (" + qty(rf.x) + " من " + qty(rf.n) + "): <b class='num " + (adj >= 0 ? "v-gain" : "v-due") + "'>" + esc(money(adj)) + "</b>." : "") +
-      " «على الأوردر» = المبلغ ÷ عدد الأوردرات. الإعلان والتغليف <b>متغيّر</b> (بيزيد مع كل أوردر)، والباقي <b>ثابت</b>." +
-      (T.total > 0.009 ? " انتقالات شراء البضاعة (" + esc(money(T.total)) + ") اتحطت على تكلفة القطع اللي اتشرت في المشوار — اللي اتباع منها في التكلفة فوق، والباقي في قيمة المخزون." : "") +
-      (T.unlinked.length ? " <span class='v-due'>" + qty(T.unlinked.length) + " مشوار شراء مالوش فاتورة في نفس الأيام — اتحسب مصروف ثابت.</span>" : "") +
-      (un ? " <span style='color:var(--ink-soft)'>" + qty(un) + " مصروف نوعه اتعرف من البيان — لو فيه غلط عدّله من الخزنة.</span>" : "") +
-      (prepaidTotal() > 0.009 ? " المصاريف محسوبة على أيامها: <b class='num'>" + esc(money(prepaidTotal())) + "</b> اتدفعت مقدّم (رصيد فيسبوك واشتراكات) ولسه ما دخلتش — في «المدفوع مقدّماً»." : "") +
-      (P.noCost ? " <span class='v-due'>" + esc(qty(P.noCost)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
+    // v187: سطر واحد بس — الشرح الطويل كان بيزحم الشاشة. التحذيرات (لو فيه) بتفضل ظاهرة
+    if(nt) nt.innerHTML = "دوس على أي بند تشوف تفاصيله" +
+      (pisMode === "exp" && P.nOpen ? " · «لو كله اتسلّم» = نفس الحساب + الـ" + qty(P.nOpen) + " أوردر اللي مع المندوب لو العملاء خدوهم كلهم" +
+        (adj !== null ? " (ولو الرفض فضل " + Math.round(rf.p * 100) + "%: <b class='num'>" + esc(qty(Math.round(adj))) + "</b>)" : "") : "") +
+      (T.unlinked.length ? " · <span class='v-due'>" + qty(T.unlinked.length) + " مشوار شراء مالوش فاتورة — اتحسب مصروف ثابت.</span>" : "") +
+      (un ? " · " + qty(un) + " مصروف نوعه اتعرف من البيان — لو فيه غلط عدّله من الخزنة." : "") +
+      (P.noCost ? " · <span class='v-due'>" + esc(qty(P.noCost)) + " أوردر فيهم صنف لسه ما اتشراش — بره الحسبة.</span>" : "");
   }
   /* v130: «من غير إعلانات» — نفس القايمة بالوضعين جنب بعض («لو كله اتسلّم» و«اتسلّم فعلاً»)
      والإعلانات صفر. نسخة من الأرقام، الأصل ما بيتغيّرش. */
@@ -19658,6 +19729,10 @@
       period.mode = this.value;
       syncPeriodUI(); renderAll();
     });
+  });
+  document.getElementById("rep-per").addEventListener("click", function(e){
+    var b = e.target.closest("[data-repper]"); if(!b) return;
+    period.mode = b.dataset.repper; syncPeriodUI(); renderAll();
   });
   Array.prototype.forEach.call(document.querySelectorAll(".per-from"), function(el){
     el.addEventListener("change", function(){ period.from = this.value; period.mode="custom"; syncPeriodUI(); renderAll(); });

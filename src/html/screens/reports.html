@@ -3,21 +3,30 @@
   <h2>تقارير<button type="button" class="info-b" data-info aria-expanded="false" aria-label="شرح الشاشة" title="شرح الشاشة">ⓘ</button></h2>
   <div class="pseg" role="group" aria-label="الجزء" hidden></div>
   <p class="hint" data-infotxt hidden>كل الأرقام هنا بتتبع نفس فترة لوحة المتابعة.</p>
-  <div class="panel" style="padding:12px 14px">
-    <div class="grid" style="align-items:end">
-      <div><label for="per-rep">الفترة</label>
-        <select id="per-rep" class="per">
-          <option value="all">كل الفترات</option>
-          <option value="month">الشهر ده</option>
-          <option value="prev">الشهر اللي فات</option>
-          <option value="d30">آخر ٣٠ يوم</option>
-          <option value="custom">فترة محددة</option>
-        </select></div>
-      <div class="per-cust" hidden><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
-      <div class="per-cust" hidden><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
-      <div style="grid-column:1/-1"><p class="note ok" id="per-label-rep" style="margin:0"></p></div>
-      <div class="money-only" style="grid-column:1/-1;display:flex;justify-content:flex-start"><button class="tbtn primary" type="button" id="b-prt">⎙ تقرير الشهر للشركاء</button></div>
+  <!-- v187: الفترة تبويبات رفيعة بدل قايمة في كارت لوحده — نفس select.per من ورا عشان باقي الشاشات تفضل متزامنة -->
+  <div class="rep-per">
+    <div class="rep-per-t" id="rep-per" role="group" aria-label="الفترة">
+      <button type="button" data-repper="month">الشهر ده</button>
+      <button type="button" data-repper="prev">الشهر اللي فات</button>
+      <button type="button" data-repper="d30">آخر 30 يوم</button>
+      <button type="button" data-repper="all">كل الفترات</button>
+      <button type="button" data-repper="custom">فترة محددة</button>
     </div>
+    <div class="money-only rep-prt"><button class="tbtn" type="button" id="b-prt">⎙ تقرير للشركاء</button></div>
+  </div>
+  <div class="rep-per-in" hidden>
+    <select id="per-rep" class="per" aria-label="الفترة">
+      <option value="all">كل الفترات</option>
+      <option value="month">الشهر ده</option>
+      <option value="prev">الشهر اللي فات</option>
+      <option value="d30">آخر ٣٠ يوم</option>
+      <option value="custom">فترة محددة</option>
+    </select>
+    <p id="per-label-rep"></p>
+  </div>
+  <div class="rep-cust per-cust" hidden>
+    <div><label for="per-from-rep">من</label><input type="date" id="per-from-rep" class="per-from"></div>
+    <div><label for="per-to-rep">لـ</label><input type="date" id="per-to-rep" class="per-to"></div>
   </div>
 
   <!-- v126: التقارير تبويبات بدل صفحة طويلة — كل تبويب فيه حاجته بس -->
@@ -72,11 +81,10 @@
 
   <!-- v115: قايمة الدخل المتوقعة — الفعلي + الأوردرات اللي لسه ماشية لو اتسلّمت -->
   <div class="panel money-only" id="pis-panel" data-rt="sum">
-    <div class="pis-head"><h3>قايمة الدخل <small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-2);color:var(--ink-soft)"></small></h3>
-      <div class="quick" id="pis-mode" role="group" aria-label="الأوردرات">
-        <button type="button" data-pism="exp" class="on">لو كله اتسلّم</button>
-        <button type="button" data-pism="act">اتسلّم فعلاً</button>
-        <button type="button" data-pism="noads">من غير إعلانات</button>
+    <div class="pis-head"><h3><small class="s" id="pis-sum" style="font-weight:400;font-size:var(--fs-3);color:var(--ink-soft)"></small></h3>
+      <div class="pis-seg" id="pis-mode" role="group" aria-label="الأوردرات">
+        <button type="button" data-pism="act" class="on">اللي خلص</button>
+        <button type="button" data-pism="exp">لو كله اتسلّم</button>
       </div></div>
     <div class="pis-na" id="pis-na" hidden></div>
     <p class="hint" id="pis-note" style="margin:0 0 var(--sp-3)"></p>
@@ -84,8 +92,9 @@
   </div>
 
   <!-- السؤال الأهم: أبيع بكام؟ -->
-  <div class="panel" data-rt="sum">
-    <div class="fold-h"><h3>عشان تبدأ تكسب <small id="rep-be-sum"></small></h3>
+  <details class="panel rep-fold" data-rt="sum">
+    <summary>الأوردر الواحد بيكسب كام؟ وإمتى تبدأ تكسب <b id="rep-be-sum"></b></summary>
+    <div class="fold-h"><span></span>
       <button class="tbtn" type="button" data-foldbtn="rep-be-body" aria-expanded="false" aria-controls="rep-be-body">عشان أكسب مبلغ معيّن ▾</button></div>
     <div class="money3" id="rep-be"></div>
     <div id="rep-be-body" data-fold hidden>
@@ -107,14 +116,14 @@
       <div class="tbl-wrap"><table id="t-rep-cost"></table></div>
     </details>
     </div>
-  </div>
+  </details>
 
   <!-- الأداء -->
-  <div class="panel" data-rt="sum">
-    <h3>تقييم الأداء</h3>
+  <details class="panel rep-fold" data-rt="sum">
+    <summary>تقييم الأداء <b>هامش البضاعة · الرفض · متوسط الأوردر</b></summary>
     <div class="stats" id="rep-kpi"></div>
     <p class="hint" id="rep-kpi-wait" hidden style="margin:var(--sp-2) 0 0"></p>
-  </div>
+  </details>
 
   <!-- v126: ربح كل صنف بعد الإعلان والشحن -->
   <div class="panel money-only" id="rep-itp-panel" data-rt="items">
@@ -130,7 +139,7 @@
 
   <!-- الباقي مطوي -->
   <div class="panel rsecs">
-    <details class="rsec" open data-rt="sum">
+    <details class="rsec" data-rt="sum">
       <summary>الربح شهر بشهر <b>هل بتتحسّن ولا بتتراجع؟</b></summary>
       <div class="tbl-wrap"><table id="t-rep-months"></table></div>
     </details>
