@@ -69,3 +69,40 @@
     .dist-fill .tbtn{flex:1;justify-content:center}
   }
 
+  /* ═══ v183 — «فلوسكم فين؟»: ٣ خطوات، كل واحدة بتتجمع قدام الشركاء ═══ */
+  .cap-recon[hidden]{display:none}
+  .ms{margin-bottom:var(--sp-5)}
+  .ms:empty{display:none}
+  .ms-hd{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3)}
+  .ms-hd h3{margin:0;font-size:var(--fs-5);font-weight:600}
+  .ms-hd p{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-3)}
+  .ms-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 24px;max-width:760px}
+  .ms-card .ms-hd h3{margin:0;font-size:var(--fs-5);font-weight:600}
+  .ms-card .ms-lead{margin:2px 0 0}
+  .ms-ln,.ms-sub,.ms-end{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:8px;align-items:baseline}
+  .ms-ln{padding:9px 0;border-bottom:1px dashed var(--line);font-size:var(--fs-3)}
+  .ms-ln > i,.ms-sub > i,.ms-end > i{font-style:normal;color:var(--ink-soft);text-align:center;font-weight:600}
+  .ms-ln small,.ms-sub small{display:block;color:var(--ink-soft);font-size:var(--fs-2);line-height:1.45;font-weight:400}
+  .ms-ln b{font-weight:600;font-size:var(--fs-4);white-space:nowrap}
+  .ms-tag{font-style:normal;font-size:var(--fs-1);font-weight:500;border-radius:99px;padding:1px 8px;margin-inline-start:6px;white-space:nowrap;
+    background:var(--teal-soft);color:var(--teal);vertical-align:1px}
+  .ms-tag.l{background:var(--warn-soft);color:var(--warn)}
+  .ms-tag.c{background:var(--gain-soft);color:var(--gain-ink)}
+  .ms-sub{padding:10px 12px;margin:6px -12px;border-radius:10px;background:var(--paper);font-weight:600}
+  .ms-sub b{font-size:var(--fs-4)}
+  .ms-end{margin-top:8px;padding-top:12px;border-top:2px solid var(--ink);font-weight:600}
+  .ms-end b{font-size:var(--fs-6)}
+  .ms-note{margin:14px 0 0;background:var(--gain-soft);border-radius:12px;padding:12px 16px;font-size:var(--fs-3);line-height:1.8}
+  .ms-note b{font-weight:600}
+  .ms-foot{margin:var(--sp-2) 2px 0;font-size:var(--fs-2);color:var(--ink-soft)}
+  .ms-foot a{color:var(--teal)}
+  @media (max-width:760px){ .ms-hd{flex-wrap:wrap;align-items:flex-start} .ms-hd .tbtn{width:100%;justify-content:center} .ms-card{padding:16px} }
+  /* مفتاح الجزئين — نفس شكل .pseg (اللي بيتملي من القايمة، فده كلاس لوحده عشان ما يتمسحش) */
+  .lseg{display:inline-flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:99px;background:var(--card);margin:0 0 var(--sp-4);max-width:100%}
+  .lseg button{font:inherit;font-size:var(--fs-3);border:0;background:none;border-radius:99px;padding:6px 16px;min-height:36px;color:var(--ink-soft);cursor:pointer;touch-action:manipulation}
+  .lseg button:hover{color:var(--ink);background:var(--teal-soft)}
+  .lseg button[aria-pressed="true"]{background:var(--teal);color:var(--on-accent);font-weight:600;cursor:default}
+  .lseg button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  #tab-capital .cap-m[hidden],#cap-story[hidden]{display:none}
+  .ms-hd{align-items:center}
+  .ms-lead{margin:0;color:var(--ink-soft);font-size:var(--fs-3)}
