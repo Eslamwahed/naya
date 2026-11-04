@@ -68,3 +68,48 @@
     .cd-x:empty{display:none}
   }
 
+  /* ═══ v185 — الخزنة: الرصيد كبير · ٤ زراير بنفس الحجم · قايمة واحدة بعنوان رمادي لكل يوم ═══ */
+  .cash-head{align-items:flex-end;flex-wrap:wrap;gap:var(--sp-3);margin-bottom:var(--sp-4)}
+  .cash-head h2{font-size:var(--fs-3);font-weight:500;color:var(--ink-soft);margin:0}
+  .cb-big{font-size:30px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+  .cb-sub{margin:2px 0 0;color:var(--ink-soft);font-size:var(--fs-3)}
+  .cb-sub b{font-weight:600}
+  .cash-head .cq{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:0}
+  .cash-head .cq .tbtn{padding:0 14px;min-height:40px;border-radius:10px;font-size:var(--fs-3)}
+  .cash-head .cq .tbtn .ic{font-size:15px}
+  #cash-kinds.cash-kinds{display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin-bottom:var(--sp-4)}
+  #cash-kinds.cash-kinds button{flex:0 0 auto;border:0;border-radius:0;background:none;padding:10px 14px 12px;color:var(--ink-soft);font-size:var(--fs-3);position:relative}
+  #cash-kinds.cash-kinds button b{color:var(--ink);font-weight:600;margin-inline-start:6px}
+  #cash-kinds.cash-kinds button:hover{color:var(--ink)}
+  #cash-kinds.cash-kinds button.on{color:var(--ink);font-weight:500;background:none}
+  #cash-kinds.cash-kinds button.on::after{content:"";position:absolute;inset-inline:10px;bottom:-1px;height:2px;background:var(--teal);border-radius:2px 2px 0 0}
+  #cash-days:not(:empty){background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  #cash-days > .cd-empty{margin:var(--sp-4)}
+  #cash-days .cd-day{background:none;border:0;border-radius:0;margin:0;overflow:visible}
+  #cash-days .cd-day + .cd-day .cd-h{border-top:1px solid var(--line)}
+  #cash-days .cd-h{background:var(--paper);border-bottom:1px solid var(--line);padding:8px 18px;font-size:var(--fs-2);color:var(--ink-soft)}
+  #cash-days .cd-h > b{font-weight:600}
+  #cash-days .cd-h .v-gain{color:var(--gain)}
+  #cash-days .cd-mv{grid-template-columns:24px minmax(0,1fr) 130px 34px;padding:11px 18px;border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+  #cash-days .cd-h + .cd-mv{border-top:0}
+  #cash-days .cd-mv .ic{width:24px;height:24px;background:none!important;color:var(--ink-soft);border-radius:0}
+  #cash-days .cd-t b{font-weight:500}
+  #cash-days .cd-a{text-align:end;font-weight:600;font-size:var(--fs-4)}
+  #cash-days .cd-mv.out .cd-a{color:var(--ink)}
+  .cd-more{position:relative}
+  .cd-more summary{list-style:none;cursor:pointer;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--ink-soft);opacity:.55}
+  .cd-more summary::-webkit-details-marker{display:none}
+  .cd-mv:hover .cd-more summary,.cd-more[open] summary,.cd-more summary:focus-visible{opacity:1;background:var(--paper)}
+  .cd-more > div{position:absolute;inset-inline-end:0;top:calc(100% + 4px);z-index:5;display:flex;flex-direction:column;gap:6px;min-width:130px;padding:8px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .cd-more .cd-del{color:var(--due)}
+  @media (max-width:760px){
+    .cash-head .cq{display:grid;grid-template-columns:1fr 1fr;width:100%}
+    .cash-head .cq .tbtn{flex-direction:row;justify-content:center;padding:0 8px}
+    .cash-head .cq .tbtn[data-openentry]{grid-column:auto}
+    #cash-kinds.cash-kinds{margin-inline:calc(-1 * var(--sp-2));padding-inline:var(--sp-1)}
+    #cash-kinds.cash-kinds button{padding-inline:10px}
+    #cash-days .cd-h{padding:8px 14px}
+    #cash-days .cd-mv{grid-template-columns:22px minmax(0,1fr) auto auto;padding:11px 14px}
+    #cash-days .cd-x{grid-column:auto}
+  }

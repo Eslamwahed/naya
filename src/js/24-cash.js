@@ -42,24 +42,19 @@
     return true;
   }
 
+  /* v185: الرصيد رقم واحد كبير، وتحته الشهر ده (داخل · خارج) — ولو فيه فلتر: داخل وخارج المعروض */
   function renderCashStats(shown, tin, tout){
     var el = document.getElementById("cash-stats");
     if(!el) return;
-    var bal = cashBox(), wal = walletsTotal();
+    var bal = cashBox();
     var filtered = Object.keys(CF_LABEL).some(function(k){ return cfilt[k]; });
-    var scope = filtered ? "في الحركات المعروضة" : "من أول يوم";
-    var cells = [
-      ["رصيد الخزنة", money(bal), bal >= 0 ? "" : "v-due",
-        bal >= 0 ? "الفلوس اللي في إيدك دلوقتي" : "بالسالب — في حركة ناقصة أو صرف زيادة"],
-      ["داخل", money(tin), tin ? "v-gain" : "", scope],
-      ["خارج", money(tout), tout ? "v-due" : "", scope]
-    ];
-    // «في محافظ الشحن» اتشالت من هنا: موجودة في الرئيسية وشاشة شركات الشحن
-    void wal;
-    el.innerHTML = cells.map(function(c){
-      return "<div><span>"+esc(c[0])+"</span><strong class='num "+c[2]+"'>"+esc(c[1])+"</strong>" +
-        "<small>"+esc(c[3])+"</small></div>";
-    }).join("");
+    var mi = 0, mo = 0, m = monthRange(0);
+    if(!filtered) cashLedger().forEach(function(x){ if(x.d >= m.from && x.d <= m.to){ mi += x.inn; mo += x.out; } });
+    var a = filtered ? tin : mi, b = filtered ? tout : mo;
+    el.innerHTML = "<div class='cb-big num" + (bal < 0 ? " v-due" : "") + "'>" + esc(money(bal)) + "</div>" +
+      "<p class='cb-sub'>" + esc(filtered ? "المعروض" : monthLabel(m.from).split(" ")[0]) + ": داخل <b class='num v-gain'>+" + esc(qty(Math.round(a))) +
+      "</b> · خارج <b class='num" + (b > 0.009 ? " v-due" : "") + "'>" + (b > 0.009 ? "−" : "") + esc(qty(Math.round(b))) + "</b>" +
+      (bal < 0 ? " · <span class='v-due'>الرصيد بالسالب — في حركة ناقصة أو صرف زيادة</span>" : "") + "</p>";
   }
 
   function renderCash(){
@@ -151,15 +146,17 @@
           " · الرصيد <b class='num" + (bal < 0 ? " v-due" : "") + "'>" + esc(money(bal)) + "</b></span></div>" +
         dy.list.map(function(x){
           var inn = x.inn > 0.009, who = (x.who && x.who !== "—") ? x.who : "";
+          // v185: تعديل وحذف جوه «⋯» — كانوا مكتوبين جنب كل حركة (والحذف بالأحمر)
           var acts = x.id
-            ? (x.cap ? "<button class='del' style='color:var(--teal)' data-editcap='" + x.id + "'>تعديل</button>"
-                     : "<button class='del' style='color:var(--teal)' data-edit='cash|" + x.id + "'>تعديل</button>") +
-              "<button class='del' data-del='cash' data-id='" + x.id + "'>حذف</button>"
+            ? "<details class='cd-more'><summary aria-label='تعديل أو حذف' title='تعديل أو حذف'>⋯</summary><div>" +
+              (x.cap ? "<button class='tbtn' type='button' data-editcap='" + x.id + "'>تعديل</button>"
+                     : "<button class='tbtn' type='button' data-edit='cash|" + x.id + "'>تعديل</button>") +
+              "<button class='tbtn cd-del' type='button' data-del='cash' data-id='" + x.id + "'>حذف</button></div></details>"
             : "";
           return "<div class='cd-mv " + (inn ? "in" : "out") + "'>" +
             "<span class='ic' aria-hidden='true'>" + (CASH_IC[x.kind] ? ico(CASH_IC[x.kind]) : "•") + "</span>" +
             "<span class='cd-t'><b>" + esc(x.t) + (who ? " · " + esc(who) : "") +
-              (x.id ? "<span class='cd-tag'>" + esc(x.src) + "</span>" : "") + "</b>" +
+              "</b>" +
               (x.note ? "<span class='sub'>" + esc(x.note) + "</span>" : "") + "</span>" +
             "<span class='cd-a num'>" + (inn ? "+" + esc(money(x.inn)) : "−" + esc(money(x.out))) + "</span>" +
             "<span class='cd-x'>" + acts + "</span></div>";
