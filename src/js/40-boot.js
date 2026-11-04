@@ -53,6 +53,6 @@
     db:function(){ return db; }, settings:function(){ return settings; }, clearStockIdx:clearStockIdx, stampDelivery:stampDelivery,
     periodStats:periodStats, projStats:projStats, finIS:finIS, finBS:finBS, stockBookValue:stockBookValue, cashBox:cashBox,
     cashLedger:cashLedger, partyBalance:partyBalance, walletOf:walletOf, avgCostVB:avgCostVB, costTrueUps:costTrueUps,
-    addPay:addPay, openPRet:openPRet, computeShares:computeShares, weightedRatio:weightedRatio, revDate:revDate, canTab:canTab
+    addPay:addPay, openPRet:openPRet, computeShares:computeShares, weightedRatio:weightedRatio, revDate:revDate, canTab:canTab, metaBook:metaBook
   };
 })();
