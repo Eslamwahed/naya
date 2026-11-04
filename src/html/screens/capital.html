@@ -9,6 +9,13 @@
 <section id="tab-capital" hidden>
   <div class="pt-head"><h2>رأس المال والشركاء</h2><button class="tbtn primary" type="button" data-openentry="capital">+ حركة رأس مال</button></div>
 
+  <!-- v183: جزئين — كل جزء بيجاوب على سؤال واحد، عشان الشاشة ما تبقاش زحمة -->
+  <div class="lseg" id="cap-seg" role="group" aria-label="الجزء">
+    <button type="button" data-capseg="story" aria-pressed="true">فلوسكم فين؟</button>
+    <button type="button" data-capseg="main" aria-pressed="false">الشركاء</button>
+  </div>
+  <div class="ms" id="cap-story" role="region" aria-label="فلوسكم فين؟"></div>
+  <div id="cap-main" class="cap-m" hidden>
   <div class="cap-recon" id="cap-recon"></div>
   <details class="hm-more" id="cap-recon-more">
     <summary>تفاصيل الميزانية</summary>
@@ -16,7 +23,6 @@
     <div class="tbl-wrap"><table id="t-recon"></table></div>
   </details>
 
-<div class="stats" id="cap-stats"></div>
 
   <h3 class="cap-h">الشركاء <small>النسبة بتتحسب لوحدها من رأس مال كل واحد</small></h3>
   <div class="cap-own" id="cap-own"></div>
@@ -73,6 +79,7 @@
     <p class="note ok" id="dist-done" hidden></p>
   </div>
 
+  </div>
 <div class="panel" id="entry-capital" hidden>
     <div class="dhead">
       <h3 id="title-capital">حركة رأس مال</h3>
@@ -117,7 +124,7 @@
     </div>
   </div>
 
-  <details class="hm-more" id="cap-more">
+  <details class="hm-more cap-m" id="cap-more" hidden>
     <summary>جدول الشركاء وسجل كل الحركات والشرح</summary>
     <p class="hint">فلوس الشريك نوعين: <strong>رأس ماله</strong> (اللي حطّه، وبيحدّد نسبته) و<strong>أرباح مستحقة له</strong> (أرباح بقت ملكه ولسه ما أخدهاش، ومابتأثّرش على نسبته). لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي دفع فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
 
@@ -172,7 +179,7 @@
   </details>
 
   <!-- v132: استرداد رأس المال اتنقل هنا من التقارير — كل حاجة عن الشركاء في مكان واحد -->
-  <div class="panel rsecs" style="margin-top:var(--sp-3)">
+  <div class="panel rsecs cap-m" style="margin-top:var(--sp-3)" hidden>
     <details class="rsec" open>
       <summary>استرداد رأس المال للشركاء <b>كل شريك كسب كام ورجعله كام</b></summary>
       <p class="hint" id="rep-pb-note"></p>

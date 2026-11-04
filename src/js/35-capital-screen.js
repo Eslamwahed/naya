@@ -18,6 +18,200 @@
     }).join("");
   }
 
+  /* ═══ v183 — «فلوسكم فين؟» ═══
+     الشركاء كانوا بيقارنوا رأس المال بالخزنة ويفتكروا الفرق ربح. هنا الحسبة كلها في ٣ خطوات،
+     كل خطوة بتتجمع قدامهم بالظبط ومن نفس الدوال (cashLedger · finBS · projStats):
+       ١ الخزنة نزلت ليه؟  (حركة الكاش)     ٢ بس الخزنة مش كل حاجة  (الميزانية)     ٣ يعني كسبتوا كام؟
+     الأرقام بتتقرّب لجنيه، والتقريب بيتظبط على أكبر بند عشان الجمع يطلع صح قدامهم. */
+  function balRound(parts, total){
+    var r = parts.map(function(x){ return Math.round(x); });
+    var diff = Math.round(total) - r.reduce(function(a, b){ return a + b; }, 0);
+    if(diff && parts.length){
+      var k = 0; parts.forEach(function(x, i){ if(Math.abs(x) > Math.abs(parts[k])) k = i; });
+      r[k] += diff;
+    }
+    return r;
+  }
+  // نسب من ١٠٠ مجموعها ١٠٠ بالظبط (أكبر باقي)
+  function pct100(parts, total){
+    var raw = parts.map(function(x){ return total > 0 ? x / total * 100 : 0; });
+    var f = raw.map(Math.floor), left = 100 - f.reduce(function(a, b){ return a + b; }, 0);
+    raw.map(function(x, i){ return [x - f[i], i]; }).sort(function(a, b){ return b[0] - a[0]; })
+      .slice(0, Math.max(0, left)).forEach(function(x){ f[x[1]]++; });
+    return f;
+  }
+  function moneyStory(){
+    var repay = CAP.cap_repay.label, f = { open:0, cap:0, capOut:0, goods:0, orders:0, exp:0 };
+    cashLedger().forEach(function(x){
+      var n = (Number(x.inn)||0) - (Number(x.out)||0);
+      if(x.kind === "رأس مال"){
+        if(x.t === repay) f.exp -= n;               // رجّعنا لشريك مصروف دفعه = مصروف
+        else if(n >= 0) f.cap += n; else f.capOut -= n;
+      }
+      else if(x.kind === "افتتاحي") f.open += n;
+      else if(x.kind === "دفع" || x.t === "استرداد من مورد") f.goods -= n;
+      else if(x.kind === "مصروف") f.exp -= n;
+      else f.orders += n;                            // تحصيل من عملاء · استلام من شركات الشحن
+    });
+    var cash = cashBox();
+    var s1 = [];
+    if(Math.abs(f.open) > 0.005) s1.push(["رصيد أول ما بدأتوا السيستم", "", f.open]);
+    s1.push(["حطّيتوا", "رأس المال", f.cap]);
+    if(f.capOut > 0.005) s1.push(["خدتوا", "رأس مال أو أرباح اتصرفت", -f.capOut]);
+    s1.push(["دفعتوا تمن بضاعة", "للموردين", -f.goods]);
+    s1.push(["وصلكم من الأوردرات", "من شركات الشحن والعملاء", f.orders]);
+    s1.push(["مصاريف", "إعلانات · تغليف · اشتراكات · نقل", -f.exp]);
+    var res = cash - s1.reduce(function(a, x){ return a + x[2]; }, 0);
+    if(Math.abs(res) > 0.5) s1.push(["حركات تانية", "", res]);
+
+    var B = finBS(), not = [];
+    if(B.pay > 0.005) not.push("لموردين " + qty(Math.round(B.pay)));
+    if(B.custAdv > 0.005) not.push("عربون عملاء " + qty(Math.round(B.custAdv)));
+    if(B.owed > 0.005) not.push("مصاريف دفعها شريك من جيبه " + qty(Math.round(B.owed)));
+    var s2 = [["في الخزنة", "", B.cash],
+      ["بضاعة", "على الرف ومع المندوب — بالسعر اللي اشتريتوا بيه", B.stock]];
+    if(Math.abs(B.wallets) > 0.005) s2.push(["فلوس عند شركات الشحن", "", B.wallets]);
+    if(Math.abs(B.recv) > 0.005) s2.push(["فلوس عند عملاء", "", B.recv]);
+    if(Math.abs(B.supAdv) > 0.005) s2.push(["دافعين مقدّم لموردين", "", B.supAdv]);
+    if(Math.abs(B.prepaid) > 0.005) s2.push(["مدفوع مقدّم", "رصيد إعلانات واشتراكات لسه ما اتصرفش", B.prepaid]);
+    if(B.liab > 0.005) s2.push(["فلوس مش بتاعتكم", not.join(" + "), -B.liab]);
+    var worth = B.assets - B.liab, base = B.cap + B.opening, kept = worth - base;
+    var earned = netProfitAll(), took = earned - kept;
+
+    var A = projStats(null).act, split = null;
+    if(A.goods > 0.009 && A.net > 0.009 && A.ship <= 0.009){
+      var parts = [A.goods - A.gross, -A.ship, A.varExp + A.fixedExp, A.net];
+      split = pct100(parts, A.goods);
+    }
+    var r1 = balRound(s1.map(function(x){ return x[2]; }), cash);
+    var r2 = balRound(s2.map(function(x){ return x[2]; }), worth);
+    s1.forEach(function(x, i){ x[3] = r1[i]; });
+    s2.forEach(function(x, i){ x[3] = r2[i]; });
+    return { s1:s1, cash:Math.round(cash), s2:s2, worth:Math.round(worth), base:Math.round(base),
+             kept:Math.round(worth) - Math.round(base), took:took, split:split, bad:Math.abs(B.diff) >= 0.01 };
+  }
+  var SPLIT_L = [["تمن البضاعة", "#9AA0A6"], ["شحن من جيبكم", "#4F6FA8"], ["إعلانات ومصاريف", "#B07A47"], ["ربحكم", "#2A7348"]];
+  function storyNum(v, sign){
+    var t = qty(Math.abs(v));
+    return sign ? (v < 0 ? "−" : (v > 0 ? "+" : "")) + t : (v < 0 ? "−" + t : t);
+  }
+  function storyLines(L, first){
+    return L.map(function(x, i){
+      var sg = (first && i === 0) ? "" : (x[3] < 0 ? "−" : "+");
+      return "<div class='ms-ln'><span><i>" + sg + "</i>" + esc(x[0]) + (x[1] ? "<small>" + esc(x[1]) + "</small>" : "") + "</span>" +
+        "<b class='num" + (sg === "+" ? " v-gain" : "") + "'>" + storyNum(x[3], !(first && i === 0)) + "</b></div>";
+    }).join("");
+  }
+  function renderCapStory(){
+    var el = document.getElementById("cap-story");
+    if(!el) return;
+    if(!partners().length){ el.innerHTML = ""; return; }
+    var m = moneyStory();
+    // العنوان «فلوسكم فين؟» هو اسم الجزء في المفتاح فوق — مش بيتكرر هنا
+    el.innerHTML = "<div class='ms-hd'><p class='ms-lead'>3 خطوات — كل خطوة بتجاوب على سؤال واحد، وأرقامها بتتجمع قدامكم.</p>" +
+        "<button class='tbtn' type='button' id='b-story-img'>⇩ صورة للشركاء</button></div>" +
+      "<div class='ms-steps'>" +
+        "<div class='ms-st'><span class='k'>1</span><h4>الخزنة نزلت ليه؟</h4><p class='q'>من أول يوم لحد النهارده</p>" +
+          storyLines(m.s1, true) + "<div class='ms-tot'><span>في الخزنة دلوقتي</span><b class='num'>" + storyNum(m.cash) + "</b></div></div>" +
+        "<div class='ms-st'><span class='k'>2</span><h4>بس الخزنة مش كل حاجة</h4><p class='q'>الفلوس اللي طلعت ما ضاعتش — اتحوّلت لحاجات</p>" +
+          storyLines(m.s2, true) + "<div class='ms-tot'><span>الشركة كلها تسوى</span><b class='num'>" + storyNum(m.worth) + "</b></div></div>" +
+        "<div class='ms-st win'><span class='k'>3</span><h4>يعني كسبتوا كام؟</h4><p class='q'>اللي الشركة تسواه − اللي حطّيتوه</p>" +
+          "<div class='ms-big num " + (m.kept < 0 ? "v-due" : "v-gain") + "'>" + storyNum(m.kept, true) + "</div>" +
+          "<div class='ms-calc'><span class='num'>" + qty(m.worth) + "</span> − <span class='num'>" + qty(m.base) + "</span></div>" +
+          (m.took > 0.5 ? "<p class='q'>وده غير <b class='num'>" + qty(Math.round(m.took)) + "</b> أرباح خدتوها قبل كده.</p>" : "") +
+          (m.split ? "<div class='ms-split'><p>من كل 100 جنيه بعتوا بيهم:</p><div class='ms-bar'>" +
+              m.split.map(function(v, i){ return v ? "<i style='width:" + v + "%;background:" + SPLIT_L[i][1] + "'>" + v + "</i>" : ""; }).join("") +
+            "</div><div class='ms-leg'>" + SPLIT_L.map(function(x, i){
+              return "<span><i style='background:" + x[1] + "'></i>" + (i === 3 ? "<b>" + x[0] + "</b>" : x[0]) + "</span>"; }).join("") + "</div></div>" : "") +
+        "</div></div>" +
+      "<p class='ms-note'>الفرق بين رأس المال والخزنة (<b class='num'>" + qty(Math.abs(m.base - m.cash)) + "</b>) " +
+        (m.base > m.cash ? "<b>مش ربح ومش خسارة</b> — أغلبه بضاعة ولسه فلوس عند ناس. أول ما تتباع بترجع الخزنة ومعاها ربحها."
+                         : "مش كله ربح — الربح هو الرقم في الخطوة 3 بس.") + "</p>" +
+      "<p class='ms-foot'>من الخزنة والميزانية وقايمة الدخل · <a href='#' data-gorep='sum'>شوف الحسبة كاملة في قايمة الدخل</a>" +
+        (m.bad ? " · <span class='v-due'>⚠ الميزانية فيها فرق — الأرقام ممكن تكون مش دقيقة</span>" : "") + "</p>";
+  }
+  // صورة الكارت للشركاء — بنفس رسم صورة الخزنة (canvas بعرض تليفون وخط كبير، فاتحة دايماً)
+  function drawStoryImage(){
+    var m = moneyStory(), W = CI.W, P = CI.PAD, R = W - P, L = P + 8;
+    var rows = 0; [m.s1, m.s2].forEach(function(s){ rows += s.length; });
+    var H = 200 + 2 * 140 + rows * 46 + 260 + (m.split ? 120 : 0);
+    var cv = document.createElement("canvas"); cv.width = W * CI.S; cv.height = H * CI.S;
+    var c = cv.getContext("2d"); c.scale(CI.S, CI.S);
+    c.fillStyle = CI_C.bg; c.fillRect(0, 0, W, H);
+    c.fillStyle = CI_C.brand; c.fillRect(0, 0, W, 8);
+    var y = 58;
+    ciR(c, "فلوسكم فين؟", R, y, ciFont(700, 32), CI_C.ink);
+    ciL(c, "Lora Collection · " + today(), P, y, ciFont(400, 16), CI_C.soft); y += 40;
+    var step = function(n, title, L0, totT, tot){
+      y += 18; ciR(c, n + "  " + title, R, y, ciFont(700, 22), CI_C.brand); y += 16;
+      L0.forEach(function(x, i){
+        y += 34;
+        ciR(c, (i ? (x[3] < 0 ? "−  " : "+  ") : "") + x[0], R, y, ciFont(500, 20), CI_C.ink);
+        ciL(c, storyNum(x[3], i > 0), L, y, ciFont(600, 21), i && x[3] > 0 ? CI_C.gain : CI_C.ink);
+        y += 12; c.fillStyle = CI_C.line; c.fillRect(P, y, W - 2 * P, 1);
+      });
+      y += 38; ciR(c, totT, R, y, ciFont(700, 22), CI_C.ink); ciL(c, storyNum(tot), L, y, ciFont(700, 26), CI_C.ink); y += 46;
+    };
+    step("1", "الخزنة نزلت ليه؟", m.s1, "= في الخزنة دلوقتي", m.cash);
+    step("2", "بس الخزنة مش كل حاجة", m.s2, "= الشركة كلها تسوى", m.worth);
+    y += 18; ciR(c, "3  يعني كسبتوا كام؟", R, y, ciFont(700, 22), CI_C.brand); y += 58;
+    ciL(c, storyNum(m.kept, true), L, y, ciFont(700, 48), m.kept < 0 ? CI_C.due : CI_C.gain);
+    ciR(c, qty(m.worth) + " − " + qty(m.base), R, y, ciFont(500, 20), CI_C.soft); y += 40;
+    if(m.split){
+      ciR(c, "من كل 100 جنيه بعتوا بيهم:", R, y, ciFont(600, 19), CI_C.ink); y += 18;
+      var x0 = W - P, bw = W - 2 * P;
+      m.split.forEach(function(v, i){
+        var w = bw * v / 100; if(!w) return;
+        c.fillStyle = SPLIT_L[i][1]; c.fillRect(x0 - w, y, w, 34);
+        if(w > 30){ c.fillStyle = "#fff"; c.font = ciFont(700, 16); c.textAlign = "center"; c.fillText(String(v), x0 - w / 2, y + 23); }
+        x0 -= w;
+      });
+      y += 60;
+      ciR(c, SPLIT_L.map(function(x, i){ return m.split[i] + " " + x[0]; }).join("  ·  "), R, y, ciFont(500, 17), CI_C.soft); y += 34;
+    }
+    ciR(c, "الفرق بين رأس المال والخزنة مش كله ربح — الربح هو رقم الخطوة 3 بس.", R, y, ciFont(500, 16), CI_C.soft);
+    // الارتفاع اتحسب بالتقريب — بنقصّ الفاضي اللي تحت
+    var h = Math.min(H, Math.ceil(y + 32));
+    if(h >= H) return cv;
+    var out = document.createElement("canvas"); out.width = W * CI.S; out.height = h * CI.S;
+    out.getContext("2d").drawImage(cv, 0, 0);
+    return out;
+  }
+  /* v183: «فلوسكم فين؟» و«الشركاء» جزئين بمفتاح — الاختيار في الذاكرة بس (مفيش مفتاح تخزين جديد) */
+  var capSeg = "story";
+  function setCapSeg(v){
+    capSeg = v === "main" ? "main" : "story";
+    var st = document.getElementById("cap-story");
+    if(st) st.hidden = capSeg !== "story";
+    Array.prototype.forEach.call(document.querySelectorAll("#tab-capital .cap-m"), function(x){ x.hidden = capSeg !== "main"; });
+    Array.prototype.forEach.call(document.querySelectorAll("#cap-seg [data-capseg]"), function(b){
+      b.setAttribute("aria-pressed", b.dataset.capseg === capSeg ? "true" : "false"); });
+  }
+  document.getElementById("cap-seg").addEventListener("click", function(e){
+    var b = e.target.closest("[data-capseg]"); if(b) setCapSeg(b.dataset.capseg);
+  });
+  // أي حاجة بتودّي لحاجة جوه «الشركاء» (لينك من شاشة تانية أو تعديل حركة) بتفتح الجزء ده لوحدها
+  document.addEventListener("focusin", function(e){
+    var mn = e.target && e.target.closest ? e.target.closest("#tab-capital .cap-m") : null;
+    if(mn && mn.hidden) setCapSeg("main");
+  });
+  document.getElementById("cap-story").addEventListener("click", function(e){
+    var g = e.target.closest("[data-gorep]");
+    if(g){ e.preventDefault(); goTab("rep"); return; }
+    var b = e.target.closest("#b-story-img"); if(!b) return;
+    var old = b.textContent; b.disabled = true; b.textContent = "بيحضّر…";
+    var go = function(){
+      try{
+        drawStoryImage().toBlob(function(blob){
+          b.disabled = false; b.textContent = old;
+          if(!blob){ toast("المتصفح ما قدرش يعمل الصورة"); return; }
+          downloadBlob("lora-flosna-fein-" + today() + ".png", blob); toast("الصورة نزلت");
+        }, "image/png");
+      } catch(err){ b.disabled = false; b.textContent = old; toast("الصورة ما اتعملتش: " + (err && err.message || err)); }
+    };
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(go, go); else go();
+  });
+
   /* ---------- شارة الميزانية وكارت لكل شريك ----------
      الجدول القديم والسجل والشرح لسه موجودين تحت في «جدول الشركاء وسجل كل
      الحركات». الكروت بتقرا من نفس الدوال (capitalOf/currentOf/ratioOf)،
@@ -42,6 +236,7 @@
     var det = document.getElementById("cap-recon-more");
     var a = netAssets(), e = totalEquity(), d = a - e, ok = Math.abs(d) < 0.01;
     el.className = "cap-recon " + (ok ? "ok" : "bad");
+    el.hidden = ok;                         // v183: لو مظبوطة «فلوسكم فين؟» فوق بتقول نفس الكلام — بتبان بس لو فيه فرق
     el.innerHTML = "<span class='ic' aria-hidden='true'>" + (ok ? "✓" : "⚠") + "</span><span class='t'>" +
       (ok ? "<b>الميزانية مظبوطة</b><small>كل اللي عندك (خزنة + بضاعة + فلوس عند شركات الشحن والعملاء) = " +
               "<span class='num'>" + esc(money(a)) + "</span> = فلوس الشركاء + الأرباح</small>"
@@ -257,7 +452,7 @@
   function renderCapital(){
     renderPayback();
     renderCapStats(); renderPartners(); renderRecon(); renderCapLog(); renderCapHint();
-    renderCapRecon(); renderCapCards(); renderCapShare();
+    renderCapStory(); renderCapRecon(); renderCapCards(); renderCapShare();
     var df = document.getElementById("dist-from"), dt = document.getElementById("dist-to");
     if(df && !df.value){ var m = monthRange(0); df.value = m.from; dt.value = m.to; }
     distPerSync();
