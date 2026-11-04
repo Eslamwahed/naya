@@ -1,26 +1,35 @@
   /* ================= شركات الشحن: كارت لكل شركة ================= */
-  #shc-top{margin-bottom:var(--sp-3)}
-  .shc{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--sp-3);overflow:hidden}
-  .shc-h{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);background:var(--teal-soft);flex-wrap:wrap}
-  .shc-h .nm{font-size:var(--fs-5);font-weight:700}
-  .shc-h .big small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
-  .shc-h .big b{font-size:var(--fs-6)}
+  /* ═══ v180 — شركات الشحن: سطر ملخّص تحت العنوان · الشركات جنب بعض · لكل شركة رقم واحد كبير وسطر حقائق ═══ */
+  .shc-head{align-items:flex-end;margin-bottom:var(--sp-4)}
+  .shc-head h2{font-size:var(--fs-6);letter-spacing:-.02em}
+  #shc-top{margin:2px 0 0;font-size:var(--fs-3);color:var(--ink-soft)}
+  #shc-top b{font-weight:600}
+  #shc-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:var(--sp-4);align-items:start}
+  .shc{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .shc-h{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"nm acts" "big acts" "note note";gap:4px var(--sp-3);
+    align-items:center;padding:18px 20px 6px;background:none}
+  .shc-h .nm{grid-area:nm;font-size:var(--fs-5);font-weight:600}
+  .shc-h .big{grid-area:big}
+  .shc-h .big small{display:block;font-size:var(--fs-2);color:var(--ink-soft)}
+  .shc-h .big b{font-size:var(--fs-7);font-weight:600;letter-spacing:-.02em;line-height:1.2}
   .shc-h .big b.muted{color:var(--ink-soft)}
-  .shc-h .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-  .shc-part{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--line)}
+  .shc-h .acts{grid-area:acts;display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+  .shc-h .acts .tbtn{min-height:40px;border-radius:10px;padding-inline:16px}
+  .shc-note{grid-area:note;margin:6px 0 0;background:var(--due-soft);color:var(--due);border-radius:var(--r-sm);padding:8px 12px;font-size:var(--fs-2)}
+  .shc-part{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;padding:var(--sp-3) 20px;border-bottom:1px solid var(--line)}
   .shc-part label{display:inline-flex;gap:6px;align-items:center;font-size:var(--fs-2)}
   .shc-part input{width:140px}
-  .shc-st{display:grid;grid-template-columns:repeat(5,1fr);gap:var(--sp-2);padding:var(--sp-3) var(--sp-4)}
-  .shc-st > div{background:var(--paper);border-radius:var(--r-sm);padding:6px 10px}
-  .shc-st small{display:block;font-size:var(--fs-1);color:var(--ink-soft)}
-  .shc-st b{font-size:var(--fs-4)} .shc-st b.w{color:var(--warn)}
-  .shc-st .pct{font-size:var(--fs-1);font-weight:400}
+  .shc-st{display:flex;flex-wrap:wrap;gap:4px 18px;padding:6px 20px 16px;font-size:var(--fs-2);color:var(--ink-soft)}
+  .shc-st b{font-weight:600;color:var(--ink)} .shc-st b.w{color:var(--warn)}
+  .shc-all{border:0;background:none;color:var(--teal);font:inherit;font-size:var(--fs-2);font-weight:500;cursor:pointer;padding:4px 0}
+  .shc-all:hover{text-decoration:underline;text-underline-offset:3px}
   .shc-sec{display:flex;align-items:center;gap:var(--sp-2);width:100%;border:0;border-top:1px solid var(--line);background:none;
-    font:inherit;color:inherit;padding:10px var(--sp-4);cursor:pointer;text-align:start}
+    font:inherit;color:inherit;padding:13px 20px;cursor:pointer;text-align:start}
+  .shc-sec b{font-weight:500}
   .shc-sec:hover{background:var(--teal-soft)}
   .shc-sec small{margin-inline-start:auto;color:var(--ink-soft);font-size:var(--fs-2)}
   .shc-sec span{color:var(--ink-soft)}
-  .shc-b{padding:0 var(--sp-4) var(--sp-3)}
+  .shc-b{padding:0 20px var(--sp-3)}
   .shc-row{display:grid;grid-template-columns:56px minmax(0,1fr) 70px auto;gap:var(--sp-2);padding:8px 0;border-top:1px dashed var(--line);
     align-items:center;font-size:var(--fs-2)}
   .shc-b .shc-row:first-child{border-top:0}
@@ -61,17 +70,18 @@
   .shc-row .shc-one{padding:4px 10px;font-size:var(--fs-2)}
   .shc-row.pk input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--teal);cursor:pointer}
   .shc-row.on{background:var(--teal-soft);border-radius:var(--r-sm)}
-  .shc-pick{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:8px 10px;margin-bottom:6px;border-radius:var(--r-sm);
-    background:var(--paper)}
+  .shc-pick{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;padding:0 0 4px;margin-bottom:2px;border-radius:var(--r-sm);
+    background:none}
   .shc-pick > :first-child{flex:1;min-width:0}
-  .shc-pick.on{position:sticky;top:8px;z-index:2;background:var(--teal-soft);border:1px solid var(--teal);box-shadow:var(--shadow)}
+  .shc-pick.on{position:sticky;top:8px;z-index:2;background:var(--teal-soft);border:1px solid var(--teal);box-shadow:var(--shadow);padding:8px 10px}
   .shc-row.st > .sub:last-child{text-align:end}
   @media (max-width:760px){
-    #shc-top{display:grid;grid-template-columns:1fr 1fr}
-    .shc-h{padding:var(--sp-3)}
-    .shc-h .acts{width:100%} .shc-h .acts .tbtn{flex:1;justify-content:center}
+    .shc-head{flex-wrap:wrap;align-items:flex-start}
+    .shc-head #b-stm{width:100%;justify-content:center;min-height:42px}
+    .shc-h{grid-template-columns:1fr;grid-template-areas:"nm" "big" "note" "acts";padding:var(--sp-4) var(--sp-3) 4px}
+    .shc-h .acts{width:100%;margin-top:6px} .shc-h .acts .tbtn{flex:1;justify-content:center}
     .shc-part{padding:var(--sp-3)}
-    .shc-st{grid-template-columns:repeat(3,1fr);padding:var(--sp-3)}
+    .shc-st{padding:4px var(--sp-3) var(--sp-4)}
     .shc-sec{padding:10px var(--sp-3)}
     .shc-b{padding:0 var(--sp-3) var(--sp-3)}
     .shc-row{grid-template-columns:48px minmax(0,1fr) auto}

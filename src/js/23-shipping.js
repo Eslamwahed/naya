@@ -722,19 +722,12 @@
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
-    var pocket = 0;
-    cos.forEach(function(co){ pocket += shipCoStats(co).pocket; });
     var wal = walletsTotal(), held = heldOpenQty();
-    var cells = [
-      ["لك عند الشركات", money(wal), wal > 0.009 ? "v-gain" : "", "لسه ما استلمتهاش"],
-      ["مع المندوب", qty(withCourier.length), "", "أوردر مستني العميل يستلم"],
-      ["مرتجع عندهم", qty(held) + " قطعة", held ? "v-due" : "", held ? "لسه ما رجعش المخزن" : "كله رجع"],
-      [pocket >= 0 ? "شحن من جيبك" : "كسبت من الشحن", money(Math.abs(pocket)), pocket > 0.009 ? "v-due" : "v-gain",
-       pocket >= 0 ? "دفعت للشركات أكتر مما حمّلت العملاء" : "حمّلت العملاء أكتر مما دفعت للشركات"]
-    ];
-    top.innerHTML = cells.map(function(c){
-      return "<div><span>" + esc(c[0]) + "</span><strong class='num " + c[2] + "'>" + esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
-    }).join("");
+    /* v180: سطر واحد تحت العنوان بدل ٤ كروت — «شحن من جيبك» في «كل الأرقام» تحت وفي التقارير */
+    var sumTxt = wal > 0.009 ? "ليك عندهم <b class='num v-gain'>" + esc(money(wal)) + "</b>"
+               : (wal < -0.009 ? "عليك ليهم <b class='num v-due'>" + esc(money(-wal)) + "</b>" : "كل فلوسك وصلتك ✓");
+    top.innerHTML = sumTxt + (withCourier.length ? " · مع المندوب " + esc(plural(withCourier.length, "أوردر واحد", "أوردرين", "أوردرات")) : "") +
+      (held ? " · مرتجع عندهم " + qty(held) + " قطعة" : "");
     if(!cos.length){
       box.innerHTML = "<p class='cd-empty'>لما تكتب اسم شركة الشحن في الأوردرات، هتلاقي هنا حساب كل شركة.</p>";
       return;
@@ -744,34 +737,33 @@
     box.innerHTML = cos.map(function(co){
       var name = squish(co), bal = walletOf(name);
       var L = S.filter(function(x){ return squish(x.shipCo) === name; });
-      var dl = L.filter(isDelivered).length, cc = L.filter(isCancelled).length;
+      var cc = L.filter(isCancelled).length;
       var withC = L.filter(function(x){ return orderStep(x).k === "inspect"; }).length;
-      var counted = L.filter(shipCounts), fees = counted.reduce(function(a, x){ return a + shipOut(x); }, 0);
-      var avg = counted.length ? fees / counted.length : 0;
       var pend = L.filter(function(x){ return viaShip(x) && Math.abs(shipPend(x).left) > 0.009; })
         .sort(function(a, b){ return -byDate(a, b); });
       var hl = heldOpen().filter(function(h){ return squish(h.s.shipCo) === name; });
       var hq = hl.reduce(function(a, h){ return a + h.n; }, 0);
       var sec = shcOpen[name] || (pend.length ? "orders" : "");
+      /* v180: الرقم بيتقري زي ما هو — «ليك عندها 760» أو «عليك ليها 50» (مش «لك عندها −50») */
       var head = "<div class='shc-h'><span class='nm'>" + (name ? esc(name) : "⚠ من غير اسم شركة") + "</span>" +
-        "<span class='big'><small>لك عندها</small><b class='num" + (bal > 0.009 ? " v-gain" : (bal < -0.009 ? " v-due" : " muted")) + "'>" + esc(money(bal)) + "</b></span>" +
+        "<span class='big'><small>" + (bal < -0.009 ? "عليك ليها" : "ليك عندها") + "</small><b class='num" +
+          (bal > 0.009 ? " v-gain" : (bal < -0.009 ? " v-due" : " muted")) + "'>" + esc(money(Math.abs(bal))) + "</b></span>" +
         "<span class='acts'>" + (bal > 0.009 && name && ed
           ? "<button class='tbtn primary' type='button' data-shcall='" + esc(name) + "'>استلم " + esc(money(bal)) + "</button>" +
             "<button class='tbtn' type='button' data-shcpart='" + esc(name) + "'>استلم جزء</button>"
           : (bal > 0.009 && !name ? "<span class='sub'>افتح الأوردرات واكتب اسم الشركة</span>"
-             : (bal < -0.009 ? "<span class='sub'>عليك مصاريف مرتجع — هتتخصم من الاستلام الجاي</span>" : "<span class='sub'>✓ كل فلوسك وصلتك</span>"))) +
-        "</span></div>";
+             : (bal < -0.009 ? "" : "<span class='sub'>✓ كل فلوسك وصلتك</span>"))) +
+        "</span>" +
+        (bal < -0.009 ? "<p class='shc-note'>مصاريف مرتجع — هتتخصم من أول استلام جاي، مش محتاج تعمل حاجة.</p>" : "") + "</div>";
       var part = (shcPart === name && ed)
         ? "<div class='shc-part'><label>استلمت كام؟ <input inputmode='decimal' class='num' data-shcamt='" + esc(name) + "' placeholder='" + esc(money(bal)) + "'></label>" +
           "<button class='tbtn primary' type='button' data-shcok='" + esc(name) + "'>سجّل</button>" +
           "<span class='sub'>بيدخل الخزنة ويتحسب على الأوردرات الأقدم الأول</span></div>" : "";
+      /* v180: سطر واحد بالحاجات اللي بتتابعها — العدد الكلي ومتوسط الشحن في «كل الأرقام» تحت */
       var st = "<div class='shc-st'>" +
-        "<div><small>أوردرات</small><b class='num'>" + qty(L.length) + "</b></div>" +
-        "<div><small>اتسلّم</small><b class='num'>" + qty(dl) + "</b></div>" +
-        "<div><small>اترفض</small><b class='num" + (cc ? " v-due" : "") + "'>" + qty(cc) +
-          (L.length && cc ? " <span class='pct'>(" + Math.round(cc / L.length * 100) + "%)</span>" : "") + "</b></div>" +
-        "<div><small>مع المندوب</small><b class='num" + (withC ? " w" : "") + "'>" + qty(withC) + "</b></div>" +
-        "<div><small>متوسط الشحن</small><b class='num'>" + esc(qty(Math.round(avg * 100) / 100)) + "</b></div></div>";
+        "<span>مع المندوب <b class='num" + (withC ? " w" : "") + "'>" + qty(withC) + "</b></span>" +
+        "<span>مرتجع عندها <b class='num'>" + (hq ? qty(hq) + "</b> قطعة" : "مفيش</b>") + "</span>" +
+        "<span>اترفض <b class='num'><bdi>" + (L.length ? Math.round(cc / L.length * 100) : 0) + "%</bdi></b></span></div>";
       var secHead = function(k, t, sm){
         return "<button type='button' class='shc-sec" + (sec === k ? " on" : "") + "' data-shcsec='" + esc(name) + "|" + k + "'>" +
           "<b>" + esc(t) + "</b><small>" + esc(sm) + "</small><span aria-hidden='true'>" + (sec === k ? "▴" : "▾") + "</span></button>";
@@ -786,8 +778,8 @@
                 (sum <= 0.009 ? "<span class='sub'>المجموع مش موجب — علّم معاه الأوردرات اللي الشركة حاسبتك عليها</span>" : "") + "</b>" +
               (sum > 0.009 ? "<button class='tbtn primary' type='button' data-shcpick='" + esc(name) + "'>استلمت فلوسهم</button>" : "") +
               "<button class='tbtn' type='button' data-shcclr='" + esc(name) + "'>إلغاء</button>"
-            : "<span class='sub'>علّم الأوردرات اللي الشركة حاسبتك عليها</span>" +
-              "<button class='tbtn' type='button' data-shcselall='" + esc(name) + "'>اختار الكل</button>") + "</div>";
+            : "<span class='sub'>علّم اللي الشركة حاسبتك عليه</span>" +
+              "<button class='shc-all' type='button' data-shcselall='" + esc(name) + "'>اختار الكل</button>") + "</div>";
         body = pick + (pend.length ? pend.map(function(x){
           var got = isCancelled(x) ? shipIn(x) : (Number(x.paid)||0), fee = shipCounts(x) ? shipOut(x) : 0;
           var net = got - fee, pd = shipPend(x).left, neg = pd < -0.009;
@@ -796,12 +788,12 @@
                   " aria-label='استلمت فلوس أوردر " + esc(x.no || "") + "'>" : "") +
             "<a href='#' class='ono' data-shcorder='" + esc(x.id) + "'>#" + esc(x.no || "—") + "</a>" +
             "<span>" + esc(partyName(x.partyId)) + "<span class='sub'>" +
-              (neg ? "رفض" + (got ? " · دفع الشحن " + esc(qty(got)) : " · ما دفعش الشحن") + " − مرتجع " + esc(qty(fee)) + " عليك — بيتخصم من الاستلام الجاي"
-                   : (isCancelled(x) ? "رفض · دفع الشحن " : "العميل دفع ") + esc(qty(got)) + (fee ? " − شحنها " + esc(qty(fee)) : "") +
-                     (net - pd > 0.009 ? " · اتحسب منها " + esc(qty(Math.round((net - pd) * 100) / 100)) + " من اللي استلمته" : "")) + "</span></span>" +
+              (neg ? "رفض" + (got ? " · دفع الشحن " + esc(qty(got)) : " · ما دفعش الشحن") + " − مرتجع " + esc(qty(fee))
+                   : (isCancelled(x) ? "رفض · دفع الشحن " : "دفع ") + esc(qty(got)) + (fee ? " − شحن " + esc(qty(fee)) : "") +
+                     (net - pd > 0.009 ? " − " + esc(qty(Math.round((net - pd) * 100) / 100)) + " اتحسبوا قبل كده" : "")) + "</span></span>" +
             "<span class='sub num'>" + esc(dShort(x.deliveredAt || x.cancelledAt || x.date)) + "</span>" +
             "<b class='num" + (neg ? " v-due" : "") + "'>" + esc(money(pd)) + "</b>" +
-            (ed && !neg ? "<button class='tbtn shc-one' type='button' data-shcone='" + esc(name) + "|" + esc(x.id) + "' title='الشركة حاسبتك على الأوردر ده — " + esc(money(pd)) + " تدخل الخزنة'>استلمت</button>" : (ed ? "<span></span>" : "")) + "</div>";
+            (ed && !neg ? "<button class='tbtn shc-one' type='button' data-shcone='" + esc(name) + "|" + esc(x.id) + "' title='الشركة حاسبتك على الأوردر ده — " + esc(money(pd)) + " تدخل الخزنة'>استلمتها</button>" : (ed ? "<span></span>" : "")) + "</div>";
         }).join("") : "<p class='sub' style='margin:0'>مفيش أوردرات فلوسها لسه عندها.</p>");
       } else if(sec === "held"){
         body = hl.length ? hl.map(function(h){
@@ -825,7 +817,13 @@
         }).join("") : "<p class='sub' style='margin:0'>مفيش حركات للشركة دي لسه.</p>";
       }
       return "<div class='shc'>" + head + part + st +
-        secHead("orders", "الأوردرات اللي فلوسها عندها", pend.length ? plural(pend.length, "أوردر واحد", "أوردرين", "أوردرات") + " · " + money(pend.reduce(function(a, x){ return a + shipPend(x).left; }, 0)) : "مفيش") +
+        (function(){
+          var ps = pend.reduce(function(a, x){ return a + shipPend(x).left; }, 0), pn = pend.length ? plural(pend.length, "أوردر واحد", "أوردرين", "أوردرات") : "";
+          // لو الأوردرات دي هي الرصيد كله: «الـ760 دي من أوردرين» — بتجاوب على «الفلوس دي جاية منين؟»
+          return pend.length && bal > 0.009 && Math.abs(ps - bal) < 0.01
+            ? secHead("orders", "الـ" + qty(Math.round(bal * 100) / 100) + " دي من " + pn, "")
+            : secHead("orders", "الأوردرات اللي فلوسها عندها", pend.length ? pn + " · " + money(ps) : "مفيش");
+        })() +
         (sec === "orders" ? "<div class='shc-b'>" + body + "</div>" : "") +
         secHead("held", "مرتجع عندها", hq ? qty(hq) + " قطعة" : "مفيش") +
         (sec === "held" ? "<div class='shc-b'>" + body + "</div>" : "") +
