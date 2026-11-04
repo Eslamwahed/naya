@@ -206,7 +206,7 @@
     var det = document.getElementById("cap-recon-more");
     var a = netAssets(), e = totalEquity(), d = a - e, ok = Math.abs(d) < 0.01;
     el.className = "cap-recon " + (ok ? "ok" : "bad");
-    el.hidden = ok;                         // v183: لو مظبوطة «فلوسكم فين؟» فوق بتقول نفس الكلام — بتبان بس لو فيه فرق
+    el.hidden = ok; if(det) det.hidden = ok;   // v183: لو مظبوطة «فلوسكم فين؟» فوق بتقول نفس الكلام — بتبان بس لو فيه فرق
     el.innerHTML = "<span class='ic' aria-hidden='true'>" + (ok ? "✓" : "⚠") + "</span><span class='t'>" +
       (ok ? "<b>الميزانية مظبوطة</b><small>كل اللي عندك (خزنة + بضاعة + فلوس عند شركات الشحن والعملاء) = " +
               "<span class='num'>" + esc(money(a)) + "</span> = فلوس الشركاء + الأرباح</small>"
@@ -228,55 +228,82 @@
         "<button class='del' type='button' data-del='cash' data-id='" + c.id + "'>حذف</button></span></div>";
   }
 
+  /* v186 — جزء «الشركاء»: جدول واحد بدل كارت لكل شريك + شريط النسب + جدول «نصيب الشركاء» لوحده.
+     السطر: الاسم · نسبته (بشريط) · رأس ماله · [أرباح ليه — لو فيه] · نصيبه من ربح الفترة · «⋯» فيها أزراره.
+     النصيب بنفس حساب «نصيب الشركاء» القديم بالظبط (weightedRatio + فرق التقريب على أكبر نصيب). */
+  function capShareRows(ps){
+    var r = csPer === "all" ? null : distPerRange(csPer);
+    var from = r ? r.from : earliestDate(), to = r ? r.to : today();
+    var net = periodStats(r).net;
+    var fc = ps.map(function(x){ return capStartOf(x.id); }).filter(Boolean).sort()[0];
+    var capFrom = fc && fc > from ? fc : from;
+    var allDays = capFrom > to ? 0 : daysBetween(capFrom, to) + 1;
+    var sh = ps.map(function(x){ return Math.round(net * weightedRatio(x.id, from, to) * 100) / 100; });
+    var diff = Math.round((net - sh.reduce(function(a, b){ return a + b; }, 0)) * 100) / 100;
+    if(diff !== 0 && sh.length){
+      var big = 0; sh.forEach(function(v, i){ if(Math.abs(v) > Math.abs(sh[big])) big = i; });
+      sh[big] = Math.round((sh[big] + diff) * 100) / 100;
+    }
+    return { net:net, share:sh, days:ps.map(function(x){ return capDaysIn(x.id, from, to); }), allDays:allDays };
+  }
   function renderCapCards(){
-    var box = document.getElementById("cap-cards"), own = document.getElementById("cap-own");
-    if(!box || !own) return;
+    var box = document.getElementById("cap-cards"), al = document.getElementById("cap-alert");
+    if(!box) return;
     var ps = partners(), tot = totalCapital();
+    Array.prototype.forEach.call(document.querySelectorAll("#cs-per [data-csper]"), function(x){
+      x.classList.toggle("on", x.dataset.csper === csPer);
+      x.setAttribute("aria-pressed", x.dataset.csper === csPer ? "true" : "false");
+    });
+    // تنبيه بس لو الشركة عليها لشريك (مصاريف دفعها من جيبه)
+    if(al) al.innerHTML = ps.filter(function(p){ return owedOf(p.id) > 0.009; }).map(function(p){
+      return "<div class='cap-owe'><p><b>الشركة عليها لـ" + esc(p.name) + " <span class='num'>" + esc(qty(Math.round(owedOf(p.id)))) + "</span></b>" +
+        "<small>مصاريف دفعها من جيبه — مش جزء من رأس ماله ولا أرباحه</small></p>" +
+        "<button class='tbtn primary' type='button' data-capdo='cap_repay|" + p.id + "'>رجّعله من الخزنة</button></div>";
+    }).join("");
     if(!ps.length){
-      own.innerHTML = "";
-      box.innerHTML = "<div class='cd-empty' style='grid-column:1 / -1'>مفيش شركاء لسه — اضغط «+ حركة رأس مال» فوق، وجوه الدرج هتلاقي «+ شريك».</div>";
+      box.innerHTML = "<div class='cd-empty'>مفيش شركاء لسه — اضغط «+ حركة رأس مال» فوق، وجوه الدرج هتلاقي «+ شريك».</div>";
       return;
     }
-    own.innerHTML = tot > 0.009
-      ? "<div class='cap-bar'>" + ps.map(function(p, i){
-          var r = ratioOf(p.id);
-          return r > 0 ? "<i style='width:" + (r*100) + "%;background:" + capClr(i) + "'></i>" : "";
-        }).join("") + "</div><div class='cap-lg'>" + ps.map(function(p, i){
-          return "<span><em style='background:" + capClr(i) + "'></em>" + esc(p.name) + " " + capPct(ratioOf(p.id)) + "</span>";
-        }).join("") + "</div>"
-      : "";
     if(capOpen && !ps.some(function(p){ return p.id === capOpen; })) capOpen = null;
-    box.innerHTML = ps.map(function(p, i){
+    var S = tot > 0.009 ? capShareRows(ps) : null;
+    var anyCur = ps.some(function(p){ return Math.abs(currentOf(p.id)) > 0.009; });
+    var cols = "cap-t" + (anyCur ? " cur" : "");
+    var head = "<div class='cap-r th'><span>الشريك</span><span>نسبته</span><span class='n'>رأس ماله</span>" +
+      (anyCur ? "<span class='n'>أرباح ليه لسه ما خدهاش</span>" : "") + "<span class='n'>نصيبه من الربح</span><span></span></div>";
+    var rows = ps.map(function(p, i){
       var cap = capitalOf(p.id), cur = currentOf(p.id), r = ratioOf(p.id);
       var mv = capMoves(p.id).slice().sort(function(a, b){
         if((a.date||"") !== (b.date||"")) return (a.date||"") < (b.date||"") ? 1 : -1;
         return (b.at||0) - (a.at||0);
       });
       var st = capStartOf(p.id), open = capOpen === p.id && mv.length;
-      var sub = (st ? "شريك من " + dShort(st) : "لسه ما دفعش رأس مال") +
-        (mv.length ? " · " + nMoves(mv.length) : "") + (p.phone ? " · " + p.phone : "");
-      return "<div class='cpc' data-cpc='" + p.id + "'>" +
-        "<div class='cpc-h'><span class='av' style='background:" + capClr(i) + "'>" + esc((p.name||"؟").charAt(0)) + "</span>" +
-          "<span class='nm'><b>" + esc(p.name) + "</b><span class='sub'>" + esc(sub) + "</span></span>" +
-          "<span class='pcnt'><b class='num'>" + capPct(r) + "</b><small>نسبته دلوقتي</small></span></div>" +
-        "<div class='cpc-st'>" +
-          "<div><small>رأس ماله</small><b class='num'>" + esc(money(cap)) + "</b></div>" +
-          "<div><small>أرباح ليه لسه ما أخدهاش</small><b class='num" + (cur > 0.009 ? " v-gain" : "") + "'>" + esc(money(cur)) + "</b></div>" +
-          "<div><small>إجمالي حقه</small><b class='num'>" + esc(money(cap + cur)) + "</b></div></div>" +
-        (owedOf(p.id) > 0.009 ? "<div class='cpc-owe'><span>الشركة عليها له <b class='num'>" + esc(money(owedOf(p.id))) + "</b><small>مصاريف دفعها من جيبه — مش جزء من رأس ماله ولا أرباحه</small></span>" +
-          "<button class='tbtn primary' type='button' data-capdo='cap_repay|" + p.id + "'>رجّعله من الخزنة</button></div>" : "") +
-        "<div class='cpc-a'>" +
-          "<button class='tbtn' type='button' data-capdo='cap_in|" + p.id + "'>+ دفع رأس مال</button>" +
-          "<button class='tbtn' type='button' data-capdo='cap_out|" + p.id + "'" + (cap > 0.009 ? "" : " disabled") + ">سحب من رأس ماله</button>" +
-          "<button class='tbtn' type='button' data-capdo='cap_payout|" + p.id + "'" + (cur > 0.009 ? "" : " disabled title='مفيش أرباح ليه لسه ما أخدهاش'") + ">صرف أرباحه</button>" +
-          "<button class='tbtn lnk' type='button' data-editpartner='" + p.id + "'>الاسم</button>" +
-          (mv.length
-            ? "<button class='tbtn lnk' type='button' data-capopen='" + p.id + "' aria-expanded='" + (open ? "true" : "false") + "'>حركاته " + (open ? "▴" : "▾") + "</button>"
-            : "<button class='tbtn lnk' type='button' style='color:var(--due)' data-delpartner='" + p.id + "'>حذف</button>") +
-        "</div>" +
-        (open ? "<div class='cpc-tl'><h4>حركات " + esc(p.name) + "</h4>" + mv.map(capMoveRow).join("") + "</div>" : "") +
-      "</div>";
+      var sh = S ? S.share[i] : 0, dz = S ? S.days[i] : null;
+      var late = S && dz !== null && dz < S.allDays;
+      var menu = "<details class='cap-more'><summary aria-label='حاجات " + esc(p.name) + "' title='حاجات تانية'>⋯</summary><div>" +
+        "<button class='tbtn' type='button' data-capdo='cap_in|" + p.id + "'>+ دفع رأس مال</button>" +
+        (cap > 0.009 ? "<button class='tbtn' type='button' data-capdo='cap_out|" + p.id + "'>سحب من رأس ماله</button>" : "") +
+        (cur > 0.009 ? "<button class='tbtn' type='button' data-capdo='cap_payout|" + p.id + "'>صرف أرباحه</button>" : "") +
+        "<button class='tbtn' type='button' data-editpartner='" + p.id + "'>تعديل الاسم</button>" +
+        (mv.length ? "<button class='tbtn' type='button' data-capopen='" + p.id + "'>" + (open ? "اقفل حركاته" : "حركاته (" + qty(mv.length) + ")") + "</button>"
+                   : "<button class='tbtn cap-del' type='button' data-delpartner='" + p.id + "'>حذف</button>") +
+        "</div></details>";
+      return "<div class='cap-r'>" +
+        "<span class='nm'><i style='background:" + capClr(i) + "'></i><span><b>" + esc(p.name) + "</b>" +
+          "<small>" + esc(st ? "من " + dShort(st) : "لسه ما دفعش رأس مال") + "</small></span></span>" +
+        "<span class='cpct'><b class='num'>" + capPct(r) + "</b><span class='pbar'><i style='width:" + (r * 100) + "%;background:" + capClr(i) + "'></i></span></span>" +
+        "<span class='n num'>" + esc(qty(Math.round(cap))) + "</span>" +
+        (anyCur ? "<span class='n num" + (cur > 0.009 ? " v-gain" : "") + "'>" + esc(qty(Math.round(cur))) + "</span>" : "") +
+        "<span class='n sh'><b class='num " + (sh < 0 ? "v-due" : "v-gain") + "'>" + (sh > 0 ? "+" : sh < 0 ? "−" : "") + esc(qty(Math.abs(Math.round(sh)))) + "</b>" +
+          (late ? "<small>فلوسه اشتغلت " + qty(dz) + " من " + qty(S.allDays) + " يوم</small>" : "") + "</span>" +
+        "<span class='mo'>" + menu + "</span></div>" +
+        (open ? "<div class='cpc-tl'><h4>حركات " + esc(p.name) + "</h4>" + mv.map(capMoveRow).join("") + "</div>" : "");
     }).join("");
+    var totCur = ps.reduce(function(a, p){ return a + currentOf(p.id); }, 0);
+    var total = "<div class='cap-r tot'><span>الإجمالي</span><span class='num'>100%</span><span class='n num'>" + esc(qty(Math.round(tot))) + "</span>" +
+      (anyCur ? "<span class='n num'>" + esc(qty(Math.round(totCur))) + "</span>" : "") +
+      "<span class='n'><b class='num " + (S && S.net < 0 ? "v-due" : "v-gain") + "'>" + (S ? (S.net > 0 ? "+" : S.net < 0 ? "−" : "") + esc(qty(Math.abs(Math.round(S.net)))) : "—") + "</b></span><span></span></div>";
+    box.className = cols;
+    box.innerHTML = head + rows + total;
   }
 
   /* ---------- خطوات التوزيع ---------- */
@@ -640,7 +667,7 @@
     return;
   }
 
-  document.getElementById("cap-cards").addEventListener("click", function(e){
+  function capCardsClick(e){
     var t;
     if((t = e.target.closest("[data-capdo]"))){
       // «دفع رأس مال» / «سحب» / «صرف أرباحه» = نفس درج «حركة رأس مال» والشريك والنوع متحدّدين
@@ -663,7 +690,9 @@
     if((t = e.target.closest("[data-editcap]"))){ startEditCap(t.dataset.editcap); return; }
     if((t = e.target.closest("[data-editpartner]"))){ openPartnerBox(t.dataset.editpartner); openEntry("capital"); return; }
     if((t = e.target.closest("[data-delpartner]"))){ delPartnerClick(t); return; }
-  });
+  }
+  document.getElementById("cap-cards").addEventListener("click", capCardsClick);
+  document.getElementById("cap-alert").addEventListener("click", capCardsClick);
   document.getElementById("cap-recon").addEventListener("click", function(e){
     if(!e.target.closest("[data-capreconx]")) return;
     var det = document.getElementById("cap-recon-more");
@@ -701,7 +730,7 @@
 
   document.getElementById("cs-per").addEventListener("click", function(e){
     var cs = e.target.closest("[data-csper]"); if(!cs) return;
-    csPer = cs.dataset.csper; renderCapShare();
+    csPer = cs.dataset.csper; renderCapShare(); renderCapCards();
   });
   document.getElementById("dist-per").addEventListener("click", function(e){
     var b = e.target.closest("[data-distper]"); if(!b) return;
