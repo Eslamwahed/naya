@@ -1843,6 +1843,32 @@
   #tab-rep .rsecs > .rsec[open]{padding-bottom:var(--sp-3)}
   #tab-rep .rsecs > .rsec > :not(summary){margin-inline:18px}
   #pis-panel .pis-head h3 small{margin:0}
+  /* v187 fix: قايمة الدخل واللي مطوي كانوا بيبانوا في باقي التقارير (display بيغلب .rt-off) */
+  #tab-rep #pis-panel.rt-off,#tab-rep details.rep-fold.rt-off,#tab-rep .fin2.rt-off{display:none}
+  /* ═══ v188 — الميزانية: عمودين «عندك إيه؟» و«جاية منين؟» · الباقي مطوي ═══ */
+  .fin2 .fin-sub{margin:-6px 0 var(--sp-4);color:var(--ink-soft);font-size:var(--fs-3);display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+  .fin2 .fin-ok{display:inline-flex;align-items:center;border-radius:99px;padding:3px 12px;font-size:var(--fs-2);font-weight:500}
+  .fin2 .fin-ok.ok{background:var(--gain-soft);color:var(--gain-ink)}
+  .fin2 .fin-ok.bad{background:var(--due-soft);color:var(--due)}
+  .fin-cols{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);align-items:start;margin-bottom:var(--sp-4)}
+  .fin-c{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .fin-c > h3{margin:0;padding:14px 18px 2px;font-size:var(--fs-4);font-weight:600}
+  .fin-c > .q{margin:0;padding:0 18px 10px;color:var(--ink-soft);font-size:var(--fs-2);border-bottom:1px solid var(--line)}
+  .fin-ln{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 18px;font-size:var(--fs-3);border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+  .fin-ln small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .fin-ln b{font-weight:600;white-space:nowrap}
+  .fin-ln.ind{padding-inline-start:34px;color:var(--ink-soft);font-size:var(--fs-2)}
+  .fin-g{padding:8px 18px 2px;font-size:var(--fs-2);color:var(--ink-soft)}
+  .fin-g + .fin-ln,.fin-c > .q + .fin-ln{border-top:0}
+  .fin-st{display:flex;justify-content:space-between;padding:9px 18px;background:color-mix(in srgb,var(--paper) 55%,var(--card));font-weight:600;font-size:var(--fs-3);border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+  .fin-tot{display:flex;justify-content:space-between;padding:13px 18px;background:var(--paper);border-top:1px solid var(--line);font-weight:600;font-size:var(--fs-4)}
+  .fin-caps > summary{list-style:none;cursor:pointer}
+  .fin-caps > summary::-webkit-details-marker{display:none}
+  .fin-caps .fin-n{color:var(--teal);font-size:var(--fs-2);margin-inline-start:6px}
+  .fin-fold{margin-bottom:var(--sp-2)}
+  @media (max-width:760px){ .fin-cols{grid-template-columns:1fr} }
+  #tab-rep[data-repcur="fin"] .rep-per-t,#tab-rep[data-repcur="fin"] .rep-cust{display:none}
+  #tab-rep[data-repcur="fin"] .rep-per{justify-content:flex-end;border-bottom:0;margin-bottom:var(--sp-2)}
   /* v133: تقرير الشركاء — ثيم Lora Plum. ألوانه من --lp-* الثابتة: التقرير بيتطبع فاتح حتى لو السيستم ليلي */
   #prt{position:fixed;inset:0;z-index:60;background:#E9E3E8;overflow:auto;direction:rtl}
   #prt[hidden]{display:none}
@@ -3964,12 +3990,17 @@
   </div>
 
   <!-- v132: القوايم المالية — الميزانية العمومية وقايمة الدخل على أساس التسليم (IFRS 15) -->
-  <div class="panel money-only" id="fin-panel" data-rt="fin">
-    <div class="fin-head"><h3>الميزانية العمومية <small id="fin-asof"></small></h3><span class="fin-ok" id="fin-ok"></span></div>
-    <div class="tbl-wrap"><table id="t-fin-bs" class="fin-t"></table></div>
-    <h3 style="margin-top:var(--sp-5)">قايمة الدخل <small id="fin-per"></small></h3>
-    <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div>
-    <p class="hint" id="fin-note" style="margin:var(--sp-3) 0 0"></p>
+  <!-- v188: الميزانية عمودين — «عندك إيه؟» و«جاية منين؟» — وقايمة الدخل بشكل المحاسبين مطوية (موجودة في شاشتها) -->
+  <div class="money-only fin2" id="fin-panel" data-rt="fin">
+    <p class="fin-sub"><span class="fin-ok" id="fin-ok"></span> <span id="fin-asof"></span></p>
+    <div class="fin-cols">
+      <div class="fin-c"><h3>عندك إيه؟</h3><p class="q">الأصول — كل حاجة الشركة تملكها</p><div id="t-fin-bs"></div></div>
+      <div class="fin-c"><h3>جاية منين؟</h3><p class="q">الالتزامات وحقوق الملكية — فلوس مين اللي في الشركة</p><div id="t-fin-le"></div></div>
+    </div>
+    <details class="panel rep-fold fin-fold"><summary>قايمة الدخل بشكل المحاسبين <b id="fin-per"></b></summary>
+      <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div></details>
+    <details class="panel rep-fold fin-fold"><summary>الأساس المحاسبي <b>الإيراد وقت التسليم (IFRS 15) · المخزون بالمتوسط المتحرّك (IAS 2)</b></summary>
+      <p class="hint" id="fin-note" style="margin:var(--sp-3) 0"></p></details>
   </div>
 
   <!-- v135: المدير المالي — تقييم الأداء وخطة زيادة الربح. كله محسوب من الحركات وبيتحدّث لوحده -->
@@ -4596,8 +4627,14 @@
   /* ---------- الإصدار وسجل التغييرات ----------
      أي تعديل على السيستم لازم يزوّد VERSION ويضيف سطر في CHANGELOG،
      عشان تعرف النسخة اللي على كل جهاز بتحتوي على إيه. */
-  var VERSION = "187";
+  var VERSION = "188";
   var CHANGELOG = [
+    { v:"188", d:"2026-11-04", items:[
+      "الميزانية عمودين جنب بعض: «عندك إيه؟» (الأصول) و«جاية منين؟» (الالتزامات وحقوق الملكية) — من غير قروش، ورأس مال الشركاء سطر واحد بيتفتح",
+      "قايمة الدخل اتشالت من شاشة الميزانية (كانت متكررة مرتين) — بشكل المحاسبين والأساس المحاسبي مطويين تحت · تبويبات الفترة مستخبية لأن الميزانية «كما في النهارده»",
+      "تصليح: قايمة الدخل كانت بتبان تحت باقي التقارير من إصدار 187",
+      "مفيش أي رقم أو حساب اتغيّر"
+    ]},
     { v:"187", d:"2026-11-04", items:[
       "قايمة الدخل بتفتح على «اللي خلص» — نفس صافي الربح اللي في الميزانية و«فلوسكم فين؟»، و«لو كله اتسلّم» بدوسة",
       "الفترة تبويبات رفيعة (الشهر ده · اللي فات · آخر 30 يوم · كل الفترات · فترة محددة) بدل قايمة في كارت لوحده",
@@ -9363,6 +9400,7 @@
   function applyRepTab(swap){
     var sec = document.getElementById("tab-rep"); if(!sec) return;
     if((repTab === "fin" || repTab === "cfo") && !canMoney()) repTab = "sum";   // أرقام ربح وتكلفة
+    sec.setAttribute("data-repcur", repTab);     // v188: الميزانية «كما في النهارده» — تبويبات الفترة بتستخبى
     Array.prototype.forEach.call(sec.querySelectorAll("[data-rtab]"), function(b){
       var on = b.dataset.rtab === repTab;
       b.classList.toggle("on", on); b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1;
@@ -9828,41 +9866,43 @@
     var B = finBS(), r = periodRange(), A = finIS(null), Pd = r ? finIS(r) : null;
     var m = function(v){ return v < -0.004 ? "(" + money(-v) + ")" : money(v); };
     var cls = function(v){ return v < -0.004 ? " v-due" : ""; };
-    var R = function(label, v, kind, sub){
-      var c = kind === "sec" ? "fs-sec" : kind === "sub" ? "fs-sub" : kind === "tot" ? "fs-tot" : kind === "grand" ? "fs-grand" : "";
-      return "<tr" + (c ? " class='" + c + "'" : "") + "><td class='wide" + (kind === "ind" ? " ind" : "") + "'>" + label +
-        (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td><td class='num" + (v === null ? "" : cls(v)) + "'>" + (v === null ? "" : m(v)) + "</td></tr>";
+    /* v188: عمودين — «عندك إيه؟» (الأصول) و«جاية منين؟» (الالتزامات + حقوق الملكية)، من غير قروش.
+       نفس بنود finBS بالظبط؛ رأس مال الشركاء سطر واحد بيتفتح. */
+    var q = function(v){ return v < -0.004 ? "(" + qty(Math.round(-v)) + ")" : qty(Math.round(v)); };
+    var L = function(label, v, sub, more){
+      return "<div class='fin-ln'><span>" + label + (sub ? "<small>" + sub + "</small>" : "") + "</span><b class='num" + cls(v) + "'>" + q(v) + "</b></div>" + (more || "");
     };
-    var bs = [];
-    // كل البنود متداولة (IAS 1.66 و1.69) — مفيش أصول ثابتة متسجّلة
-    bs.push(R("الأصول المتداولة", null, "sec"));
-    bs.push(R("النقدية في الخزنة", B.cash, "ind"));
-    bs.push(R("مستحقات عند شركات الشحن", B.wallets, "ind", "فلوس العملاء اللي المندوب حصّلها ولسه ما وصلتكش"));
-    if(B.recv > 0.009) bs.push(R("مديونيات العملاء", B.recv, "ind"));
-    if(B.supAdv > 0.009) bs.push(R("دفعات مقدّمة للموردين", B.supAdv, "ind"));
-    bs.push(R("المخزون (بالتكلفة)", B.stock, "ind", B.inOrders > 0.009 ? "منه حوالي " + esc(money(B.inOrders)) + " في أوردرات لسه ما اتسلّمتش" : ""));
-    if(B.prepaid > 0.009) bs.push(R("مصروفات مدفوعة مقدّماً", B.prepaid, "ind",
-      "رصيد فيسبوك " + esc(money(B.prepMeta)) + (B.prepaid - B.prepMeta > 0.009 ? " · اشتراكات لسه أيامها ما جتش " + esc(money(B.prepaid - B.prepMeta)) : "")));
-    bs.push(R("إجمالي الأصول", B.assets, "tot"));
-    bs.push(R("الالتزامات المتداولة", null, "sec"));
-    bs.push(R("مستحق للموردين", B.pay, "ind"));
-    bs.push(R("عرابين عملاء — التزامات عقود (IFRS 15.106)", B.custAdv, "ind", "فلوس دفعها عملاء على أوردرات لسه ما اتسلّمتش"));
-    if(B.owed > 0.009) bs.push(R("مستحق للشركاء", B.owed, "ind", "مصاريف دفعوها من جيبهم ولسه ما رجعتلهمش"));
-    bs.push(R("إجمالي الالتزامات", B.liab, "tot"));
-    bs.push(R("حقوق الملكية", null, "sec"));
-    B.partners.forEach(function(x){ if(Math.abs(x.cap) > 0.009) bs.push(R("رأس مال " + esc(x.n), x.cap, "ind")); });
-    bs.push(R("إجمالي رأس المال", B.cap, "sub"));
-    if(Math.abs(B.cur) > 0.009) bs.push(R("أرباح اتوزّعت على الشركاء ولسه ما اتصرفتش", B.cur, "ind"));
-    if(Math.abs(B.opening) > 0.009) bs.push(R("صافي الأرصدة الافتتاحية", B.opening, "ind"));
-    bs.push(R("الأرباح المحتجزة", B.re, "ind", "صافي الربح من البداية " + esc(m(A.net)) + (B.dist > 0.009 ? " − اللي اتوزّع " + esc(money(B.dist)) : "")));
-    bs.push(R("إجمالي حقوق الملكية", B.equity, "tot"));
-    bs.push(R("إجمالي الالتزامات وحقوق الملكية", B.liab + B.equity, "grand"));
-    table("t-fin-bs", ["البند", "المبلغ"], bs, "");
+    var T = function(label, v, big){ return "<div class='" + (big ? "fin-tot" : "fin-st") + "'><span>" + label + "</span><b class='num" + cls(v) + "'>" + q(v) + "</b></div>"; };
+    var G = function(t){ return "<div class='fin-g'>" + t + "</div>"; };
+    var a = [L("النقدية في الخزنة", B.cash),
+      L("المخزون (بسعر الشرا)", B.stock, B.inOrders > 0.009 ? "منه " + esc(qty(Math.round(B.inOrders))) + " في أوردرات لسه ما اتسلّمتش" : "")];
+    if(Math.abs(B.wallets) > 0.009) a.push(L("عند شركات الشحن", B.wallets, "العملاء دفعوها والمندوب ما وصّلهاش"));
+    if(B.recv > 0.009) a.push(L("عند عملاء", B.recv, "استلموا ولسه ما دفعوش"));
+    if(B.supAdv > 0.009) a.push(L("دفعات مقدّمة للموردين", B.supAdv));
+    if(B.prepaid > 0.009) a.push(L("مصروفات مدفوعة مقدّم", B.prepaid,
+      "رصيد فيسبوك " + esc(qty(Math.round(B.prepMeta))) + (B.prepaid - B.prepMeta > 0.009 ? " · اشتراكات لسه أيامها ما جتش " + esc(qty(Math.round(B.prepaid - B.prepMeta))) : "")));
+    document.getElementById("t-fin-bs").innerHTML = a.join("") + T("إجمالي الأصول", B.assets, true);
+    var l = [G("عليك لغيرك")];
+    if(B.pay > 0.009) l.push(L("مستحق للموردين", B.pay));
+    if(B.custAdv > 0.009) l.push(L("عرابين عملاء", B.custAdv, "على أوردرات لسه ما اتسلّمتش"));
+    if(B.owed > 0.009) l.push(L("مستحق للشركاء", B.owed, "مصاريف دفعوها من جيبهم ولسه ما رجعتلهمش"));
+    if(l.length === 1) l.push(L("مفيش", 0));
+    l.push(T("إجمالي الالتزامات", B.liab));
+    l.push(G("فلوس الشركاء"));
+    var pl = B.partners.filter(function(x){ return Math.abs(x.cap) > 0.009; });
+    l.push("<details class='fin-caps'><summary>" + L("رأس المال <span class='fin-n'>" + qty(pl.length) + (pl.length === 1 ? " شريك" : " شركاء") + " ▾</span>", B.cap) + "</summary>" +
+      pl.map(function(x){ return "<div class='fin-ln ind'><span>" + esc(x.n) + "</span><b class='num'>" + q(x.cap) + "</b></div>"; }).join("") + "</details>");
+    if(Math.abs(B.cur) > 0.009) l.push(L("أرباح اتوزّعت ولسه ما اتصرفتش", B.cur));
+    if(Math.abs(B.opening) > 0.009) l.push(L("صافي الأرصدة الافتتاحية", B.opening));
+    l.push(L("الأرباح المحتجزة", B.re, "صافي الربح من البداية" + (B.dist > 0.009 ? " − اللي اتوزّع " + esc(qty(Math.round(B.dist))) : "") + " — ما اتوزّعش"));
+    l.push(T("إجمالي حقوق الملكية", B.equity));
+    document.getElementById("t-fin-le").innerHTML = l.join("") + T("الإجمالي", B.liab + B.equity, true);
     var ok = Math.abs(B.diff) < 0.01 && Math.abs(B.recon) < 0.01;
     var okEl = document.getElementById("fin-ok");
     okEl.className = "fin-ok " + (ok ? "ok" : "bad");
-    okEl.textContent = ok ? "✓ متوازنة: الأصول = الالتزامات + حقوق الملكية" : "⚠ فيه فرق " + money(Math.abs(B.diff)) + " — راجع «توفيق الميزانية» في رأس المال";
-    document.getElementById("fin-asof").textContent = "كما في " + today();
+    okEl.textContent = ok ? "✓ متوازنة" : "⚠ فيه فرق " + money(Math.abs(B.diff)) + " — راجع «توفيق الميزانية» في الشركاء";
+    var td = today().split("-");
+    document.getElementById("fin-asof").textContent = "كما في النهارده " + Number(td[2]) + "/" + Number(td[1]) + " · الأصول = الالتزامات + حقوق الملكية";
 
     var cols = Pd ? [Pd, A] : [A];
     var I = function(label, k, kind, sub){

@@ -40,12 +40,17 @@
   </div>
 
   <!-- v132: القوايم المالية — الميزانية العمومية وقايمة الدخل على أساس التسليم (IFRS 15) -->
-  <div class="panel money-only" id="fin-panel" data-rt="fin">
-    <div class="fin-head"><h3>الميزانية العمومية <small id="fin-asof"></small></h3><span class="fin-ok" id="fin-ok"></span></div>
-    <div class="tbl-wrap"><table id="t-fin-bs" class="fin-t"></table></div>
-    <h3 style="margin-top:var(--sp-5)">قايمة الدخل <small id="fin-per"></small></h3>
-    <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div>
-    <p class="hint" id="fin-note" style="margin:var(--sp-3) 0 0"></p>
+  <!-- v188: الميزانية عمودين — «عندك إيه؟» و«جاية منين؟» — وقايمة الدخل بشكل المحاسبين مطوية (موجودة في شاشتها) -->
+  <div class="money-only fin2" id="fin-panel" data-rt="fin">
+    <p class="fin-sub"><span class="fin-ok" id="fin-ok"></span> <span id="fin-asof"></span></p>
+    <div class="fin-cols">
+      <div class="fin-c"><h3>عندك إيه؟</h3><p class="q">الأصول — كل حاجة الشركة تملكها</p><div id="t-fin-bs"></div></div>
+      <div class="fin-c"><h3>جاية منين؟</h3><p class="q">الالتزامات وحقوق الملكية — فلوس مين اللي في الشركة</p><div id="t-fin-le"></div></div>
+    </div>
+    <details class="panel rep-fold fin-fold"><summary>قايمة الدخل بشكل المحاسبين <b id="fin-per"></b></summary>
+      <div class="tbl-wrap"><table id="t-fin-is" class="fin-t"></table></div></details>
+    <details class="panel rep-fold fin-fold"><summary>الأساس المحاسبي <b>الإيراد وقت التسليم (IFRS 15) · المخزون بالمتوسط المتحرّك (IAS 2)</b></summary>
+      <p class="hint" id="fin-note" style="margin:var(--sp-3) 0"></p></details>
   </div>
 
   <!-- v135: المدير المالي — تقييم الأداء وخطة زيادة الربح. كله محسوب من الحركات وبيتحدّث لوحده -->

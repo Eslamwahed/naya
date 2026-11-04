@@ -198,3 +198,29 @@
   #tab-rep .rsecs > .rsec[open]{padding-bottom:var(--sp-3)}
   #tab-rep .rsecs > .rsec > :not(summary){margin-inline:18px}
   #pis-panel .pis-head h3 small{margin:0}
+  /* v187 fix: قايمة الدخل واللي مطوي كانوا بيبانوا في باقي التقارير (display بيغلب .rt-off) */
+  #tab-rep #pis-panel.rt-off,#tab-rep details.rep-fold.rt-off,#tab-rep .fin2.rt-off{display:none}
+  /* ═══ v188 — الميزانية: عمودين «عندك إيه؟» و«جاية منين؟» · الباقي مطوي ═══ */
+  .fin2 .fin-sub{margin:-6px 0 var(--sp-4);color:var(--ink-soft);font-size:var(--fs-3);display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+  .fin2 .fin-ok{display:inline-flex;align-items:center;border-radius:99px;padding:3px 12px;font-size:var(--fs-2);font-weight:500}
+  .fin2 .fin-ok.ok{background:var(--gain-soft);color:var(--gain-ink)}
+  .fin2 .fin-ok.bad{background:var(--due-soft);color:var(--due)}
+  .fin-cols{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4);align-items:start;margin-bottom:var(--sp-4)}
+  .fin-c{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .fin-c > h3{margin:0;padding:14px 18px 2px;font-size:var(--fs-4);font-weight:600}
+  .fin-c > .q{margin:0;padding:0 18px 10px;color:var(--ink-soft);font-size:var(--fs-2);border-bottom:1px solid var(--line)}
+  .fin-ln{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 18px;font-size:var(--fs-3);border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+  .fin-ln small{display:block;color:var(--ink-soft);font-size:var(--fs-1)}
+  .fin-ln b{font-weight:600;white-space:nowrap}
+  .fin-ln.ind{padding-inline-start:34px;color:var(--ink-soft);font-size:var(--fs-2)}
+  .fin-g{padding:8px 18px 2px;font-size:var(--fs-2);color:var(--ink-soft)}
+  .fin-g + .fin-ln,.fin-c > .q + .fin-ln{border-top:0}
+  .fin-st{display:flex;justify-content:space-between;padding:9px 18px;background:color-mix(in srgb,var(--paper) 55%,var(--card));font-weight:600;font-size:var(--fs-3);border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+  .fin-tot{display:flex;justify-content:space-between;padding:13px 18px;background:var(--paper);border-top:1px solid var(--line);font-weight:600;font-size:var(--fs-4)}
+  .fin-caps > summary{list-style:none;cursor:pointer}
+  .fin-caps > summary::-webkit-details-marker{display:none}
+  .fin-caps .fin-n{color:var(--teal);font-size:var(--fs-2);margin-inline-start:6px}
+  .fin-fold{margin-bottom:var(--sp-2)}
+  @media (max-width:760px){ .fin-cols{grid-template-columns:1fr} }
+  #tab-rep[data-repcur="fin"] .rep-per-t,#tab-rep[data-repcur="fin"] .rep-cust{display:none}
+  #tab-rep[data-repcur="fin"] .rep-per{justify-content:flex-end;border-bottom:0;margin-bottom:var(--sp-2)}
