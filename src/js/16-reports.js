@@ -730,6 +730,7 @@
   function applyRepTab(swap){
     var sec = document.getElementById("tab-rep"); if(!sec) return;
     if((repTab === "fin" || repTab === "cfo") && !canMoney()) repTab = "sum";   // أرقام ربح وتكلفة
+    sec.setAttribute("data-repcur", repTab);     // v188: الميزانية «كما في النهارده» — تبويبات الفترة بتستخبى
     Array.prototype.forEach.call(sec.querySelectorAll("[data-rtab]"), function(b){
       var on = b.dataset.rtab === repTab;
       b.classList.toggle("on", on); b.setAttribute("aria-selected", on ? "true" : "false"); b.tabIndex = on ? 0 : -1;
@@ -1195,41 +1196,43 @@
     var B = finBS(), r = periodRange(), A = finIS(null), Pd = r ? finIS(r) : null;
     var m = function(v){ return v < -0.004 ? "(" + money(-v) + ")" : money(v); };
     var cls = function(v){ return v < -0.004 ? " v-due" : ""; };
-    var R = function(label, v, kind, sub){
-      var c = kind === "sec" ? "fs-sec" : kind === "sub" ? "fs-sub" : kind === "tot" ? "fs-tot" : kind === "grand" ? "fs-grand" : "";
-      return "<tr" + (c ? " class='" + c + "'" : "") + "><td class='wide" + (kind === "ind" ? " ind" : "") + "'>" + label +
-        (sub ? "<span class='sub'>" + sub + "</span>" : "") + "</td><td class='num" + (v === null ? "" : cls(v)) + "'>" + (v === null ? "" : m(v)) + "</td></tr>";
+    /* v188: عمودين — «عندك إيه؟» (الأصول) و«جاية منين؟» (الالتزامات + حقوق الملكية)، من غير قروش.
+       نفس بنود finBS بالظبط؛ رأس مال الشركاء سطر واحد بيتفتح. */
+    var q = function(v){ return v < -0.004 ? "(" + qty(Math.round(-v)) + ")" : qty(Math.round(v)); };
+    var L = function(label, v, sub, more){
+      return "<div class='fin-ln'><span>" + label + (sub ? "<small>" + sub + "</small>" : "") + "</span><b class='num" + cls(v) + "'>" + q(v) + "</b></div>" + (more || "");
     };
-    var bs = [];
-    // كل البنود متداولة (IAS 1.66 و1.69) — مفيش أصول ثابتة متسجّلة
-    bs.push(R("الأصول المتداولة", null, "sec"));
-    bs.push(R("النقدية في الخزنة", B.cash, "ind"));
-    bs.push(R("مستحقات عند شركات الشحن", B.wallets, "ind", "فلوس العملاء اللي المندوب حصّلها ولسه ما وصلتكش"));
-    if(B.recv > 0.009) bs.push(R("مديونيات العملاء", B.recv, "ind"));
-    if(B.supAdv > 0.009) bs.push(R("دفعات مقدّمة للموردين", B.supAdv, "ind"));
-    bs.push(R("المخزون (بالتكلفة)", B.stock, "ind", B.inOrders > 0.009 ? "منه حوالي " + esc(money(B.inOrders)) + " في أوردرات لسه ما اتسلّمتش" : ""));
-    if(B.prepaid > 0.009) bs.push(R("مصروفات مدفوعة مقدّماً", B.prepaid, "ind",
-      "رصيد فيسبوك " + esc(money(B.prepMeta)) + (B.prepaid - B.prepMeta > 0.009 ? " · اشتراكات لسه أيامها ما جتش " + esc(money(B.prepaid - B.prepMeta)) : "")));
-    bs.push(R("إجمالي الأصول", B.assets, "tot"));
-    bs.push(R("الالتزامات المتداولة", null, "sec"));
-    bs.push(R("مستحق للموردين", B.pay, "ind"));
-    bs.push(R("عرابين عملاء — التزامات عقود (IFRS 15.106)", B.custAdv, "ind", "فلوس دفعها عملاء على أوردرات لسه ما اتسلّمتش"));
-    if(B.owed > 0.009) bs.push(R("مستحق للشركاء", B.owed, "ind", "مصاريف دفعوها من جيبهم ولسه ما رجعتلهمش"));
-    bs.push(R("إجمالي الالتزامات", B.liab, "tot"));
-    bs.push(R("حقوق الملكية", null, "sec"));
-    B.partners.forEach(function(x){ if(Math.abs(x.cap) > 0.009) bs.push(R("رأس مال " + esc(x.n), x.cap, "ind")); });
-    bs.push(R("إجمالي رأس المال", B.cap, "sub"));
-    if(Math.abs(B.cur) > 0.009) bs.push(R("أرباح اتوزّعت على الشركاء ولسه ما اتصرفتش", B.cur, "ind"));
-    if(Math.abs(B.opening) > 0.009) bs.push(R("صافي الأرصدة الافتتاحية", B.opening, "ind"));
-    bs.push(R("الأرباح المحتجزة", B.re, "ind", "صافي الربح من البداية " + esc(m(A.net)) + (B.dist > 0.009 ? " − اللي اتوزّع " + esc(money(B.dist)) : "")));
-    bs.push(R("إجمالي حقوق الملكية", B.equity, "tot"));
-    bs.push(R("إجمالي الالتزامات وحقوق الملكية", B.liab + B.equity, "grand"));
-    table("t-fin-bs", ["البند", "المبلغ"], bs, "");
+    var T = function(label, v, big){ return "<div class='" + (big ? "fin-tot" : "fin-st") + "'><span>" + label + "</span><b class='num" + cls(v) + "'>" + q(v) + "</b></div>"; };
+    var G = function(t){ return "<div class='fin-g'>" + t + "</div>"; };
+    var a = [L("النقدية في الخزنة", B.cash),
+      L("المخزون (بسعر الشرا)", B.stock, B.inOrders > 0.009 ? "منه " + esc(qty(Math.round(B.inOrders))) + " في أوردرات لسه ما اتسلّمتش" : "")];
+    if(Math.abs(B.wallets) > 0.009) a.push(L("عند شركات الشحن", B.wallets, "العملاء دفعوها والمندوب ما وصّلهاش"));
+    if(B.recv > 0.009) a.push(L("عند عملاء", B.recv, "استلموا ولسه ما دفعوش"));
+    if(B.supAdv > 0.009) a.push(L("دفعات مقدّمة للموردين", B.supAdv));
+    if(B.prepaid > 0.009) a.push(L("مصروفات مدفوعة مقدّم", B.prepaid,
+      "رصيد فيسبوك " + esc(qty(Math.round(B.prepMeta))) + (B.prepaid - B.prepMeta > 0.009 ? " · اشتراكات لسه أيامها ما جتش " + esc(qty(Math.round(B.prepaid - B.prepMeta))) : "")));
+    document.getElementById("t-fin-bs").innerHTML = a.join("") + T("إجمالي الأصول", B.assets, true);
+    var l = [G("عليك لغيرك")];
+    if(B.pay > 0.009) l.push(L("مستحق للموردين", B.pay));
+    if(B.custAdv > 0.009) l.push(L("عرابين عملاء", B.custAdv, "على أوردرات لسه ما اتسلّمتش"));
+    if(B.owed > 0.009) l.push(L("مستحق للشركاء", B.owed, "مصاريف دفعوها من جيبهم ولسه ما رجعتلهمش"));
+    if(l.length === 1) l.push(L("مفيش", 0));
+    l.push(T("إجمالي الالتزامات", B.liab));
+    l.push(G("فلوس الشركاء"));
+    var pl = B.partners.filter(function(x){ return Math.abs(x.cap) > 0.009; });
+    l.push("<details class='fin-caps'><summary>" + L("رأس المال <span class='fin-n'>" + qty(pl.length) + (pl.length === 1 ? " شريك" : " شركاء") + " ▾</span>", B.cap) + "</summary>" +
+      pl.map(function(x){ return "<div class='fin-ln ind'><span>" + esc(x.n) + "</span><b class='num'>" + q(x.cap) + "</b></div>"; }).join("") + "</details>");
+    if(Math.abs(B.cur) > 0.009) l.push(L("أرباح اتوزّعت ولسه ما اتصرفتش", B.cur));
+    if(Math.abs(B.opening) > 0.009) l.push(L("صافي الأرصدة الافتتاحية", B.opening));
+    l.push(L("الأرباح المحتجزة", B.re, "صافي الربح من البداية" + (B.dist > 0.009 ? " − اللي اتوزّع " + esc(qty(Math.round(B.dist))) : "") + " — ما اتوزّعش"));
+    l.push(T("إجمالي حقوق الملكية", B.equity));
+    document.getElementById("t-fin-le").innerHTML = l.join("") + T("الإجمالي", B.liab + B.equity, true);
     var ok = Math.abs(B.diff) < 0.01 && Math.abs(B.recon) < 0.01;
     var okEl = document.getElementById("fin-ok");
     okEl.className = "fin-ok " + (ok ? "ok" : "bad");
-    okEl.textContent = ok ? "✓ متوازنة: الأصول = الالتزامات + حقوق الملكية" : "⚠ فيه فرق " + money(Math.abs(B.diff)) + " — راجع «توفيق الميزانية» في رأس المال";
-    document.getElementById("fin-asof").textContent = "كما في " + today();
+    okEl.textContent = ok ? "✓ متوازنة" : "⚠ فيه فرق " + money(Math.abs(B.diff)) + " — راجع «توفيق الميزانية» في الشركاء";
+    var td = today().split("-");
+    document.getElementById("fin-asof").textContent = "كما في النهارده " + Number(td[2]) + "/" + Number(td[1]) + " · الأصول = الالتزامات + حقوق الملكية";
 
     var cols = Pd ? [Pd, A] : [A];
     var I = function(label, k, kind, sub){
