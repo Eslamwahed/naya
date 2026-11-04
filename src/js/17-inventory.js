@@ -290,21 +290,14 @@
   /* ---------- المخزون: ٤ أرقام + كارت لكل صنف + جدول لون × مقاس ----------
      كل الأرقام من نفس صفوف invRows اللي الجدول الكامل مبني عليها،
      فمجموع الكروت = الجدول بالظبط. */
+  /* v181: سطر واحد تحت العنوان بدل ٤ كروت — «لو اتباعت كلها» و«عند الشركات» في الجدول الكامل وشاشة الشحن */
   function renderInvTop(src, units, value, retail, reserved, scope){
     var el = document.getElementById("inv-top");
     if(!el) return;
-    var sc = scope ? "حسب الفلتر" : "";
-    var held = heldOpenQty();
-    var cells = [
-      ["قطع في المخزن", qty(units), "", reserved ? "منهم " + qty(reserved) + " محجوزين لأوردرات" : (sc || "مفيش حاجة محجوزة"), 0],
-      ["قيمتها بالتكلفة", money(value), "", sc || "اللي دفعته فيها", 1],
-      ["لو اتباعت كلها", money(retail), "v-gain", "بسعر البيع", 0],
-      ["عند شركات الشحن", qty(held) + " قطعة", held ? "v-due" : "", held ? "مرتجع لسه ما رجعش" : "كله في مخزنك", 0]
-    ];
-    el.innerHTML = cells.map(function(c){
-      return "<div" + (c[4] ? " class='money-only'" : "") + "><span>" + esc(c[0]) + "</span>" +
-        "<strong class='num " + c[2] + "'>" + esc(c[1]) + "</strong><small>" + esc(c[3]) + "</small></div>";
-    }).join("");
+    el.innerHTML = "<b class='num'>" + qty(units) + "</b> قطعة في المخزن" +
+      (reserved ? " · منهم " + qty(reserved) + " محجوز" : "") +
+      "<span class='money-only'> · قيمتها <b class='num'>" + esc(money(value)) + "</b> بالتكلفة</span>" +
+      (scope ? " · حسب الفلتر" : "");
   }
   // عدد الأصناف في كل زرار — بنفس شرط الفلتر بالظبط
   function renderInvQuickCounts(all){
@@ -339,41 +332,47 @@
         : "مفيش أصناف لسه — ضيف أصناف من «الأصناف» وسجّل شراءها.") + "</p>";
       return;
     }
-    var heldBy = {};
-    heldOpen().forEach(function(h){ heldBy[h.l.itemId] = (heldBy[h.l.itemId] || 0) + h.n; });
     var autoOpen = !!(ifilt.color || ifilt.size || ifilt.text || ifilt.only !== "all");
-    box.innerHTML = byItem.map(function(g){
+    box.innerHTML = "<div class='iv-th' aria-hidden='true'><span>الصنف</span><span>المتاح بكل لون</span><span>متاح</span><span>محجوز</span><span>محتاج تشتري</span><span></span></div>" +
+      byItem.map(function(g){
       var it = g.item, id = it.id;
-      var stock = 0, rsv = 0, val = 0;
-      g.vars.forEach(function(x){ stock += x.stock; rsv += x.rsv; val += x.stock * x.cost; });
+      var stock = 0, rsv = 0;
+      g.vars.forEach(function(x){ stock += x.stock; rsv += x.rsv; });
       var lowN = g.vars.filter(isLow).length;
       var outN = g.vars.filter(function(x){ return x.stock <= 0 && (x.bought || x.soldEver); }).length;
       var colors = invAxis(g.vars, "color", it.colors), sizes = invAxis(g.vars, "size", it.sizes);
-      var cN = colors.filter(Boolean).length, zN = sizes.filter(Boolean).length;
+      var cN = colors.filter(Boolean).length;
       var open = autoOpen || !!openInv[id];
-      var held = heldBy[id] || 0;
-      var sub = (cN ? plural(cN, "لون واحد", "لونين", "ألوان") : "من غير لون") + " · " +
-                (zN ? plural(zN, "مقاس واحد", "مقاسين", "مقاسات") : "من غير مقاس") +
-                ((Number(it.price)||0) ? " · سعره " + qty(Number(it.price)) : "");
+      /* v181 — سطر لكل صنف: الاسم والسعر · كل لون بدايرته والمتاح منه (اللي خلص دايرته فاضية) · متاح · محجوز · خلص/قرب يخلص.
+         المتاح = نفس رقم خانات الجدول تحت (الرصيد − المحجوز)، والألوان بنفس شرط الجدول. */
+      var byC = {};
+      g.vars.forEach(function(x){
+        if(!x.bought && !x.stock && !x.soldEver && !x.rsv) return;
+        byC[x.color] = (byC[x.color] || 0) + (x.stock - x.rsv);
+      });
+      var chips = colors.filter(function(c){ return c in byC; }).map(function(c){
+        var f = byC[c], hx = swHex(c);
+        return "<span class='ivc" + (f <= 0 ? " z" : "") + "'><i" + (hx ? " style='background:" + hx + "'" : " class='u'") + "></i>" +
+          esc(c || "من غير لون") + " <b class='num'>" + qty(f) + "</b></span>";
+      }).join("");
+      var state = [outN ? "<span class='r'>" + qty(outN) + " خلص</span>" : "",
+                   lowN ? "<span class='w'>" + qty(lowN) + " قرب يخلص</span>" : ""].filter(Boolean).join(" · ") || "كله فيه";
       var head = "<button type='button' class='iv-h' data-invcard='" + esc(id) + "' aria-expanded='" + (open ? "true" : "false") + "'>" +
-        (thumbHTML(id) || "<span class='dd-noimg' aria-hidden='true'>" + esc(String(it.name || "").charAt(0)) + "</span>") +
         "<span class='iv-n'><b>" + esc(it.name) + "</b>" +
-          (lowN ? "<span class='iv-pill w'>" + qty(lowN) + " قرب يخلص</span>" : "") +
-          (outN ? "<span class='iv-pill r'>" + qty(outN) + " خلص</span>" : "") +
-          "<span class='sub'>" + esc(sub) + "</span></span>" +
-        "<span class='iv-cs'>" +
-          "<span><small>متاح</small><b class='num'>" + qty(stock - rsv) + "</b></span>" +
-          "<span><small>محجوز</small><b class='num" + (rsv ? " w" : "") + "'>" + (rsv ? qty(rsv) : "—") + "</b></span>" +
-          "<span><small>عند الشركات</small><b class='num" + (held ? " r" : "") + "'>" + (held ? qty(held) : "—") + "</b></span>" +
-          "<span class='money-only'><small>قيمته</small><b class='num'>" + esc(qty(Math.round(val * 100) / 100)) + "</b></span>" +
-        "</span><span class='iv-chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span></button>";
+          ((Number(it.price)||0) ? "<span class='sub num'>" + esc(money(Number(it.price))) + "</span>" : "") + "</span>" +
+        "<span class='iv-cl'>" + (chips || "<span class='sub'>" + (cN ? "" : "من غير لون") + "</span>") + "</span>" +
+        "<span class='iv-av num'>" + qty(stock - rsv) + "</span>" +
+        "<span class='iv-rs num" + (rsv ? " w" : "") + "'>" + (rsv ? qty(rsv) : "—") + "</span>" +
+        "<span class='iv-st'>" + state + "</span>" +
+        "<span class='iv-chev' aria-hidden='true'>" + (open ? "▴" : "▾") + "</span></button>";
       if(!open) return "<div class='iv'>" + head + "</div>";
       var cell = {};
       g.vars.forEach(function(x){ cell[x.color + "|" + x.size] = x; });
       var mx = "<table class='iv-mx'><thead><tr><th></th>" + sizes.map(function(z){
           return "<th>" + esc(z || "—") + "</th>"; }).join("") + "</tr></thead><tbody>" +
         colors.map(function(c){
-          return "<tr><th class='rh'>" + esc(c || "—") + "</th>" + sizes.map(function(z){
+          var hx = swHex(c);
+          return "<tr><th class='rh'>" + (hx ? "<i class='ivd' style='background:" + hx + "'></i>" : "") + esc(c || "—") + "</th>" + sizes.map(function(z){
             var x = cell[c + "|" + z];
             if(!x || (!x.bought && !x.stock && !x.soldEver && !x.rsv)) return "<td class='none'>—</td>";
             var free = x.stock - x.rsv;
@@ -385,10 +384,8 @@
           }).join("") + "</tr>";
         }).join("") + "</tbody></table>";
       return "<div class='iv open'>" + head + "<div class='iv-b'>" +
-        "<h4>المتاح بكل لون ومقاس <small>دوس على أي خانة تشوف حركتها</small></h4>" +
         "<div class='iv-wrap'>" + mx + "</div>" +
-        "<div class='iv-lg'><span><i class='ok'></i>فيه</span><span><i class='low'></i>قرب يخلص</span>" +
-          "<span><i class='out'></i>خلص</span><span><i class='none'></i>ما اشتريتوش</span></div>" +
+        "<p class='iv-lg'>دوس على أي خانة تشوف حركتها · الأحمر خلص · الأصفر قرب يخلص · — ما اشتريتوش</p>" +
         "</div></div>";
     }).join("");
   }
