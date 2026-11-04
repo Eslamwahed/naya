@@ -535,6 +535,67 @@
     else if(q[0] === "tab") goTab(q[1]);
     else { goTab(q[0] === "cash" ? "cash" : "purch"); startEdit(q[0], q[1]); }
   });
+  /* v189: كشف فيسبوك 21/9 ← 3/11 فيه 12 شحنة (8,162.40) — المتسجّل في الخزنة 7 بس (6,186.40).
+     الـ5 الناقصين اتدفعوا من الخزنة (إسلام أكّد) · الرسوم 3% زي اللي قبلهم (مقرّبة لفوق زي 866.40 ← 893).
+     ورصيد فيسبوك يوم 3/11 = اتشحن 8,162.40 − اتصرف 7,390.41 = 771.99. */
+  var FIX189 = { tops:[["2026-10-20",500,515],["2026-10-25",300,309],["2026-10-28",750,773],["2026-10-31",276,285],["2026-11-03",150,155]],
+                 had:6186.4, n:7, last:{ d:"2026-10-17", bal:1326.4 }, rec:{ d:"2026-11-03", bal:771.99 } }, fix189Later = false;
+  function fix189Why(){
+    var w = [], T = metaTops(), R = metaRecs(), last = R.length ? R[R.length - 1] : null;
+    var cr = T.reduce(function(a, c){ return a + metaCredit(c); }, 0);
+    if(T.length !== FIX189.n || Math.abs(cr - FIX189.had) > 0.009) w.push("شحنات فيسبوك في الخزنة اتغيّرت");
+    if(!last || last.d !== FIX189.last.d || Math.abs((Number(last.bal)||0) - FIX189.last.bal) > 0.009) w.push("آخر مطابقة فيسبوك اتغيّرت");
+    FIX189.tops.forEach(function(t){ if(isLocked(t[0])) w.push("فترة " + dShort(t[0]) + " مقفولة"); });
+    return w;
+  }
+  function fix189Pending(){ return !settings.fix189 && !fix189Later && canEdit() && canMoney() && !fix189Why().length; }
+  function fix189Nums(){
+    _mspan = null; clearMonthly();
+    return { cash:cashBox(), meta:metaBook().bal, ads:expByCat(null).ads, net:netProfitAll() };
+  }
+  function fix189Run(dry){
+    var n0 = db.cash.length, keep = settings.metaRec, t0 = Date.now(), out;
+    try{
+      FIX189.tops.forEach(function(t, i){
+        var c = stamp({ date:t[0], type:"expense", cat:"metatop", amount:t[2], credit:t[1], partyId:"", shipCo:"", paidBy:"", svcDays:"", costKind:"var",
+                        src:"", camp:"", note:"شحن فيسبوك " + dShort(t[0]) + " — من كشف فيسبوك", fx:"189" });
+        c.made = t0 + i;
+        db.cash.push(c);
+      });
+      settings.metaRec = (keep || []).concat([{ d:FIX189.rec.d, bal:FIX189.rec.bal, by:"كشف فيسبوك", at:t0 + 100 }]);
+      out = fix189Nums();
+    } finally {
+      if(dry){ db.cash.length = n0; settings.metaRec = keep; fix189Nums(); }
+    }
+    return out;
+  }
+  function fix189HTML(){
+    if(!fix189Pending()) return "";
+    var b = fix189Nums(), a = fix189Run(true), n = function(x){ return esc(money(x)); };
+    return "<div class='panel fx-card' id='fx189'><h3>سجّل شحنات فيسبوك الناقصة</h3>" +
+      "<p class='hint'>كشف فيسبوك (21/9 ← 3/11) فيه 12 شحنة بـ<span class='num'>8,162.40</span> — المتسجّل في الخزنة 7 بس. الـ5 دول اتدفعوا من الخزنة:</p>" +
+      "<ul class='fx-ul'>" + FIX189.tops.map(function(t){
+        return "<li><b>" + esc(dShort(t[0])) + "</b> — <span class='num'>" + qty(t[1]) + "</span> في فيسبوك · <span class='num'>" + qty(t[2]) + "</span> من الخزنة</li>";
+      }).join("") +
+        "<li>ورصيد فيسبوك يوم 3/11 = <span class='num'>8,162.40 − 7,390.41 = 771.99</span> (اتشحن − اتصرف)</li></ul>" +
+      "<div class='fx-eff'><div><small>الخزنة</small><b class='num'>" + n(b.cash) + " ← " + n(a.cash) + "</b></div>" +
+        "<div><small>رصيد فيسبوك</small><b class='num'>" + n(b.meta) + " ← " + n(a.meta) + "</b></div>" +
+        "<div><small>الإعلانات</small><b class='num'>" + n(b.ads) + " ← " + n(a.ads) + "</b></div>" +
+        "<div><small>صافي الربح</small><b class='num'>" + n(b.net) + " ← " + n(a.net) + "</b></div></div>" +
+      "<p class='hintline'>رسوم فوري محسوبة 3% زي الشحنات اللي قبلها — لو دفعت مبلغ تاني في أي واحدة، عدّلها من الخزنة بعد التسجيل.</p>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx189'>سجّل</button><button class='tbtn' type='button' id='x-fx189'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx189")){ fix189Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx189")) return;
+    if(!canEdit() || !canMoney()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(settings.fix189 || fix189Why().length){ renderAll(); return; }
+    var r = fix189Run(false);
+    settings.fix189 = { at:Date.now(), by:me || "" };
+    saveSoon("cash"); saveSettings(); renderAll();
+    toast("اتسجّلت 5 شحنات فيسبوك — الخزنة " + money(r.cash) + " · رصيد فيسبوك " + money(r.meta), 4200);
+  });
   function renderPrepaid(){
     var box = document.getElementById("pp-body"); if(!box) return;
     var nn = function(x){ return esc(money(x)); }, t = today();
@@ -580,7 +641,7 @@
       (rows.length ? "<div class='tbl-wrap'><table class='pp-t'><thead><tr><th>البيان</th><th class='num'>اتدفع</th><th>بيغطي</th><th class='num'>فاضل</th></tr></thead><tbody>" + rows.join("") + "</tbody></table></div>"
                    : "<p class='hint'>مفيش — كل المصاريف اتحسبت يوم دفعها.</p>") +
       "<p class='hintline'>كل يوم بيعدّي بيتحول جزء منها مصروف في قايمة الدخل. التغليف ومصاريف المرة الواحدة بتتحسب يوم الدفع — مش بتظهر هنا.</p></div>";
-    box.innerHTML = meta + subs;
+    box.innerHTML = fix189HTML() + meta + subs;
   }
   function metaRecPreview(){
     var el = document.getElementById("mr-prev"), v = document.getElementById("mr-bal").value;

@@ -124,7 +124,9 @@
              s:sq.map(function(x){ return "#" + (x.no || ""); }).join(" · ") + " · دوسة على كل واحد", v:"", go:"sales" });
     if(canTab("prepaid") && canMoney()){
       var MB = metaBook(), gp = MB.last ? daysBetween(MB.last.d, today()) : null;
-      if(metaTops().length && (gp === null || gp >= META_MAX_GAP))
+      if(fix189Pending())
+        line({ grp:"acct", btn:"سجّل", ic:"wallet", cls:"bad", t:"سجّل شحنات فيسبوك الناقصة", s:"5 شحنات من 20/10 لحد 3/11 · 2,037 من الخزنة — دوسة واحدة", v:"", go:"prepaid" });
+      else if(metaTops().length && (gp === null || gp >= META_MAX_GAP))
         line({ grp:"acct", btn:"طابق", ic:"wallet", cls:"warn", t:"طابق رصيد فيسبوك", s: gp === null ? "لسه ما طابقتش ولا مرة" : "آخر مطابقة من " + qty(gp) + " يوم", v:money(MB.bal), go:"prepaid" });
       prepaidList().forEach(function(x){
         var dl = daysBetween(today(), x.to);
