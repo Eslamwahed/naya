@@ -24,23 +24,16 @@
   </details>
 
 
-  <h3 class="cap-h">الشركاء <small>النسبة بتتحسب لوحدها من رأس مال كل واحد</small></h3>
-  <div class="cap-own" id="cap-own"></div>
-  <div class="cap-grid" id="cap-cards"></div>
-  <p class="hint" style="margin:0 0 var(--sp-3)">شريك جديد؟ من <strong>«+ حركة رأس مال»</strong> فوق — فيه <strong>«+ شريك»</strong> جنب القايمة.</p>
+  <!-- v186: جدول واحد للشركاء — نسبة كل واحد ورأس ماله ونصيبه من الربح، وأزراره جوه «⋯» -->
+  <div id="cap-alert"></div>
+  <div class="cap-perbar"><div class="cap-tabs" id="cs-per" role="group" aria-label="الفترة">
+    <button type="button" data-csper="month" aria-pressed="false">الشهر ده</button>
+    <button type="button" data-csper="prev" aria-pressed="false">الشهر اللي فات</button>
+    <button type="button" data-csper="all" aria-pressed="true" class="on">من البداية</button>
+  </div><span class="cap-lbl">نصيب كل شريك من الربح بيتحسب بنسبته وعدد الأيام اللي فلوسه اشتغلت فيها</span></div>
+  <div id="cap-cards"></div>
 
-  <!-- نصيب كل شريك من ربح الفترة — للفرجة، والتوزيع الفعلي من «وزّع أرباح» تحته -->
-  <div class="panel" id="cap-share-panel">
-    <div class="fold-h"><h3>نصيب الشركاء من ربح الفترة</h3>
-      <div class="quick" id="cs-per" role="group" aria-label="الفترة">
-        <button type="button" data-csper="month" aria-pressed="false">الشهر ده</button>
-        <button type="button" data-csper="prev" aria-pressed="false">الشهر اللي فات</button>
-        <button type="button" data-csper="all" aria-pressed="true" class="on">من البداية</button>
-      </div></div>
-    <p class="hint" id="cs-note"></p>
-    <div class="tbl-wrap"><table id="t-cap-share"></table></div>
-  </div>
-
+  <div class="cap-folds">
   <div class="panel" id="dist-panel">
     <div class="fold-h"><h3>توزيع أرباح</h3>
       <button class="tbtn" type="button" data-foldbtn="dist-body" aria-expanded="false" aria-controls="dist-body">وزّع أرباح ▾</button></div>
@@ -79,6 +72,7 @@
     <p class="note ok" id="dist-done" hidden></p>
   </div>
 
+  </div>
   </div>
 <div class="panel" id="entry-capital" hidden>
     <div class="dhead">
@@ -124,7 +118,7 @@
     </div>
   </div>
 
-  <details class="hm-more cap-m" id="cap-more" hidden>
+  <details class="hm-more cap-m cap-fold" id="cap-more" hidden>
     <summary>جدول الشركاء وسجل كل الحركات والشرح</summary>
     <p class="hint">فلوس الشريك نوعين: <strong>رأس ماله</strong> (اللي حطّه، وبيحدّد نسبته) و<strong>أرباح مستحقة له</strong> (أرباح بقت ملكه ولسه ما أخدهاش، ومابتأثّرش على نسبته). لما توزّع أرباح، نصيب كل شريك بيتحسب بـ<strong>النسبة المرجّحة بالزمن</strong> مش بنسبته الحالية — الشريك اللي دفع فلوس في يونيو مياخدش نسبته الجديدة على أرباح يناير.</p>
 
@@ -179,8 +173,8 @@
   </details>
 
   <!-- v132: استرداد رأس المال اتنقل هنا من التقارير — كل حاجة عن الشركاء في مكان واحد -->
-  <div class="panel rsecs cap-m" style="margin-top:var(--sp-3)" hidden>
-    <details class="rsec" open>
+  <div class="panel rsecs cap-m cap-fold" hidden>
+    <details class="rsec">
       <summary>استرداد رأس المال للشركاء <b>كل شريك كسب كام ورجعله كام</b></summary>
       <p class="hint" id="rep-pb-note"></p>
       <div class="tbl-wrap"><table id="t-rep-payback"></table></div>
