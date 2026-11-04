@@ -80,7 +80,7 @@
     table.iv-mx td.none{padding:10px 8px}
     table.iv-mx td{min-width:58px}
     /* الأرقام اللي فوق: اتنين جنب بعض بدل عمود طويل */
-    #cash-stats,#cap-stats,#pu-top{display:grid;grid-template-columns:1fr 1fr}
+    #cash-stats,#cap-stats{display:grid;grid-template-columns:1fr 1fr}
     #cash-stats > div:last-child:nth-child(odd){grid-column:1 / -1}
   }
 
