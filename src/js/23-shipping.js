@@ -715,10 +715,73 @@
     STM = null; saveSoon("cash"); saveSoon("sales"); renderAll();
     toast("اتسجّل " + qty(n) + (n === 1 ? " كشف" : " كشوف") + " · رصيد QP " + money(r.qp), 4200);
   });
+  /* v190: كشف QP 4/11 فيه 25 «فرق تحصيل» من عميلة #126 (23766604) — دفعت شحن 85 مش 60.
+     الـ25 اتسجّلت يوم 4/11 على #79 بالغلط. الكارت: #126 شحن العميل 85 (المحصّل 385) والاستلام يتنقل لـ#126.
+     الخزنة ما بتتغيّرش · #79 بيرجع عليه 25 عند QP زي ما كان قبل 4/11. */
+  var FIX190 = { st:"mw28qf3l9sur8", s2:"mvzhyutedvgpx", o126:"mvu1h92fmma5m", o79:"mvcr6wihmdi32", d:"2026-11-04" }, fix190Later = false;
+  function fix190S(id){ return live("sales").find(function(x){ return x.id === id; }) || null; }
+  function fix190Why(){
+    var w = [], c = live("cash").find(function(k){ return k.id === FIX190.st; }), a = fix190S(FIX190.o126), b = fix190S(FIX190.o79);
+    if(!c || c.type !== "settle" || squish(c.shipCo) !== "QP" || c.date !== FIX190.d || Math.abs(c.amount - 25) > 0.009 || (c.orders || []).join() !== FIX190.o79) w.push("استلام الـ25 اتغيّر");
+    var c2 = live("cash").find(function(k){ return k.id === FIX190.s2; });
+    if(!c2 || c2.type !== "settle" || c2.date !== "2026-11-02" || Math.abs(c2.amount - 5350) > 0.009 || (c2.orders || []).length !== 14 || (c2.orders || []).indexOf(FIX190.o126) < 0) w.push("استلام 2/11 اتغيّر");
+    if(!a || !isDelivered(a) || squish(a.shipCo) !== "QP" || a.shipCode !== "23766604" || Number(a.shipIn) !== 60 || Number(a.paid) !== 360 || Math.abs(saleTotal(a) - 300) > 0.009) w.push("#126 اتعدّل");
+    if(!b || !isDelivered(b) || squish(b.shipCo) !== "QP") w.push("#79 اتعدّل");
+    if(isLocked(FIX190.d) || (a && isLocked(a.deliveredAt))) w.push("الفترة مقفولة");
+    return w;
+  }
+  function fix190Pending(){ return !settings.fix190 && !fix190Later && canEdit() && canMoney() && !fix190Why().length; }
+  function fix190Nums(){
+    pendCache = null; clearMonthly();
+    var m = shipPendMap();
+    return { cash:cashBox(), qp:walletOf("QP"), net:netProfitAll(), p126:(m[FIX190.o126] || {}).left || 0, p79:(m[FIX190.o79] || {}).left || 0 };
+  }
+  function fix190Run(dry){
+    var c = live("cash").find(function(k){ return k.id === FIX190.st; }), a = fix190S(FIX190.o126), c2 = live("cash").find(function(k){ return k.id === FIX190.s2; });
+    var jc = JSON.stringify(c), ja = JSON.stringify(a), j2 = JSON.stringify(c2), out;
+    try{
+      a.shipIn = 85; a.paid = 385; a.fx = "190";
+      c.orders = [FIX190.o126]; c.fx = "190";
+      // كشف 2/11 دفع 250 بس لـ#126 (قبل الفرق) — آخر واحد في الاستلام عشان الـ250 تروحله وباقي الأوردرات تتغطّى كاملة
+      c2.orders = c2.orders.filter(function(id){ return id !== FIX190.o126; }).concat([FIX190.o126]); c.note = "كشف QP 4/11: فرق شحن #126 (العميلة دفعت 85 مش 60)";
+      if(!dry){ a.editedBy = c.editedBy = me || "غير محدد"; a.at = c.at = Date.now(); }
+      out = fix190Nums();
+    } finally {
+      if(dry){ [[c, jc], [a, ja], [c2, j2]].forEach(function(p){ Object.keys(p[0]).forEach(function(k){ delete p[0][k]; }); Object.assign(p[0], JSON.parse(p[1])); }); fix190Nums(); }
+    }
+    return out;
+  }
+  function fix190HTML(){
+    if(!fix190Pending()) return "";
+    var b = fix190Nums(), a = fix190Run(true), n = function(x){ return esc(money(x)); };
+    return "<div class='panel fx-card' id='fx190'><h3>صحّح فرق الشحن في كشف QP 4/11</h3>" +
+      "<p class='hint'>الكشف <span class='num'>2,995</span> = المتسجّل <span class='num'>2,995</span> — بس الـ<span class='num'>25</span> اتسجّلت على الأوردر الغلط.</p>" +
+      "<ul class='fx-ul'>" +
+        "<li><b>#126</b> (23766604) — العميلة دفعت شحن <span class='num'>85</span> مش <span class='num'>60</span>، وQP بعتت الفرق <span class='num'>25</span> في كشف 4/11</li>" +
+        "<li>الـ<span class='num'>25</span> اتسجّلت على <b>#79</b> — هتتنقل لـ<b>#126</b></li>" +
+        "<li><b>#79</b> هيرجع عليه <span class='num'>25</span> عند QP زي ما كان — اسألهم عليها</li>" +
+      "</ul>" +
+      "<div class='fx-eff'><div><small>الخزنة</small><b class='num'>" + n(b.cash) + " ← " + n(a.cash) + "</b></div>" +
+        "<div><small>QP</small><b class='num'>" + n(b.qp) + " ← " + n(a.qp) + "</b></div>" +
+        "<div><small>صافي الربح</small><b class='num'>" + n(b.net) + " ← " + n(a.net) + "</b></div></div>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx190'>صحّح</button><button class='tbtn' type='button' id='x-fx190'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx190")){ fix190Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx190")) return;
+    if(!canEdit() || !canMoney()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(settings.fix190 || fix190Why().length){ renderAll(); return; }
+    var r = fix190Run(false);
+    settings.fix190 = { at:Date.now(), by:me || "" };
+    saveSoon("sales"); saveSoon("cash"); saveSettings(); renderAll();
+    toast("اتصحّح — الـ25 بقت على #126 · رصيد QP " + money(r.qp), 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     stmRender();
+    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix190HTML();
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
