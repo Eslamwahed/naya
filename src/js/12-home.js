@@ -122,6 +122,8 @@
     if(canTab("sales") && sq.length)
       line({ grp:"orders", btn:"جاوب", ic:"truck", cls:"warn", t:sq.length === 1 ? "#" + (sq[0].no || "") + " اترفض — العميل دفع كام من الشحن؟" : sq.length + " أوردرات اترفضت — العملاء دفعوا كام من الشحن؟",
              s:sq.map(function(x){ return "#" + (x.no || ""); }).join(" · ") + " · دوسة على كل واحد", v:"", go:"sales" });
+    if(canTab("ship") && fix190Pending())
+      line({ grp:"acct", btn:"صحّح", ic:"truck", cls:"bad", t:"صحّح فرق الشحن في كشف QP 4/11", s:"الـ25 اتسجّلت على #79 والصح #126 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("prepaid") && canMoney()){
       var MB = metaBook(), gp = MB.last ? daysBetween(MB.last.d, today()) : null;
       if(fix189Pending())
