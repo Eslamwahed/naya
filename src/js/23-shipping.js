@@ -777,11 +777,66 @@
     saveSoon("sales"); saveSoon("cash"); saveSettings(); renderAll();
     toast("اتصحّح — الـ25 بقت على #126 · رصيد QP " + money(r.qp), 4200);
   });
+  /* v192: كشف QP 19/11 فيه بوليصة 24167914 لشيماء (عميلة #136): إجمالي 60 وشحن 80 = −20.
+     دي شحنة الـuggs بني 39.5 بتاع #136 — البضاعة اتدفعت لوحدها (175 يوم 1/11) والمندوب حصّل الشحن بس.
+     الكارت بيسجّل الشحنة أوردر QP من غير بضاعة: شحن العميل 60 · الشحن 80 · اتسلّم 19/11 — عشان كشف 19/11 يترفع. */
+  var FIX192 = { o136:"mvw6wjmovj5xh", party:"mvw6vg1idekv3", code:"24167914", out:"2026-11-15", del:"2026-11-19" }, fix192Later = false;
+  function fix192Why(){
+    var w = [], s = live("sales").find(function(x){ return x.id === FIX192.o136; });
+    if(!s || !isDelivered(s) || s.partyId !== FIX192.party || Number(s.paid) !== 175 || SL(s).length !== 1 || Number(SL(s)[0].price) !== 175) w.push("#136 اتعدّل");
+    if(live("sales").some(function(x){ return squish(x.shipCode) === FIX192.code; })) w.push("البوليصة متسجّلة");
+    if(!live("parties").some(function(p){ return p.id === FIX192.party; })) w.push("العميلة مش موجودة");
+    if(isLocked(FIX192.del)) w.push("الفترة مقفولة");
+    return w;
+  }
+  function fix192Pending(){ return !settings.fix192 && !fix192Later && canEdit() && canMoney() && !fix192Why().length; }
+  function fix192Nums(){ pendCache = null; clearMonthly(); return { cash:cashBox(), qp:walletOf("QP"), net:netProfitAll() }; }
+  function fix192Run(dry){
+    var n0 = db.sales.length, out;
+    try{
+      var r = stamp({ date:FIX192.out, partyId:FIX192.party, status:"delivered", payVia:"ship", shipCo:"QP", shipCode:FIX192.code, selfDel:false, preCancel:false,
+                      shippedAt:FIX192.out, deliveredAt:FIX192.del, shipIn:60, shipOut:80, paid:60, dep:0, lines:[], cf:"", cfAt:"", rsn:"", src:"", camp:"", courier:"",
+                      owner:"", note:"شحن الـuggs بني 39.5 بتاع #136 — البضاعة اتدفعت لوحدها، والمندوب حصّل الشحن بس", fx:"192" });
+      r.no = nextSaleNo();
+      db.sales.push(r);
+      out = fix192Nums(); out.no = r.no;
+    } finally {
+      if(dry){ db.sales.length = n0; fix192Nums(); }
+    }
+    return out;
+  }
+  function fix192HTML(){
+    if(!fix192Pending()) return "";
+    var b = fix192Nums(), a = fix192Run(true), n = function(x){ return esc(money(x)); };
+    return "<div class='panel fx-card' id='fx192'><h3>سجّل شحنة شيماء من كشف QP 19/11</h3>" +
+      "<p class='hint'>البوليصة <span class='num'>24167914</span> في الكشف ومش متسجّلة — عشان كده الكشف مش بيترفع.</p>" +
+      "<ul class='fx-ul'>" +
+        "<li>دي شحنة الـuggs بني 39.5 بتاع <b>#136</b> — البضاعة اتدفعت لوحدها (<span class='num'>175</span> يوم 1/11)</li>" +
+        "<li>المندوب حصّل منها شحن <span class='num'>60</span> بس، وQP خدت <span class='num'>80</span> — يعني <span class='num'>−20</span></li>" +
+        "<li>هتتسجّل أوردر QP جديد (#" + qty(a.no) + ") من غير بضاعة · اتشحن 15/11 · اتسلّم 19/11</li>" +
+      "</ul>" +
+      "<div class='fx-eff'><div><small>الخزنة</small><b class='num'>" + n(b.cash) + " ← " + n(a.cash) + "</b></div>" +
+        "<div><small>QP</small><b class='num'>" + n(b.qp) + " ← " + n(a.qp) + "</b></div>" +
+        "<div><small>صافي الربح</small><b class='num'>" + n(b.net) + " ← " + n(a.net) + "</b></div></div>" +
+      "<p class='hintline'>بعدها ارفع كشفين 19/11 و23/11 من «ارفع كشف QP» — هيشيلوا الاستلامات اليدوي ويسجّلوا اللي في الكشف بالظبط.</p>" +
+      "<div class='fx-a'><button class='act' type='button' id='b-fx192'>سجّل</button><button class='tbtn' type='button' id='x-fx192'>بعدين</button></div></div>";
+  }
+  document.addEventListener("click", function(e){
+    if(!e.target.closest) return;
+    if(e.target.closest("#x-fx192")){ fix192Later = true; renderAll(); return; }
+    if(!e.target.closest("#b-fx192")) return;
+    if(!canEdit() || !canMoney()){ toast("مالكش صلاحية تعدّل"); return; }
+    if(settings.fix192 || fix192Why().length){ renderAll(); return; }
+    var r = fix192Run(false);
+    settings.fix192 = { at:Date.now(), by:me || "" };
+    saveSoon("sales"); saveSettings(); renderAll();
+    toast("اتسجّلت شحنة شيماء #" + r.no + " — دلوقتي ارفع كشفين QP", 4200);
+  });
   function renderShipCards(){
     var top = document.getElementById("shc-top"), box = document.getElementById("shc-cards");
     if(!top || !box) return;
     stmRender();
-    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix190HTML();
+    var fxb = document.getElementById("shc-fix"); if(fxb) fxb.innerHTML = fix192HTML() + fix190HTML();
     var cos = shipBuckets();
     var S = live("sales");
     var withCourier = S.filter(function(x){ return orderStep(x).k === "inspect"; });
