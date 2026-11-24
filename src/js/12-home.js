@@ -128,8 +128,8 @@
       line({ grp:"acct", btn:"صحّح", ic:"truck", cls:"bad", t:"صحّح فرق الشحن في كشف QP 4/11", s:"الـ25 اتسجّلت على #79 والصح #126 — دوسة واحدة", v:"", go:"ship" });
     if(canTab("prepaid") && canMoney()){
       var MB = metaBook(), gp = MB.last ? daysBetween(MB.last.d, today()) : null;
-      if(fix189Pending())
-        line({ grp:"acct", btn:"سجّل", ic:"wallet", cls:"bad", t:"سجّل شحنات فيسبوك الناقصة", s:"5 شحنات من 20/10 لحد 3/11 · 2,037 من الخزنة — دوسة واحدة", v:"", go:"prepaid" });
+      if(fix193Pending())
+        line({ grp:"acct", btn:"سجّل", ic:"wallet", cls:"bad", t:"سجّل شحنات فيسبوك الناقصة", s:"5 شحنات من 6/11 لحد 23/11 · 2,678 من الخزنة — دوسة واحدة", v:"", go:"prepaid" });
       else if(metaTops().length && (gp === null || gp >= META_MAX_GAP))
         line({ grp:"acct", btn:"طابق", ic:"wallet", cls:"warn", t:"طابق رصيد فيسبوك", s: gp === null ? "لسه ما طابقتش ولا مرة" : "آخر مطابقة من " + qty(gp) + " يوم", v:money(MB.bal), go:"prepaid" });
       prepaidList().forEach(function(x){
